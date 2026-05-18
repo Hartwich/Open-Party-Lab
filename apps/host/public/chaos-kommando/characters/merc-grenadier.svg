@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="grenadierCoat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a5f39"/>
+      <stop offset="100%" stop-color="#25351f"/>
+    </linearGradient>
+    <linearGradient id="grenadierAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffe37a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="grenadierDrop" x="-25%" y="-25%" width="150%" height="170%">
+      <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#0b1120" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <g stroke="#172032" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="128" cy="229" rx="58" ry="14" fill="#0f172a" opacity="0.18" stroke="none"/>
+    <g filter="url(#grenadierDrop)">
+      <rect x="96" y="156" width="26" height="58" rx="13" fill="#475a35" transform="rotate(4 109 185)"/>
+      <rect x="132" y="156" width="26" height="58" rx="13" fill="#536741" transform="rotate(-4 145 185)"/>
+      <path d="M83 211 Q103 202 123 208 L122 229 Q100 235 80 222 Z" fill="#7b4b27"/>
+      <path d="M133 208 Q152 202 173 208 L176 227 Q156 235 133 228 Z" fill="#6a4023"/>
+      <path d="M90 94 C101 78 154 76 166 92 L161 166 Q129 179 95 166 Z" fill="url(#grenadierCoat)"/>
+      <path d="M106 92 H149 L153 164 Q129 171 103 164 Z" fill="#314726"/>
+      <path d="M95 107 Q73 121 78 151 Q95 154 107 144 L106 119 Z" fill="#455938"/>
+      <path d="M163 108 Q181 119 180 144 Q166 154 149 148 L149 121 Z" fill="#455938"/>
+      <circle cx="128" cy="69" r="28" fill="#ffd6ad"/>
+      <path d="M99 63 Q104 35 128 35 Q153 35 158 63 L150 79 H106 Z" fill="url(#grenadierAccent)"/>
+      <path d="M116 41 H140" stroke="#fff4c2"/>
+      <path d="M108 78 Q128 92 148 78" fill="#f97316"/>
+      <path d="M112 76 Q128 83 144 76" fill="none"/>
+      <circle cx="117" cy="68" r="3" fill="#172032"/>
+      <circle cx="140" cy="68" r="3" fill="#172032"/>
+      <path d="M111 94 L149 94 L159 107 L97 107 Z" fill="#fbbf24"/>
+      <path d="M105 112 L151 153" stroke="#ffe08a" stroke-width="8"/>
+      <g transform="translate(171 145) rotate(20)">
+        <ellipse cx="0" cy="0" rx="18" ry="14" fill="#ffd54d"/>
+        <circle cx="15" cy="-12" r="10" fill="#ffe066"/>
+        <path d="M17 -14 H28" stroke="#f97316"/>
+        <path d="M22 -25 Q34 -36 43 -28" fill="none"/>
+        <path d="M20 -7 Q31 -2 40 -10" fill="#f59e0b"/>
+        <circle cx="12" cy="-14" r="2.5" fill="#172032"/>
+      </g>
+      <circle cx="116" cy="122" r="8" fill="#ffd54d"/>
+      <circle cx="133" cy="136" r="8" fill="#ffd54d"/>
+      <circle cx="151" cy="150" r="8" fill="#ffd54d"/>
+      <circle cx="119" cy="126" r="2" fill="#172032"/>
+      <circle cx="136" cy="140" r="2" fill="#172032"/>
+      <circle cx="154" cy="154" r="2" fill="#172032"/>
+    </g>
+  </g>
+</svg>

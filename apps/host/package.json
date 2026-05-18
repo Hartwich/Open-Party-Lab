@@ -1,0 +1,18 @@
+{
+  "name": "@open-party-lab/host",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 5173",
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@open-party-lab/protocol": "0.1.0",
+    "@open-party-lab/ui-kit": "0.1.0",
+    "phaser": "^3.90.0",
+    "qrcode": "^1.5.4",
+    "socket.io-client": "^4.8.1"
+  }
+}

@@ -1,0 +1,26 @@
+export const arenaSurvivorPlayerDefinition = {
+  id: "arena-survivor-player",
+  displayName: "Survivor",
+  // Baseline stats before character modifiers, items and weapons are applied.
+  moveSpeed: 240,
+  pickupRadius: 36,
+  maxHp: 100,
+  radius: 18,
+  armor: 0,
+  hpRegen: 0,
+  damageMultiplier: 1,
+  autoFireRateMultiplier: 1,
+  attackSpeedMultiplier: 1,
+  projectileDamageMultiplier: 1,
+  projectileSpeedMultiplier: 1,
+  contactDamageTakenMultiplier: 1,
+  meleePowerMultiplier: 1,
+  rangedPowerMultiplier: 1,
+  magicPowerMultiplier: 1,
+  elementalPowerMultiplier: 1,
+  critChancePct: 0,
+  critDamageMultiplier: 1.5,
+  projectileCountBonus: 0,
+  pierceBonus: 0,
+  lifeStealPct: 0
+} as const;

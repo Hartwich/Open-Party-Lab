@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+  <defs>
+    <linearGradient id="goliathBody" x1="20%" y1="18%" x2="82%" y2="88%">
+      <stop offset="0%" stop-color="#d7e0ea"/>
+      <stop offset="38%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+    <linearGradient id="goliathPlate" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <radialGradient id="goliathHalo" cx="50%" cy="42%" r="56%">
+      <stop offset="0%" stop-color="#f8fafc" stop-opacity="0.5"/>
+      <stop offset="58%" stop-color="#94a3b8" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="goliathShadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#020617" flood-opacity="0.38"/>
+    </filter>
+  </defs>
+  <ellipse cx="80" cy="137" rx="37" ry="10" fill="#020617" opacity="0.34"/>
+  <circle cx="80" cy="72" r="45" fill="url(#goliathHalo)"/>
+  <g filter="url(#goliathShadow)">
+    <path d="M50 39 L110 39 L127 69 L119 112 L92 127 L68 127 L41 112 L33 69 Z" fill="url(#goliathBody)" stroke="#e2e8f0" stroke-opacity="0.35" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M61 31 L99 31 L112 46 L48 46 Z" fill="#64748b"/>
+    <path d="M44 63 L58 55 L58 107 L42 98 Z" fill="#475569"/>
+    <path d="M116 55 L130 63 L132 98 L116 107 Z" fill="#475569"/>
+    <path d="M63 58 L97 58 L106 74 L97 111 L63 111 L54 74 Z" fill="#1e293b" stroke="#f59e0b" stroke-opacity="0.65" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M68 67 H92 L98 79 L92 102 H68 L62 79 Z" fill="#334155"/>
+    <rect x="63" y="74" width="34" height="9" rx="4.5" fill="url(#goliathPlate)"/>
+    <circle cx="55" cy="60" r="4" fill="#f8fafc" fill-opacity="0.7"/>
+    <circle cx="105" cy="60" r="4" fill="#f8fafc" fill-opacity="0.7"/>
+    <path d="M56 119 L69 110 L75 126 L61 132 Z" fill="#64748b"/>
+    <path d="M104 119 L91 110 L85 126 L99 132 Z" fill="#64748b"/>
+  </g>
+  <circle cx="119" cy="35" r="3" fill="#f59e0b" fill-opacity="0.8"/>
+</svg>

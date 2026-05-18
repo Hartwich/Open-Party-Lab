@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="gunnerArmor" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#43304f"/>
+      <stop offset="100%" stop-color="#201728"/>
+    </linearGradient>
+    <linearGradient id="gunnerAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff9cc7"/>
+      <stop offset="100%" stop-color="#fb7185"/>
+    </linearGradient>
+    <filter id="gunnerDrop" x="-25%" y="-25%" width="150%" height="170%">
+      <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#0b1120" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <g stroke="#152032" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="128" cy="229" rx="59" ry="14" fill="#0f172a" opacity="0.18" stroke="none"/>
+    <g filter="url(#gunnerDrop)">
+      <rect x="95" y="156" width="28" height="58" rx="14" fill="#394967"/>
+      <rect x="133" y="156" width="28" height="58" rx="14" fill="#465676"/>
+      <path d="M81 210 Q102 202 122 208 L122 229 Q100 236 78 223 Z" fill="#7a4726"/>
+      <path d="M134 208 Q154 202 177 207 L179 226 Q158 236 133 228 Z" fill="#663a21"/>
+      <path d="M85 97 C97 80 154 76 171 95 L164 168 Q128 183 92 168 Z" fill="url(#gunnerArmor)"/>
+      <path d="M104 95 H152 L155 166 Q128 172 101 166 Z" fill="#31223a"/>
+      <path d="M88 108 Q69 127 78 150 Q94 153 108 143 L106 119 Z" fill="#3d2c48"/>
+      <path d="M168 108 Q185 125 181 149 Q165 154 149 145 L150 118 Z" fill="#3d2c48"/>
+      <circle cx="128" cy="69" r="28" fill="#ffd0a6"/>
+      <path d="M98 63 Q104 43 117 40 L124 22 H133 L140 40 Q154 42 159 63 L152 79 H104 Z" fill="url(#gunnerAccent)"/>
+      <rect x="101" y="56" width="54" height="18" rx="9" fill="#272d3c"/>
+      <circle cx="117" cy="65" r="5" fill="#7dd3fc"/>
+      <circle cx="139" cy="65" r="5" fill="#7dd3fc"/>
+      <path d="M112 78 Q128 90 145 78" fill="#fb7185"/>
+      <path d="M111 80 Q128 87 145 80" fill="none"/>
+      <path d="M92 118 H165" stroke="#ff9cc7" stroke-width="8"/>
+      <circle cx="106" cy="118" r="6" fill="#ffe29a"/>
+      <circle cx="124" cy="118" r="6" fill="#ffe29a"/>
+      <circle cx="142" cy="118" r="6" fill="#ffe29a"/>
+      <g transform="translate(155 146) rotate(-8)">
+        <rect x="-8" y="-16" width="54" height="32" rx="16" fill="#6b7280"/>
+        <rect x="28" y="-8" width="32" height="16" rx="8" fill="#94a3b8"/>
+        <rect x="4" y="-8" width="20" height="16" rx="8" fill="#fb7185"/>
+        <rect x="-4" y="10" width="18" height="24" rx="6" fill="#5b341c"/>
+        <circle cx="50" cy="0" r="5" fill="#fde68a"/>
+      </g>
+    </g>
+  </g>
+</svg>

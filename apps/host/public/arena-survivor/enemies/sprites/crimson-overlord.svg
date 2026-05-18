@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+  <defs>
+    <radialGradient id="overlordHalo" cx="50%" cy="46%" r="56%">
+      <stop offset="0%" stop-color="#fecaca" stop-opacity="0.8"/>
+      <stop offset="42%" stop-color="#ef4444" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#3f0b15" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="overlordBody" cx="45%" cy="38%" r="58%">
+      <stop offset="0%" stop-color="#fb7185"/>
+      <stop offset="50%" stop-color="#b91c1c"/>
+      <stop offset="100%" stop-color="#4c0519"/>
+    </radialGradient>
+    <linearGradient id="overlordCore" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef2f2"/>
+      <stop offset="100%" stop-color="#fecdd3"/>
+    </linearGradient>
+    <filter id="overlordShadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#020617" flood-opacity="0.42"/>
+    </filter>
+  </defs>
+  <ellipse cx="80" cy="138" rx="40" ry="10" fill="#020617" opacity="0.36"/>
+  <circle cx="80" cy="74" r="46" fill="url(#overlordHalo)"/>
+  <g filter="url(#overlordShadow)">
+    <path d="M80 29 L101 42 L123 40 L126 61 L141 79 L126 97 L123 119 L101 117 L80 130 L59 117 L37 119 L34 97 L19 79 L34 61 L37 40 L59 42 Z" fill="url(#overlordBody)" stroke="#fecdd3" stroke-opacity="0.42" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="80" cy="79" r="28" fill="#7f1d1d" opacity="0.6"/>
+    <circle cx="80" cy="79" r="19" fill="url(#overlordCore)"/>
+    <path d="M67 77 Q80 68 93 77" stroke="#7f1d1d" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <circle cx="69" cy="72" r="3.5" fill="#7f1d1d"/>
+    <circle cx="91" cy="72" r="3.5" fill="#7f1d1d"/>
+    <circle cx="80" cy="33" r="6" fill="#ef4444"/>
+    <circle cx="126" cy="79" r="6" fill="#ef4444"/>
+    <circle cx="80" cy="125" r="6" fill="#ef4444"/>
+    <circle cx="34" cy="79" r="6" fill="#ef4444"/>
+  </g>
+  <circle cx="119" cy="36" r="3" fill="#fecaca" fill-opacity="0.82"/>
+</svg>

@@ -1,0 +1,32 @@
+{
+  "name": "open-party-lab",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:packages": "tsc -b packages/utils packages/ui-kit packages/game-core packages/protocol",
+    "watch:packages": "tsc -b packages/utils packages/ui-kit packages/game-core packages/protocol -w",
+    "dev:all": "powershell -ExecutionPolicy Bypass -File ./scripts/dev-all.ps1",
+    "dev:stop": "powershell -ExecutionPolicy Bypass -File ./scripts/stop-dev.ps1",
+    "dev:server": "npm run build:packages && npm run dev --workspace @open-party-lab/server",
+    "dev:host": "npm run build:packages && npm run dev --workspace @open-party-lab/host",
+    "dev:controller": "npm run build:packages && npm run dev --workspace @open-party-lab/controller",
+    "build": "npm run build:packages && npm run build --workspace @open-party-lab/server && npm run build --workspace @open-party-lab/host && npm run build --workspace @open-party-lab/controller",
+    "typecheck": "npm run build:packages && npm run typecheck --workspace @open-party-lab/utils && npm run typecheck --workspace @open-party-lab/ui-kit && npm run typecheck --workspace @open-party-lab/game-core && npm run typecheck --workspace @open-party-lab/protocol && npm run typecheck --workspace @open-party-lab/server && npm run typecheck --workspace @open-party-lab/host && npm run typecheck --workspace @open-party-lab/controller",
+    "lint": "npm run typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.5"
+  }
+}

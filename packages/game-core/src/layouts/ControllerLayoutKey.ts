@@ -1,0 +1,15 @@
+﻿export type ControllerLayoutKey =
+  | "chaos_kommando_controls"
+  | "drawing_guess"
+  | "schaetzorama"
+  | "word_tiles_board"
+  | "single_button"
+  | "left_right_hold"
+  | "tap_mash"
+  | "choice"
+  | "dpad"
+  | "racing_controls"
+  | "virtual_joystick"
+  | "swipe"
+  | "tower_defense"
+  | "twin_stick";

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+  <defs>
+    <linearGradient id="venomGlass" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#b7ff8d"/>
+      <stop offset="1" stop-color="#1b7f3b"/>
+    </linearGradient>
+  </defs>
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <path d="M80 14 V34" stroke="#d6b36a" stroke-width="6"/>
+    <path d="M80 10 V20" stroke="#f5f1d8" stroke-width="2"/>
+    <rect x="72" y="18" width="16" height="20" rx="6" fill="#664018" stroke="#f2d896" stroke-width="3"/>
+    <rect x="67" y="36" width="26" height="48" rx="12" fill="url(#venomGlass)" stroke="#e8ffe0" stroke-width="3"/>
+    <rect x="72" y="48" width="16" height="24" rx="7" fill="#0fbf57"/>
+    <circle cx="80" cy="42" r="4" fill="#eaffb8"/>
+    <path d="M64 62 Q56 70 60 82" fill="none" stroke="#38593d" stroke-width="5"/>
+    <circle cx="58" cy="85" r="8" fill="#4f5d37" stroke="#d6e6ad" stroke-width="3"/>
+    <rect x="68" y="84" width="24" height="30" rx="8" fill="#33402c" stroke="#f0db98" stroke-width="3"/>
+    <path d="M69 114 L63 139 Q72 143 80 136 L80 118 Z" fill="#243022" stroke="#f0db98" stroke-width="3"/>
+    <rect x="63" y="112" width="34" height="16" rx="7" fill="#5a4a24"/>
+  </g>
+</svg>

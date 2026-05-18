@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+  <defs>
+    <radialGradient id="magCore" cx="0.5" cy="0.5" r="0.55">
+      <stop offset="0" stop-color="#bdfcff"/>
+      <stop offset="1" stop-color="#2bd2f5"/>
+    </radialGradient>
+  </defs>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M52 48 V94 A28 28 0 0 0 108 94 V48" stroke="#e3504a" stroke-width="20"/>
+    <path d="M52 48 V94 A28 28 0 0 0 108 94 V48" stroke="#fff1ea" stroke-width="6"/>
+    <rect x="42" y="34" width="20" height="24" rx="8" fill="#eef5ff" stroke="#d7e5f7" stroke-width="3"/>
+    <rect x="98" y="34" width="20" height="24" rx="8" fill="#eef5ff" stroke="#d7e5f7" stroke-width="3"/>
+    <circle cx="80" cy="86" r="24" fill="#182737" stroke="#86ecff" stroke-width="4"/>
+    <circle cx="80" cy="86" r="12" fill="url(#magCore)"/>
+    <path d="M80 32 V22" stroke="#7bf1ff" stroke-width="6"/>
+    <path d="M48 72 H36" stroke="#7bf1ff" stroke-width="6"/>
+    <path d="M112 72 H124" stroke="#7bf1ff" stroke-width="6"/>
+  </g>
+</svg>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="prismBg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#33205d"/>
+      <stop offset="1" stop-color="#120f1c"/>
+    </linearGradient>
+    <linearGradient id="prismGem" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ff8ad6"/>
+      <stop offset="0.5" stop-color="#8f7dff"/>
+      <stop offset="1" stop-color="#44dcff"/>
+    </linearGradient>
+    <linearGradient id="prismShaft" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#f2cc72"/>
+      <stop offset="1" stop-color="#8b5a17"/>
+    </linearGradient>
+  </defs>
+  <rect x="28" y="28" width="200" height="200" rx="44" fill="url(#prismBg)"/>
+  <rect x="38" y="38" width="180" height="180" rx="34" fill="#151425" opacity="0.94" stroke="#c38cff" stroke-width="4"/>
+  <circle cx="66" cy="68" r="20" fill="#ff8ad6" opacity="0.12"/>
+  <circle cx="192" cy="186" r="24" fill="#44dcff" opacity="0.1"/>
+  <g transform="scale(1.6)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M80 18 L94 34 L80 56 L66 34 Z" fill="url(#prismGem)" stroke="#f5f9ff" stroke-width="3"/>
+    <path d="M80 22 L88 34 L80 46 L72 34 Z" fill="#ffffff" opacity="0.45"/>
+    <path d="M68 34 L56 42 L64 50 L72 42 Z" fill="#7f7cff" stroke="#f5f9ff" stroke-width="3"/>
+    <path d="M92 34 L104 42 L96 50 L88 42 Z" fill="#36d8ff" stroke="#f5f9ff" stroke-width="3"/>
+    <rect x="76" y="52" width="8" height="72" rx="4" fill="url(#prismShaft)" stroke="#f5dd9a" stroke-width="3"/>
+    <rect x="68" y="62" width="24" height="12" rx="6" fill="#7b4dd9" stroke="#f0d6ff" stroke-width="3"/>
+    <circle cx="80" cy="76" r="5" fill="#fff2a5"/>
+    <rect x="70" y="92" width="20" height="16" rx="6" fill="#533098"/>
+    <path d="M69 114 L63 140 Q72 143 80 136 L80 118 Z" fill="#412269" stroke="#f0d6ff" stroke-width="3"/>
+  </g>
+</svg>

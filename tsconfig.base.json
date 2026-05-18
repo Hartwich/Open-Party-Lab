@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "ES2022",
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "useDefineForClassFields": true,
+    "paths": {
+      "@open-party-lab/utils": ["packages/utils/src/index.ts"],
+      "@open-party-lab/ui-kit": ["packages/ui-kit/src/index.ts"],
+      "@open-party-lab/game-core": ["packages/game-core/src/index.ts"],
+      "@open-party-lab/protocol": ["packages/protocol/src/index.ts"]
+    }
+  }
+}

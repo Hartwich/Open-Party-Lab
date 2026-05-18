@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="drillIconBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d9f99d"/>
+      <stop offset="45%" stop-color="#84cc16"/>
+      <stop offset="100%" stop-color="#3f6212"/>
+    </linearGradient>
+    <linearGradient id="drillIconMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="45%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+    <filter id="drillIconDrop" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="9" flood-color="#0b1120" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <g filter="url(#drillIconDrop)" stroke="#152133" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" transform="translate(128 128) rotate(-24)">
+    <path d="M-88 -26 H42 C68 -26 88 -15 101 0 C88 15 68 26 42 26 H-88 Z" fill="url(#drillIconBody)"/>
+    <path d="M42 -34 L118 0 L42 34 Z" fill="url(#drillIconMetal)"/>
+    <path d="M57 -20 L96 -2 M57 0 L105 16 M50 20 L81 31" stroke="#475569" stroke-width="4" opacity="0.7"/>
+    <path d="M-102 -18 H-88 V18 H-102 L-116 0 Z" fill="#64748b"/>
+    <path d="M-34 26 C-38 42 -33 62 -18 82 H6 L8 36 C-1 28 -14 25 -34 26 Z" fill="#6b3f24"/>
+    <rect x="-14" y="-17" width="31" height="34" rx="11" fill="#fef3c7"/>
+    <circle cx="2" cy="0" r="6" fill="#84cc16"/>
+    <path d="M-64 -26 L-78 -48 H-45 Z" fill="#bef264"/>
+    <path d="M-64 26 L-78 48 H-45 Z" fill="#bef264"/>
+  </g>
+</svg>

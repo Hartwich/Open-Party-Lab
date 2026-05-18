@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="confettiCarryBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5d0fe"/>
+      <stop offset="46%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#6b21a8"/>
+    </linearGradient>
+    <linearGradient id="confettiCarryStock" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9a6a3d"/>
+      <stop offset="100%" stop-color="#4b2e1a"/>
+    </linearGradient>
+    <linearGradient id="confettiCarryMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="48%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#1a1f26" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 107 H156 C184 107 211 119 232 141 V157 H68 C45 147 29 132 22 107 Z" fill="url(#confettiCarryBody)"/>
+    <path d="M155 107 L219 74 L237 99 L187 130 Z" fill="url(#confettiCarryMetal)"/>
+    <path d="M42 97 H98 V116 H42 Z" fill="#67e8f9"/>
+    <path d="M87 156 C80 179 88 205 107 232 H139 C131 199 132 177 146 156 Z" fill="url(#confettiCarryStock)"/>
+    <path d="M109 162 C122 167 132 178 136 193" stroke="#e9c291" stroke-width="3.2" opacity="0.58"/>
+    <path d="M122 137 H171" stroke="#fdf4ff" stroke-width="3" opacity="0.4"/>
+    <circle cx="162" cy="135" r="10" fill="#fef3c7"/>
+    <rect x="201" y="49" width="14" height="14" rx="3" fill="#f0abfc" stroke="none" transform="rotate(18 208 56)"/>
+    <circle cx="226" cy="78" r="7" fill="#fde047" stroke="none"/>
+  </g>
+</svg>

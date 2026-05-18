@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="splitIconBody" cx="38%" cy="32%" r="68%">
+      <stop offset="0%" stop-color="#ffe7b0"/>
+      <stop offset="46%" stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#9a3412"/>
+    </radialGradient>
+    <filter id="splitIconDrop" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="9" flood-color="#0b1120" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <g filter="url(#splitIconDrop)" stroke="#152133" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M126 28 L140 68 H112 Z" fill="#f97316"/>
+    <path d="M126 228 L112 188 H140 Z" fill="#f97316"/>
+    <path d="M28 126 L68 112 V140 Z" fill="#f97316"/>
+    <path d="M228 126 L188 140 V112 Z" fill="#f97316"/>
+    <path d="M55 55 L94 75 L75 94 Z" fill="#f97316"/>
+    <path d="M201 55 L181 94 L162 75 Z" fill="#f97316"/>
+    <path d="M55 201 L75 162 L94 181 Z" fill="#f97316"/>
+    <path d="M201 201 L162 181 L181 162 Z" fill="#f97316"/>
+    <circle cx="128" cy="128" r="70" fill="url(#splitIconBody)"/>
+    <path d="M88 124 C112 105 142 105 168 124" fill="none" stroke="#fff4ca" stroke-width="5" opacity="0.55"/>
+    <circle cx="105" cy="105" r="8" fill="#fff7d6" stroke="none"/>
+    <path d="M91 151 C114 168 145 168 166 149" fill="none" stroke="#7c2d12" stroke-width="5" opacity="0.5"/>
+  </g>
+</svg>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="gearBg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#5f3619"/>
+      <stop offset="1" stop-color="#1b120e"/>
+    </linearGradient>
+    <linearGradient id="gearMetal" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#7b8798"/>
+      <stop offset="1" stop-color="#232b37"/>
+    </linearGradient>
+  </defs>
+  <rect x="28" y="28" width="200" height="200" rx="44" fill="url(#gearBg)"/>
+  <rect x="38" y="38" width="180" height="180" rx="34" fill="#23140f" opacity="0.92" stroke="#ffb45a" stroke-width="4"/>
+  <circle cx="68" cy="70" r="18" fill="#ffbf69" opacity="0.12"/>
+  <circle cx="192" cy="188" r="22" fill="#ffbf69" opacity="0.1"/>
+  <g transform="scale(1.6)" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="74" y="18" width="12" height="66" rx="6" fill="url(#gearMetal)" stroke="#f8e5b7" stroke-width="3"/>
+    <rect x="71" y="16" width="18" height="12" rx="4" fill="#ffe19a"/>
+    <g fill="#d88a2d">
+      <rect x="76" y="28" width="8" height="14" rx="3"/>
+      <rect x="76" y="70" width="8" height="14" rx="3"/>
+      <rect x="96" y="52" width="14" height="8" rx="3"/>
+      <rect x="50" y="52" width="14" height="8" rx="3"/>
+      <rect x="94" y="35" width="12" height="8" rx="3" transform="rotate(45 100 39)"/>
+      <rect x="54" y="35" width="12" height="8" rx="3" transform="rotate(-45 60 39)"/>
+      <rect x="94" y="69" width="12" height="8" rx="3" transform="rotate(-45 100 73)"/>
+      <rect x="54" y="69" width="12" height="8" rx="3" transform="rotate(45 60 73)"/>
+    </g>
+    <circle cx="80" cy="56" r="20" fill="#364152" stroke="#ffbf69" stroke-width="4"/>
+    <circle cx="80" cy="56" r="8" fill="#18202d" stroke="#ffd592" stroke-width="3"/>
+    <rect x="65" y="82" width="30" height="34" rx="8" fill="#845127" stroke="#ffe0b1" stroke-width="3"/>
+    <rect x="69" y="89" width="22" height="14" rx="5" fill="#ffb347"/>
+    <path d="M67 114 L60 140 Q71 144 80 135 L80 118 Z" fill="#5f391b" stroke="#ffe0b1" stroke-width="3"/>
+    <rect x="61" y="112" width="38" height="16" rx="8" fill="#67401e"/>
+  </g>
+</svg>

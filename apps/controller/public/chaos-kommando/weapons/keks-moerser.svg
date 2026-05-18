@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="cookieIconMortar" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#78716c"/>
+      <stop offset="52%" stop-color="#3f3f46"/>
+      <stop offset="100%" stop-color="#18181b"/>
+    </linearGradient>
+    <radialGradient id="cookieIconCookie" cx="40%" cy="32%" r="70%">
+      <stop offset="0%" stop-color="#fed7aa"/>
+      <stop offset="52%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#7c2d12"/>
+    </radialGradient>
+    <filter id="cookieIconDrop" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="9" flood-color="#0b1120" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <g filter="url(#cookieIconDrop)" stroke="#152133" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(129 157) rotate(-18)">
+      <path d="M-68 -30 H56 C72 -30 82 -16 75 0 C82 16 72 30 56 30 H-68 C-80 20 -84 10 -84 0 C-84 -10 -80 -20 -68 -30 Z" fill="url(#cookieIconMortar)"/>
+      <path d="M-33 28 C-37 49 -31 70 -16 91 H16 C9 65 10 47 25 28 Z" fill="#6b3f24"/>
+      <path d="M54 -30 L93 -45 L106 -22 L73 -2 Z" fill="#a8a29e"/>
+      <circle cx="-40" cy="0" r="12" fill="#fef3c7"/>
+    </g>
+    <circle cx="167" cy="79" r="42" fill="url(#cookieIconCookie)"/>
+    <circle cx="152" cy="69" r="6" fill="#7c2d12" stroke="none"/>
+    <circle cx="182" cy="91" r="7" fill="#7c2d12" stroke="none"/>
+    <circle cx="178" cy="61" r="5" fill="#7c2d12" stroke="none"/>
+    <path d="M128 69 C141 41 174 30 203 47" fill="none" stroke="#fff7d6" stroke-width="5" opacity="0.45"/>
+  </g>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111827"/>
+      <stop offset="100%" stop-color="#374151"/>
+    </linearGradient>
+    <linearGradient id="shaft" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b5a2b"/>
+      <stop offset="100%" stop-color="#c08a53"/>
+    </linearGradient>
+    <linearGradient id="rock" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d1d5db"/>
+      <stop offset="100%" stop-color="#6b7280"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="12" width="232" height="232" rx="40" fill="url(#bg)"/>
+  <rect x="20" y="20" width="216" height="216" rx="32" fill="none" stroke="#d1d5db" stroke-opacity="0.28" stroke-width="4"/>
+  <g transform="translate(128 128) rotate(-34)">
+    <rect x="-22" y="-7" width="98" height="14" rx="7" fill="url(#shaft)"/>
+    <path d="M82 -28 L109 -14 L118 11 L103 32 L73 24 L60 0 Z" fill="url(#rock)" stroke="#4b5563" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M68 -10 L86 -20 M68 9 L88 22" stroke="#d6b588" stroke-width="5" stroke-linecap="round"/>
+    <rect x="-32" y="-10" width="22" height="20" rx="6" fill="#5c3818"/>
+  </g>
+</svg>

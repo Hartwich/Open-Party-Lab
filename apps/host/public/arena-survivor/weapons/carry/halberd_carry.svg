@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+  <defs>
+    <linearGradient id="shaft" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#714320"/>
+      <stop offset="100%" stop-color="#b37d45"/>
+    </linearGradient>
+    <linearGradient id="blade" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(80 80) rotate(-35)">
+    <rect x="-12" y="-4" width="92" height="8" rx="4" fill="url(#shaft)"/>
+    <path d="M72 -2 L94 -24 L104 -4 L91 10 Z" fill="url(#blade)" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M74 0 L96 22 L83 24 L69 10 Z" fill="#dbe4f0" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M82 0 L107 -12 L101 0 L107 12 Z" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round"/>
+    <rect x="-16" y="-6" width="14" height="12" rx="4" fill="#513116"/>
+  </g>
+</svg>

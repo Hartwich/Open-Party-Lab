@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" fill="none">
+  <defs>
+    <linearGradient id="sand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8f6e47"/>
+      <stop offset="52%" stop-color="#a78157"/>
+      <stop offset="100%" stop-color="#6f5437"/>
+    </linearGradient>
+    <radialGradient id="lightPatch" cx="0.28" cy="0.22" r="0.48">
+      <stop offset="0%" stop-color="#d6b88d" stop-opacity="0.42"/>
+      <stop offset="100%" stop-color="#d6b88d" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="shadowPatch" cx="0.82" cy="0.78" r="0.46">
+      <stop offset="0%" stop-color="#5f472e" stop-opacity="0.34"/>
+      <stop offset="100%" stop-color="#5f472e" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dust" width="180" height="180" patternUnits="userSpaceOnUse">
+      <circle cx="22" cy="28" r="2" fill="#6f5336" fill-opacity="0.22"/>
+      <circle cx="88" cy="56" r="1.8" fill="#d8bf97" fill-opacity="0.18"/>
+      <circle cx="138" cy="102" r="2.2" fill="#6a5033" fill-opacity="0.2"/>
+      <circle cx="60" cy="144" r="1.6" fill="#dccaab" fill-opacity="0.18"/>
+      <circle cx="158" cy="24" r="2.4" fill="#755638" fill-opacity="0.16"/>
+    </pattern>
+    <g id="rockA">
+      <path d="M0 10L14 0L30 6L34 20L20 32L4 24Z" fill="#7f6140"/>
+      <path d="M8 11L17 6L26 9L20 22L10 21Z" fill="#a3835d" fill-opacity="0.72"/>
+    </g>
+    <g id="rockB">
+      <path d="M0 8L9 0L21 4L24 15L13 23L2 20Z" fill="#6e5336"/>
+      <path d="M6 8L12 5L18 7L14 16L7 15Z" fill="#b2926b" fill-opacity="0.66"/>
+    </g>
+  </defs>
+  <rect width="1280" height="720" fill="url(#sand)"/>
+  <rect width="1280" height="720" fill="url(#lightPatch)"/>
+  <rect width="1280" height="720" fill="url(#shadowPatch)"/>
+  <rect width="1280" height="720" fill="url(#dust)"/>
+
+  <path d="M0 132C168 88 296 90 448 132C584 170 702 170 842 132C986 92 1116 96 1280 148V0H0Z" fill="#cfaf81" fill-opacity="0.08"/>
+  <path d="M0 548C180 506 316 510 476 558C614 600 756 602 930 552C1074 510 1178 508 1280 530V720H0Z" fill="#5d452d" fill-opacity="0.1"/>
+
+  <use href="#rockA" transform="translate(82 86) rotate(-12 17 16)" opacity="0.9"/>
+  <use href="#rockB" transform="translate(234 148) rotate(18 12 11)" opacity="0.85"/>
+  <use href="#rockA" transform="translate(416 94) rotate(11 17 16) scale(0.82)" opacity="0.8"/>
+  <use href="#rockB" transform="translate(562 172) rotate(-9 12 11) scale(1.15)" opacity="0.78"/>
+  <use href="#rockA" transform="translate(736 112) rotate(-17 17 16) scale(0.94)" opacity="0.88"/>
+  <use href="#rockB" transform="translate(914 86) rotate(9 12 11)" opacity="0.82"/>
+  <use href="#rockA" transform="translate(1094 142) rotate(15 17 16) scale(1.08)" opacity="0.84"/>
+  <use href="#rockB" transform="translate(1198 220) rotate(-14 12 11) scale(0.92)" opacity="0.84"/>
+
+  <use href="#rockB" transform="translate(126 512) rotate(-8 12 11) scale(1.12)" opacity="0.8"/>
+  <use href="#rockA" transform="translate(286 612) rotate(22 17 16)" opacity="0.88"/>
+  <use href="#rockB" transform="translate(492 556) rotate(-17 12 11)" opacity="0.82"/>
+  <use href="#rockA" transform="translate(654 638) rotate(14 17 16) scale(0.86)" opacity="0.84"/>
+  <use href="#rockB" transform="translate(836 576) rotate(12 12 11) scale(1.06)" opacity="0.8"/>
+  <use href="#rockA" transform="translate(1022 628) rotate(-19 17 16)" opacity="0.9"/>
+  <use href="#rockB" transform="translate(1178 564) rotate(16 12 11) scale(1.18)" opacity="0.78"/>
+
+  <rect x="18" y="18" width="1244" height="684" rx="28" fill="none" stroke="#e5c79c" stroke-opacity="0.35" stroke-width="5"/>
+  <rect x="28" y="28" width="1224" height="664" rx="22" fill="none" stroke="#4f3924" stroke-opacity="0.22" stroke-width="2"/>
+</svg>

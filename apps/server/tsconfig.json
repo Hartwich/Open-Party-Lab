@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "sourceMap": true
+  },
+  "references": [
+    { "path": "../../packages/utils" },
+    { "path": "../../packages/game-core" },
+    { "path": "../../packages/protocol" }
+  ],
+  "include": ["src"]
+}

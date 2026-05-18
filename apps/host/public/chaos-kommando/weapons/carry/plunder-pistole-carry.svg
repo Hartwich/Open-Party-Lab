@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="pistol-metal" x1="8%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7d8792"/>
+      <stop offset="32%" stop-color="#505a66"/>
+      <stop offset="72%" stop-color="#2a313a"/>
+      <stop offset="100%" stop-color="#11161c"/>
+    </linearGradient>
+    <linearGradient id="pistol-slide" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#bec7d0"/>
+      <stop offset="34%" stop-color="#7f8a95"/>
+      <stop offset="78%" stop-color="#313942"/>
+      <stop offset="100%" stop-color="#161b21"/>
+    </linearGradient>
+    <linearGradient id="pistol-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffb364"/>
+      <stop offset="100%" stop-color="#c85617"/>
+    </linearGradient>
+    <linearGradient id="pistol-grip" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8d5e37"/>
+      <stop offset="100%" stop-color="#49301d"/>
+    </linearGradient>
+    <linearGradient id="pistol-brass" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffe9aa"/>
+      <stop offset="100%" stop-color="#d19f38"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#1a1f26" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path
+      d="M44 100 H150 C181 100 205 109 223 127 V138 H47 L36 123 Z"
+      fill="url(#pistol-metal)"
+    />
+    <path d="M58 88 H171 C188 88 201 94 208 104 H58 Z" fill="url(#pistol-slide)"/>
+    <path d="M171 88 H204 C219 92 230 100 235 112 C221 111 205 112 190 117 H171 Z" fill="#c9d1d8"/>
+    <path d="M204 112 H236 V126 H204 Z" fill="#1d232a"/>
+    <path d="M74 106 H129 C138 121 138 139 126 154 H80 C84 139 83 122 74 106 Z" fill="#313841"/>
+    <path d="M89 107 H144 V138 H86" stroke="#7b8893" stroke-width="3.2"/>
+    <rect x="118" y="100" width="42" height="24" rx="7" fill="url(#pistol-accent)"/>
+    <rect x="173" y="98" width="19" height="8" rx="2.5" fill="url(#pistol-brass)"/>
+    <path d="M74 134 H103 C110 134 117 139 120 146 L116 170 H76 C71 155 70 144 74 134 Z" fill="#242b33"/>
+    <path d="M79 136 C70 150 68 175 77 203 C82 215 92 221 109 224 L124 182 C122 156 110 144 79 136 Z" fill="url(#pistol-grip)"/>
+    <path d="M87 146 C98 151 107 160 112 174" stroke="#c6925f" stroke-width="3.1" opacity="0.62"/>
+    <path d="M95 159 C104 164 111 171 114 181" stroke="#c6925f" stroke-width="3.1" opacity="0.54"/>
+    <path d="M99 115 H136" stroke="#dfe5ea" stroke-width="2.6" opacity="0.54"/>
+    <path d="M57 97 H108" stroke="#eef2f5" stroke-width="2.2" opacity="0.34"/>
+    <path d="M96 138 C112 141 121 150 124 165" stroke="#11161c" stroke-width="3.5"/>
+    <path d="M97 135 C104 128 116 127 125 132" stroke="#5f6a74" stroke-width="3"/>
+    <path d="M119 143 C133 144 142 152 144 165 C136 172 124 173 113 169" fill="none"/>
+    <path d="M141 102 H184" stroke="#12171d" stroke-width="4"/>
+    <path d="M210 108 C216 110 221 115 224 121" stroke="#fef1c3" stroke-width="2.2" opacity="0.34"/>
+    <circle cx="66" cy="123" r="7" fill="url(#pistol-brass)"/>
+  </g>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="drillCarryBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d9f99d"/>
+      <stop offset="44%" stop-color="#84cc16"/>
+      <stop offset="100%" stop-color="#3f6212"/>
+    </linearGradient>
+    <linearGradient id="drillCarryMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="48%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+    <linearGradient id="drillCarryGrip" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5e34"/>
+      <stop offset="100%" stop-color="#4b2f1b"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#1a1f26" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M25 103 H149 C181 103 206 115 225 134 C206 153 181 165 149 165 H25 C13 153 9 143 9 134 C9 125 13 115 25 103 Z" fill="url(#drillCarryBody)"/>
+    <path d="M148 94 L246 134 L148 174 Z" fill="url(#drillCarryMetal)"/>
+    <path d="M169 112 L220 130 M168 134 L232 151 M163 157 L202 170" stroke="#475569" stroke-width="4" opacity="0.65"/>
+    <path d="M9 112 H25 V156 H9 C3 149 0 142 0 134 C0 126 3 119 9 112 Z" fill="#64748b"/>
+    <path d="M55 164 C49 185 56 208 74 234 H101 C93 203 95 181 111 164 Z" fill="url(#drillCarryGrip)"/>
+    <path d="M72 171 C84 177 94 188 99 202" stroke="#c6925f" stroke-width="3" opacity="0.58"/>
+    <rect x="88" y="116" width="36" height="36" rx="12" fill="#fef3c7"/>
+    <circle cx="106" cy="134" r="7" fill="#84cc16"/>
+    <path d="M48 103 L34 78 H72 Z" fill="#bef264"/>
+    <path d="M48 165 L34 190 H72 Z" fill="#bef264"/>
+  </g>
+</svg>
