@@ -3,6 +3,7 @@ import { DPadLayout } from "./DPadLayout.js";
 import { SingleButtonLayout } from "./SingleButtonLayout.js";
 import { ChoiceLayout } from "./ChoiceLayout.js";
 import { ShopLayout } from "./ShopLayout.js";
+import { ArenaSurvivorModernShopLayout } from "./ArenaSurvivorModernShopLayout.js";
 import { TapMashLayout } from "./TapMashLayout.js";
 import { VirtualJoystickLayout } from "./VirtualJoystickLayout.js";
 import { ChaosKommandoLayout } from "./ChaosKommandoLayout.js";
@@ -36,6 +37,8 @@ export function ControllerLayoutRenderer({ model }: ControllerLayoutRendererProp
       return <TwinStickLayout model={model} />;
     case "shop":
       return <ShopLayout model={model} />;
+    case "arena_survivor_modern_shop":
+      return <ArenaSurvivorModernShopLayout model={model} />;
     case "single_button":
       return <SingleButtonLayout model={model} />;
     case "choice":

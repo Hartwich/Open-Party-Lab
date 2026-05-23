@@ -1,6 +1,11 @@
 import type { ArenaSurvivorPlayerState, ArenaSurvivorShopOfferState, ArenaSurvivorState } from "@open-party-lab/protocol";
 import type { ControllerGameRenderContext } from "../registry.js";
-import type { LayoutStat, ShopLayoutModel, ShopOfferModel, VirtualJoystickLayoutModel } from "../../layouts/models.js";
+import type {
+  ArenaSurvivorModernShopLayoutModel,
+  LayoutStat,
+  ShopOfferModel,
+  VirtualJoystickLayoutModel
+} from "../../layouts/models.js";
 import {
   createArenaSurvivorMoveInput,
   createArenaSurvivorShopInput,
@@ -25,7 +30,11 @@ function formatPercent(value: number | null | undefined): string {
   return `${safeValue >= 10 ? Math.round(safeValue) : Math.round(safeValue * 10) / 10}%`;
 }
 
-function buildWeaponOfferStats(offer: ArenaSurvivorShopOfferState): LayoutStat[] {
+function shouldHighlightOfferStat(label: string, index: number): boolean {
+  return index === 0 || /crit|schaden|damage|projektil|projectile|reichweite|range/i.test(label);
+}
+
+function buildOfferStats(offer: ArenaSurvivorShopOfferState): LayoutStat[] {
   if (!offer.detailLines?.length) {
     return [];
   }
@@ -33,7 +42,7 @@ function buildWeaponOfferStats(offer: ArenaSurvivorShopOfferState): LayoutStat[]
   return offer.detailLines.map((detailLine, index) => ({
     label: detailLine.label,
     value: detailLine.value,
-    highlighted: index === 0 || detailLine.label === "Crit" || detailLine.label === "Projektile"
+    highlighted: shouldHighlightOfferStat(detailLine.label, index)
   }));
 }
 
@@ -41,11 +50,7 @@ function enrichArenaSurvivorShopOffers(
   offers: ArenaSurvivorShopOfferState[]
 ): ShopOfferModel[] {
   return offers.map((offer) => {
-    if (offer.kind !== "weapon") {
-      return offer;
-    }
-
-    const stats = buildWeaponOfferStats(offer);
+    const stats = buildOfferStats(offer);
 
     return stats.length > 0 ? { ...offer, stats } : offer;
   });
@@ -109,8 +114,12 @@ function resolvePlayerStats(player: ArenaSurvivorPlayerState | null): Array<{ la
     { label: "Proj Dmg", value: `${Math.round(stats.projectileDamageMultiplier * 100)}%` },
     { label: "Fire Rate", value: `${Math.round(stats.autoFireRateMultiplier * 100)}%` },
     { label: "Armor", value: `${Math.round((stats.armor ?? 0) * 100) / 100}` },
+    { label: "Dodge", value: formatPercent(stats.dodgePct) },
     { label: "Crit", value: `${Math.round(stats.critChancePct ?? 0)}%` },
     { label: "Atk Spd", value: `${Math.round((stats.attackSpeedMultiplier ?? 1) * 100)}%` },
+    { label: "Range", value: `${Math.round((stats.weaponRangeMultiplier ?? 1) * 100)}%` },
+    { label: "Luck", value: `${Math.round(stats.luck ?? 0)}` },
+    { label: "Harvest", value: `${Math.round(stats.harvesting ?? 0)}` },
     { label: "Life Steal", value: formatPercent(stats.lifeStealPct) },
     { label: "Regen", value: `${Math.round((stats.hpRegen ?? 0) * 10) / 10}` }
   ];
@@ -120,7 +129,7 @@ function buildArenaSurvivorShopModel(
   context: ControllerGameRenderContext,
   state: ArenaSurvivorState,
   player: ArenaSurvivorPlayerState
-): ShopLayoutModel {
+): ArenaSurvivorModernShopLayoutModel {
   const currentPlayerReady = Boolean(context.state.player?.isReady);
   const language = context.state.room?.language;
   const en = language === "en";
@@ -134,7 +143,7 @@ function buildArenaSurvivorShopModel(
   }, new Map<string, number>());
 
   return {
-    kind: "shop",
+    kind: "arena_survivor_modern_shop",
     language,
     title: `${player.name} Shop`,
     subtitle: `${en ? "Wave" : "Welle"} ${state.waveNumber} | Material ${player.materials}`,
@@ -287,7 +296,7 @@ function buildArenaSurvivorJoystickModel(
 
 export function buildArenaSurvivorControllerModel(
   context: ControllerGameRenderContext
-): ShopLayoutModel | VirtualJoystickLayoutModel {
+): ArenaSurvivorModernShopLayoutModel | VirtualJoystickLayoutModel {
   const gameState = (context.state.game?.state ?? null) as ArenaSurvivorState | null;
   const currentPlayer = resolveCurrentPlayer(context, gameState);
   const shouldShowShop =

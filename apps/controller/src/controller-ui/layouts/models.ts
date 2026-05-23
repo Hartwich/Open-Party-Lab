@@ -343,6 +343,11 @@ export interface ShopOfferModel {
   targetLevel?: number;
   summary?: string;
   stats?: LayoutStat[];
+  tags?: string[];
+  detailLines?: Array<{
+    label: string;
+    value: string;
+  }>;
 }
 
 export interface ShopLayoutModel {
@@ -380,6 +385,8 @@ export interface ShopLayoutModel {
       itemId: string;
       level: number;
       displayName: string;
+      description?: string;
+      iconPath?: string;
     }>;
   };
   runSummary?: {
@@ -396,6 +403,10 @@ export interface ShopLayoutModel {
   onBuy: (offerId: string) => void;
   onSellWeapon?: (weaponInstanceId: string) => void;
   onCombineWeapon?: (weaponInstanceId: string) => void;
+}
+
+export interface ArenaSurvivorModernShopLayoutModel extends Omit<ShopLayoutModel, "kind"> {
+  kind: "arena_survivor_modern_shop";
 }
 
 export interface DrawingGuessStrokeModel {
@@ -509,6 +520,7 @@ export type ControllerLayoutModel =
   | TwinStickLayoutModel
   | TowerDefenseLayoutModel
   | ShopLayoutModel
+  | ArenaSurvivorModernShopLayoutModel
   | DrawingGuessLayoutModel
   | SchaetzoramaLayoutModel
   | WordTilesLayoutModel;
