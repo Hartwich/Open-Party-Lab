@@ -10,8 +10,31 @@ import { createArenaSurvivorEnemyDrops } from "../factories/createEnemyDrops.js"
 import { createArenaSurvivorProjectile } from "../factories/createProjectile.js";
 import { resolveArenaSurvivorDifficulty } from "../difficulty/arenaSurvivorDifficulty.js";
 import { resolveArenaSurvivorWeaponLevel } from "../loadout/arenaSurvivorLoadout.js";
+import type { ArenaSurvivorWeaponDamageScaling } from "../content/types.js";
 
 const weaponOrbitDistanceMultiplier = 2.25;
+
+function resolveStatScalingMultiplier(
+  scaling: ArenaSurvivorWeaponDamageScaling | undefined,
+  stats: ArenaSurvivorRuntimePlayerState["stats"],
+  fallbackMultiplier: number
+): number {
+  if (!scaling) {
+    return fallbackMultiplier;
+  }
+
+  const multiplierDelta =
+    (stats.meleePowerMultiplier - 1) * (scaling.meleePower ?? 0) +
+    (stats.rangedPowerMultiplier - 1) * (scaling.rangedPower ?? 0) +
+    (stats.magicPowerMultiplier - 1) * (scaling.magicPower ?? 0) +
+    (stats.elementalPowerMultiplier - 1) * (scaling.elementalPower ?? 0) +
+    (stats.attackSpeedMultiplier - 1) * (scaling.attackSpeed ?? 0) +
+    (stats.maxHp / 100 - 1) * (scaling.maxHp ?? 0) +
+    (stats.armor / 10) * (scaling.armor ?? 0) +
+    (stats.lifeStealPct / 100) * (scaling.lifeSteal ?? 0);
+
+  return Math.max(0.1, 1 + multiplierDelta);
+}
 
 function pickTargetEnemy(
   originX: number,
@@ -125,11 +148,12 @@ export function applyAutoFireSystem(
         definition.attackPattern === "single_projectile"
           ? (arenaSurvivorProjectileDefinitionsById[definition.projectileDefinitionId ?? definition.id]?.radius ?? 0)
           : 0;
+      const weaponRange = levelDefinition.range * nextPlayer.stats.weaponRangeMultiplier;
       const targetEnemy = pickTargetEnemy(
         originX,
         originY,
         nextEnemies,
-        levelDefinition.range,
+        weaponRange,
         projectileRadius
       );
 
@@ -146,6 +170,11 @@ export function applyAutoFireSystem(
       const elementalMultiplier = definition.tags.includes("elemental")
         ? nextPlayer.stats.elementalPowerMultiplier
         : 1;
+      const weaponScalingMultiplier = resolveStatScalingMultiplier(
+        levelDefinition.damageScaling,
+        nextPlayer.stats,
+        categoryMultiplier * elementalMultiplier
+      );
       const baseAngle = Math.atan2(targetEnemy.y - originY, targetEnemy.x - originX);
       const attackReachDistance =
         definition.category === "melee"
@@ -157,10 +186,12 @@ export function applyAutoFireSystem(
       const baseDamage =
         levelDefinition.damage *
         nextPlayer.stats.damageMultiplier *
-        categoryMultiplier *
-        elementalMultiplier;
+        weaponScalingMultiplier;
       const cooldownMs = levelDefinition.cooldownMs / nextPlayer.stats.autoFireRateMultiplier;
-      const critChance = nextPlayer.stats.critChancePct / 100;
+      const critChance = Math.max(
+        0,
+        (nextPlayer.stats.critChancePct + (levelDefinition.critChancePct ?? 0)) / 100
+      );
       const critScale = levelDefinition.critScale ?? 1;
 
       if (definition.attackPattern === "single_projectile") {
@@ -193,7 +224,7 @@ export function applyAutoFireSystem(
               now,
               speed: projectileSpeed,
               damage,
-              maxRange: levelDefinition.range,
+              maxRange: weaponRange,
               pierce: Math.max(1, 1 + (levelDefinition.pierce ?? 0) + nextPlayer.stats.pierceBonus),
               crit
             })
@@ -212,7 +243,7 @@ export function applyAutoFireSystem(
         for (let hitIndex = 0; hitIndex < rapidHitCount; hitIndex += 1) {
           const activePrimaryTarget =
             nextEnemies.find((enemy) => enemy.id === primaryTargetId && enemy.alive) ??
-            pickTargetEnemy(originX, originY, nextEnemies, levelDefinition.range, 0);
+            pickTargetEnemy(originX, originY, nextEnemies, weaponRange, 0);
 
           if (!activePrimaryTarget) {
             break;
@@ -254,7 +285,8 @@ export function applyAutoFireSystem(
               enemy,
               materialValue: difficulty.pickupValue,
               now,
-              seed: nextSeed
+              seed: nextSeed,
+              luck: nextPlayer.stats.luck
             });
             nextSeed = drops.seed;
             nextPickups.push(...drops.pickups);
@@ -265,7 +297,7 @@ export function applyAutoFireSystem(
           originX,
           originY,
           nextEnemies,
-          levelDefinition.range,
+          weaponRange,
           0
         )
           .filter((enemy) => enemy.id !== primaryTargetId)
@@ -308,7 +340,8 @@ export function applyAutoFireSystem(
               enemy,
               materialValue: difficulty.pickupValue,
               now,
-              seed: nextSeed
+              seed: nextSeed,
+              luck: nextPlayer.stats.luck
             });
             nextSeed = drops.seed;
             nextPickups.push(...drops.pickups);

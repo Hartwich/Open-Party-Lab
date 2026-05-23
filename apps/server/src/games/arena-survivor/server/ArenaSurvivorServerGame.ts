@@ -116,6 +116,7 @@ function toPublicSpawnIndicator(
     moveSpeed: _moveSpeed,
     maxHp: _maxHp,
     contactDamage: _contactDamage,
+    projectileDamageMultiplier: _projectileDamageMultiplier,
     ...publicIndicator
   } = indicator;
   return publicIndicator;

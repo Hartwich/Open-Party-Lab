@@ -68,23 +68,23 @@ const setupText = {
     allCharactersSelected: "Alle Charaktere sind gewaehlt.",
     notReady: (names) => `Noch nicht bereit: ${names.join(", ")}`,
     allPlayersReady: "Alle Spieler sind bereit.",
-    defaultDifficultyHint: "Stufe 3 entspricht dem bisherigen Standard.",
+    defaultDifficultyHint: "Stufe 3 entspricht Gefahr 3 mit +12% Druck.",
     autoStartHint: "Eine bestaetigte Lobby startet automatisch, sobald alle bereit sind.",
     spawnInterval: "Spawn-Intervall",
     spawnIntervalHelper: "Hoeher bedeutet mehr Zeit zwischen Gegner-Spawns.",
-    enemyHp: "Gegner-Leben",
-    enemyHpHelper: "Skaliert das Leben aller Gegner inklusive Bossen.",
+    enemyHp: "Gegnerwerte",
+    enemyHpHelper: "HP und Schaden skalieren direkt, Tempo steigt moderat.",
     setupConfirmedButton: "Setup bestaetigt",
     releaseRunButton: "Run freigeben",
     startWhenReady: "Startet automatisch, sobald alle Spieler bereit bleiben.",
     releaseBeforeReady: "Freigeben geht jetzt schon, startet aber erst mit voller Bereitschaft.",
     rangeLabel: (min, max, step) => `${min} bis ${max} in ${step}-Schritten`,
     difficultyTiers: {
-      1: { label: "Sanft", description: "Deutlich entspanntere Spawns und weichere Gegner." },
-      2: { label: "Locker", description: "Etwas mehr Luft, ohne die Runde komplett zahm zu machen." },
-      3: { label: "Standard", description: "Der bisherige Arena-Survivor-Standard." },
-      4: { label: "Hart", description: "Schnellere Wellen mit merklich zaeheren Gegnern." },
-      5: { label: "Chaos", description: "Sehr dichter Druck und deutlich robustere Gegner." }
+      1: { label: "Gefahr 1", description: "Einsteigerdruck mit langsameren Spawns und weicheren Gegnern." },
+      2: { label: "Gefahr 2", description: "Der klare Standard: faire Spawns, normale Gegnerwerte." },
+      3: { label: "Gefahr 3", description: "Neue Gegner frueher, mehr Druck und +12% Gegnerwerte." },
+      4: { label: "Gefahr 4", description: "Dichte Horden, fruehere Spezialgegner und +26% Gegnerwerte." },
+      5: { label: "Gefahr 5", description: "Maximaldruck: +40% Gegnerwerte und Doppelboss." }
     }
   },
   en: {
@@ -105,23 +105,23 @@ const setupText = {
     allCharactersSelected: "All characters are selected.",
     notReady: (names) => `Not ready yet: ${names.join(", ")}`,
     allPlayersReady: "All players are ready.",
-    defaultDifficultyHint: "Level 3 matches the previous default.",
+    defaultDifficultyHint: "Level 3 is Danger 3 with +12% pressure.",
     autoStartHint: "A confirmed lobby starts automatically once everyone is ready.",
     spawnInterval: "Spawn Interval",
     spawnIntervalHelper: "Higher means more time between enemy spawns.",
-    enemyHp: "Enemy Health",
-    enemyHpHelper: "Scales the health of all enemies, including bosses.",
+    enemyHp: "Enemy Values",
+    enemyHpHelper: "HP and damage scale directly; speed rises moderately.",
     setupConfirmedButton: "Setup confirmed",
     releaseRunButton: "Release run",
     startWhenReady: "Starts automatically while all players stay ready.",
     releaseBeforeReady: "You can release now, but the run waits for full readiness.",
     rangeLabel: (min, max, step) => `${min} to ${max} in steps of ${step}`,
     difficultyTiers: {
-      1: { label: "Gentle", description: "Much calmer spawns and softer enemies." },
-      2: { label: "Relaxed", description: "A little more breathing room without making the run tame." },
-      3: { label: "Standard", description: "The previous Arena Survivor default." },
-      4: { label: "Hard", description: "Faster waves with noticeably tougher enemies." },
-      5: { label: "Chaos", description: "Very dense pressure and much sturdier enemies." }
+      1: { label: "Danger 1", description: "Starter pressure with slower spawns and softer enemies." },
+      2: { label: "Danger 2", description: "The clear standard: fair spawns, normal enemy values." },
+      3: { label: "Danger 3", description: "Earlier new enemies, more pressure, and +12% enemy values." },
+      4: { label: "Danger 4", description: "Dense hordes, earlier specialists, and +26% enemy values." },
+      5: { label: "Danger 5", description: "Maximum pressure: +40% enemy values and double boss." }
     }
   }
 } satisfies Record<SupportedLanguage, ArenaSurvivorSetupText>;
@@ -410,7 +410,7 @@ export class ArenaSurvivorSetupScene extends Phaser.Scene {
       statCardY,
       cardWidth,
       text.enemyHp,
-      `${Math.round(difficultyTier.enemyHpMultiplier * 100)}%`,
+      `HP ${Math.round(difficultyTier.enemyHpMultiplier * 100)}% / DMG ${Math.round(difficultyTier.enemyDamageMultiplier * 100)}%`,
       text.enemyHpHelper
     );
 
@@ -486,9 +486,10 @@ export class ArenaSurvivorSetupScene extends Phaser.Scene {
       fontSize: "13px",
       color: "#94a3b8"
     });
+    const valueFontSize = value.length > 14 ? "19px" : "28px";
     this.add.text(x + 14, y + 30, value, {
       fontFamily: "\"Space Grotesk\", sans-serif",
-      fontSize: "28px",
+      fontSize: valueFontSize,
       color: "#f8fafc"
     });
     this.add.text(x + 14, y + 58, helper, {

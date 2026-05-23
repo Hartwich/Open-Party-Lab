@@ -7,6 +7,14 @@ import {
 } from "../arenaSurvivorState.js";
 import { createArenaSurvivorShopsForPlayers } from "../loadout/arenaSurvivorLoadout.js";
 
+function resolveHarvestingReward(harvesting: number, waveNumber: number): number {
+  if (harvesting <= 0) {
+    return 0;
+  }
+
+  return Math.floor(harvesting * (1 + Math.max(0, waveNumber - 1) * 0.03));
+}
+
 export function resolveRoundEndSystem(
   state: ArenaSurvivorRuntimeState,
   now: number
@@ -28,10 +36,28 @@ export function resolveRoundEndSystem(
   const title = survived
     ? en ? `Wave ${state.waveNumber} cleared` : `Welle ${state.waveNumber} geschafft`
     : en ? `Run ended in wave ${state.waveNumber}` : `Run beendet in Welle ${state.waveNumber}`;
+  const playersWithHarvesting = survived
+    ? state.players.map((player) => {
+      const harvestingReward = resolveHarvestingReward(player.stats.harvesting, state.waveNumber);
+
+      if (harvestingReward <= 0) {
+        return player;
+      }
+
+      return {
+        ...player,
+        materials: player.materials + harvestingReward,
+        runStats: {
+          ...player.runStats,
+          materialsCollected: player.runStats.materialsCollected + harvestingReward
+        }
+      };
+    })
+    : state.players;
   const shopRoll = survived
-    ? createArenaSurvivorShopsForPlayers(state.players, state.waveNumber, state.seed, state.language)
+    ? createArenaSurvivorShopsForPlayers(playersWithHarvesting, state.waveNumber, state.seed, state.language)
     : { shopsByPlayerId: new Map<string, typeof state.players[number]["shop"]>(), seed: state.seed };
-  const nextPlayers = state.players.map((player) => ({
+  const nextPlayers = playersWithHarvesting.map((player) => ({
     ...player,
     shop: shopRoll.shopsByPlayerId.get(player.playerId) ?? {
       ...createEmptyShopState()

@@ -8,12 +8,18 @@ export type ArenaSurvivorCharacterArchetype =
   | "regen"
   | "tank"
   | "speed"
+  | "luck"
+  | "economy"
   | "hybrid";
 
 export interface ArenaSurvivorStatModifiers {
   maxHp?: number;
   armor?: number;
+  dodgePct?: number;
+  luck?: number;
+  harvesting?: number;
   moveSpeedPct?: number;
+  weaponRangePct?: number;
   pickupRadius?: number;
   pickupRadiusPct?: number;
   damagePct?: number;
@@ -31,7 +37,7 @@ export interface ArenaSurvivorStatModifiers {
 }
 
 export interface ArenaSurvivorItemLevelDefinition {
-  level: 1 | 2 | 3;
+  level: 1 | 2 | 3 | 4;
   cost: number;
   description: string;
   modifiers: ArenaSurvivorStatModifiers;
@@ -40,7 +46,7 @@ export interface ArenaSurvivorItemLevelDefinition {
 export interface ArenaSurvivorItemDefinition {
   id: string;
   name: string;
-  maxLevel: 3;
+  maxLevel: 1 | 2 | 3 | 4;
   tags?: string[];
   description: string;
   levels: ArenaSurvivorItemLevelDefinition[];
@@ -56,9 +62,22 @@ export interface ArenaSurvivorWeaponLevelDefinition {
   projectileSpeed: number;
   projectileCount?: number;
   pierce?: number;
+  critChancePct?: number;
   critScale?: number;
+  damageScaling?: ArenaSurvivorWeaponDamageScaling;
   knockback?: number;
   description: string;
+}
+
+export interface ArenaSurvivorWeaponDamageScaling {
+  meleePower?: number;
+  rangedPower?: number;
+  magicPower?: number;
+  elementalPower?: number;
+  attackSpeed?: number;
+  maxHp?: number;
+  armor?: number;
+  lifeSteal?: number;
 }
 
 export interface ArenaSurvivorWeaponDefinition {

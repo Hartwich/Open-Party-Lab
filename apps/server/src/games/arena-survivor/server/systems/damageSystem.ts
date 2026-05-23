@@ -1,6 +1,7 @@
 import { arenaSurvivorConfig } from "../arenaSurvivorConfig.js";
 import { createArenaSurvivorEnemyDrops } from "../factories/createEnemyDrops.js";
 import { resolveArenaSurvivorDifficulty } from "../difficulty/arenaSurvivorDifficulty.js";
+import { createSeededRandom } from "../arenaSurvivorState.js";
 import type {
   ArenaSurvivorRuntimeEnemyState,
   ArenaSurvivorRuntimeProjectileState,
@@ -14,6 +15,21 @@ function resolveContactDamage(rawDamage: number, armor: number): number {
   }
 
   return rawDamage * (1 + Math.abs(armor) * 0.08);
+}
+
+function rollDodge(dodgePct: number, seed: number): { dodged: boolean; seed: number } {
+  const chance = Math.min(70, Math.max(0, dodgePct)) / 100;
+
+  if (chance <= 0) {
+    return { dodged: false, seed };
+  }
+
+  const roll = createSeededRandom(seed);
+
+  return {
+    dodged: roll.value <= chance,
+    seed: roll.seed
+  };
 }
 
 export function applyDamageSystem(
@@ -91,7 +107,8 @@ export function applyDamageSystem(
         enemy,
         materialValue: difficulty.pickupValue,
         now,
-        seed: nextSeed
+        seed: nextSeed,
+        luck: owner?.stats.luck
       });
       nextSeed = drops.seed;
       pickups = [...pickups, ...drops.pickups];
@@ -129,6 +146,13 @@ export function applyDamageSystem(
       continue;
     }
 
+    const dodgeRoll = rollDodge(player.stats.dodgePct, nextSeed);
+    nextSeed = dodgeRoll.seed;
+
+    if (dodgeRoll.dodged) {
+      continue;
+    }
+
     const mitigatedDamage =
       resolveContactDamage(projectile.damage, player.stats.armor) *
       player.stats.contactDamageTakenMultiplier;
@@ -159,6 +183,17 @@ export function applyDamageSystem(
     }
 
     if (enemy.lastContactDamageAt !== null && now < enemy.lastContactDamageAt + enemy.contactDamageCooldownMs) {
+      continue;
+    }
+
+    const dodgeRoll = rollDodge(player.stats.dodgePct, nextSeed);
+    nextSeed = dodgeRoll.seed;
+
+    if (dodgeRoll.dodged) {
+      enemiesById.set(enemy.id, {
+        ...enemy,
+        lastContactDamageAt: now
+      });
       continue;
     }
 

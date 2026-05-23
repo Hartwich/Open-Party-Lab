@@ -83,28 +83,29 @@ const arenaSurvivorShopRerollStepCost = 2;
 const arenaSurvivorWeaponSellRatio = 1 / 3;
 const arenaSurvivorWeaponOfferLevelChanceBands = {
   2: [
-    { wave: 1, chance: 0.01 },
-    { wave: 4, chance: 0.08 },
-    { wave: 7, chance: 0.28 },
-    { wave: 10, chance: 0.6 },
-    { wave: 14, chance: 0.52 },
-    { wave: 20, chance: 0.4 },
-    { wave: 30, chance: 0.28 }
+    { wave: 1, chance: 0 },
+    { wave: 2, chance: 0.08 },
+    { wave: 4, chance: 0.18 },
+    { wave: 8, chance: 0.34 },
+    { wave: 12, chance: 0.42 },
+    { wave: 20, chance: 0.36 },
+    { wave: 30, chance: 0.3 }
   ],
   3: [
-    { wave: 1, chance: 0.001 },
-    { wave: 6, chance: 0.015 },
-    { wave: 10, chance: 0.07 },
-    { wave: 14, chance: 0.16 },
-    { wave: 20, chance: 0.22 },
-    { wave: 30, chance: 0.18 }
+    { wave: 1, chance: 0 },
+    { wave: 4, chance: 0.03 },
+    { wave: 8, chance: 0.1 },
+    { wave: 12, chance: 0.18 },
+    { wave: 16, chance: 0.24 },
+    { wave: 30, chance: 0.22 }
   ],
   4: [
-    { wave: 1, chance: 0.0001 },
-    { wave: 10, chance: 0.012 },
-    { wave: 16, chance: 0.07 },
-    { wave: 20, chance: 0.15 },
-    { wave: 30, chance: 0.18 }
+    { wave: 1, chance: 0 },
+    { wave: 8, chance: 0.025 },
+    { wave: 12, chance: 0.07 },
+    { wave: 16, chance: 0.12 },
+    { wave: 20, chance: 0.18 },
+    { wave: 30, chance: 0.2 }
   ]
 } as const;
 
@@ -268,7 +269,15 @@ function buildWeaponOfferDetailLines(
   if (typeof levelDefinition.critScale === "number" && levelDefinition.critScale > 1) {
     detailLines.push({
       label: "Crit",
-      value: formatMultiplierLabel(levelDefinition.critScale)
+      value:
+        typeof levelDefinition.critChancePct === "number"
+          ? `${formatMultiplierLabel(levelDefinition.critScale)} / ${formatShopNumber(levelDefinition.critChancePct)}%`
+          : formatMultiplierLabel(levelDefinition.critScale)
+    });
+  } else if (typeof levelDefinition.critChancePct === "number" && levelDefinition.critChancePct > 0) {
+    detailLines.push({
+      label: "Crit",
+      value: `${formatShopNumber(levelDefinition.critChancePct)}%`
     });
   }
 
@@ -362,6 +371,10 @@ function resolveStarterWeaponIdForCharacter(characterId?: string): string {
       return "frost-orb";
     case "speed":
       return "spark-rod";
+    case "luck":
+      return "stick";
+    case "economy":
+      return "stone";
     case "hybrid":
       return "survivor-pistol";
     case "tank":
@@ -522,8 +535,12 @@ export function resolveArenaSurvivorPlayerStats(
   const character = sanitizeCharacter(characterId, 0);
   let maxHpBonus = 0;
   let armor: number = arenaSurvivorPlayerDefinition.armor;
+  let dodgePct: number = arenaSurvivorPlayerDefinition.dodgePct;
+  let luck: number = arenaSurvivorPlayerDefinition.luck;
+  let harvesting: number = arenaSurvivorPlayerDefinition.harvesting;
   let hpRegen: number = arenaSurvivorPlayerDefinition.hpRegen;
   let moveSpeedMultiplier = 1;
+  let weaponRangeMultiplier: number = arenaSurvivorPlayerDefinition.weaponRangeMultiplier;
   let pickupRadiusBonus = 0;
   let pickupRadiusMultiplier = 1;
   let damageMultiplier: number = arenaSurvivorPlayerDefinition.damageMultiplier;
@@ -541,8 +558,12 @@ export function resolveArenaSurvivorPlayerStats(
   const applyModifiers = (modifiers: ArenaSurvivorStatModifiers) => {
     maxHpBonus += modifiers.maxHp ?? 0;
     armor += modifiers.armor ?? 0;
+    dodgePct += modifiers.dodgePct ?? 0;
+    luck += modifiers.luck ?? 0;
+    harvesting += modifiers.harvesting ?? 0;
     hpRegen += modifiers.hpRegen ?? 0;
     moveSpeedMultiplier = resolveMultiplier(moveSpeedMultiplier, modifiers.moveSpeedPct);
+    weaponRangeMultiplier = resolveMultiplier(weaponRangeMultiplier, modifiers.weaponRangePct);
     pickupRadiusBonus += modifiers.pickupRadius ?? 0;
     pickupRadiusMultiplier = resolveMultiplier(pickupRadiusMultiplier, modifiers.pickupRadiusPct);
     damageMultiplier = resolveMultiplier(damageMultiplier, modifiers.damagePct);
@@ -583,11 +604,15 @@ export function resolveArenaSurvivorPlayerStats(
     pickupRadius,
     maxHp,
     armor,
+    dodgePct: Math.min(70, Math.max(0, dodgePct)),
+    luck,
+    harvesting,
     hpRegen: Math.max(0, hpRegen),
     contactDamageTakenMultiplier: arenaSurvivorPlayerDefinition.contactDamageTakenMultiplier,
     damageMultiplier,
     projectileDamageMultiplier: damageMultiplier,
     projectileSpeedMultiplier: arenaSurvivorPlayerDefinition.projectileSpeedMultiplier,
+    weaponRangeMultiplier: Math.max(0.2, weaponRangeMultiplier),
     attackSpeedMultiplier,
     autoFireRateMultiplier: attackSpeedMultiplier,
     meleePowerMultiplier,
@@ -672,7 +697,8 @@ export function resolveArenaSurvivorRunCarry(
 function createItemOffer(
   itemId: string,
   currentLevel: number,
-  materials: number
+  materials: number,
+  waveNumber: number
 ): ArenaSurvivorShopOfferState | null {
   const definition = arenaSurvivorItemDefinitionsById[itemId];
 
@@ -681,6 +707,19 @@ function createItemOffer(
   }
 
   const targetLevel = currentLevel + 1;
+  const minimumWave =
+    targetLevel <= 1
+      ? 1
+      : targetLevel === 2
+        ? 2
+        : targetLevel === 3
+          ? 4
+          : 8;
+
+  if (waveNumber < minimumWave) {
+    return null;
+  }
+
   const levelDefinition = definition.levels.find((entry) => entry.level === targetLevel);
 
   if (!levelDefinition) {
@@ -787,7 +826,9 @@ function createOfferPools(
 
   return {
     items: arenaSurvivorItemDefinitions
-      .map((item) => createItemOffer(item.id, itemLevels.get(item.id) ?? 0, player.materials))
+      .map((item) =>
+        createItemOffer(item.id, itemLevels.get(item.id) ?? 0, player.materials, waveNumber)
+      )
       .filter((offer): offer is ArenaSurvivorShopOfferState => offer !== null),
     weapons: arenaSurvivorWeaponDefinitions
       .map((weapon) => {

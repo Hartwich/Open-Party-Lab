@@ -9,16 +9,21 @@ export interface ArenaSurvivorSpawnPick {
   seed: number;
 }
 
-export function resolveArenaSurvivorSpawnBurst(waveNumber: number): number {
+export function resolveArenaSurvivorSpawnBurst(
+  waveNumber: number,
+  difficultySpawnBurstBonus = 0
+): number {
+  const tierBonus = Math.max(0, Math.round(difficultySpawnBurstBonus));
+
   if (waveNumber >= 10) {
-    return 3;
+    return 3 + tierBonus;
   }
 
   if (waveNumber >= 5) {
-    return 2;
+    return 2 + tierBonus;
   }
 
-  return 1;
+  return 1 + tierBonus;
 }
 
 export function pickArenaSurvivorEnemyDefinition(

@@ -39,6 +39,7 @@ export interface ArenaSurvivorRuntimeSpawnIndicatorState extends ArenaSurvivorSp
   moveSpeed?: number;
   maxHp?: number;
   contactDamage?: number;
+  projectileDamageMultiplier?: number;
 }
 
 export interface ArenaSurvivorPublicState extends PublicArenaSurvivorState {

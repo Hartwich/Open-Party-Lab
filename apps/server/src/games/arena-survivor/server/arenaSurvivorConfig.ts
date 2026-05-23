@@ -35,7 +35,7 @@ export const arenaSurvivorConfig: ArenaSurvivorConfig = {
   arenaHeight: 720,
   roundDurationMs: 45000,
   tickRate: 60,
-  enemySpawnIntervalMs: 881,
+  enemySpawnIntervalMs: 900,
   hitInvulnerabilityMs: 850,
   resultScreenMs: 3200,
   scoreboardScreenMs: 3600,
@@ -44,12 +44,12 @@ export const arenaSurvivorConfig: ArenaSurvivorConfig = {
   enemySpawnWarningLeadMs: 1000,
   enemySpawnForbiddenRadius: 180,
   enemySpawnPointAttemptCount: 24,
-  maxEnemiesOnScreen: 18,
-  difficultySpawnIntervalReductionMs: 113,
-  difficultyMaxEnemiesBonusPerRound: 4,
-  difficultyEnemyHpMultiplierPerRound: 1.2,
-  difficultyEnemyWaveSpeedBonus: 9,
-  difficultyEnemyContactDamageIncreaseEveryRounds: 2,
+  maxEnemiesOnScreen: 32,
+  difficultySpawnIntervalReductionMs: 32,
+  difficultyMaxEnemiesBonusPerRound: 3,
+  difficultyEnemyHpMultiplierPerRound: 1.055,
+  difficultyEnemyWaveSpeedBonus: 4,
+  difficultyEnemyContactDamageIncreaseEveryRounds: 3,
   difficultyPickupTierEveryRounds: 2,
   pickupItemRadius: 9,
   pickupLifetimeMs: 16000,
@@ -59,8 +59,8 @@ export const arenaSurvivorConfig: ArenaSurvivorConfig = {
   pickupValueBase: 1,
   pickupValuePerDifficultyTier: 0,
   healthPickupRadius: 11,
-  healthPickupHealAmount: 25,
-  healthPickupDropChance: 0.05
+  healthPickupHealAmount: 18,
+  healthPickupDropChance: 0.035
 };
 
 export const arenaSurvivorRoomSettingKeys = {

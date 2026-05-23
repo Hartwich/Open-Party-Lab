@@ -151,6 +151,7 @@ function createSpawnIndicator(
     moveSpeed?: number;
     maxHp?: number;
     contactDamage?: number;
+    projectileDamageMultiplier?: number;
   }
 ): ArenaSurvivorRuntimeSpawnIndicatorState {
   return {
@@ -162,7 +163,8 @@ function createSpawnIndicator(
     spawnAtMs,
     moveSpeed: overrides?.moveSpeed,
     maxHp: overrides?.maxHp,
-    contactDamage: overrides?.contactDamage
+    contactDamage: overrides?.contactDamage,
+    projectileDamageMultiplier: overrides?.projectileDamageMultiplier
   };
 }
 
@@ -190,7 +192,8 @@ function spawnDueIndicators(state: ArenaSurvivorRuntimeState): ArenaSurvivorRunt
         {
           moveSpeed: indicator.moveSpeed,
           maxHp: indicator.maxHp,
-          contactDamage: indicator.contactDamage
+          contactDamage: indicator.contactDamage,
+          projectileDamageMultiplier: indicator.projectileDamageMultiplier
         }
       )
     );
@@ -207,9 +210,10 @@ function scheduleBossSpawnIndicator(
   state: ArenaSurvivorRuntimeState,
   spawnAtMs: number,
   definitionId: string,
-  difficulty: ReturnType<typeof resolveArenaSurvivorDifficulty>
+  difficulty: ReturnType<typeof resolveArenaSurvivorDifficulty>,
+  forcedSide?: 0 | 1 | 2 | 3
 ): { indicator: ArenaSurvivorRuntimeSpawnIndicatorState; seed: number } {
-  const bossSpawnPoint = createSafeSpawnPoint(state, state.seed, 2);
+  const bossSpawnPoint = createSafeSpawnPoint(state, state.seed, forcedSide ?? 2);
   const definition = arenaSurvivorEnemyDefinitionsById[definitionId];
 
   return {
@@ -220,8 +224,25 @@ function scheduleBossSpawnIndicator(
       spawnAtMs,
       {
         maxHp: definition
-          ? Math.max(1, Math.round(definition.maxHp * difficulty.enemyHpMultiplier))
-          : undefined
+          ? Math.max(
+              1,
+              Math.round(
+                definition.maxHp *
+                  difficulty.enemyHpMultiplier *
+                  difficulty.bossHpMultiplier
+              )
+            )
+          : undefined,
+        moveSpeed: definition
+          ? Math.max(40, Math.round(definition.moveSpeed * difficulty.enemySpeedMultiplier))
+          : undefined,
+        contactDamage: definition
+          ? Math.max(
+              1,
+              Math.round(definition.contactDamage * difficulty.enemyDamageMultiplier)
+            )
+          : undefined,
+        projectileDamageMultiplier: difficulty.enemyDamageMultiplier
       }
     ),
     seed: bossSpawnPoint.seed
@@ -235,28 +256,30 @@ function scheduleRegularSpawnIndicator(
   difficulty: ReturnType<typeof resolveArenaSurvivorDifficulty>
 ): { indicator: ArenaSurvivorRuntimeSpawnIndicatorState; seed: number } {
   const spawnPoint = createSafeSpawnPoint(state, seed);
-  const enemyPick = pickArenaSurvivorEnemyDefinition(state.waveNumber, spawnPoint.seed);
-  const roundsSinceUnlock = Math.max(0, state.difficultyLevel - enemyPick.definition.minWave);
-  const hpMultiplier = Math.pow(
-    arenaSurvivorConfig.difficultyEnemyHpMultiplierPerRound,
-    roundsSinceUnlock
-  ) * difficulty.enemyHpMultiplier;
+  const effectiveWave = Math.max(1, state.waveNumber + difficulty.enemyUnlockWaveBonus);
+  const enemyPick = pickArenaSurvivorEnemyDefinition(effectiveWave, spawnPoint.seed);
+  const wavesSinceUnlock = Math.max(0, effectiveWave - enemyPick.definition.minWave);
+  const waveHpMultiplier =
+    1 +
+    wavesSinceUnlock *
+      Math.max(0, arenaSurvivorConfig.difficultyEnemyHpMultiplierPerRound - 1);
+  const hpMultiplier = waveHpMultiplier * difficulty.enemyHpMultiplier;
+  const baseMoveSpeed =
+    enemyPick.definition.moveSpeed +
+    wavesSinceUnlock * arenaSurvivorConfig.difficultyEnemyWaveSpeedBonus;
+  const baseContactDamage =
+    enemyPick.definition.contactDamage +
+    Math.floor(
+      wavesSinceUnlock /
+        arenaSurvivorConfig.difficultyEnemyContactDamageIncreaseEveryRounds
+    );
 
   return {
     indicator: createSpawnIndicator(enemyPick.definition.id, spawnPoint.x, spawnPoint.y, spawnAtMs, {
-      moveSpeed: Math.max(
-        40,
-        enemyPick.definition.moveSpeed +
-          Math.max(0, state.difficultyLevel - enemyPick.definition.minWave) *
-            arenaSurvivorConfig.difficultyEnemyWaveSpeedBonus
-      ),
+      moveSpeed: Math.max(40, Math.round(baseMoveSpeed * difficulty.enemySpeedMultiplier)),
       maxHp: Math.max(1, Math.round(enemyPick.definition.maxHp * hpMultiplier)),
-      contactDamage:
-        enemyPick.definition.contactDamage +
-        Math.floor(
-          Math.max(0, state.difficultyLevel - enemyPick.definition.minWave) /
-            arenaSurvivorConfig.difficultyEnemyContactDamageIncreaseEveryRounds
-        )
+      contactDamage: Math.max(1, Math.round(baseContactDamage * difficulty.enemyDamageMultiplier)),
+      projectileDamageMultiplier: difficulty.enemyDamageMultiplier
     }),
     seed: enemyPick.seed
   };
@@ -272,7 +295,10 @@ export function applySpawnSystem(state: ArenaSurvivorRuntimeState): ArenaSurvivo
     state.players.length,
     state.difficultyTier
   );
-  const spawnBurst = resolveArenaSurvivorSpawnBurst(state.waveNumber);
+  const spawnBurst = resolveArenaSurvivorSpawnBurst(
+    state.waveNumber,
+    difficulty.spawnBurstBonus
+  );
   const bossWave = resolveArenaSurvivorBossWave(state.waveNumber);
   let nextState = spawnDueIndicators(state);
 
@@ -282,17 +308,29 @@ export function applySpawnSystem(state: ArenaSurvivorRuntimeState): ArenaSurvivo
     nextState.enemies.length + nextState.spawnIndicators.length < difficulty.maxEnemiesOnScreen &&
     nextState.elapsedMs + arenaSurvivorConfig.enemySpawnWarningLeadMs >= nextState.nextEnemySpawnAtMs
   ) {
-    const bossIndicator = scheduleBossSpawnIndicator(
-      nextState,
-      nextState.nextEnemySpawnAtMs,
-      bossWave.definitionId,
-      difficulty
-    );
+    let nextSeed = nextState.seed;
+    const bossIndicators: ArenaSurvivorRuntimeSpawnIndicatorState[] = [];
+    const bossSpawnCount = Math.max(1, difficulty.bossSpawnCount);
+
+    for (let index = 0; index < bossSpawnCount; index += 1) {
+      const bossIndicator = scheduleBossSpawnIndicator(
+        {
+          ...nextState,
+          seed: nextSeed
+        },
+        nextState.nextEnemySpawnAtMs,
+        bossWave.definitionId,
+        difficulty,
+        index % 2 === 0 ? 2 : 3
+      );
+      nextSeed = bossIndicator.seed;
+      bossIndicators.push(bossIndicator.indicator);
+    }
 
     nextState = {
       ...nextState,
-      seed: bossIndicator.seed,
-      spawnIndicators: [...nextState.spawnIndicators, bossIndicator.indicator],
+      seed: nextSeed,
+      spawnIndicators: [...nextState.spawnIndicators, ...bossIndicators],
       spawnedBossDefinitionIds: [...nextState.spawnedBossDefinitionIds, bossWave.definitionId],
       nextEnemySpawnAtMs: nextState.nextEnemySpawnAtMs + difficulty.enemySpawnIntervalMs
     };

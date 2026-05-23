@@ -12,6 +12,12 @@ export interface ArenaSurvivorDifficultyState {
   maxEnemiesOnScreen: number;
   pickupValue: number;
   enemyHpMultiplier: number;
+  enemyDamageMultiplier: number;
+  enemySpeedMultiplier: number;
+  enemyUnlockWaveBonus: number;
+  spawnBurstBonus: number;
+  bossSpawnCount: number;
+  bossHpMultiplier: number;
 }
 
 export function resolveArenaSurvivorPlayerCountMultiplier(playerCount: number): number {
@@ -43,8 +49,19 @@ export function resolveArenaSurvivorDifficulty(
         (baseSpawnInterval * resolvedTier.spawnIntervalMultiplier) / playerCountMultiplier
       )
     ),
-    maxEnemiesOnScreen: arenaSurvivorConfig.maxEnemiesOnScreen + Math.min(20, maxEnemiesBonus),
+    maxEnemiesOnScreen: Math.max(
+      8,
+      arenaSurvivorConfig.maxEnemiesOnScreen +
+        Math.min(48, maxEnemiesBonus) +
+        resolvedTier.maxEnemyCountBonus
+    ),
     pickupValue: arenaSurvivorConfig.pickupValueBase,
-    enemyHpMultiplier: resolvedTier.enemyHpMultiplier
+    enemyHpMultiplier: resolvedTier.enemyHpMultiplier,
+    enemyDamageMultiplier: resolvedTier.enemyDamageMultiplier,
+    enemySpeedMultiplier: resolvedTier.enemySpeedMultiplier,
+    enemyUnlockWaveBonus: resolvedTier.enemyUnlockWaveBonus,
+    spawnBurstBonus: resolvedTier.spawnBurstBonus,
+    bossSpawnCount: resolvedTier.bossSpawnCount,
+    bossHpMultiplier: resolvedTier.bossHpMultiplier
   };
 }

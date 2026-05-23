@@ -23,6 +23,7 @@ export function createArenaSurvivorEnemy(
     maxHp?: number;
     contactDamage?: number;
     contactDamageCooldownMs?: number;
+    projectileDamageMultiplier?: number;
   }
 ): ArenaSurvivorRuntimeEnemyState {
   const definition = arenaSurvivorEnemyDefinitionsById[definitionId] as
@@ -40,6 +41,16 @@ export function createArenaSurvivorEnemy(
   const speed = overrides?.moveSpeed ?? definition.moveSpeed;
   const maxHp = overrides?.maxHp ?? definition.maxHp;
   const shootCooldownMs = definition.shootCooldownMs;
+  const projectile =
+    definition.projectile && overrides?.projectileDamageMultiplier
+      ? {
+          ...definition.projectile,
+          damage: Math.max(
+            1,
+            Math.round(definition.projectile.damage * overrides.projectileDamageMultiplier)
+          )
+        }
+      : definition.projectile;
 
   return {
     id: createId("enemy"),
@@ -62,7 +73,7 @@ export function createArenaSurvivorEnemy(
     shootCooldownRemainingMs: shootCooldownMs ?? 0,
     shootCooldownMs,
     shootRange: definition.shootRange,
-    projectile: definition.projectile,
+    projectile,
     spritePath: definition.spritePath,
     portraitPath: definition.portraitPath,
     spawnedAtMs: now

@@ -1,23 +1,36 @@
 import Phaser from "phaser";
 
-const characterIds = [
-  "schrotto-scharfschuss",
-  "kloppbert-keulenwucht",
-  "funkenberta-flaemmchen",
-  "kanni-baldrian",
-  "doktor-knolle",
-  "sir-pampel-panzer",
-  "flitzelotte",
-  "professor-paradox"
+const characterAssetIds = [
+  { id: "schrotto-scharfschuss", assetId: "schrotto-scharfschuss" },
+  { id: "kloppbert-keulenwucht", assetId: "kloppbert-keulenwucht" },
+  { id: "funkenberta-flaemmchen", assetId: "funkenberta-flaemmchen" },
+  { id: "kanni-baldrian", assetId: "kanni-baldrian" },
+  { id: "doktor-knolle", assetId: "doktor-knolle" },
+  { id: "sir-pampel-panzer", assetId: "sir-pampel-panzer" },
+  { id: "flitzelotte", assetId: "flitzelotte" },
+  { id: "professor-paradox", assetId: "professor-paradox" },
+  { id: "rundling-allround", assetId: "professor-paradox" },
+  { id: "pruegler-brawler", assetId: "kloppbert-keulenwucht" },
+  { id: "jaeger-ranger", assetId: "schrotto-scharfschuss" },
+  { id: "gluecksknolle-lucky", assetId: "flitzelotte" },
+  { id: "ackerling-farmer", assetId: "doktor-knolle" }
 ] as const;
-const enemyIds = [
-  "slime-blob",
-  "fang-crawler",
-  "stone-brute",
-  "ember-wisp",
-  "toxic-shroom",
-  "scrap-goliath",
-  "crimson-overlord"
+const enemyAssetIds = [
+  { id: "slime-blob", assetId: "slime-blob" },
+  { id: "fang-crawler", assetId: "fang-crawler" },
+  { id: "needle-runner", assetId: "fang-crawler" },
+  { id: "stone-brute", assetId: "stone-brute" },
+  { id: "shell-bulwark", assetId: "stone-brute" },
+  { id: "ember-wisp", assetId: "ember-wisp" },
+  { id: "toxic-shroom", assetId: "toxic-shroom" },
+  { id: "ash-spitter", assetId: "ember-wisp" },
+  { id: "plague-lobber", assetId: "toxic-shroom" },
+  { id: "iron-mauler", assetId: "stone-brute" },
+  { id: "loot-runner", assetId: "fang-crawler" },
+  { id: "charger-hulk", assetId: "stone-brute" },
+  { id: "elite-spitter", assetId: "ember-wisp" },
+  { id: "scrap-goliath", assetId: "scrap-goliath" },
+  { id: "crimson-overlord", assetId: "crimson-overlord" }
 ] as const;
 const weaponIds = [
   "cleaver",
@@ -53,20 +66,20 @@ export interface ArenaSurvivorAssetDescriptor {
   portraitPath: string;
 }
 
-export const arenaSurvivorCharacterAssets: readonly ArenaSurvivorAssetDescriptor[] = characterIds.map((id) => ({
-  id,
-  spriteKey: `arena-survivor-character-${id}`,
-  spritePath: `/arena-survivor/characters/sprites/${id}.svg`,
-  portraitKey: `arena-survivor-character-portrait-${id}`,
-  portraitPath: `/arena-survivor/characters/portraits/${id}.svg`
+export const arenaSurvivorCharacterAssets: readonly ArenaSurvivorAssetDescriptor[] = characterAssetIds.map((entry) => ({
+  id: entry.id,
+  spriteKey: `arena-survivor-character-${entry.id}`,
+  spritePath: `/arena-survivor/characters/sprites/${entry.assetId}.svg`,
+  portraitKey: `arena-survivor-character-portrait-${entry.id}`,
+  portraitPath: `/arena-survivor/characters/portraits/${entry.assetId}.svg`
 }));
 
-export const arenaSurvivorEnemyAssets: readonly ArenaSurvivorAssetDescriptor[] = enemyIds.map((id) => ({
-  id,
-  spriteKey: `arena-survivor-enemy-${id}`,
-  spritePath: `/arena-survivor/enemies/sprites/${id}.svg`,
-  portraitKey: `arena-survivor-enemy-portrait-${id}`,
-  portraitPath: `/arena-survivor/enemies/portraits/${id}.svg`
+export const arenaSurvivorEnemyAssets: readonly ArenaSurvivorAssetDescriptor[] = enemyAssetIds.map((entry) => ({
+  id: entry.id,
+  spriteKey: `arena-survivor-enemy-${entry.id}`,
+  spritePath: `/arena-survivor/enemies/sprites/${entry.assetId}.svg`,
+  portraitKey: `arena-survivor-enemy-portrait-${entry.id}`,
+  portraitPath: `/arena-survivor/enemies/portraits/${entry.assetId}.svg`
 }));
 
 export const arenaSurvivorWeaponCarryAssets: ReadonlyArray<{

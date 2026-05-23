@@ -1,6 +1,20 @@
 import { defineConfig } from "vite";
+import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@open-party-lab/protocol": fileURLToPath(
+        new URL("../../packages/protocol/src/index.ts", import.meta.url)
+      ),
+      "@open-party-lab/game-core": fileURLToPath(
+        new URL("../../packages/game-core/src/index.ts", import.meta.url)
+      ),
+      "@open-party-lab/ui-kit": fileURLToPath(
+        new URL("../../packages/ui-kit/src/index.ts", import.meta.url)
+      )
+    }
+  },
   build: {
     rollupOptions: {
       output: {

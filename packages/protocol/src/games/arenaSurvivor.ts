@@ -67,44 +67,86 @@ export interface ArenaSurvivorDifficultyTierDefinition {
   label: string;
   description: string;
   enemyHpMultiplier: number;
+  enemyDamageMultiplier: number;
+  enemySpeedMultiplier: number;
   spawnIntervalMultiplier: number;
+  maxEnemyCountBonus: number;
+  spawnBurstBonus: number;
+  enemyUnlockWaveBonus: number;
+  bossSpawnCount: number;
+  bossHpMultiplier: number;
 }
 
 export const arenaSurvivorDifficultyTiers = [
   {
     level: 1,
-    label: "Sanft",
-    description: "Deutlich entspanntere Spawns und weichere Gegner.",
-    enemyHpMultiplier: 0.72,
-    spawnIntervalMultiplier: 1.35
+    label: "Gefahr 1",
+    description: "Einsteigerdruck mit langsameren Spawns und weicheren Gegnern.",
+    enemyHpMultiplier: 0.85,
+    enemyDamageMultiplier: 0.85,
+    enemySpeedMultiplier: 0.95,
+    spawnIntervalMultiplier: 1.18,
+    maxEnemyCountBonus: -6,
+    spawnBurstBonus: 0,
+    enemyUnlockWaveBonus: -1,
+    bossSpawnCount: 1,
+    bossHpMultiplier: 1
   },
   {
     level: 2,
-    label: "Locker",
-    description: "Etwas mehr Luft, ohne die Runde komplett zahm zu machen.",
-    enemyHpMultiplier: 0.88,
-    spawnIntervalMultiplier: 1.16
+    label: "Gefahr 2",
+    description: "Der klare Standard: faire Spawns, normale Gegnerwerte.",
+    enemyHpMultiplier: 1,
+    enemyDamageMultiplier: 1,
+    enemySpeedMultiplier: 1,
+    spawnIntervalMultiplier: 1.04,
+    maxEnemyCountBonus: 0,
+    spawnBurstBonus: 0,
+    enemyUnlockWaveBonus: 0,
+    bossSpawnCount: 1,
+    bossHpMultiplier: 1
   },
   {
     level: 3,
-    label: "Standard",
-    description: "Der bisherige Arena-Survivor-Standard.",
-    enemyHpMultiplier: 1,
-    spawnIntervalMultiplier: 1
+    label: "Gefahr 3",
+    description: "Neue Gegner frueher, mehr Druck und +12% Gegnerwerte.",
+    enemyHpMultiplier: 1.12,
+    enemyDamageMultiplier: 1.12,
+    enemySpeedMultiplier: 1.04,
+    spawnIntervalMultiplier: 0.96,
+    maxEnemyCountBonus: 6,
+    spawnBurstBonus: 0,
+    enemyUnlockWaveBonus: 1,
+    bossSpawnCount: 1,
+    bossHpMultiplier: 1
   },
   {
     level: 4,
-    label: "Hart",
-    description: "Schnellere Wellen mit merklich zäheren Gegnern.",
-    enemyHpMultiplier: 1.2,
-    spawnIntervalMultiplier: 0.88
+    label: "Gefahr 4",
+    description: "Dichte Horden, fruehere Spezialgegner und +26% Gegnerwerte.",
+    enemyHpMultiplier: 1.26,
+    enemyDamageMultiplier: 1.26,
+    enemySpeedMultiplier: 1.08,
+    spawnIntervalMultiplier: 0.88,
+    maxEnemyCountBonus: 12,
+    spawnBurstBonus: 1,
+    enemyUnlockWaveBonus: 2,
+    bossSpawnCount: 1,
+    bossHpMultiplier: 1
   },
   {
     level: 5,
-    label: "Chaos",
-    description: "Sehr dichter Druck und deutlich robustere Gegner.",
-    enemyHpMultiplier: 1.45,
-    spawnIntervalMultiplier: 0.76
+    label: "Gefahr 5",
+    description: "Maximaldruck: +40% Gegnerwerte und Doppelboss.",
+    enemyHpMultiplier: 1.4,
+    enemyDamageMultiplier: 1.4,
+    enemySpeedMultiplier: 1.12,
+    spawnIntervalMultiplier: 0.78,
+    maxEnemyCountBonus: 18,
+    spawnBurstBonus: 1,
+    enemyUnlockWaveBonus: 3,
+    bossSpawnCount: 2,
+    bossHpMultiplier: 0.75
   }
 ] as const satisfies readonly ArenaSurvivorDifficultyTierDefinition[];
 
@@ -146,6 +188,8 @@ export type ArenaSurvivorCharacterArchetype =
   | "regen"
   | "tank"
   | "speed"
+  | "luck"
+  | "economy"
   | "hybrid";
 
 export interface ArenaSurvivorCharacterVisualState {
@@ -167,7 +211,11 @@ export interface ArenaSurvivorCharacterState {
 export interface ArenaSurvivorStatModifiers {
   maxHp?: number;
   armor?: number;
+  dodgePct?: number;
+  luck?: number;
+  harvesting?: number;
   moveSpeedPct?: number;
+  weaponRangePct?: number;
   pickupRadius?: number;
   pickupRadiusPct?: number;
   damagePct?: number;
@@ -189,11 +237,15 @@ export interface ArenaSurvivorPlayerStats {
   pickupRadius: number;
   maxHp: number;
   armor: number;
+  dodgePct: number;
+  luck: number;
+  harvesting: number;
   hpRegen: number;
   contactDamageTakenMultiplier: number;
   damageMultiplier: number;
   projectileDamageMultiplier: number;
   projectileSpeedMultiplier: number;
+  weaponRangeMultiplier: number;
   attackSpeedMultiplier: number;
   autoFireRateMultiplier: number;
   meleePowerMultiplier: number;
@@ -210,6 +262,17 @@ export interface ArenaSurvivorPlayerStats {
 export type ArenaSurvivorWeaponCategory = "melee" | "ranged" | "magic";
 export type ArenaSurvivorAttackPattern = "melee_arc" | "single_projectile";
 
+export interface ArenaSurvivorWeaponDamageScaling {
+  meleePower?: number;
+  rangedPower?: number;
+  magicPower?: number;
+  elementalPower?: number;
+  attackSpeed?: number;
+  maxHp?: number;
+  armor?: number;
+  lifeSteal?: number;
+}
+
 export interface ArenaSurvivorWeaponLevelDefinition {
   level: 1 | 2 | 3 | 4;
   damage: number;
@@ -218,7 +281,9 @@ export interface ArenaSurvivorWeaponLevelDefinition {
   projectileSpeed: number;
   projectileCount?: number;
   pierce?: number;
+  critChancePct?: number;
   critScale?: number;
+  damageScaling?: ArenaSurvivorWeaponDamageScaling;
   knockback?: number;
   description: string;
   cost: number;
@@ -358,7 +423,7 @@ export interface ArenaSurvivorSpawnIndicatorState {
 }
 
 export interface ArenaSurvivorItemLevelDefinition {
-  level: 1 | 2 | 3;
+  level: 1 | 2 | 3 | 4;
   description: string;
   cost: number;
   modifiers: ArenaSurvivorStatModifiers;
@@ -367,7 +432,7 @@ export interface ArenaSurvivorItemLevelDefinition {
 export interface ArenaSurvivorItemDefinition {
   id: string;
   displayName: string;
-  maxLevel: 3;
+  maxLevel: 1 | 2 | 3 | 4;
   tags?: string[];
   description: string;
   levels: ArenaSurvivorItemLevelDefinition[];

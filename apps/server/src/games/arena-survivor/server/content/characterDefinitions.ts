@@ -70,7 +70,7 @@ export const arenaSurvivorCharacterDefinitions = [
     description:
       "Sieht harmlos aus, knabbert sich aber durch ganze Horden. Viel Lebensraub und gutes Angriffstempo, dafuer weniger Grundschaden.",
     modifiers: {
-      lifeStealPct: 0.8,
+      lifeStealPct: 4,
       attackSpeedPct: 14,
       damagePct: -8,
       armor: -1,
@@ -126,10 +126,12 @@ export const arenaSurvivorCharacterDefinitions = [
     title: "der Turboknoedel",
     archetype: "speed",
     description:
-      "Ist schon weg, bevor der Gegner den Angriff bemerkt. Viel Bewegung und Angriffsgeschwindigkeit, aber wenig Leben.",
+      "Ist schon weg, bevor der Gegner den Angriff bemerkt. Viel Tempo und Ausweichen, aber wenig Leben und Reichweite.",
     modifiers: {
-      moveSpeedPct: 18,
-      attackSpeedPct: 16,
+      moveSpeedPct: 30,
+      dodgePct: 10,
+      attackSpeedPct: 8,
+      weaponRangePct: -10,
       maxHp: -12,
       armor: -2
     },
@@ -142,24 +144,119 @@ export const arenaSurvivorCharacterDefinitions = [
   {
     id: "professor-paradox",
     name: "Professor Paradox",
-    title: "der Alles-ein-bisschen",
+    title: "der Allrounder",
     archetype: "hybrid",
     description:
-      "Hat zu allem eine Theorie und meistens auch eine fragwuerdige Loesung. Solider Hybrid mit leicht mehr Projektilen, aber ohne Extremwerte.",
+      "Hat zu allem eine Theorie und meistens auch eine brauchbare Loesung. Kleine Vorteile in Leben, Schaden, Tempo und Economy.",
     modifiers: {
-      damagePct: 8,
-      projectileCount: 1,
-      meleePowerPct: 8,
-      rangedPowerPct: 8,
-      magicPowerPct: 8,
-      elementalPowerPct: 8,
-      maxHp: -4,
-      armor: -1
+      maxHp: 5,
+      damagePct: 5,
+      attackSpeedPct: 5,
+      moveSpeedPct: 5,
+      harvesting: 8
     },
     visual: {
       primaryColor: "#d2ae85",
       secondaryColor: "#5ed0c6",
       accentColor: "#375c88"
+    }
+  },
+  {
+    id: "rundling-allround",
+    name: "Rundling",
+    title: "der Ausgewogene",
+    archetype: "hybrid",
+    description:
+      "Runder Einstieg mit kleinen Boni auf Leben, Schaden, Tempo und langfristige Materialien.",
+    modifiers: {
+      maxHp: 5,
+      damagePct: 5,
+      attackSpeedPct: 5,
+      moveSpeedPct: 5,
+      harvesting: 8
+    },
+    visual: {
+      primaryColor: "#d4a772",
+      secondaryColor: "#87b66d",
+      accentColor: "#40664b"
+    }
+  },
+  {
+    id: "pruegler-brawler",
+    name: "Pruegler",
+    title: "der Nahkaempfer",
+    archetype: "melee",
+    description:
+      "Hohes Angriffstempo und Ausweichen mit Nahkampf-Fokus, aber schwache Reichweite und Fernkampfwerte.",
+    modifiers: {
+      meleePowerPct: 15,
+      attackSpeedPct: 25,
+      dodgePct: 12,
+      weaponRangePct: -20,
+      rangedPowerPct: -20
+    },
+    visual: {
+      primaryColor: "#c78e64",
+      secondaryColor: "#b84a3a",
+      accentColor: "#59231d"
+    }
+  },
+  {
+    id: "jaeger-ranger",
+    name: "Jaeger",
+    title: "der Fernkaempfer",
+    archetype: "ranged",
+    description:
+      "Hohe Waffenreichweite, Fernkampf und Crit, aber spuerbar weniger Leben und Nahkampfwert.",
+    modifiers: {
+      rangedPowerPct: 25,
+      weaponRangePct: 35,
+      critChancePct: 10,
+      maxHp: -12,
+      meleePowerPct: -20
+    },
+    visual: {
+      primaryColor: "#c99f75",
+      secondaryColor: "#5c91d6",
+      accentColor: "#243b63"
+    }
+  },
+  {
+    id: "gluecksknolle-lucky",
+    name: "Gluecksknolle",
+    title: "der Glueckliche",
+    archetype: "luck",
+    description:
+      "Bessere Drops und Health-Pickups, dafuer schwaecherer direkter Kampf.",
+    modifiers: {
+      luck: 80,
+      pickupRadiusPct: 20,
+      damagePct: -15,
+      attackSpeedPct: -8
+    },
+    visual: {
+      primaryColor: "#d7ae73",
+      secondaryColor: "#f6d45e",
+      accentColor: "#7a5a12"
+    }
+  },
+  {
+    id: "ackerling-farmer",
+    name: "Ackerling",
+    title: "der Erntehelfer",
+    archetype: "economy",
+    description:
+      "Starkes Harvesting und langfristige Economy, aber schwacher Startschaden.",
+    modifiers: {
+      harvesting: 30,
+      luck: 10,
+      damagePct: -20,
+      attackSpeedPct: -6
+    },
+    visual: {
+      primaryColor: "#d2a16e",
+      secondaryColor: "#8ebf50",
+      accentColor: "#4f6e28"
     }
   }
 ] as const satisfies readonly ArenaSurvivorCharacterDefinition[];

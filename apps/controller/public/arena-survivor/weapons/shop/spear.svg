@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1324"/>
+      <stop offset="100%" stop-color="#1f2937"/>
+    </linearGradient>
+    <linearGradient id="shaft" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7c4a22"/>
+      <stop offset="100%" stop-color="#c0894f"/>
+    </linearGradient>
+    <linearGradient id="tip" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="12" width="232" height="232" rx="40" fill="url(#bg)"/>
+  <rect x="20" y="20" width="216" height="216" rx="32" fill="none" stroke="#93c5fd" stroke-opacity="0.32" stroke-width="4"/>
+  <g transform="translate(128 128) rotate(-36)">
+    <rect x="-20" y="-7" width="138" height="14" rx="7" fill="url(#shaft)"/>
+    <rect x="63" y="-10" width="16" height="20" rx="3" fill="#b45309"/>
+    <path d="M118 0 L156 -18 L148 0 L156 18 Z" fill="url(#tip)" stroke="#cbd5e1" stroke-width="3" stroke-linejoin="round"/>
+    <rect x="-30" y="-10" width="22" height="20" rx="6" fill="#5b3718"/>
+  </g>
+</svg>
