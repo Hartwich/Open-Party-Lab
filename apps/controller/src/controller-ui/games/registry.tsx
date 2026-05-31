@@ -4,8 +4,6 @@ import { buildLightTrailsControllerModel } from "./light-trails/LightTrailsContr
 import { buildArenaSurvivorControllerModel } from "./arena-survivor/ArenaSurvivorController.js";
 import { buildChaosKommandoControllerModel } from "./chaos-kommando/ChaosKommandoController.js";
 import { buildMinionsTdControllerModel } from "./minions-td/MinionsTdController.js";
-import { buildImposterControllerModel } from "./imposter/ImposterController.js";
-import { createTabuCorrectInput } from "./tabu/tabuBindings.js";
 import {
   createDrawingClearInput,
   createDrawingEndInput,
@@ -15,16 +13,12 @@ import {
   createGuessSubmitInput
 } from "./zeichnen-und-erraten/zeichnenUndErratenBindings.js";
 import { buildDriftRacerControllerModel } from "./drift-racer/DriftRacerController.js";
-import { buildSchaetzoramaControllerModel } from "./schaetzorama/SchaetzoramaController.js";
 import { buildWordTilesControllerModel } from "./word-tiles/WordTilesController.js";
 import type {
   ControllerLayoutModel,
-  ChoiceLayoutModel,
   DrawingGuessLayoutModel,
-  ReadyLayoutModel,
-  SingleButtonLayoutModel
+  ReadyLayoutModel
 } from "../layouts/models.js";
-import type { TabuControllerState } from "@open-party-lab/protocol";
 import { getControllerText } from "../../i18n/controllerText.js";
 import { externalControllerGameRegistrations } from "./.generated/externalGames.js";
 
@@ -139,115 +133,6 @@ const internalControllerGameRegistry: Record<string, ControllerGameRegistration>
       return buildLightTrailsControllerModel(context);
     }
   },
-  tabu: {
-    id: "tabu",
-    layoutKey: "choice",
-    buildLayout(context) {
-      const { state, onInput } = context;
-      const text = getControllerText(state.room?.language ?? state.preferredLanguage);
-      const en = state.room?.language === "en";
-      const playerId = state.player?.id ?? "";
-      const tabuState = (state.game?.state ?? {}) as TabuControllerState;
-      const playerNames = new Map((state.room?.players ?? []).map((player) => [player.id, player.name]));
-      const currentTurnPlayerId = tabuState.currentTurnPlayerId;
-      const currentTurnPlayerName = currentTurnPlayerId
-        ? playerNames.get(currentTurnPlayerId) ?? currentTurnPlayerId
-        : undefined;
-      const currentTurnTeamId =
-        tabuState.currentTurnTeamId ?? (currentTurnPlayerId ? tabuState.teamByPlayerId[currentTurnPlayerId] : undefined);
-      const currentTurnTeamLabel =
-        currentTurnTeamId === "team1" ? "Team 1" : currentTurnTeamId === "team2" ? "Team 2" : undefined;
-      const solved = tabuState.solvedTerms ?? 0;
-      const target = tabuState.targetTerms ?? 10;
-      const isExplainer = tabuState.currentTurnPlayerId === playerId;
-      const currentTerm = isExplainer ? tabuState.currentCardTerm ?? (en ? "Waiting for the first term" : "Warte auf den Startbegriff") : undefined;
-      const remainingSeconds =
-        tabuState.turnRemainingMs !== null ? Math.max(0, Math.ceil(tabuState.turnRemainingMs / 1000)) : null;
-      const choices: ChoiceLayoutModel["choices"] = [];
-
-      if (isExplainer && tabuState.mode === "duel") {
-        for (const otherPlayer of state.room?.players ?? []) {
-          if (otherPlayer.id === playerId) {
-            continue;
-          }
-
-          choices.push({
-            id: `tabu:duel:${otherPlayer.id}`,
-            label: otherPlayer.name,
-            description: en ? "Guessed the word" : "Hat das Wort erraten",
-            disabled: state.game?.phase !== "playing",
-            onSelect: () => onInput(createTabuCorrectInput(playerId, otherPlayer.id))
-          });
-        }
-      }
-
-      if (isExplainer && tabuState.mode === "team") {
-        choices.push({
-          id: "tabu:team:solved",
-          label: en ? "Solved" : "Geloest",
-          description: en ? "Your team guessed the word" : "Euer Team hat das Wort geschafft",
-          disabled: state.game?.phase !== "playing",
-          onSelect: () => onInput(createTabuCorrectInput(playerId))
-        });
-      }
-
-      const model: ChoiceLayoutModel = {
-        kind: "choice",
-        title: "Tabu",
-        subtitle:
-          tabuState.mode === "team"
-            ? `${tabuState.currentModeLabel} | ${currentTurnTeamLabel ?? "Team"}: ${currentTurnPlayerName ?? text.unknown}`
-            : `${tabuState.currentModeLabel} | ${en ? "Explainer" : "Erklaerer"}: ${currentTurnPlayerName ?? text.unknown}`,
-        helperText: isExplainer
-          ? tabuState.mode === "team"
-            ? currentTerm
-              ? `${currentTerm}\n${en ? "Tap Solved once your team guessed the word." : "Tippe auf Geloest, wenn euer Team das Wort geschafft hat."}`
-              : en ? "Tap Solved once your team guessed the word." : "Tippe auf Geloest, wenn euer Team das Wort geschafft hat."
-            : currentTerm
-              ? `${en ? "Word" : "Wort"}: ${currentTerm}\n${en ? "Choose the player who guessed the word." : "Waehle den Spieler, der das Wort erraten hat."}`
-              : en ? "Choose the player who guessed the word." : "Waehle den Spieler, der das Wort erraten hat."
-          : currentTurnPlayerName
-            ? `${en ? "Waiting for" : "Warte auf"} ${currentTurnPlayerName}.`
-            : en ? "Waiting for the explaining player." : "Warte auf die erklaerende Person.",
-        disabled: state.game?.phase !== "playing" || !isExplainer,
-        choices,
-        stats: [
-          {
-            label: en ? "Progress" : "Fortschritt",
-            value: `${solved}/${target}`
-          },
-          {
-            label: en ? "Cards left" : "Karten uebrig",
-            value: `${tabuState.remainingCards ?? 0}`
-          },
-          {
-            label: en ? "Mode" : "Modus",
-            value: tabuState.currentModeLabel
-          },
-          {
-            label: en ? "Time" : "Zeit",
-            value: remainingSeconds !== null ? `${remainingSeconds}s` : "-"
-          },
-          {
-            label: en ? "Role" : "Rolle",
-            value: isExplainer ? (en ? "Explainer" : "Erklaerer") : (en ? "Viewer" : "Zuschauer")
-          },
-          {
-            label: "Team",
-            value: currentTurnTeamLabel ?? "-"
-          }
-        ],
-      };
-      return withAutoReady(model, context);
-    }
-  },
-  imposter: {
-    id: "imposter",
-    layoutKey: "choice",
-    buildLayout(context) {
-      return withAutoReady(buildImposterControllerModel(context), context);
-    }
-  },
   "zeichnen-und-erraten": {
     id: "zeichnen-und-erraten",
     layoutKey: "drawing_guess",
@@ -294,13 +179,6 @@ const internalControllerGameRegistry: Record<string, ControllerGameRegistration>
         onSubmitGuess: (guess) => onInput(createGuessSubmitInput(playerId, guess))
       };
       return withAutoReady(model, context);
-    }
-  },
-  schaetzorama: {
-    id: "schaetzorama",
-    layoutKey: "schaetzorama",
-    buildLayout(context) {
-      return withAutoReady(buildSchaetzoramaControllerModel(context), context);
     }
   },
   "word-tiles": {

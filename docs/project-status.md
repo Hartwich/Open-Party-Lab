@@ -23,12 +23,9 @@ Games:
 - Drift Racer
 - Chaos-Kommando
 - Draw & Guess
-- Schaetzorama
 - Word Tiles
 - Arena Survivor
 - MinionsTD
-- Imposter
-- Tabu
 - Light Trails
 
 Optional local game repos:
@@ -36,6 +33,9 @@ Optional local game repos:
 - Tap Race can be loaded from `local-games/tap-race` when cloned locally; `local-games/open-party-game-tap-race` remains supported as a legacy path.
 - Pantomime can be loaded from `local-games/pantomime` when cloned locally.
 - Air Hockey can be loaded from `local-games/air-hockey` when cloned locally.
+- Tabu can be loaded from `local-games/tabu` when cloned locally.
+- Imposter can be loaded from `local-games/imposter` when cloned locally.
+- Schaetzorama can be loaded from `local-games/schaetzorama` when cloned locally.
 
 Draw & Guess:
 
@@ -48,7 +48,7 @@ Draw & Guess:
 - no hosted deployment configuration is included;
 - no formal end-to-end test suite exists yet;
 - controller bundles can be split further;
-- most games still live inside the platform repo until they are migrated to optional game repos;
+- several games still live inside the platform repo until they are migrated to optional game repos;
 - several games need deeper playtesting and balancing;
 - Firefox phone controllers can sometimes show controller issues around fullscreen behavior, reconnect/session handling, or touch input timing;
 - asset and word-list rights need review before any store release.
@@ -59,7 +59,7 @@ Draw & Guess:
 - expand AI browser-check recipes around the generic virtual controller helper;
 - improve persistence and restore behavior;
 - split controller code by game;
-- migrate the next simple game into its own optional repo after Tap Race;
+- migrate the remaining games into optional repos in small vertical slices;
 - add more incremental host rendering paths;
 - improve docs for each game;
 - improve balancing, round pacing, scoring clarity, and player feedback for alpha games;

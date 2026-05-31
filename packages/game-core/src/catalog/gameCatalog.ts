@@ -61,26 +61,6 @@ export const gameCatalog = [
     }
   },
   {
-    id: "schaetzorama",
-    displayName: "Schaetzorama",
-    description: "Schaetzen, sortieren und abschreiben auf einer quietschbunten Quiz-Konsole.",
-    minPlayers: 1,
-    maxPlayers: 8,
-    hostView: "SchaetzoramaHostScene",
-    controllerView: "schaetzorama",
-    controllerLayout: "schaetzorama",
-    supportsTeams: false,
-    estimatedRoundDurationMs: 145_000,
-    roundCompletionMode: "wait_for_ready",
-    phaseDurations: {
-      roundIntroMs: 1_500,
-      countdownMs: 2_000,
-      lockedMs: 26_000,
-      resultMs: 5_000,
-      scoreboardMs: 5_000
-    }
-  },
-  {
     id: "word-tiles",
     displayName: "Word Tiles",
     description: "Lege Woerter auf ein gemeinsames Brett und nutze Premiumfelder geschickt.",
@@ -136,38 +116,6 @@ export const gameCatalog = [
       resultMs: 4_500,
       scoreboardMs: 4_500
     }
-  },
-  {
-    id: "imposter",
-    displayName: "Imposter",
-    description: "Finde den Bluffenden durch Hinweise und Abstimmung.",
-    minPlayers: 3,
-    maxPlayers: 20,
-    hostView: "ImposterHostScene",
-    controllerView: "imposter",
-    controllerLayout: "choice",
-    supportsTeams: false,
-    estimatedRoundDurationMs: 120_000,
-    roundCompletionMode: "wait_for_ready",
-    phaseDurations: {
-      roundIntroMs: 1_600,
-      countdownMs: 2_200,
-      resultMs: 6_000,
-      scoreboardMs: 5_000
-    }
-  },
-  {
-    id: "tabu",
-    displayName: "Tabu",
-    description: "Erklaert Begriffe, ohne die Tabu-Woerter zu benutzen.",
-    minPlayers: 2,
-    maxPlayers: 20,
-    hostView: "TabuHostScene",
-    controllerView: "tabu",
-    controllerLayout: "single_button",
-    supportsTeams: false,
-    estimatedRoundDurationMs: 75_000,
-    roundCompletionMode: "wait_for_ready"
   },
   {
     id: "light-trails",

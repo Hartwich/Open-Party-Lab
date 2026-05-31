@@ -27,5 +27,32 @@
     "alternateLocalPaths": [
       "../air-hockey"
     ]
+  },
+  {
+    "id": "tabu",
+    "package": "@open-party-lab/game-tabu",
+    "repo": "https://github.com/Hartwich/tabu.git",
+    "defaultLocalPath": "local-games/tabu",
+    "alternateLocalPaths": [
+      "../tabu"
+    ]
+  },
+  {
+    "id": "imposter",
+    "package": "@open-party-lab/game-imposter",
+    "repo": "https://github.com/Hartwich/imposter.git",
+    "defaultLocalPath": "local-games/imposter",
+    "alternateLocalPaths": [
+      "../imposter"
+    ]
+  },
+  {
+    "id": "schaetzorama",
+    "package": "@open-party-lab/game-schaetzorama",
+    "repo": "https://github.com/Hartwich/schaetzorama.git",
+    "defaultLocalPath": "local-games/schaetzorama",
+    "alternateLocalPaths": [
+      "../schaetzorama"
+    ]
   }
 ]

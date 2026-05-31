@@ -10,11 +10,8 @@ import { arenaSurvivorServerGame } from "../games/arena-survivor/server/ArenaSur
 import { chaosKommandoServerGame } from "../games/chaos-kommando/server/ChaosKommandoServerGame.js";
 import { minionsTdServerGame } from "../games/minions-td/server/MinionsTdServerGame.js";
 import { lightTrailsServerGame } from "../games/light-trails/server/LightTrailsServerGame.js";
-import { imposterServerGame } from "../games/imposter/server/ImposterServerGame.js";
-import { tabuServerGame } from "../games/tabu/server/tabuServerGame.js";
 import { zeichnenUndErratenServerGame } from "../games/zeichnen-und-erraten/server/zeichnenUndErratenServerGame.js";
 import { driftRacerServerGame } from "../games/drift-racer/server/DriftRacerServerGame.js";
-import { schaetzoramaServerGame } from "../games/schaetzorama/server/schaetzoramaServerGame.js";
 import { wordTilesServerGame } from "../games/word-tiles/server/wordTilesServerGame.js";
 import { externalServerGameEntries } from "./.generated/externalGames.js";
 
@@ -46,20 +43,8 @@ export class GameRegistry {
       { manifest: lightTrailsServerGame.manifest, serverGame: lightTrailsServerGame }
     ],
     [
-      imposterServerGame.manifest.id,
-      { manifest: imposterServerGame.manifest, serverGame: imposterServerGame }
-    ],
-    [
-      tabuServerGame.manifest.id,
-      { manifest: tabuServerGame.manifest, serverGame: tabuServerGame }
-    ],
-    [
       zeichnenUndErratenServerGame.manifest.id,
       { manifest: zeichnenUndErratenServerGame.manifest, serverGame: zeichnenUndErratenServerGame }
-    ],
-    [
-      schaetzoramaServerGame.manifest.id,
-      { manifest: schaetzoramaServerGame.manifest, serverGame: schaetzoramaServerGame }
     ],
     [
       wordTilesServerGame.manifest.id,

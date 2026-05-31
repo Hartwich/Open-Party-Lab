@@ -40,12 +40,9 @@ Public game catalog in this source cut:
 - Drift Racer
 - Chaos-Kommando
 - Draw & Guess
-- Schaetzorama
 - Word Tiles
 - Arena Survivor
 - MinionsTD
-- Imposter
-- Tabu
 - Light Trails
 
 Optional local game repos:
@@ -53,6 +50,9 @@ Optional local game repos:
 - Tap Race (`local-games/tap-race` when cloned locally; the legacy `local-games/open-party-game-tap-race` folder still works)
 - Pantomime (`local-games/pantomime` when cloned locally)
 - Air Hockey (`local-games/air-hockey` when cloned locally)
+- Tabu (`local-games/tabu` when cloned locally)
+- Imposter (`local-games/imposter` when cloned locally)
+- Schaetzorama (`local-games/schaetzorama` when cloned locally)
 
 ## Quick Start
 
@@ -120,6 +120,9 @@ Clone optional games:
 ```bash
 git clone https://github.com/Hartwich/open-party-game-tap-race.git local-games/tap-race
 git clone https://github.com/Hartwich/air-hockey.git local-games/air-hockey
+git clone https://github.com/Hartwich/tabu.git local-games/tabu
+git clone https://github.com/Hartwich/imposter.git local-games/imposter
+git clone https://github.com/Hartwich/schaetzorama.git local-games/schaetzorama
 npm run games:sync-local
 ```
 
