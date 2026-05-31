@@ -46,13 +46,13 @@ Public game catalog in this source cut:
 - MinionsTD
 - Imposter
 - Tabu
-- Air Hockey
 - Light Trails
 
 Optional local game repos:
 
 - Tap Race (`local-games/tap-race` when cloned locally; the legacy `local-games/open-party-game-tap-race` folder still works)
 - Pantomime (`local-games/pantomime` when cloned locally)
+- Air Hockey (`local-games/air-hockey` when cloned locally)
 
 ## Quick Start
 
@@ -115,10 +115,11 @@ Open-Party-Lab/
     tap-race/
 ```
 
-Clone an optional game:
+Clone optional games:
 
 ```bash
 git clone https://github.com/Hartwich/open-party-game-tap-race.git local-games/tap-race
+git clone https://github.com/Hartwich/air-hockey.git local-games/air-hockey
 npm run games:sync-local
 ```
 

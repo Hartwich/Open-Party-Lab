@@ -5,7 +5,6 @@ import { chaosKommandoHostManifest } from "./chaos-kommando/manifest.js";
 import { imposterHostManifest } from "./imposter/manifest.js";
 import { tabuHostManifest } from "./tabu/manifest.js";
 import { zeichnenUndErratenHostManifest } from "./zeichnen-und-erraten/manifest.js";
-import { airHockeyHostManifest } from "./air-hockey/manifest.js";
 import { driftRacerHostManifest } from "./drift-racer/manifest.js";
 import { schaetzoramaHostManifest } from "./schaetzorama/manifest.js";
 import { wordTilesHostManifest } from "./word-tiles/manifest.js";
@@ -25,6 +24,5 @@ export const hostGameRegistry: Record<
   [zeichnenUndErratenHostManifest.id]: zeichnenUndErratenHostManifest,
   [schaetzoramaHostManifest.id]: schaetzoramaHostManifest,
   [wordTilesHostManifest.id]: wordTilesHostManifest,
-  [airHockeyHostManifest.id]: airHockeyHostManifest,
   ...externalHostGameRegistry
 };

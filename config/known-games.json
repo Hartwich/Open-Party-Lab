@@ -18,5 +18,14 @@
     "alternateLocalPaths": [
       "../pantomime"
     ]
+  },
+  {
+    "id": "air-hockey",
+    "package": "@open-party-lab/game-air-hockey",
+    "repo": "https://github.com/Hartwich/air-hockey.git",
+    "defaultLocalPath": "local-games/air-hockey",
+    "alternateLocalPaths": [
+      "../air-hockey"
+    ]
   }
 ]

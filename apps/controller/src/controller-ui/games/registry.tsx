@@ -14,7 +14,6 @@ import {
   createDrawingSetColorInput,
   createGuessSubmitInput
 } from "./zeichnen-und-erraten/zeichnenUndErratenBindings.js";
-import { buildAirHockeyControllerModel } from "./air-hockey/AirHockeyController.js";
 import { buildDriftRacerControllerModel } from "./drift-racer/DriftRacerController.js";
 import { buildSchaetzoramaControllerModel } from "./schaetzorama/SchaetzoramaController.js";
 import { buildWordTilesControllerModel } from "./word-tiles/WordTilesController.js";
@@ -312,17 +311,6 @@ const internalControllerGameRegistry: Record<string, ControllerGameRegistration>
         buildWordTilesControllerModel(context),
         context,
         context.state.room?.language === "en" ? "Next Word Tiles Round" : "Naechste Word-Tiles-Runde"
-      );
-    }
-  },
-  "air-hockey": {
-    id: "air-hockey",
-    layoutKey: "virtual_joystick",
-    buildLayout(context) {
-      return withAutoReady(
-        buildAirHockeyControllerModel(context),
-        context,
-        context.state.room?.language === "en" ? "Next Round" : "Naechste Runde"
       );
     }
   }

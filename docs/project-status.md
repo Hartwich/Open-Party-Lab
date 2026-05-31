@@ -29,13 +29,13 @@ Games:
 - MinionsTD
 - Imposter
 - Tabu
-- Air Hockey
 - Light Trails
 
 Optional local game repos:
 
 - Tap Race can be loaded from `local-games/tap-race` when cloned locally; `local-games/open-party-game-tap-race` remains supported as a legacy path.
 - Pantomime can be loaded from `local-games/pantomime` when cloned locally.
+- Air Hockey can be loaded from `local-games/air-hockey` when cloned locally.
 
 Draw & Guess:
 

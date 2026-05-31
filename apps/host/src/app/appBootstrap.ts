@@ -28,7 +28,6 @@ import { MinionsTdHostScene } from "../games/minions-td/host/MinionsTdHostScene.
 import { ImposterHostScene } from "../games/imposter/host/ImposterHostScene.js";
 import { TabuHostScene } from "../games/tabu/host/TabuHostScene.js";
 import { ZeichnenUndErratenHostScene } from "../games/zeichnen-und-erraten/host/ZeichnenUndErratenHostScene.js";
-import { AirHockeyHostScene } from "../games/air-hockey/host/AirHockeyHostScene.js";
 import { DriftRacerHostScene } from "../games/drift-racer/host/DriftRacerHostScene.js";
 import { SchaetzoramaHostScene } from "../games/schaetzorama/host/SchaetzoramaHostScene.js";
 import { WordTilesHostScene } from "../games/word-tiles/host/WordTilesHostScene.js";
@@ -69,7 +68,6 @@ export function bootstrapHostApp(): Phaser.Game {
       ZeichnenUndErratenHostScene,
       SchaetzoramaHostScene,
       WordTilesHostScene,
-      AirHockeyHostScene,
       ...externalHostScenes
     ]
   });

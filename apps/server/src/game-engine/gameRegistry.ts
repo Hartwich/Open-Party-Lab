@@ -13,7 +13,6 @@ import { lightTrailsServerGame } from "../games/light-trails/server/LightTrailsS
 import { imposterServerGame } from "../games/imposter/server/ImposterServerGame.js";
 import { tabuServerGame } from "../games/tabu/server/tabuServerGame.js";
 import { zeichnenUndErratenServerGame } from "../games/zeichnen-und-erraten/server/zeichnenUndErratenServerGame.js";
-import { airHockeyServerGame } from "../games/air-hockey/server/airHockeyServerGame.js";
 import { driftRacerServerGame } from "../games/drift-racer/server/DriftRacerServerGame.js";
 import { schaetzoramaServerGame } from "../games/schaetzorama/server/schaetzoramaServerGame.js";
 import { wordTilesServerGame } from "../games/word-tiles/server/wordTilesServerGame.js";
@@ -65,10 +64,6 @@ export class GameRegistry {
     [
       wordTilesServerGame.manifest.id,
       { manifest: wordTilesServerGame.manifest, serverGame: wordTilesServerGame }
-    ],
-    [
-      airHockeyServerGame.manifest.id,
-      { manifest: airHockeyServerGame.manifest, serverGame: airHockeyServerGame }
     ],
     ...externalServerGameEntries.map((entry) => [
       entry.manifest.id,

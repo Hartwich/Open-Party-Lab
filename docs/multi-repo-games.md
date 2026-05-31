@@ -32,10 +32,11 @@ List known optional games:
 npm run games:list
 ```
 
-Clone an optional game:
+Clone optional games:
 
 ```bash
 git clone https://github.com/Hartwich/open-party-game-tap-race.git local-games/tap-race
+git clone https://github.com/Hartwich/air-hockey.git local-games/air-hockey
 ```
 
 Link local games:
@@ -69,6 +70,8 @@ External games expose only these public entrypoints:
 @open-party-lab/game-tap-race/host
 @open-party-lab/game-tap-race/controller
 ```
+
+For Air Hockey, the same contract uses `@open-party-lab/game-air-hockey/...`.
 
 The platform generates registry imports only for local repos that exist and build successfully. Missing repos are skipped.
 
