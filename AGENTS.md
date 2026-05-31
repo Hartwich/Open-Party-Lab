@@ -45,7 +45,7 @@ Do not reintroduce these without maintainer approval:
 - For new games, follow `docs/minigame-sdk.md` and `docs/multi-repo-games.md`.
 - For optional external games, export only the documented package entrypoints and let `npm run games:sync-local` generate platform registries.
 - For UI changes, verify both desktop host and phone controller sizes.
-- For screenshots and visual QA, use the Codex in-app browser. Do not launch external browser executables for screenshots unless the maintainer explicitly asks for that.
+- For screenshots and visual QA, prefer Codex in-app browser. Launch external browser executables for screenshots as fallback or if the maintainer explicitly asks for that.
 - For AI checks that need players, use `npm run ai:controllers` to add generic virtual controller sessions to an existing room.
 - Keep naming, folder structure, state flow, and UI patterns consistent with nearby games before inventing new conventions.
 - Treat localization as part of the feature design. User-facing text should be structured so multiple languages can be supported, using the existing language and catalog text patterns instead of scattering hard-coded strings through server, host, and controller code.
