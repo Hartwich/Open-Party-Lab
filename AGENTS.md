@@ -11,6 +11,7 @@ This file is for AI coding agents and humans using them.
 - Game manifests drive availability, display names, player counts, and layout selection.
 - Optional external game repos live under `local-games/` during local development and are ignored by this repo.
 - Missing optional game repos are normal. Do not add static imports to packages that might not exist locally.
+- New external game repos use the short game name as repo and folder name, for example `tap-race`, not an `open-party-game-` prefix.
 
 ## Important Entry Points
 
@@ -19,6 +20,7 @@ This file is for AI coding agents and humans using them.
 - Controller game registry: `apps/controller/src/controller-ui/games/registry.tsx`
 - Optional game list: `config/known-games.json`
 - Local game generator: `scripts/local-games.mjs`
+- Virtual controller helper for AI browser checks: `scripts/virtual-controllers.mjs`
 - Catalog: `packages/game-core/src/catalog/gameCatalog.ts`
 - Shared protocol exports: `packages/protocol/src/index.ts`
 - Room lifecycle: `apps/server/src/rooms/roomLifecycle.ts`
@@ -43,6 +45,8 @@ Do not reintroduce these without maintainer approval:
 - For new games, follow `docs/minigame-sdk.md` and `docs/multi-repo-games.md`.
 - For optional external games, export only the documented package entrypoints and let `npm run games:sync-local` generate platform registries.
 - For UI changes, verify both desktop host and phone controller sizes.
+- For screenshots and visual QA, use the Codex in-app browser. Do not launch external browser executables for screenshots unless the maintainer explicitly asks for that.
+- For AI checks that need players, use `npm run ai:controllers` to add generic virtual controller sessions to an existing room.
 - Keep naming, folder structure, state flow, and UI patterns consistent with nearby games before inventing new conventions.
 - Treat localization as part of the feature design. User-facing text should be structured so multiple languages can be supported, using the existing language and catalog text patterns instead of scattering hard-coded strings through server, host, and controller code.
 - Before creating a new controller layout, check `apps/controller/src/controller-ui/layouts`, `apps/controller/src/controller-ui/layouts/models.ts`, and existing game controller builders. Reuse or extend an existing controller when it fits; add a new one only when the interaction model genuinely needs it.

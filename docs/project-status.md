@@ -16,6 +16,7 @@ Platform:
 - scoreboards
 - host controls for language, FPS, and player moderation outside active rounds
 - optional local game-repo discovery through `npm run games:list` and `npm run games:sync-local`
+- virtual controller helper for AI browser checks through `npm run ai:controllers`
 
 Games:
 
@@ -34,7 +35,7 @@ Games:
 
 Optional local game repos:
 
-- Tap Race can be loaded from `local-games/open-party-game-tap-race` when cloned locally.
+- Tap Race can be loaded from `local-games/tap-race` when cloned locally; `local-games/open-party-game-tap-race` remains supported as a legacy path.
 
 Draw & Guess:
 
@@ -55,6 +56,7 @@ Draw & Guess:
 ## Good Next Contributions
 
 - add E2E smoke tests for join, reconnect, round start, and round end;
+- expand AI browser-check recipes around the generic virtual controller helper;
 - improve persistence and restore behavior;
 - split controller code by game;
 - migrate the next simple game into its own optional repo after Tap Race;

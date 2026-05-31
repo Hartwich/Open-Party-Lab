@@ -12,6 +12,7 @@
     "games:list": "node scripts/local-games.mjs list",
     "games:sync-local": "node scripts/local-games.mjs sync-local",
     "games:clear-local": "node scripts/local-games.mjs clear-local",
+    "ai:controllers": "node scripts/virtual-controllers.mjs",
     "postinstall": "node scripts/local-games.mjs ensure-generated",
     "build:packages": "tsc -b packages/utils packages/ui-kit packages/game-core packages/protocol",
     "watch:packages": "tsc -b packages/utils packages/ui-kit packages/game-core packages/protocol -w",

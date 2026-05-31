@@ -9,17 +9,19 @@ Use child repos inside the platform working tree:
 ```text
 Open-Party-Lab/
   local-games/
-    open-party-game-tap-race/
+    tap-race/
 ```
 
 `local-games/` is ignored by the platform repo, so each child folder can be its own Git repository.
+
+New game repos should use the short game name as the repo and folder name, for example `tap-race` or `light-trails`, not an `open-party-game-` prefix. The npm package name may still use `@open-party-lab/game-<game-id>`.
 
 The generator also accepts the older sibling layout as a fallback:
 
 ```text
 OpenParty/
   Open-Party-Lab/
-  open-party-game-tap-race/
+  tap-race/
 ```
 
 ## Commands
@@ -33,7 +35,7 @@ npm run games:list
 Clone an optional game:
 
 ```bash
-git clone https://github.com/Hartwich/open-party-game-tap-race.git local-games/open-party-game-tap-race
+git clone https://github.com/Hartwich/open-party-game-tap-race.git local-games/tap-race
 ```
 
 Link local games:
@@ -71,6 +73,20 @@ External games expose only these public entrypoints:
 The platform generates registry imports only for local repos that exist and build successfully. Missing repos are skipped.
 
 ## AI Agent Workflow
+
+Use the Codex in-app browser for visual checks and screenshots. Do not fall back to external browser executables for README or QA screenshots unless the maintainer explicitly asks for that.
+
+Virtual controllers can be joined to an existing browser-hosted room without opening phone browser tabs:
+
+```bash
+npm run ai:controllers -- --room DEBU --players 4 --ready true --hold-ms 600000
+```
+
+The helper is game-agnostic. If a game needs input during the check, pass that game's input shape as JSON:
+
+```bash
+npm run ai:controllers -- --room DEBU --players 4 --input-json "{\"type\":\"tap\"}" --input-duration-ms 3000
+```
 
 When working on one game, open that game repo directly and run:
 

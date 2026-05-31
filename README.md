@@ -52,7 +52,7 @@ Public game catalog in this source cut:
 
 Optional local game repos:
 
-- Tap Race (`local-games/open-party-game-tap-race` when cloned locally)
+- Tap Race (`local-games/tap-race` when cloned locally; the legacy `local-games/open-party-game-tap-race` folder still works)
 
 ## Quick Start
 
@@ -94,6 +94,7 @@ Useful scripts:
 - `npm run games:list`
 - `npm run games:sync-local`
 - `npm run games:clear-local`
+- `npm run ai:controllers`
 - `npm run dev:all`
 - `npm run dev:stop`
 - `npm run dev:server`
@@ -111,17 +112,25 @@ Recommended child-repo layout:
 ```text
 Open-Party-Lab/
   local-games/
-    open-party-game-tap-race/
+    tap-race/
 ```
 
 Clone an optional game:
 
 ```bash
-git clone https://github.com/Hartwich/open-party-game-tap-race.git local-games/open-party-game-tap-race
+git clone https://github.com/Hartwich/open-party-game-tap-race.git local-games/tap-race
 npm run games:sync-local
 ```
 
 `games:sync-local` builds and links only the local game repos it finds. Missing games are skipped and do not break `dev`, `typecheck`, or `build`.
+
+New game repos should use the short game name as the repo and folder name, for example `tap-race`, not an `open-party-game-` prefix. Package names can still use the scoped npm shape, for example `@open-party-lab/game-tap-race`.
+
+For AI browser checks, use the in-app browser for screenshots. Virtual controllers can be added without opening phone browser windows:
+
+```bash
+npm run ai:controllers -- --room DEBU --players 4 --ready true --hold-ms 600000
+```
 
 ## LAN Setup
 

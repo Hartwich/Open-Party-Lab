@@ -3,7 +3,11 @@
     "id": "tap-race",
     "package": "@open-party-lab/game-tap-race",
     "repo": "https://github.com/Hartwich/open-party-game-tap-race.git",
-    "defaultLocalPath": "local-games/open-party-game-tap-race",
-    "alternateLocalPaths": ["../open-party-game-tap-race"]
+    "defaultLocalPath": "local-games/tap-race",
+    "alternateLocalPaths": [
+      "local-games/open-party-game-tap-race",
+      "../tap-race",
+      "../open-party-game-tap-race"
+    ]
   }
 ]
