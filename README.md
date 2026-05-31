@@ -43,7 +43,6 @@ Public game catalog in this source cut:
 - Word Tiles
 - Arena Survivor
 - MinionsTD
-- Light Trails
 
 Optional local game repos:
 
@@ -53,6 +52,7 @@ Optional local game repos:
 - Tabu (`local-games/tabu` when cloned locally)
 - Imposter (`local-games/imposter` when cloned locally)
 - Schaetzorama (`local-games/schaetzorama` when cloned locally)
+- Light Trails (`local-games/light-trails` when cloned locally)
 
 ## Quick Start
 
@@ -123,6 +123,7 @@ git clone https://github.com/Hartwich/air-hockey.git local-games/air-hockey
 git clone https://github.com/Hartwich/tabu.git local-games/tabu
 git clone https://github.com/Hartwich/imposter.git local-games/imposter
 git clone https://github.com/Hartwich/schaetzorama.git local-games/schaetzorama
+git clone https://github.com/Hartwich/light-trails.git local-games/light-trails
 npm run games:sync-local
 ```
 

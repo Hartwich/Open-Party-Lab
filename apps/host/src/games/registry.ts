@@ -1,5 +1,4 @@
 ﻿import { minionsTdHostManifest } from "./minions-td/manifest.js";
-import { lightTrailsHostManifest } from "./light-trails/manifest.js";
 import { arenaSurvivorHostManifest } from "./arena-survivor/manifest.js";
 import { chaosKommandoHostManifest } from "./chaos-kommando/manifest.js";
 import { zeichnenUndErratenHostManifest } from "./zeichnen-und-erraten/manifest.js";
@@ -15,7 +14,6 @@ export const hostGameRegistry: Record<
   [minionsTdHostManifest.id]: minionsTdHostManifest,
   [arenaSurvivorHostManifest.id]: arenaSurvivorHostManifest,
   [chaosKommandoHostManifest.id]: chaosKommandoHostManifest,
-  [lightTrailsHostManifest.id]: lightTrailsHostManifest,
   [zeichnenUndErratenHostManifest.id]: zeichnenUndErratenHostManifest,
   [wordTilesHostManifest.id]: wordTilesHostManifest,
   ...externalHostGameRegistry

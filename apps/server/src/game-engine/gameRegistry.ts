@@ -9,7 +9,6 @@ import type { AvailableGameDto } from "@open-party-lab/protocol";
 import { arenaSurvivorServerGame } from "../games/arena-survivor/server/ArenaSurvivorServerGame.js";
 import { chaosKommandoServerGame } from "../games/chaos-kommando/server/ChaosKommandoServerGame.js";
 import { minionsTdServerGame } from "../games/minions-td/server/MinionsTdServerGame.js";
-import { lightTrailsServerGame } from "../games/light-trails/server/LightTrailsServerGame.js";
 import { zeichnenUndErratenServerGame } from "../games/zeichnen-und-erraten/server/zeichnenUndErratenServerGame.js";
 import { driftRacerServerGame } from "../games/drift-racer/server/DriftRacerServerGame.js";
 import { wordTilesServerGame } from "../games/word-tiles/server/wordTilesServerGame.js";
@@ -37,10 +36,6 @@ export class GameRegistry {
     [
       minionsTdServerGame.manifest.id,
       { manifest: minionsTdServerGame.manifest, serverGame: minionsTdServerGame }
-    ],
-    [
-      lightTrailsServerGame.manifest.id,
-      { manifest: lightTrailsServerGame.manifest, serverGame: lightTrailsServerGame }
     ],
     [
       zeichnenUndErratenServerGame.manifest.id,

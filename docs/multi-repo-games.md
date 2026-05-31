@@ -40,6 +40,7 @@ git clone https://github.com/Hartwich/air-hockey.git local-games/air-hockey
 git clone https://github.com/Hartwich/tabu.git local-games/tabu
 git clone https://github.com/Hartwich/imposter.git local-games/imposter
 git clone https://github.com/Hartwich/schaetzorama.git local-games/schaetzorama
+git clone https://github.com/Hartwich/light-trails.git local-games/light-trails
 ```
 
 Link local games:
@@ -74,7 +75,7 @@ External games expose only these public entrypoints:
 @open-party-lab/game-tap-race/controller
 ```
 
-For Air Hockey, Tabu, Imposter, and Schaetzorama, the same contract uses the matching package name such as `@open-party-lab/game-air-hockey/...` or `@open-party-lab/game-tabu/...`.
+For Air Hockey, Tabu, Imposter, Schaetzorama, and Light Trails, the same contract uses the matching package name such as `@open-party-lab/game-air-hockey/...` or `@open-party-lab/game-light-trails/...`.
 
 The platform generates registry imports only for local repos that exist and build successfully. Missing repos are skipped.
 

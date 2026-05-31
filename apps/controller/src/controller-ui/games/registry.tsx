@@ -1,6 +1,5 @@
 ﻿import type { ControllerLayoutKey } from "@open-party-lab/game-core";
 import type { ControllerAppState } from "../../app/controllerSocketClient.js";
-import { buildLightTrailsControllerModel } from "./light-trails/LightTrailsController.js";
 import { buildArenaSurvivorControllerModel } from "./arena-survivor/ArenaSurvivorController.js";
 import { buildChaosKommandoControllerModel } from "./chaos-kommando/ChaosKommandoController.js";
 import { buildMinionsTdControllerModel } from "./minions-td/MinionsTdController.js";
@@ -124,13 +123,6 @@ const internalControllerGameRegistry: Record<string, ControllerGameRegistration>
     layoutKey: "tower_defense",
     buildLayout(context) {
       return buildMinionsTdControllerModel(context);
-    }
-  },
-  "light-trails": {
-    id: "light-trails",
-    layoutKey: "left_right_hold",
-    buildLayout(context) {
-      return buildLightTrailsControllerModel(context);
     }
   },
   "zeichnen-und-erraten": {

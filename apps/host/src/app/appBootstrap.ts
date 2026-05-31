@@ -21,7 +21,6 @@ import { ArenaSurvivorSetupScene } from "../scenes/ArenaSurvivorSetupScene.js";
 import { MinionsTdSetupScene } from "../scenes/MinionsTdSetupScene.js";
 import { RoundIntroScene } from "../scenes/RoundIntroScene.js";
 import { ScoreboardScene } from "../scenes/ScoreboardScene.js";
-import { LightTrailsHostScene } from "../games/light-trails/host/LightTrailsHostScene.js";
 import { ArenaSurvivorHostScene } from "../games/arena-survivor/host/ArenaSurvivorHostScene.js";
 import { ChaosKommandoHostScene } from "../games/chaos-kommando/host/ChaosKommandoHostScene.js";
 import { MinionsTdHostScene } from "../games/minions-td/host/MinionsTdHostScene.js";
@@ -56,7 +55,6 @@ export function bootstrapHostApp(): Phaser.Game {
       RoundIntroScene,
       ScoreboardScene,
       DriftRacerHostScene,
-      LightTrailsHostScene,
       ArenaSurvivorHostScene,
       ChaosKommandoHostScene,
       MinionsTdHostScene,

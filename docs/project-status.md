@@ -26,7 +26,6 @@ Games:
 - Word Tiles
 - Arena Survivor
 - MinionsTD
-- Light Trails
 
 Optional local game repos:
 
@@ -36,6 +35,7 @@ Optional local game repos:
 - Tabu can be loaded from `local-games/tabu` when cloned locally.
 - Imposter can be loaded from `local-games/imposter` when cloned locally.
 - Schaetzorama can be loaded from `local-games/schaetzorama` when cloned locally.
+- Light Trails can be loaded from `local-games/light-trails` when cloned locally.
 
 Draw & Guess:
 

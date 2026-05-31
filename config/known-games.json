@@ -54,5 +54,14 @@
     "alternateLocalPaths": [
       "../schaetzorama"
     ]
+  },
+  {
+    "id": "light-trails",
+    "package": "@open-party-lab/game-light-trails",
+    "repo": "https://github.com/Hartwich/light-trails.git",
+    "defaultLocalPath": "local-games/light-trails",
+    "alternateLocalPaths": [
+      "../light-trails"
+    ]
   }
 ]
