@@ -9,7 +9,6 @@ import type { AvailableGameDto } from "@open-party-lab/protocol";
 import { arenaSurvivorServerGame } from "../games/arena-survivor/server/ArenaSurvivorServerGame.js";
 import { chaosKommandoServerGame } from "../games/chaos-kommando/server/ChaosKommandoServerGame.js";
 import { minionsTdServerGame } from "../games/minions-td/server/MinionsTdServerGame.js";
-import { tapRaceServerGame } from "../games/tap-race/server/tapRaceServerGame.js";
 import { lightTrailsServerGame } from "../games/light-trails/server/LightTrailsServerGame.js";
 import { pantomimeServerGame } from "../games/pantomime/server/pantomimeServerGame.js";
 import { imposterServerGame } from "../games/imposter/server/ImposterServerGame.js";
@@ -19,6 +18,7 @@ import { airHockeyServerGame } from "../games/air-hockey/server/airHockeyServerG
 import { driftRacerServerGame } from "../games/drift-racer/server/DriftRacerServerGame.js";
 import { schaetzoramaServerGame } from "../games/schaetzorama/server/schaetzoramaServerGame.js";
 import { wordTilesServerGame } from "../games/word-tiles/server/wordTilesServerGame.js";
+import { externalServerGameEntries } from "./.generated/externalGames.js";
 
 export interface ServerGameEntry {
   manifest: GameManifest;
@@ -48,10 +48,6 @@ export class GameRegistry {
       { manifest: pantomimeServerGame.manifest, serverGame: pantomimeServerGame }
     ],
     [
-      tapRaceServerGame.manifest.id,
-      { manifest: tapRaceServerGame.manifest, serverGame: tapRaceServerGame }
-    ],
-    [
       lightTrailsServerGame.manifest.id,
       { manifest: lightTrailsServerGame.manifest, serverGame: lightTrailsServerGame }
     ],
@@ -78,7 +74,11 @@ export class GameRegistry {
     [
       airHockeyServerGame.manifest.id,
       { manifest: airHockeyServerGame.manifest, serverGame: airHockeyServerGame }
-    ]
+    ],
+    ...externalServerGameEntries.map((entry) => [
+      entry.manifest.id,
+      entry
+    ] as const)
   ]);
 
   get(gameId: string): ServerGameEntry | undefined {

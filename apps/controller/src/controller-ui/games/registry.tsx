@@ -4,7 +4,6 @@ import { buildLightTrailsControllerModel } from "./light-trails/LightTrailsContr
 import { buildArenaSurvivorControllerModel } from "./arena-survivor/ArenaSurvivorController.js";
 import { buildChaosKommandoControllerModel } from "./chaos-kommando/ChaosKommandoController.js";
 import { buildMinionsTdControllerModel } from "./minions-td/MinionsTdController.js";
-import { createTapRaceInput } from "./tap-race/tapRaceBindings.js";
 import { buildImposterControllerModel } from "./imposter/ImposterController.js";
 import { createTabuCorrectInput } from "./tabu/tabuBindings.js";
 import {
@@ -28,6 +27,7 @@ import type {
 } from "../layouts/models.js";
 import type { TabuControllerState } from "@open-party-lab/protocol";
 import { getControllerText } from "../../i18n/controllerText.js";
+import { externalControllerGameRegistrations } from "./.generated/externalGames.js";
 
 export interface ControllerGameRenderContext {
   state: ControllerAppState;
@@ -100,7 +100,7 @@ function withAutoReady<T extends { ready?: ReadyLayoutModel }>(
   };
 }
 
-export const controllerGameRegistry: Record<string, ControllerGameRegistration> = {
+const internalControllerGameRegistry: Record<string, ControllerGameRegistration> = {
   "drift-racer": {
     id: "drift-racer",
     layoutKey: "racing_controls",
@@ -295,42 +295,6 @@ export const controllerGameRegistry: Record<string, ControllerGameRegistration> 
       return withAutoReady(buildImposterControllerModel(context), context);
     }
   },
-  "tap-race": {
-    id: "tap-race",
-    layoutKey: "tap_mash",
-    buildLayout({ state, onInput }) {
-      const text = getControllerText(state.room?.language ?? state.preferredLanguage);
-      const en = state.room?.language === "en";
-      const playerId = state.player?.id ?? "";
-      const tapRaceState = (state.game?.state ?? {}) as {
-        targetTaps?: number;
-        tapsByPlayer?: Record<string, number>;
-        leaderId?: string;
-      };
-      const currentTaps = tapRaceState.tapsByPlayer?.[playerId] ?? 0;
-      const maxTaps = tapRaceState.targetTaps ?? 30;
-      const rows = (state.room?.players ?? []).map((player) => ({
-        label: player.name,
-        value: `${tapRaceState.tapsByPlayer?.[player.id] ?? 0} Taps`,
-        highlighted: player.id === state.player?.id
-      }));
-
-      return {
-        kind: "tap_mash",
-        title: "Tap Race",
-        subtitle: text.formatPhase(state.game?.phase),
-        buttonLabel: "TAP",
-        helperText: state.game?.message ?? (en ? "Tap as fast as you can." : "Tippe so schnell du kannst."),
-        disabled: state.game?.phase !== "playing",
-        progress: {
-          current: currentTaps,
-          max: maxTaps
-        },
-        rows,
-        onPress: () => onInput(createTapRaceInput(playerId))
-      };
-    }
-  },
   "zeichnen-und-erraten": {
     id: "zeichnen-und-erraten",
     layoutKey: "drawing_guess",
@@ -408,4 +372,9 @@ export const controllerGameRegistry: Record<string, ControllerGameRegistration> 
       );
     }
   }
+};
+
+export const controllerGameRegistry: Record<string, ControllerGameRegistration> = {
+  ...internalControllerGameRegistry,
+  ...Object.fromEntries(externalControllerGameRegistrations.map((registration) => [registration.id, registration]))
 };

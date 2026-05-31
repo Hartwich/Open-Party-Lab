@@ -26,7 +26,6 @@ import { ArenaSurvivorHostScene } from "../games/arena-survivor/host/ArenaSurviv
 import { ChaosKommandoHostScene } from "../games/chaos-kommando/host/ChaosKommandoHostScene.js";
 import { MinionsTdHostScene } from "../games/minions-td/host/MinionsTdHostScene.js";
 import { PantomimeHostScene } from "../games/pantomime/host/PantomimeHostScene.js";
-import { TapRaceHostScene } from "../games/tap-race/host/TapRaceHostScene.js";
 import { ImposterHostScene } from "../games/imposter/host/ImposterHostScene.js";
 import { TabuHostScene } from "../games/tabu/host/TabuHostScene.js";
 import { ZeichnenUndErratenHostScene } from "../games/zeichnen-und-erraten/host/ZeichnenUndErratenHostScene.js";
@@ -34,6 +33,7 @@ import { AirHockeyHostScene } from "../games/air-hockey/host/AirHockeyHostScene.
 import { DriftRacerHostScene } from "../games/drift-racer/host/DriftRacerHostScene.js";
 import { SchaetzoramaHostScene } from "../games/schaetzorama/host/SchaetzoramaHostScene.js";
 import { WordTilesHostScene } from "../games/word-tiles/host/WordTilesHostScene.js";
+import { externalHostScenes } from "../games/.generated/externalGames.js";
 
 export function bootstrapHostApp(): Phaser.Game {
   const serverUrl = import.meta.env.VITE_SERVER_URL ?? "http://localhost:3000";
@@ -66,13 +66,13 @@ export function bootstrapHostApp(): Phaser.Game {
       ChaosKommandoHostScene,
       MinionsTdHostScene,
       PantomimeHostScene,
-      TapRaceHostScene,
       ImposterHostScene,
       TabuHostScene,
       ZeichnenUndErratenHostScene,
       SchaetzoramaHostScene,
       WordTilesHostScene,
-      AirHockeyHostScene
+      AirHockeyHostScene,
+      ...externalHostScenes
     ]
   });
 

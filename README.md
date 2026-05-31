@@ -12,12 +12,12 @@ Open Party Lab runs three applications together:
 
 Shared code lives in npm workspace packages:
 
-- `packages/protocol`: Socket events, DTOs, and game-specific payload types
-- `packages/game-core`: game manifests, shared game types, round helpers, and catalog data
+- `packages/protocol`: Socket events, DTOs, and shared room/game-state DTOs
+- `packages/game-core`: game manifests, shared game types, round helpers, and layout keys
 - `packages/ui-kit`: shared visual tokens
 - `packages/utils`: small shared utilities
 
-This is intentionally published as a monorepo. The host, controller, server, and shared protocol change together, and splitting them into separate repositories would make game work harder rather than clearer.
+The platform is moving toward optional multi-repo games. The host, controller, server, and shared platform packages stay together here. Individual games can live in separate Git repos and are loaded only when present locally.
 
 ## Current Status
 
@@ -47,9 +47,12 @@ Public game catalog in this source cut:
 - Imposter
 - Tabu
 - Pantomime
-- Tap Race
 - Air Hockey
 - Light Trails
+
+Optional local game repos:
+
+- Tap Race (`local-games/open-party-game-tap-race` when cloned locally)
 
 ## Quick Start
 
@@ -62,6 +65,7 @@ From a fresh clone:
 
 ```bash
 npm ci
+npm run games:list
 npm run build
 ```
 
@@ -87,6 +91,9 @@ Default ports:
 
 Useful scripts:
 
+- `npm run games:list`
+- `npm run games:sync-local`
+- `npm run games:clear-local`
 - `npm run dev:all`
 - `npm run dev:stop`
 - `npm run dev:server`
@@ -94,6 +101,27 @@ Useful scripts:
 - `npm run dev:controller`
 - `npm run typecheck`
 - `npm run build`
+
+## Optional Local Games
+
+You do not need every game repo. The platform loads only game repos that exist locally and are linked by the generator.
+
+Recommended child-repo layout:
+
+```text
+Open-Party-Lab/
+  local-games/
+    open-party-game-tap-race/
+```
+
+Clone an optional game:
+
+```bash
+git clone https://github.com/Hartwich/open-party-game-tap-race.git local-games/open-party-game-tap-race
+npm run games:sync-local
+```
+
+`games:sync-local` builds and links only the local game repos it finds. Missing games are skipped and do not break `dev`, `typecheck`, or `build`.
 
 ## LAN Setup
 
@@ -124,6 +152,7 @@ Start with:
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 - [docs/architecture.md](docs/architecture.md)
 - [docs/minigame-sdk.md](docs/minigame-sdk.md)
+- [docs/multi-repo-games.md](docs/multi-repo-games.md)
 - [docs/project-status.md](docs/project-status.md)
 
 Contributions are voluntary and unpaid. The maintainer may publish official builds, including a possible Steam release, to reach a larger player base. See [CONTRIBUTING.md](CONTRIBUTING.md) and [NOTICE.md](NOTICE.md).

@@ -41,6 +41,14 @@ $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $serverUrl = "http://$LanIp`:3000"
 $controllerOrigin = "http://$LanIp`:5174"
 
+Push-Location $projectRoot
+try {
+  npm run build:packages
+  npm run games:sync-local
+} finally {
+  Pop-Location
+}
+
 $jobs = @(
   @{
     Title = "Open Party Lab Server"
@@ -48,7 +56,7 @@ $jobs = @(
 `$Host.UI.RawUI.WindowTitle = 'Open Party Lab Server'
 Set-Location '$projectRoot'
 `$env:PUBLIC_CONTROLLER_ORIGIN = '$controllerOrigin'
-npm run dev:server
+npm run dev --workspace @open-party-lab/server
 "@
   },
   @{
@@ -57,7 +65,7 @@ npm run dev:server
 `$Host.UI.RawUI.WindowTitle = 'Open Party Lab Host'
 Set-Location '$projectRoot'
 `$env:VITE_SERVER_URL = '$serverUrl'
-npm run dev:host
+npm run dev --workspace @open-party-lab/host
 "@
   },
   @{
@@ -66,7 +74,7 @@ npm run dev:host
 `$Host.UI.RawUI.WindowTitle = 'Open Party Lab Controller'
 Set-Location '$projectRoot'
 `$env:VITE_SERVER_URL = '$serverUrl'
-npm run dev:controller
+npm run dev --workspace @open-party-lab/controller
 "@
   }
 )

@@ -1,6 +1,6 @@
 # Project Status
 
-Snapshot date: 2026-05-29
+Snapshot date: 2026-05-31
 
 ## Available In This Public Cut
 
@@ -15,6 +15,7 @@ Platform:
 - shared round lifecycle
 - scoreboards
 - host controls for language, FPS, and player moderation outside active rounds
+- optional local game-repo discovery through `npm run games:list` and `npm run games:sync-local`
 
 Games:
 
@@ -28,9 +29,12 @@ Games:
 - Imposter
 - Tabu
 - Pantomime
-- Tap Race
 - Air Hockey
 - Light Trails
+
+Optional local game repos:
+
+- Tap Race can be loaded from `local-games/open-party-game-tap-race` when cloned locally.
 
 Draw & Guess:
 
@@ -43,6 +47,7 @@ Draw & Guess:
 - no hosted deployment configuration is included;
 - no formal end-to-end test suite exists yet;
 - controller bundles can be split further;
+- most games still live inside the platform repo until they are migrated to optional game repos;
 - several games need deeper playtesting and balancing;
 - Firefox phone controllers can sometimes show controller issues around fullscreen behavior, reconnect/session handling, or touch input timing;
 - asset and word-list rights need review before any store release.
@@ -52,6 +57,7 @@ Draw & Guess:
 - add E2E smoke tests for join, reconnect, round start, and round end;
 - improve persistence and restore behavior;
 - split controller code by game;
+- migrate the next simple game into its own optional repo after Tap Race;
 - add more incremental host rendering paths;
 - improve docs for each game;
 - improve balancing, round pacing, scoring clarity, and player feedback for alpha games;

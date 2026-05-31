@@ -182,18 +182,6 @@ export const gameCatalog = [
     estimatedRoundDurationMs: 70_000
   },
   {
-    id: "tap-race",
-    displayName: "Tap Race",
-    description: "Tippe schneller als die anderen bis zum Ziel.",
-    minPlayers: 1,
-    maxPlayers: 8,
-    hostView: "TapRaceHostScene",
-    controllerView: "tap-race",
-    controllerLayout: "tap_mash",
-    supportsTeams: false,
-    estimatedRoundDurationMs: 10_000
-  },
-  {
     id: "air-hockey",
     displayName: "Air Hockey",
     description: "Duelle dich im 1v1 und schiesse den Puck ins gegnerische Tor.",

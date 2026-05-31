@@ -7,7 +7,6 @@ import { imposterText } from "./games/imposter.js";
 import { minionsTdText } from "./games/minionsTd.js";
 import { pantomimeText } from "./games/pantomime.js";
 import { tabuText } from "./games/tabu.js";
-import { tapRaceText } from "./games/tapRace.js";
 import { zeichnenUndErratenText } from "./games/zeichnenUndErraten.js";
 import { driftRacerText } from "./games/driftRacer.js";
 import { schaetzoramaText } from "./games/schaetzorama.js";
@@ -21,7 +20,6 @@ const gameTextCatalog = {
   imposter: imposterText,
   tabu: tabuText,
   pantomime: pantomimeText,
-  "tap-race": tapRaceText,
   "drift-racer": driftRacerText,
   "air-hockey": airHockeyText,
   schaetzorama: schaetzoramaText,

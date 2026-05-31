@@ -2,12 +2,12 @@
 
 Each game should provide:
 
-- a catalog manifest in `packages/game-core`;
+- a package manifest export;
 - a server implementation;
 - a host view;
 - a controller model or layout binding;
 - protocol types when game-specific state or input is needed;
-- registry entries in server, host, and controller.
+- package entrypoints consumed by the platform registry generator.
 
 ## Server Contract
 
@@ -23,18 +23,30 @@ Server games generally implement these responsibilities:
 
 The exact interfaces are in `packages/game-core`.
 
+## Package Entrypoints
+
+External games must expose stable subpath exports:
+
+```text
+@open-party-lab/game-example/manifest
+@open-party-lab/game-example/protocol
+@open-party-lab/game-example/server
+@open-party-lab/game-example/host
+@open-party-lab/game-example/controller
+```
+
+The platform must not import private files from a game repo.
+
 ## Integration Checklist
 
-1. Add catalog text and manifest data.
-2. Add protocol types under `packages/protocol/src/games`.
-3. Add the server game under `apps/server/src/games/<game>`.
-4. Add the host scene under `apps/host/src/games/<game>`.
-5. Add controller bindings under `apps/controller/src/controller-ui/games/<game>`.
-6. Add or reuse a controller layout in `apps/controller/src/controller-ui/layouts`.
-7. Register the game in all registries.
-8. Update docs and status.
-9. Run `npm run typecheck`.
-10. Run `npm run build` for release-facing changes.
+1. Create or clone the game repo under `local-games/<repo-name>`.
+2. Add the game to `config/known-games.json`.
+3. Export manifest, protocol, server, host, and controller entrypoints.
+4. Add or reuse a controller layout in the platform when the existing layouts are insufficient.
+5. Run `npm run games:sync-local` from the platform.
+6. Update docs and status.
+7. Run `npm run typecheck`.
+8. Run `npm run build` for release-facing changes.
 
 ## Design Guidance
 

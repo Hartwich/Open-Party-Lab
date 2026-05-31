@@ -7,14 +7,18 @@ This file is for AI coding agents and humans using them.
 - The server is authoritative. Gameplay rules, timers, scoring, and round transitions belong in `apps/server`.
 - The host renders the shared screen. It should not become the source of truth.
 - The controller sends player intent and shows phone UI. It should not trust itself for game outcomes.
-- Protocol types in `packages/protocol` are the contract between all three apps.
-- Game catalog metadata in `packages/game-core` drives availability, display names, player counts, and layout selection.
+- Protocol types in `packages/protocol` are the shared room and socket contract between all three apps.
+- Game manifests drive availability, display names, player counts, and layout selection.
+- Optional external game repos live under `local-games/` during local development and are ignored by this repo.
+- Missing optional game repos are normal. Do not add static imports to packages that might not exist locally.
 
 ## Important Entry Points
 
 - Server game registry: `apps/server/src/game-engine/gameRegistry.ts`
 - Host game registry: `apps/host/src/games/registry.ts`
 - Controller game registry: `apps/controller/src/controller-ui/games/registry.tsx`
+- Optional game list: `config/known-games.json`
+- Local game generator: `scripts/local-games.mjs`
 - Catalog: `packages/game-core/src/catalog/gameCatalog.ts`
 - Shared protocol exports: `packages/protocol/src/index.ts`
 - Room lifecycle: `apps/server/src/rooms/roomLifecycle.ts`
@@ -27,7 +31,7 @@ Do not reintroduce these without maintainer approval:
 - private or hidden game prototypes excluded from this public cut
 - removed experimental prototypes
 - legacy experiment folders
-- `Temp/`, `artifacts/`, build output, logs, or generated browser profiles
+- `Temp/`, `artifacts/`, build output, logs, generated browser profiles, or generated external game registries
 
 ## Contribution Rules
 
@@ -36,7 +40,8 @@ Do not reintroduce these without maintainer approval:
 - Update `docs/project-status.md` when functionality or limitations change.
 - Do not add assets with unclear rights.
 - Do not add generated output to source control.
-- For new games, follow `docs/minigame-sdk.md`.
+- For new games, follow `docs/minigame-sdk.md` and `docs/multi-repo-games.md`.
+- For optional external games, export only the documented package entrypoints and let `npm run games:sync-local` generate platform registries.
 - For UI changes, verify both desktop host and phone controller sizes.
 - Keep naming, folder structure, state flow, and UI patterns consistent with nearby games before inventing new conventions.
 - Treat localization as part of the feature design. User-facing text should be structured so multiple languages can be supported, using the existing language and catalog text patterns instead of scattering hard-coded strings through server, host, and controller code.
@@ -51,6 +56,8 @@ Run at least:
 ```bash
 npm run typecheck
 ```
+
+Use `npm run games:list` to see optional local game repos and `npm run games:sync-local` to refresh generated registries.
 
 Run a full build when touching bundling, shared packages, game registries, Vite config, or publish-ready work:
 

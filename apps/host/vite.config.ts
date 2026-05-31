@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
   resolve: {
+    dedupe: ["phaser", "@open-party-lab/game-core", "@open-party-lab/protocol"],
     alias: {
       "@open-party-lab/protocol": fileURLToPath(
         new URL("../../packages/protocol/src/index.ts", import.meta.url)
@@ -31,6 +32,10 @@ export default defineConfig({
 
           if (normalizedId.includes("/node_modules/qrcode/")) {
             return "qrcode";
+          }
+
+          if (normalizedId.includes("/src/games/.generated/")) {
+            return "game-external";
           }
 
           const gameMatch = normalizedId.match(/\/src\/games\/([^/]+)\//);
