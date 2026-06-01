@@ -25,7 +25,7 @@ Optional local game repos:
 - MinionsTD can be loaded from `local-games/minions-td` when cloned locally. It is currently beta and recommended.
 - Zeichnen & Erraten can be loaded from `local-games/zeichnen-und-erraten` when cloned locally. It is currently beta and recommended.
 - Schaetzorama can be loaded from `local-games/schaetzorama` when cloned locally. It is currently beta and recommended.
-- Tap Race can be loaded from `local-games/tap-race` when cloned locally; `local-games/open-party-game-tap-race` remains supported as a legacy path.
+- Tap Race can be loaded from `local-games/tap-race` when cloned locally.
 - Pantomime can be loaded from `local-games/pantomime` when cloned locally.
 - Air Hockey can be loaded from `local-games/air-hockey` when cloned locally.
 - Tabu can be loaded from `local-games/tabu` when cloned locally.

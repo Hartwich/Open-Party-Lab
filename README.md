@@ -44,7 +44,7 @@ Recommended optional local game repos:
 
 Other optional local game repos:
 
-- Tap Race (`local-games/tap-race` when cloned locally; the legacy `local-games/open-party-game-tap-race` folder still works)
+- Tap Race (`local-games/tap-race` when cloned locally)
 - Pantomime (`local-games/pantomime` when cloned locally)
 - Air Hockey (`local-games/air-hockey` when cloned locally)
 - Tabu (`local-games/tabu` when cloned locally)
@@ -122,7 +122,7 @@ git clone https://github.com/Hartwich/arena-survivor.git local-games/arena-survi
 git clone https://github.com/Hartwich/minions-td.git local-games/minions-td
 git clone https://github.com/Hartwich/zeichnen-und-erraten.git local-games/zeichnen-und-erraten
 git clone https://github.com/Hartwich/schaetzorama.git local-games/schaetzorama
-git clone https://github.com/Hartwich/open-party-game-tap-race.git local-games/tap-race
+git clone https://github.com/Hartwich/tap-race.git local-games/tap-race
 git clone https://github.com/Hartwich/air-hockey.git local-games/air-hockey
 git clone https://github.com/Hartwich/tabu.git local-games/tabu
 git clone https://github.com/Hartwich/imposter.git local-games/imposter

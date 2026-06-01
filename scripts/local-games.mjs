@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import {
   cp,
+  lstat,
   mkdir,
   readdir,
   readFile,
@@ -64,13 +65,22 @@ function resolvePackageLinkPath(game) {
 }
 
 async function pathExists(targetPath) {
-  return existsSync(targetPath);
+  try {
+    await lstat(targetPath);
+    return true;
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      return false;
+    }
+
+    throw error;
+  }
 }
 
 async function removePackageLink(game) {
   const linkPath = resolvePackageLinkPath(game);
 
-  if (existsSync(linkPath)) {
+  if (existsSync(linkPath) || await pathExists(linkPath)) {
     await rm(linkPath, { recursive: true, force: true });
   }
 }

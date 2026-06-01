@@ -35,7 +35,7 @@ npm run games:list
 Clone optional games:
 
 ```bash
-git clone https://github.com/Hartwich/open-party-game-tap-race.git local-games/tap-race
+git clone https://github.com/Hartwich/tap-race.git local-games/tap-race
 git clone https://github.com/Hartwich/air-hockey.git local-games/air-hockey
 git clone https://github.com/Hartwich/tabu.git local-games/tabu
 git clone https://github.com/Hartwich/imposter.git local-games/imposter
