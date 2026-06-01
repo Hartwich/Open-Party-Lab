@@ -2,7 +2,6 @@
 import { lightTrailsText } from "./games/lightTrails.js";
 import { airHockeyText } from "./games/airHockey.js";
 import { arenaSurvivorText } from "./games/arenaSurvivor.js";
-import { chaosKommandoText } from "./games/chaosKommando.js";
 import { imposterText } from "./games/imposter.js";
 import { pantomimeText } from "./games/pantomime.js";
 import { tabuText } from "./games/tabu.js";
@@ -12,7 +11,6 @@ import { schaetzoramaText } from "./games/schaetzorama.js";
 import { wordTilesText } from "./games/wordTiles.js";
 
 const gameTextCatalog = {
-  "chaos-kommando": chaosKommandoText,
   "zeichnen-und-erraten": zeichnenUndErratenText,
   "arena-survivor": arenaSurvivorText,
   imposter: imposterText,

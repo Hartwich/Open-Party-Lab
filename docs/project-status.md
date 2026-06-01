@@ -18,10 +18,6 @@ Platform:
 - optional local game-repo discovery through `npm run games:list` and `npm run games:sync-local`
 - virtual controller helper for AI browser checks through `npm run ai:controllers`
 
-Games:
-
-- Chaos-Kommando
-
 Optional local game repos:
 
 - Tap Race can be loaded from `local-games/tap-race` when cloned locally; `local-games/open-party-game-tap-race` remains supported as a legacy path.
@@ -36,6 +32,7 @@ Optional local game repos:
 - Zeichnen & Erraten can be loaded from `local-games/zeichnen-und-erraten` when cloned locally.
 - Arena Survivor can be loaded from `local-games/arena-survivor` when cloned locally.
 - MinionsTD can be loaded from `local-games/minions-td` when cloned locally.
+- Chaos-Kommando can be loaded from `local-games/chaos-kommando` when cloned locally.
 
 Lobby/setup:
 
@@ -49,7 +46,6 @@ Lobby/setup:
 - no hosted deployment configuration is included;
 - no formal end-to-end test suite exists yet;
 - controller bundles can be split further;
-- several games still live inside the platform repo until they are migrated to optional game repos;
 - several games need deeper playtesting and balancing;
 - Firefox phone controllers can sometimes show controller issues around fullscreen behavior, reconnect/session handling, or touch input timing;
 - asset and word-list rights need review before any store release.
@@ -60,7 +56,6 @@ Lobby/setup:
 - expand AI browser-check recipes around the generic virtual controller helper;
 - improve persistence and restore behavior;
 - split controller code by game;
-- migrate the remaining games into optional repos in small vertical slices;
 - add more incremental host rendering paths;
 - improve docs for each game;
 - improve balancing, round pacing, scoring clarity, and player feedback for alpha games;

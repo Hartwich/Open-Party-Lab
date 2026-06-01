@@ -108,5 +108,14 @@
     "alternateLocalPaths": [
       "../minions-td"
     ]
+  },
+  {
+    "id": "chaos-kommando",
+    "package": "@open-party-lab/game-chaos-kommando",
+    "repo": "https://github.com/Hartwich/chaos-kommando.git",
+    "defaultLocalPath": "local-games/chaos-kommando",
+    "alternateLocalPaths": [
+      "../chaos-kommando"
+    ]
   }
 ]

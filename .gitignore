@@ -26,6 +26,8 @@ apps/host/public/arena-survivor/
 apps/controller/public/arena-survivor/
 apps/host/public/minions-td/
 apps/controller/public/minions-td/
+apps/host/public/chaos-kommando/
+apps/controller/public/chaos-kommando/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

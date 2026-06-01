@@ -1,6 +1,5 @@
 import type { ControllerLayoutKey } from "@open-party-lab/game-core";
 import type { ControllerAppState } from "../../app/controllerSocketClient.js";
-import { buildChaosKommandoControllerModel } from "./chaos-kommando/ChaosKommandoController.js";
 import type {
   ControllerLayoutModel,
   ReadyLayoutModel
@@ -58,12 +57,12 @@ function buildAutoReadyModel(
   };
 }
 
-function withAutoReady<T extends { ready?: ReadyLayoutModel }>(
-  model: T,
+function withAutoReady(
+  model: ControllerLayoutModel,
   context: ControllerGameRenderContext,
   label?: string
-): T {
-  if (model.ready) {
+): ControllerLayoutModel {
+  if ("ready" in model && model.ready) {
     return model;
   }
 
@@ -76,24 +75,19 @@ function withAutoReady<T extends { ready?: ReadyLayoutModel }>(
   return {
     ...model,
     ready
-  };
+  } as ControllerLayoutModel;
 }
 
-const internalControllerGameRegistry: Record<string, ControllerGameRegistration> = {
-  "chaos-kommando": {
-    id: "chaos-kommando",
-    layoutKey: "chaos_kommando_controls",
-    buildLayout(context) {
-      return withAutoReady(
-        buildChaosKommandoControllerModel(context),
-        context,
-        context.state.room?.language === "en" ? "Next Match" : "Naechstes Match"
-      );
-    }
-  }
-};
-
 export const controllerGameRegistry: Record<string, ControllerGameRegistration> = {
-  ...internalControllerGameRegistry,
-  ...Object.fromEntries(externalControllerGameRegistrations.map((registration) => [registration.id, registration]))
+  ...Object.fromEntries(
+    externalControllerGameRegistrations.map((registration) => [
+      registration.id,
+      {
+        ...registration,
+        buildLayout(context: ControllerGameRenderContext) {
+          return withAutoReady(registration.buildLayout(context), context);
+        }
+      }
+    ])
+  )
 };

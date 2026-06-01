@@ -35,10 +35,6 @@ Implemented platform features:
 - host controls for language, FPS, and player removal outside active rounds
 - typed protocol shared by server, host, and controller
 
-Public game catalog in this source cut:
-
-- Chaos-Kommando
-
 Optional local game repos:
 
 - Tap Race (`local-games/tap-race` when cloned locally; the legacy `local-games/open-party-game-tap-race` folder still works)
@@ -53,6 +49,7 @@ Optional local game repos:
 - Zeichnen & Erraten (`local-games/zeichnen-und-erraten` when cloned locally)
 - Arena Survivor (`local-games/arena-survivor` when cloned locally)
 - MinionsTD (`local-games/minions-td` when cloned locally)
+- Chaos-Kommando (`local-games/chaos-kommando` when cloned locally)
 
 ## Quick Start
 
@@ -127,6 +124,9 @@ git clone https://github.com/Hartwich/light-trails.git local-games/light-trails
 git clone https://github.com/Hartwich/drift-racer.git local-games/drift-racer
 git clone https://github.com/Hartwich/word-tiles.git local-games/word-tiles
 git clone https://github.com/Hartwich/zeichnen-und-erraten.git local-games/zeichnen-und-erraten
+git clone https://github.com/Hartwich/arena-survivor.git local-games/arena-survivor
+git clone https://github.com/Hartwich/minions-td.git local-games/minions-td
+git clone https://github.com/Hartwich/chaos-kommando.git local-games/chaos-kommando
 npm run games:sync-local
 ```
 

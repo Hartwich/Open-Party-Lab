@@ -6,7 +6,6 @@
   type SupportedLanguage
 } from "@open-party-lab/game-core";
 import type { AvailableGameDto } from "@open-party-lab/protocol";
-import { chaosKommandoServerGame } from "../games/chaos-kommando/server/ChaosKommandoServerGame.js";
 import { externalServerGameEntries } from "./.generated/externalGames.js";
 
 export interface ServerGameEntry {
@@ -16,10 +15,6 @@ export interface ServerGameEntry {
 
 export class GameRegistry {
   private readonly games = new Map<string, ServerGameEntry>([
-    [
-      chaosKommandoServerGame.manifest.id,
-      { manifest: chaosKommandoServerGame.manifest, serverGame: chaosKommandoServerGame }
-    ],
     ...externalServerGameEntries.map((entry) => [
       entry.manifest.id,
       entry

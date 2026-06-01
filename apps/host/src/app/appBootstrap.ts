@@ -19,7 +19,6 @@ import { LobbyScene } from "../scenes/LobbyScene.js";
 import { GameSelectScene } from "../scenes/GameSelectScene.js";
 import { RoundIntroScene } from "../scenes/RoundIntroScene.js";
 import { ScoreboardScene } from "../scenes/ScoreboardScene.js";
-import { ChaosKommandoHostScene } from "../games/chaos-kommando/host/ChaosKommandoHostScene.js";
 import { externalHostScenes } from "../games/.generated/externalGames.js";
 
 export function bootstrapHostApp(): Phaser.Game {
@@ -45,7 +44,6 @@ export function bootstrapHostApp(): Phaser.Game {
       GameSelectScene,
       RoundIntroScene,
       ScoreboardScene,
-      ChaosKommandoHostScene,
       ...externalHostScenes
     ]
   });
