@@ -21,18 +21,18 @@ Platform:
 
 Optional local game repos:
 
+- Arena Survivor can be loaded from `local-games/arena-survivor` when cloned locally. It is currently beta and recommended.
+- MinionsTD can be loaded from `local-games/minions-td` when cloned locally. It is currently beta and recommended.
+- Zeichnen & Erraten can be loaded from `local-games/zeichnen-und-erraten` when cloned locally. It is currently beta and recommended.
+- Schaetzorama can be loaded from `local-games/schaetzorama` when cloned locally. It is currently beta and recommended.
 - Tap Race can be loaded from `local-games/tap-race` when cloned locally; `local-games/open-party-game-tap-race` remains supported as a legacy path.
 - Pantomime can be loaded from `local-games/pantomime` when cloned locally.
 - Air Hockey can be loaded from `local-games/air-hockey` when cloned locally.
 - Tabu can be loaded from `local-games/tabu` when cloned locally.
 - Imposter can be loaded from `local-games/imposter` when cloned locally.
-- Schaetzorama can be loaded from `local-games/schaetzorama` when cloned locally.
 - Light Trails can be loaded from `local-games/light-trails` when cloned locally.
-- Drift Racer can be loaded from `local-games/drift-racer` when cloned locally.
+- Drift Racer can be loaded from `local-games/drift-racer` when cloned locally. It is under construction and currently not playable.
 - Word Tiles can be loaded from `local-games/word-tiles` when cloned locally.
-- Zeichnen & Erraten can be loaded from `local-games/zeichnen-und-erraten` when cloned locally.
-- Arena Survivor can be loaded from `local-games/arena-survivor` when cloned locally.
-- MinionsTD can be loaded from `local-games/minions-td` when cloned locally.
 - Chaos-Kommando can be loaded from `local-games/chaos-kommando` when cloned locally.
 
 Lobby/setup:
@@ -42,7 +42,8 @@ Lobby/setup:
 
 ## Not Production-Ready Yet
 
-- every included game is still alpha and may need rule, pacing, scoring, UI, and balancing changes;
+- most included games are still alpha and may need rule, pacing, scoring, UI, and balancing changes;
+- Arena Survivor, MinionsTD, Zeichnen & Erraten, and Schaetzorama are already in beta shape, but still need normal playtesting and refinement;
 - persistent storage is not wired for production use;
 - no hosted deployment configuration is included;
 - no formal end-to-end test suite exists yet;

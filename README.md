@@ -23,7 +23,7 @@ The platform is moving toward optional multi-repo games. The host, controller, s
 
 This is a playable local prototype, not a hosted production service. It is designed for devices on the same LAN.
 
-All included games are alpha versions. Rules, pacing, scoring, content, UI, and especially balancing are expected to change. Playtesting notes, balance proposals, and small polish improvements are very welcome.
+Most included games are alpha versions. Arena Survivor, MinionsTD, Zeichnen & Erraten, and Schaetzorama are the current recommended games: they are already in beta shape and generally good to play locally. Rules, pacing, scoring, content, UI, and especially balancing are still expected to change. Playtesting notes, balance proposals, and small polish improvements are very welcome.
 
 Implemented platform features:
 
@@ -35,20 +35,23 @@ Implemented platform features:
 - host controls for language, FPS, and player removal outside active rounds
 - typed protocol shared by server, host, and controller
 
-Optional local game repos:
+Recommended optional local game repos:
+
+- Arena Survivor (`local-games/arena-survivor` when cloned locally) - beta, recommended
+- MinionsTD (`local-games/minions-td` when cloned locally) - beta, recommended
+- Zeichnen & Erraten (`local-games/zeichnen-und-erraten` when cloned locally) - beta, recommended
+- Schaetzorama (`local-games/schaetzorama` when cloned locally) - beta, recommended
+
+Other optional local game repos:
 
 - Tap Race (`local-games/tap-race` when cloned locally; the legacy `local-games/open-party-game-tap-race` folder still works)
 - Pantomime (`local-games/pantomime` when cloned locally)
 - Air Hockey (`local-games/air-hockey` when cloned locally)
 - Tabu (`local-games/tabu` when cloned locally)
 - Imposter (`local-games/imposter` when cloned locally)
-- Schaetzorama (`local-games/schaetzorama` when cloned locally)
 - Light Trails (`local-games/light-trails` when cloned locally)
-- Drift Racer (`local-games/drift-racer` when cloned locally)
+- Drift Racer (`local-games/drift-racer` when cloned locally) - under construction, currently not playable
 - Word Tiles (`local-games/word-tiles` when cloned locally)
-- Zeichnen & Erraten (`local-games/zeichnen-und-erraten` when cloned locally)
-- Arena Survivor (`local-games/arena-survivor` when cloned locally)
-- MinionsTD (`local-games/minions-td` when cloned locally)
 - Chaos-Kommando (`local-games/chaos-kommando` when cloned locally)
 
 ## Quick Start
@@ -115,17 +118,17 @@ Open-Party-Lab/
 Clone optional games:
 
 ```bash
+git clone https://github.com/Hartwich/arena-survivor.git local-games/arena-survivor
+git clone https://github.com/Hartwich/minions-td.git local-games/minions-td
+git clone https://github.com/Hartwich/zeichnen-und-erraten.git local-games/zeichnen-und-erraten
+git clone https://github.com/Hartwich/schaetzorama.git local-games/schaetzorama
 git clone https://github.com/Hartwich/open-party-game-tap-race.git local-games/tap-race
 git clone https://github.com/Hartwich/air-hockey.git local-games/air-hockey
 git clone https://github.com/Hartwich/tabu.git local-games/tabu
 git clone https://github.com/Hartwich/imposter.git local-games/imposter
-git clone https://github.com/Hartwich/schaetzorama.git local-games/schaetzorama
 git clone https://github.com/Hartwich/light-trails.git local-games/light-trails
 git clone https://github.com/Hartwich/drift-racer.git local-games/drift-racer
 git clone https://github.com/Hartwich/word-tiles.git local-games/word-tiles
-git clone https://github.com/Hartwich/zeichnen-und-erraten.git local-games/zeichnen-und-erraten
-git clone https://github.com/Hartwich/arena-survivor.git local-games/arena-survivor
-git clone https://github.com/Hartwich/minions-td.git local-games/minions-td
 git clone https://github.com/Hartwich/chaos-kommando.git local-games/chaos-kommando
 npm run games:sync-local
 ```
