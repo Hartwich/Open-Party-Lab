@@ -21,6 +21,7 @@ This file is for AI coding agents and humans using them.
 - Optional game list: `config/known-games.json`
 - Local game generator: `scripts/local-games.mjs`
 - Virtual controller helper for AI browser checks: `scripts/virtual-controllers.mjs`
+- Host DEV automation bridge for browser checks: `apps/host/src/app/appBootstrap.ts`
 - Catalog: `packages/game-core/src/catalog/gameCatalog.ts`
 - Shared protocol exports: `packages/protocol/src/index.ts`
 - Room lifecycle: `apps/server/src/rooms/roomLifecycle.ts`

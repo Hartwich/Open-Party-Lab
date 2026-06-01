@@ -17,6 +17,7 @@ Platform:
 - host controls for language, FPS, and player moderation outside active rounds
 - optional local game-repo discovery through `npm run games:list` and `npm run games:sync-local`
 - virtual controller helper for AI browser checks through `npm run ai:controllers`
+- host DEV automation bridge for browser checks exposed only by the Vite dev host
 
 Optional local game repos:
 

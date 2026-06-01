@@ -27,16 +27,9 @@ If those terms do not work for you, please discuss before contributing.
 
 All games are currently alpha. Balance, pacing, scoring, and content may change substantially, and contributions that make the games easier to understand, fairer, or more fun are welcome.
 
-New or changed games usually need updates in all of these places:
+Games live in optional repos under `local-games/` during local development. A game repo owns its server logic, protocol types, host scene, controller model, assets, manifest, README, and package entrypoints.
 
-- `packages/game-core/src/catalog/gameCatalog.ts`
-- `packages/game-core/src/catalog/i18n/gameTexts.ts`
-- `packages/protocol/src/games/*`
-- `apps/server/src/game-engine/gameRegistry.ts`
-- `apps/server/src/games/*`
-- `apps/host/src/games/*`
-- `apps/controller/src/controller-ui/games/*`
-- docs
+The Platform owns common room lifecycle, generated optional game registries, reusable controller layouts, generic setup rendering, and shared DTO/socket contracts. Add a game to `config/known-games.json`, then run `npm run games:sync-local` so the generated registries import only locally available games.
 
 The server must remain authoritative. Controllers should send input, not decide winners. Before adding a controller layout, check whether an existing layout can be reused or extended.
 

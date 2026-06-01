@@ -10,8 +10,8 @@ Open Party Lab is a TypeScript npm-workspace monorepo for local browser party ga
 
 ## Shared Packages
 
-- `packages/protocol`: event names, client/server event payloads, DTOs, game-specific payloads
-- `packages/game-core`: game manifests, catalog, localization hooks, round phase helpers, shared gameplay contracts
+- `packages/protocol`: event names, client/server event payloads, and shared DTOs
+- `packages/game-core`: game manifests, layout keys, round phase helpers, and shared gameplay contracts
 - `packages/ui-kit`: shared UI tokens
 - `packages/utils`: generic utilities
 
@@ -21,7 +21,7 @@ Open Party Lab is a TypeScript npm-workspace monorepo for local browser party ga
 2. Controllers send intent; they do not decide outcomes.
 3. Host scenes render state; they do not own game rules.
 4. Protocol types are the contract between all apps.
-5. New games should be additive: manifest, server implementation, host scene, controller model, registry entries, docs.
+5. New games should live in optional game repos and expose only the documented package entrypoints.
 
 ## Runtime Flow
 
@@ -56,9 +56,10 @@ Game-specific state should fit inside this lifecycle unless there is a strong re
 
 Main registry files:
 
-- `packages/game-core/src/catalog/gameCatalog.ts`
+- `config/known-games.json`
+- `scripts/local-games.mjs`
 - `apps/server/src/game-engine/gameRegistry.ts`
 - `apps/host/src/games/registry.ts`
 - `apps/controller/src/controller-ui/games/registry.tsx`
 
-If a game is added or removed, check all of them.
+`npm run games:sync-local` generates optional registry imports from the local repos it finds. Missing optional game repos are normal and must not break `dev`, `typecheck`, or `build`.

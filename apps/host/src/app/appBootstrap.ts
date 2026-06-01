@@ -6,7 +6,7 @@ import { mountFullscreenOverlay } from "./fullscreenOverlay.js";
 import { mountScreenWakeLock } from "./screenWakeLock.js";
 import { mountBackgroundMusic } from "./backgroundMusic.js";
 import { createHostRouter } from "./router.js";
-import { HostSocketClient } from "./hostSocketClient.js";
+import { HostSocketClient, type HostAppState } from "./hostSocketClient.js";
 import { mountJoinOverlay } from "./joinOverlay.js";
 import {
   applyHostFps,
@@ -20,6 +20,36 @@ import { GameSelectScene } from "../scenes/GameSelectScene.js";
 import { RoundIntroScene } from "../scenes/RoundIntroScene.js";
 import { ScoreboardScene } from "../scenes/ScoreboardScene.js";
 import { externalHostScenes } from "../games/.generated/externalGames.js";
+
+interface HostAutomationBridge {
+  getState: () => HostAppState;
+  kickPlayer: (playerId: string) => void;
+  returnToGameSelection: () => void;
+  selectGame: (gameId: string) => void;
+  sendGameHostAction: (gameId: string, action: unknown) => void;
+  startRound: () => void;
+}
+
+declare global {
+  interface Window {
+    __openPartyLabHost?: HostAutomationBridge;
+  }
+}
+
+function exposeHostAutomationBridge(hostClient: HostSocketClient): void {
+  if (!import.meta.env.DEV) {
+    return;
+  }
+
+  window.__openPartyLabHost = {
+    getState: () => hostClient.getState(),
+    kickPlayer: (playerId) => hostClient.kickPlayer(playerId),
+    returnToGameSelection: () => hostClient.returnToGameSelection(),
+    selectGame: (gameId) => hostClient.selectGame(gameId),
+    sendGameHostAction: (gameId, action) => hostClient.sendGameHostAction(gameId, action),
+    startRound: () => hostClient.startRound()
+  };
+}
 
 export function bootstrapHostApp(): Phaser.Game {
   const serverUrl = import.meta.env.VITE_SERVER_URL ?? "http://localhost:3000";
@@ -58,6 +88,7 @@ export function bootstrapHostApp(): Phaser.Game {
   mountFullscreenOverlay(hostClient);
   mountScreenWakeLock();
   mountBackgroundMusic(hostClient);
+  exposeHostAutomationBridge(hostClient);
   hostClient.connect();
 
   return game;
