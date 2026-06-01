@@ -2,6 +2,14 @@
 
 Short descriptions and topics for GitHub repository metadata.
 
+## Magic Arena
+Description: Recommended alpha 3D hex tactics game for Open Party Lab with cards, collapsing arenas, and hidden planning.
+Topics: open-party-lab party-game browser-game threejs phaser typescript local-multiplayer tactics-game 3d-game magic-arena
+
+## Magic Duell
+Description: Recommended alpha 3D wizard duel for Open Party Lab with phone-drawn spells.
+Topics: open-party-lab party-game browser-game threejs phaser typescript local-multiplayer wizard-duel gesture-controls 3d-game
+
 ## Tap Race
 Description: Fast tap-mash race for Open Party Lab where players sprint by tapping their phone controller.
 Topics: open-party-lab party-game browser-game phaser typescript local-multiplayer tap-race

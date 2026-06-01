@@ -13,6 +13,8 @@ import { DrawingGuessLayout } from "./DrawingGuessLayout.js";
 import { RacingControlsLayout } from "./RacingControlsLayout.js";
 import { SchaetzoramaLayout } from "./SchaetzoramaLayout.js";
 import { WordTilesLayout } from "./WordTilesLayout.js";
+import { SpellCastingLayout } from "./SpellCastingLayout.js";
+import { MagicArenaLayout } from "./MagicArenaLayout.js";
 import type { ControllerLayoutModel } from "./models.js";
 
 interface ControllerLayoutRendererProps {
@@ -35,6 +37,8 @@ export function ControllerLayoutRenderer({ model }: ControllerLayoutRendererProp
       return <TowerDefenseLayout model={model} />;
     case "twin_stick":
       return <TwinStickLayout model={model} />;
+    case "spell_casting":
+      return <SpellCastingLayout model={model} />;
     case "shop":
       return <ShopLayout model={model} />;
     case "arena_survivor_modern_shop":
@@ -51,6 +55,8 @@ export function ControllerLayoutRenderer({ model }: ControllerLayoutRendererProp
       return <SchaetzoramaLayout model={model} />;
     case "word_tiles_board":
       return <WordTilesLayout model={model} />;
+    case "magic_arena":
+      return <MagicArenaLayout model={model} />;
     default:
       return null;
   }

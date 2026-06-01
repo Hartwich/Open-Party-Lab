@@ -13,6 +13,10 @@
     "@open-party-lab/ui-kit": "0.1.0",
     "phaser": "^3.90.0",
     "qrcode": "^1.5.4",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.184.1"
   }
 }

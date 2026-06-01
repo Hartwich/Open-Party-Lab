@@ -1,5 +1,23 @@
 [
   {
+    "id": "magic-arena",
+    "package": "@open-party-lab/game-magic-arena",
+    "repo": "https://github.com/Hartwich/magic-arena.git",
+    "defaultLocalPath": "local-games/magic-arena",
+    "alternateLocalPaths": [
+      "../magic-arena"
+    ]
+  },
+  {
+    "id": "magic-duell",
+    "package": "@open-party-lab/game-magic-duell",
+    "repo": "https://github.com/Hartwich/magic-duell.git",
+    "defaultLocalPath": "local-games/magic-duell",
+    "alternateLocalPaths": [
+      "../magic-duell"
+    ]
+  },
+  {
     "id": "tap-race",
     "package": "@open-party-lab/game-tap-race",
     "repo": "https://github.com/Hartwich/tap-race.git",

@@ -216,6 +216,80 @@ export interface TwinStickLayoutModel {
   onAimChange: (aimX: number, aimY: number) => void;
 }
 
+export type SpellCastingSpellId = string;
+export type SpellCastingGestureColor = "red" | "blue" | "green";
+export type SpellCastingGestureShape =
+  | "vertical_up"
+  | "vertical_down"
+  | "triangle"
+  | "circle"
+  | "square"
+  | "zigzag"
+  | "spiral"
+  | "triple_circle"
+  | "triangle_slash"
+  | "lightning"
+  | "chevron"
+  | "cross"
+  | "wave";
+
+export interface SpellCastingGesturePoint {
+  x: number;
+  y: number;
+  t?: number;
+}
+
+export interface SpellCastingSpellModel {
+  id: SpellCastingSpellId;
+  label: string;
+  description: string;
+  color: SpellCastingGestureColor;
+  shape: SpellCastingGestureShape;
+  iconPath: string;
+  manaCost: number;
+  cooldownMs: number;
+  cooldownRemainingMs: number;
+  castMs: number;
+  disabled: boolean;
+}
+
+export interface SpellCastingDuelistModel {
+  playerId: string;
+  name: string;
+  color: string;
+  hp: number;
+  maxHp: number;
+  mana: number;
+  maxMana: number;
+  shieldHp: number;
+  shieldRemainingMs: number;
+  activeCastLabel?: string;
+  lastGesture?: {
+    spellLabel: string;
+    confidence: number;
+    reason: string;
+  };
+}
+
+export interface SpellCastingLayoutModel {
+  kind: "spell_casting";
+  title: string;
+  subtitle?: string;
+  helperText?: string;
+  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  disabled: boolean;
+  ready?: ReadyLayoutModel;
+  resetKey: string;
+  nextSpellReadyMs: number;
+  nextSpellTotalMs: number;
+  selectedSpellId: SpellCastingSpellId | null;
+  self: SpellCastingDuelistModel | null;
+  opponent: SpellCastingDuelistModel | null;
+  spells: SpellCastingSpellModel[];
+  actionLog: string[];
+  onCastGesture: (spellId: SpellCastingSpellId, points: SpellCastingGesturePoint[]) => void;
+}
+
 export interface TowerDefenseTowerModel {
   id: string;
   slotId: string;
@@ -509,6 +583,21 @@ export interface WordTilesLayoutModel {
   onExchange: (tileIds: string[]) => void;
 }
 
+export interface MagicArenaLayoutModel {
+  kind: "magic_arena";
+  title: string;
+  subtitle?: string;
+  helperText?: string;
+  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  disabled: boolean;
+  ready?: ReadyLayoutModel;
+  resetKey: string;
+  currentPlayerId: string;
+  state: any;
+  onPlanSlot: (slotIndex: number, action: any | null) => void;
+  onReady: () => void;
+}
+
 export type ControllerLayoutModel =
   | SingleButtonLayoutModel
   | ChoiceLayoutModel
@@ -519,11 +608,13 @@ export type ControllerLayoutModel =
   | RacingControlsLayoutModel
   | ChaosKommandoLayoutModel
   | TwinStickLayoutModel
+  | SpellCastingLayoutModel
   | TowerDefenseLayoutModel
   | ShopLayoutModel
   | ArenaSurvivorModernShopLayoutModel
   | DrawingGuessLayoutModel
   | SchaetzoramaLayoutModel
-  | WordTilesLayoutModel;
+  | WordTilesLayoutModel
+  | MagicArenaLayoutModel;
 
 // TODO: Fuer spaetere Minispiele hier weitere Layout-Modelle wie Choice und Swipe ergaenzen.

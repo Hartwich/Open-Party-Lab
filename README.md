@@ -23,7 +23,7 @@ The platform is moving toward optional multi-repo games. The host, controller, s
 
 This is a playable local prototype, not a hosted production service. It is designed for devices on the same LAN.
 
-Most included games are alpha versions. Arena Survivor, MinionsTD, Zeichnen & Erraten, and Schaetzorama are the current recommended games: they are already in beta shape and generally good to play locally. Rules, pacing, scoring, content, UI, and especially balancing are still expected to change. Playtesting notes, balance proposals, and small polish improvements are very welcome.
+Most included games are alpha versions. Magic Arena, Magic Duell, Arena Survivor, MinionsTD, Zeichnen & Erraten, and Schaetzorama are the current recommended games: they are already in advanced alpha or beta shape and generally good to play locally. Rules, pacing, scoring, content, UI, and especially balancing are still expected to change. Playtesting notes, balance proposals, and small polish improvements are very welcome.
 
 Implemented platform features:
 
@@ -37,6 +37,8 @@ Implemented platform features:
 
 Recommended optional local game repos:
 
+- Magic Arena (`local-games/magic-arena` when cloned locally) - recommended alpha
+- Magic Duell (`local-games/magic-duell` when cloned locally) - recommended alpha
 - Arena Survivor (`local-games/arena-survivor` when cloned locally) - beta, recommended
 - MinionsTD (`local-games/minions-td` when cloned locally) - beta, recommended
 - Zeichnen & Erraten (`local-games/zeichnen-und-erraten` when cloned locally) - beta, recommended
@@ -118,6 +120,8 @@ Open-Party-Lab/
 Clone optional games:
 
 ```bash
+git clone https://github.com/Hartwich/magic-arena.git local-games/magic-arena
+git clone https://github.com/Hartwich/magic-duell.git local-games/magic-duell
 git clone https://github.com/Hartwich/arena-survivor.git local-games/arena-survivor
 git clone https://github.com/Hartwich/minions-td.git local-games/minions-td
 git clone https://github.com/Hartwich/zeichnen-und-erraten.git local-games/zeichnen-und-erraten

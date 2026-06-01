@@ -1,12 +1,14 @@
 import { existsSync } from "node:fs";
 import {
   cp,
+  open,
   lstat,
   mkdir,
   readdir,
   readFile,
   rm,
   symlink,
+  unlink,
   writeFile
 } from "node:fs/promises";
 import path from "node:path";
@@ -16,6 +18,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
 const knownGamesPath = path.join(projectRoot, "config", "known-games.json");
+const syncLockPath = path.join(projectRoot, ".local-games-sync.lock");
 const scopeDir = path.join(projectRoot, "node_modules", "@open-party-lab");
 const publicAssetTargets = [
   {
@@ -155,11 +158,47 @@ async function ensurePlatformDependencyLinks(localPath) {
     const sourcePath = path.join(projectRoot, "packages", packageName);
     const targetPath = path.join(localScopeDir, packageName);
 
-    if (existsSync(targetPath)) {
+    if (existsSync(targetPath) || await pathExists(targetPath)) {
       await rm(targetPath, { recursive: true, force: true });
     }
 
     await symlink(sourcePath, targetPath, process.platform === "win32" ? "junction" : "dir");
+  }
+}
+
+async function wait(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function withSyncLock(task) {
+  let handle;
+
+  for (let attempt = 0; attempt < 480; attempt += 1) {
+    try {
+      handle = await open(syncLockPath, "wx");
+      break;
+    } catch (error) {
+      if (!error || typeof error !== "object" || error.code !== "EEXIST") {
+        throw error;
+      }
+
+      await wait(250);
+    }
+  }
+
+  if (!handle) {
+    throw new Error("Timed out waiting for local game sync lock.");
+  }
+
+  try {
+    return await task();
+  } finally {
+    await handle.close();
+    await unlink(syncLockPath).catch((error) => {
+      if (!error || typeof error !== "object" || error.code !== "ENOENT") {
+        throw error;
+      }
+    });
   }
 }
 
@@ -343,9 +382,9 @@ const command = process.argv[2] ?? "list";
 if (command === "list") {
   await listGames();
 } else if (command === "sync-local") {
-  await syncLocalGames();
+  await withSyncLock(syncLocalGames);
 } else if (command === "clear-local") {
-  await clearLocalGames();
+  await withSyncLock(clearLocalGames);
 } else if (command === "ensure-generated") {
   await ensureGeneratedFiles();
 } else {

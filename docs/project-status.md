@@ -21,6 +21,8 @@ Platform:
 
 Optional local game repos:
 
+- Magic Arena can be loaded from `local-games/magic-arena` when cloned locally. It is currently recommended alpha and playable.
+- Magic Duell can be loaded from `local-games/magic-duell` when cloned locally. It is currently recommended alpha and playable.
 - Arena Survivor can be loaded from `local-games/arena-survivor` when cloned locally. It is currently beta and recommended.
 - MinionsTD can be loaded from `local-games/minions-td` when cloned locally. It is currently beta and recommended.
 - Zeichnen & Erraten can be loaded from `local-games/zeichnen-und-erraten` when cloned locally. It is currently beta and recommended.
@@ -43,7 +45,7 @@ Lobby/setup:
 ## Not Production-Ready Yet
 
 - most included games are still alpha and may need rule, pacing, scoring, UI, and balancing changes;
-- Arena Survivor, MinionsTD, Zeichnen & Erraten, and Schaetzorama are already in beta shape, but still need normal playtesting and refinement;
+- Magic Arena, Magic Duell, Arena Survivor, MinionsTD, Zeichnen & Erraten, and Schaetzorama are already in advanced alpha or beta shape, but still need normal playtesting and refinement;
 - persistent storage is not wired for production use;
 - no hosted deployment configuration is included;
 - no formal end-to-end test suite exists yet;
