@@ -42,26 +42,6 @@ export const gameCatalog = [
     }
   },
   {
-    id: "word-tiles",
-    displayName: "Word Tiles",
-    description: "Lege Woerter auf ein gemeinsames Brett und nutze Premiumfelder geschickt.",
-    minPlayers: 2,
-    maxPlayers: 4,
-    hostView: "WordTilesHostScene",
-    controllerView: "word-tiles",
-    controllerLayout: "word_tiles_board",
-    supportsTeams: false,
-    estimatedRoundDurationMs: 1_200_000,
-    roundCompletionMode: "wait_for_ready",
-    phaseDurations: {
-      roundIntroMs: 1_500,
-      countdownMs: 1_000,
-      lockedMs: 3_000,
-      resultMs: 5_000,
-      scoreboardMs: 5_000
-    }
-  },
-  {
     id: "arena-survivor",
     displayName: "Arena Survivor",
     description: "Ueberlebe in der Arena gegen immer neue Gegner.",

@@ -72,5 +72,14 @@
     "alternateLocalPaths": [
       "../drift-racer"
     ]
+  },
+  {
+    "id": "word-tiles",
+    "package": "@open-party-lab/game-word-tiles",
+    "repo": "https://github.com/Hartwich/word-tiles.git",
+    "defaultLocalPath": "local-games/word-tiles",
+    "alternateLocalPaths": [
+      "../word-tiles"
+    ]
   }
 ]

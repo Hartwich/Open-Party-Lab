@@ -22,7 +22,6 @@ Games:
 
 - Chaos-Kommando
 - Draw & Guess
-- Word Tiles
 - Arena Survivor
 - MinionsTD
 
@@ -36,6 +35,7 @@ Optional local game repos:
 - Schaetzorama can be loaded from `local-games/schaetzorama` when cloned locally.
 - Light Trails can be loaded from `local-games/light-trails` when cloned locally.
 - Drift Racer can be loaded from `local-games/drift-racer` when cloned locally.
+- Word Tiles can be loaded from `local-games/word-tiles` when cloned locally.
 
 Draw & Guess:
 

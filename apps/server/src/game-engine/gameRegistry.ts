@@ -10,7 +10,6 @@ import { arenaSurvivorServerGame } from "../games/arena-survivor/server/ArenaSur
 import { chaosKommandoServerGame } from "../games/chaos-kommando/server/ChaosKommandoServerGame.js";
 import { minionsTdServerGame } from "../games/minions-td/server/MinionsTdServerGame.js";
 import { zeichnenUndErratenServerGame } from "../games/zeichnen-und-erraten/server/zeichnenUndErratenServerGame.js";
-import { wordTilesServerGame } from "../games/word-tiles/server/wordTilesServerGame.js";
 import { externalServerGameEntries } from "./.generated/externalGames.js";
 
 export interface ServerGameEntry {
@@ -35,10 +34,6 @@ export class GameRegistry {
     [
       zeichnenUndErratenServerGame.manifest.id,
       { manifest: zeichnenUndErratenServerGame.manifest, serverGame: zeichnenUndErratenServerGame }
-    ],
-    [
-      wordTilesServerGame.manifest.id,
-      { manifest: wordTilesServerGame.manifest, serverGame: wordTilesServerGame }
     ],
     ...externalServerGameEntries.map((entry) => [
       entry.manifest.id,

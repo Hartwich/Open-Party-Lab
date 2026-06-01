@@ -11,7 +11,6 @@ import {
   createDrawingSetColorInput,
   createGuessSubmitInput
 } from "./zeichnen-und-erraten/zeichnenUndErratenBindings.js";
-import { buildWordTilesControllerModel } from "./word-tiles/WordTilesController.js";
 import type {
   ControllerLayoutModel,
   DrawingGuessLayoutModel,
@@ -165,17 +164,6 @@ const internalControllerGameRegistry: Record<string, ControllerGameRegistration>
       return withAutoReady(model, context);
     }
   },
-  "word-tiles": {
-    id: "word-tiles",
-    layoutKey: "word_tiles_board",
-    buildLayout(context) {
-      return withAutoReady(
-        buildWordTilesControllerModel(context),
-        context,
-        context.state.room?.language === "en" ? "Next Word Tiles Round" : "Naechste Word-Tiles-Runde"
-      );
-    }
-  }
 };
 
 export const controllerGameRegistry: Record<string, ControllerGameRegistration> = {

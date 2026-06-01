@@ -39,7 +39,6 @@ Public game catalog in this source cut:
 
 - Chaos-Kommando
 - Draw & Guess
-- Word Tiles
 - Arena Survivor
 - MinionsTD
 
@@ -53,6 +52,7 @@ Optional local game repos:
 - Schaetzorama (`local-games/schaetzorama` when cloned locally)
 - Light Trails (`local-games/light-trails` when cloned locally)
 - Drift Racer (`local-games/drift-racer` when cloned locally)
+- Word Tiles (`local-games/word-tiles` when cloned locally)
 
 ## Quick Start
 
@@ -125,6 +125,7 @@ git clone https://github.com/Hartwich/imposter.git local-games/imposter
 git clone https://github.com/Hartwich/schaetzorama.git local-games/schaetzorama
 git clone https://github.com/Hartwich/light-trails.git local-games/light-trails
 git clone https://github.com/Hartwich/drift-racer.git local-games/drift-racer
+git clone https://github.com/Hartwich/word-tiles.git local-games/word-tiles
 npm run games:sync-local
 ```
 
