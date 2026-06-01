@@ -11,7 +11,6 @@ export * from "./games/chaosKommando.js";
 export * from "./games/minionsTd.js";
 export * from "./games/tabu.js";
 export * from "./games/driftRacer.js";
-export * from "./games/zeichnenUndErraten.js";
 export * from "./games/schaetzorama.js";
 export * from "./games/wordTiles.js";
 export {

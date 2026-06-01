@@ -3,8 +3,7 @@ import {
   hasActiveRound,
   type AvailableGameDto,
   type PlayerSnapshot,
-  type SupportedLanguage,
-  type ZeichnenUndErratenLobbyState
+  type SupportedLanguage
 } from "@open-party-lab/protocol";
 import { bindGameSelectionHotkeys } from "../app/gameHotkeys.js";
 import type { HostSocketClient } from "../app/hostSocketClient.js";
@@ -91,7 +90,7 @@ export class GameSelectScene extends Phaser.Scene {
       state.room?.code ?? "----",
       hasActiveRound(state.room),
       state.room?.language ?? state.preferredLanguage,
-      state.room?.zeichnenUndErratenLobby
+      state.room?.selectedGameSettings
     );
   }
 
@@ -116,7 +115,7 @@ export class GameSelectScene extends Phaser.Scene {
     roomCode: string,
     roundActive: boolean,
     language: SupportedLanguage,
-    zeichnenUndErratenLobby?: ZeichnenUndErratenLobbyState
+    selectedGameSettings?: Record<string, string | number | boolean>
   ): void {
     this.children.removeAll(true);
     drawArcadeBackdrop(this);
@@ -189,9 +188,11 @@ export class GameSelectScene extends Phaser.Scene {
     const sideWidth = stacked ? contentWidth : Math.min(360, Math.max(300, Math.floor(contentWidth * 0.34)));
     const heroWidth = stacked ? contentWidth : contentWidth - sideWidth - gap;
     const heroHeight = stacked ? 220 : 240;
-    const hasDrawingCategoryControls = selectedGame.id === "zeichnen-und-erraten" && Boolean(zeichnenUndErratenLobby);
-    const categoryPanelHeight = hasDrawingCategoryControls ? 78 : 0;
-    const heroBlockHeight = heroHeight + (hasDrawingCategoryControls ? 12 + categoryPanelHeight : 0);
+    const hasLobbySetupControls = Boolean(selectedGame.lobbySetup?.fields.length);
+    const setupPanelHeight = hasLobbySetupControls
+      ? this.measureLobbySetupHeight(selectedGame)
+      : 0;
+    const heroBlockHeight = heroHeight + (hasLobbySetupControls ? 12 + setupPanelHeight : 0);
     renderSelectedGamePanel(this, {
       x: contentX,
       y: lowerY,
@@ -202,13 +203,14 @@ export class GameSelectScene extends Phaser.Scene {
       language
     });
 
-    if (hasDrawingCategoryControls && zeichnenUndErratenLobby) {
-      this.renderZeichnenCategoryControls({
+    if (hasLobbySetupControls && selectedGame.lobbySetup) {
+      this.renderLobbySetupControls({
         x: contentX,
         y: lowerY + heroHeight + 12,
         width: heroWidth,
-        height: categoryPanelHeight,
-        lobby: zeichnenUndErratenLobby,
+        height: setupPanelHeight,
+        game: selectedGame,
+        settings: selectedGameSettings ?? {},
         disabled: roundActive,
         language
       });
@@ -265,35 +267,105 @@ export class GameSelectScene extends Phaser.Scene {
     renderScrollBar(this, this.scrollY, this.maxScroll);
   }
 
-  private renderZeichnenCategoryControls(options: {
+  private measureLobbySetupHeight(game: AvailableGameDto): number {
+    const fields = game.lobbySetup?.fields ?? [];
+
+    return 54 + fields.reduce((height, field) => {
+      if (field.kind === "select") {
+        return height + 46;
+      }
+
+      if (field.kind === "number") {
+        return height + 58;
+      }
+
+      return height;
+    }, 0);
+  }
+
+  private renderLobbySetupControls(options: {
     x: number;
     y: number;
     width: number;
     height: number;
-    lobby: ZeichnenUndErratenLobbyState;
+    game: AvailableGameDto;
+    settings: Record<string, string | number | boolean>;
     disabled: boolean;
     language: SupportedLanguage;
   }): void {
-    const { x, y, width, height, lobby, disabled, language } = options;
+    const { x, y, width, height, game, settings, disabled, language } = options;
     const en = language === "en";
-    const gap = 10;
-    const categoryCount = Math.max(1, lobby.categories.length);
-    const buttonWidth = Math.floor((width - 24 - gap * (categoryCount - 1)) / categoryCount);
+    const fields = game.lobbySetup?.fields ?? [];
 
     this.add
       .rectangle(x, y, width, height, 0x08111f, 0.9)
       .setOrigin(0)
       .setStrokeStyle(1, 0x38bdf8, 0.22);
-    this.add.text(x + 14, y + 10, en ? "Category" : "Kategorie", {
+    this.add.text(x + 14, y + 10, game.lobbySetup?.title ?? (en ? "Setup" : "Setup"), {
       fontFamily: hostTheme.titleFont,
       fontSize: "18px",
       color: hostTheme.text
     });
 
-    lobby.categories.forEach((category, index) => {
-      const selected = lobby.selectedCategory === category.id;
-      const buttonX = x + 12 + index * (buttonWidth + gap);
-      const buttonY = y + 36;
+    if (game.lobbySetup?.description) {
+      this.add.text(x + 14, y + 32, game.lobbySetup.description, {
+        fontFamily: hostTheme.bodyFont,
+        fontSize: "12px",
+        color: "#94a3b8",
+        wordWrap: { width: width - 28 }
+      });
+    }
+
+    let cursorY = y + 58;
+
+    fields.forEach((field) => {
+      if (field.kind === "select") {
+        this.renderLobbySelectField({
+          x: x + 12,
+          y: cursorY,
+          width: width - 24,
+          game,
+          field,
+          value: settings[field.settingKey ?? field.id] ?? field.defaultValue,
+          disabled
+        });
+        cursorY += 46;
+        return;
+      }
+
+      if (field.kind === "number") {
+        this.renderLobbyNumberField({
+          x: x + 12,
+          y: cursorY,
+          width: width - 24,
+          game,
+          field,
+          value: settings[field.settingKey ?? field.id] ?? field.defaultValue,
+          disabled
+        });
+        cursorY += 58;
+      }
+    });
+  }
+
+  private renderLobbySelectField(options: {
+    x: number;
+    y: number;
+    width: number;
+    game: AvailableGameDto;
+    field: NonNullable<AvailableGameDto["lobbySetup"]>["fields"][number] & { kind: "select" };
+    value: string | number | boolean;
+    disabled: boolean;
+  }): void {
+    const { x, y, width, game, field, value, disabled } = options;
+    const gap = 10;
+    const optionCount = Math.max(1, field.options.length);
+    const buttonWidth = Math.floor((width - gap * (optionCount - 1)) / optionCount);
+
+    field.options.forEach((option, index) => {
+      const selected = value === option.id;
+      const buttonX = x + index * (buttonWidth + gap);
+      const buttonY = y;
       const fill = selected ? 0x0ea5e9 : 0x0b1320;
       const stroke = selected ? 0x7dd3fc : 0xffffff;
       const textColor = selected ? "#082f49" : "#dbeafe";
@@ -302,7 +374,7 @@ export class GameSelectScene extends Phaser.Scene {
         .rectangle(buttonX, buttonY, buttonWidth, 30, fill, disabled ? 0.58 : 0.96)
         .setOrigin(0)
         .setStrokeStyle(selected ? 2 : 1, stroke, selected ? 0.92 : 0.12);
-      this.add.text(buttonX + 12, buttonY + 6, category.label, {
+      this.add.text(buttonX + 12, buttonY + 6, option.label, {
         fontFamily: hostTheme.bodyFont,
         fontSize: "15px",
         color: textColor
@@ -314,11 +386,81 @@ export class GameSelectScene extends Phaser.Scene {
 
       const zone = this.add.zone(buttonX, buttonY, buttonWidth, 30).setOrigin(0).setInteractive({ useHandCursor: true });
       zone.on("pointerdown", () => {
-        this.client?.sendGameHostAction("zeichnen-und-erraten", {
+        this.client?.sendGameHostAction(game.id, {
           type: "configure-lobby",
-          category: category.id
+          [field.actionKey ?? field.id]: option.id
         });
       });
     });
+  }
+
+  private renderLobbyNumberField(options: {
+    x: number;
+    y: number;
+    width: number;
+    game: AvailableGameDto;
+    field: NonNullable<AvailableGameDto["lobbySetup"]>["fields"][number] & { kind: "number" };
+    value: string | number | boolean;
+    disabled: boolean;
+  }): void {
+    const { x, y, width, game, field, value, disabled } = options;
+    const numericValue = typeof value === "number" && Number.isFinite(value) ? value : field.defaultValue;
+
+    this.add.text(x, y, field.label, {
+      fontFamily: hostTheme.bodyFont,
+      fontSize: "14px",
+      color: "#cbd5e1"
+    });
+
+    const controlY = y + 20;
+    const buttonSize = 30;
+    const valueWidth = Math.max(84, width - buttonSize * 2 - 20);
+    const sendValue = (nextValue: number) => {
+      this.client?.sendGameHostAction(game.id, {
+        type: "configure-lobby",
+        [field.actionKey ?? field.id]: Math.max(field.min, Math.min(field.max, nextValue))
+      });
+    };
+
+    this.renderLobbySmallButton(x, controlY, buttonSize, "-", !disabled && numericValue > field.min, () => {
+      sendValue(numericValue - field.step);
+    });
+    this.add
+      .rectangle(x + buttonSize + 10, controlY, valueWidth, buttonSize, 0x0b1320, 0.96)
+      .setOrigin(0)
+      .setStrokeStyle(1, 0xffffff, 0.12);
+    this.add.text(x + buttonSize + 10 + valueWidth / 2, controlY + buttonSize / 2, `${numericValue}`, {
+      fontFamily: hostTheme.titleFont,
+      fontSize: "17px",
+      color: "#dbeafe"
+    }).setOrigin(0.5);
+    this.renderLobbySmallButton(x + width - buttonSize, controlY, buttonSize, "+", !disabled && numericValue < field.max, () => {
+      sendValue(numericValue + field.step);
+    });
+  }
+
+  private renderLobbySmallButton(
+    x: number,
+    y: number,
+    size: number,
+    label: string,
+    enabled: boolean,
+    onClick: () => void
+  ): void {
+    this.add
+      .rectangle(x, y, size, size, enabled ? 0x0ea5e9 : 0x0b1320, enabled ? 0.96 : 0.58)
+      .setOrigin(0)
+      .setStrokeStyle(1, enabled ? 0x7dd3fc : 0xffffff, enabled ? 0.92 : 0.12);
+    this.add.text(x + size / 2, y + size / 2, label, {
+      fontFamily: hostTheme.titleFont,
+      fontSize: "18px",
+      color: enabled ? "#082f49" : "#64748b"
+    }).setOrigin(0.5);
+
+    if (!enabled) {
+      return;
+    }
+
+    this.add.zone(x, y, size, size).setOrigin(0).setInteractive({ useHandCursor: true }).on("pointerdown", onClick);
   }
 }

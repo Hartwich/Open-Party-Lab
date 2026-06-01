@@ -5,7 +5,6 @@ import type {
   ArenaSurvivorLobbyState
 } from "../games/arenaSurvivor.js";
 import type { MinionsTdLobbyState } from "../games/minionsTd.js";
-import type { ZeichnenUndErratenLobbyState } from "../games/zeichnenUndErraten.js";
 import type { PlayerSnapshot } from "./player.js";
 
 export type RoomLifecycle =
@@ -38,12 +37,12 @@ export interface RoomSnapshot {
   hostConnected: boolean;
   lifecycle: RoomLifecycle;
   selectedGameId: string | null;
+  selectedGameSettings?: Record<string, string | number | boolean>;
   availableGames: AvailableGameDto[];
   players: PlayerSnapshot[];
   arenaSurvivorCharacterOptions?: ArenaSurvivorCharacterState[];
   arenaSurvivorLobby?: ArenaSurvivorLobbyState;
   minionsTdLobby?: MinionsTdLobbyState;
-  zeichnenUndErratenLobby?: ZeichnenUndErratenLobbyState;
   currentRound: RoundSummary | null;
 }
 

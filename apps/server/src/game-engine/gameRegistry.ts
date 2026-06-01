@@ -9,7 +9,6 @@ import type { AvailableGameDto } from "@open-party-lab/protocol";
 import { arenaSurvivorServerGame } from "../games/arena-survivor/server/ArenaSurvivorServerGame.js";
 import { chaosKommandoServerGame } from "../games/chaos-kommando/server/ChaosKommandoServerGame.js";
 import { minionsTdServerGame } from "../games/minions-td/server/MinionsTdServerGame.js";
-import { zeichnenUndErratenServerGame } from "../games/zeichnen-und-erraten/server/zeichnenUndErratenServerGame.js";
 import { externalServerGameEntries } from "./.generated/externalGames.js";
 
 export interface ServerGameEntry {
@@ -30,10 +29,6 @@ export class GameRegistry {
     [
       minionsTdServerGame.manifest.id,
       { manifest: minionsTdServerGame.manifest, serverGame: minionsTdServerGame }
-    ],
-    [
-      zeichnenUndErratenServerGame.manifest.id,
-      { manifest: zeichnenUndErratenServerGame.manifest, serverGame: zeichnenUndErratenServerGame }
     ],
     ...externalServerGameEntries.map((entry) => [
       entry.manifest.id,
@@ -83,7 +78,8 @@ export class GameRegistry {
       controllerLayout: manifest.controllerLayout,
       supportsTeams: manifest.supportsTeams,
       estimatedRoundDurationMs: manifest.estimatedRoundDurationMs,
-      roundCompletionMode: manifest.roundCompletionMode
+      roundCompletionMode: manifest.roundCompletionMode,
+      lobbySetup: manifest.lobbySetup
     };
   }
 }

@@ -81,5 +81,14 @@
     "alternateLocalPaths": [
       "../word-tiles"
     ]
+  },
+  {
+    "id": "zeichnen-und-erraten",
+    "package": "@open-party-lab/game-zeichnen-und-erraten",
+    "repo": "https://github.com/Hartwich/zeichnen-und-erraten.git",
+    "defaultLocalPath": "local-games/zeichnen-und-erraten",
+    "alternateLocalPaths": [
+      "../zeichnen-und-erraten"
+    ]
   }
 ]

@@ -24,7 +24,6 @@ import { ScoreboardScene } from "../scenes/ScoreboardScene.js";
 import { ArenaSurvivorHostScene } from "../games/arena-survivor/host/ArenaSurvivorHostScene.js";
 import { ChaosKommandoHostScene } from "../games/chaos-kommando/host/ChaosKommandoHostScene.js";
 import { MinionsTdHostScene } from "../games/minions-td/host/MinionsTdHostScene.js";
-import { ZeichnenUndErratenHostScene } from "../games/zeichnen-und-erraten/host/ZeichnenUndErratenHostScene.js";
 import { externalHostScenes } from "../games/.generated/externalGames.js";
 
 export function bootstrapHostApp(): Phaser.Game {
@@ -55,7 +54,6 @@ export function bootstrapHostApp(): Phaser.Game {
       ArenaSurvivorHostScene,
       ChaosKommandoHostScene,
       MinionsTdHostScene,
-      ZeichnenUndErratenHostScene,
       ...externalHostScenes
     ]
   });

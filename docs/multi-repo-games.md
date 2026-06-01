@@ -43,6 +43,7 @@ git clone https://github.com/Hartwich/schaetzorama.git local-games/schaetzorama
 git clone https://github.com/Hartwich/light-trails.git local-games/light-trails
 git clone https://github.com/Hartwich/drift-racer.git local-games/drift-racer
 git clone https://github.com/Hartwich/word-tiles.git local-games/word-tiles
+git clone https://github.com/Hartwich/zeichnen-und-erraten.git local-games/zeichnen-und-erraten
 ```
 
 Link local games:
@@ -77,9 +78,24 @@ External games expose only these public entrypoints:
 @open-party-lab/game-tap-race/controller
 ```
 
-For Air Hockey, Tabu, Imposter, Schaetzorama, Light Trails, Drift Racer, and Word Tiles, the same contract uses the matching package name such as `@open-party-lab/game-air-hockey/...` or `@open-party-lab/game-word-tiles/...`.
+For Air Hockey, Tabu, Imposter, Schaetzorama, Light Trails, Drift Racer, Word Tiles, and Zeichnen & Erraten, the same contract uses the matching package name such as `@open-party-lab/game-air-hockey/...` or `@open-party-lab/game-zeichnen-und-erraten/...`.
 
 The platform generates registry imports only for local repos that exist and build successfully. Missing repos are skipped.
+
+## Lobby Setup Boundary
+
+The platform owns generic lobby/setup rendering, navigation, room snapshots, and start-button behavior. Game repos own game-specific setup declarations and validation.
+
+For common setup controls, add `lobbySetup` to the game manifest. The platform currently renders reusable `select` and `number` fields and sends host actions shaped like:
+
+```ts
+{
+  type: "configure-lobby",
+  [actionKey]: value
+}
+```
+
+The game server must validate that action and persist trusted values through `roomSettings`. Do not add static Platform imports for optional game setup data.
 
 ## AI Agent Workflow
 

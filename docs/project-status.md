@@ -21,7 +21,6 @@ Platform:
 Games:
 
 - Chaos-Kommando
-- Draw & Guess
 - Arena Survivor
 - MinionsTD
 
@@ -36,10 +35,12 @@ Optional local game repos:
 - Light Trails can be loaded from `local-games/light-trails` when cloned locally.
 - Drift Racer can be loaded from `local-games/drift-racer` when cloned locally.
 - Word Tiles can be loaded from `local-games/word-tiles` when cloned locally.
+- Zeichnen & Erraten can be loaded from `local-games/zeichnen-und-erraten` when cloned locally.
 
-Draw & Guess:
+Lobby/setup:
 
-- host-selectable word categories: U18, 18+, or all words combined
+- common setup controls are rendered by the platform from `manifest.lobbySetup`;
+- game repos keep their own setup field declarations and server-side validation.
 
 ## Not Production-Ready Yet
 

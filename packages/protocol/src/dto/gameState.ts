@@ -14,6 +14,7 @@ export interface AvailableGameDto {
   supportsTeams: boolean;
   estimatedRoundDurationMs: number;
   roundCompletionMode?: GameManifest["roundCompletionMode"];
+  lobbySetup?: GameManifest["lobbySetup"];
 }
 
 export interface GameStateEnvelope<TState = unknown> {

@@ -12,7 +12,6 @@ import {
   listMinionsTdMaps,
   resolveMinionsTdMap
 } from "../games/minions-td/server/minionsTdConfig.js";
-import { getZeichnenUndErratenLobbyState } from "../games/zeichnen-und-erraten/server/zeichnenUndErratenConfig.js";
 import type { RoomRecord } from "./roomStore.js";
 
 export function deriveRoomLifecycle(room: RoomRecord): RoomLifecycle {
@@ -53,6 +52,22 @@ function isArenaSurvivorContinuingRun(room: RoomRecord): boolean {
   };
 
   return room.currentRound.phase === "finished" && roundState.result?.outcome === "survived";
+}
+
+function toPublicSelectedGameSettings(room: RoomRecord): Record<string, string | number | boolean> | undefined {
+  if (!room.selectedGameId) {
+    return undefined;
+  }
+
+  const settings = room.gameSettingsByGameId[room.selectedGameId] ?? {};
+  const publicSettings = Object.fromEntries(
+    Object.entries(settings).filter(
+      (entry): entry is [string, string | number | boolean] =>
+        typeof entry[1] === "string" || typeof entry[1] === "number" || typeof entry[1] === "boolean"
+    )
+  );
+
+  return Object.keys(publicSettings).length > 0 ? publicSettings : undefined;
 }
 
 export function canStartRound(room: RoomRecord, selectedGame: AvailableGameDto | undefined): boolean {
@@ -204,14 +219,6 @@ export function toRoomSnapshot(
           )
         }
       : undefined;
-  const zeichnenUndErratenLobby =
-    room.selectedGameId === "zeichnen-und-erraten"
-      ? getZeichnenUndErratenLobbyState(
-          room.gameSettingsByGameId["zeichnen-und-erraten"] ?? {},
-          room.language
-        )
-      : undefined;
-
   return {
     code: room.code,
     createdAt: room.createdAt,
@@ -220,11 +227,11 @@ export function toRoomSnapshot(
     hostConnected: room.hostSocketId !== null,
     lifecycle: deriveRoomLifecycle(room),
     selectedGameId: room.selectedGameId,
+    selectedGameSettings: toPublicSelectedGameSettings(room),
     availableGames,
     arenaSurvivorCharacterOptions,
     arenaSurvivorLobby,
     minionsTdLobby,
-    zeichnenUndErratenLobby,
     players: [...room.players.values()]
       .sort((left, right) => left.joinedAt - right.joinedAt)
       .map((player) => ({

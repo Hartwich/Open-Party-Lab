@@ -38,7 +38,6 @@ Implemented platform features:
 Public game catalog in this source cut:
 
 - Chaos-Kommando
-- Draw & Guess
 - Arena Survivor
 - MinionsTD
 
@@ -53,6 +52,7 @@ Optional local game repos:
 - Light Trails (`local-games/light-trails` when cloned locally)
 - Drift Racer (`local-games/drift-racer` when cloned locally)
 - Word Tiles (`local-games/word-tiles` when cloned locally)
+- Zeichnen & Erraten (`local-games/zeichnen-und-erraten` when cloned locally)
 
 ## Quick Start
 
@@ -126,10 +126,13 @@ git clone https://github.com/Hartwich/schaetzorama.git local-games/schaetzorama
 git clone https://github.com/Hartwich/light-trails.git local-games/light-trails
 git clone https://github.com/Hartwich/drift-racer.git local-games/drift-racer
 git clone https://github.com/Hartwich/word-tiles.git local-games/word-tiles
+git clone https://github.com/Hartwich/zeichnen-und-erraten.git local-games/zeichnen-und-erraten
 npm run games:sync-local
 ```
 
 `games:sync-local` builds and links only the local game repos it finds. Missing games are skipped and do not break `dev`, `typecheck`, or `build`.
+
+Lobby/setup ownership is split deliberately: the platform owns generic setup rendering and navigation, while game repos declare their setup fields in the game manifest and validate the resulting host actions on the server side. This lets multiple games reuse the same host setup UI without moving game-specific settings back into the platform repo.
 
 New game repos should use the short game name as the repo and folder name, for example `tap-race`, not an `open-party-game-` prefix. Package names can still use the scoped npm shape, for example `@open-party-lab/game-tap-race`.
 
