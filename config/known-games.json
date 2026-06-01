@@ -63,5 +63,14 @@
     "alternateLocalPaths": [
       "../light-trails"
     ]
+  },
+  {
+    "id": "drift-racer",
+    "package": "@open-party-lab/game-drift-racer",
+    "repo": "https://github.com/Hartwich/drift-racer.git",
+    "defaultLocalPath": "local-games/drift-racer",
+    "alternateLocalPaths": [
+      "../drift-racer"
+    ]
   }
 ]

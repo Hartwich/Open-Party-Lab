@@ -25,7 +25,6 @@ import { ArenaSurvivorHostScene } from "../games/arena-survivor/host/ArenaSurviv
 import { ChaosKommandoHostScene } from "../games/chaos-kommando/host/ChaosKommandoHostScene.js";
 import { MinionsTdHostScene } from "../games/minions-td/host/MinionsTdHostScene.js";
 import { ZeichnenUndErratenHostScene } from "../games/zeichnen-und-erraten/host/ZeichnenUndErratenHostScene.js";
-import { DriftRacerHostScene } from "../games/drift-racer/host/DriftRacerHostScene.js";
 import { WordTilesHostScene } from "../games/word-tiles/host/WordTilesHostScene.js";
 import { externalHostScenes } from "../games/.generated/externalGames.js";
 
@@ -54,7 +53,6 @@ export function bootstrapHostApp(): Phaser.Game {
       MinionsTdSetupScene,
       RoundIntroScene,
       ScoreboardScene,
-      DriftRacerHostScene,
       ArenaSurvivorHostScene,
       ChaosKommandoHostScene,
       MinionsTdHostScene,

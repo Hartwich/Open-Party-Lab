@@ -11,7 +11,6 @@ import {
   createDrawingSetColorInput,
   createGuessSubmitInput
 } from "./zeichnen-und-erraten/zeichnenUndErratenBindings.js";
-import { buildDriftRacerControllerModel } from "./drift-racer/DriftRacerController.js";
 import { buildWordTilesControllerModel } from "./word-tiles/WordTilesController.js";
 import type {
   ControllerLayoutModel,
@@ -93,13 +92,6 @@ function withAutoReady<T extends { ready?: ReadyLayoutModel }>(
 }
 
 const internalControllerGameRegistry: Record<string, ControllerGameRegistration> = {
-  "drift-racer": {
-    id: "drift-racer",
-    layoutKey: "racing_controls",
-    buildLayout(context) {
-      return buildDriftRacerControllerModel(context);
-    }
-  },
   "arena-survivor": {
     id: "arena-survivor",
     layoutKey: "virtual_joystick",

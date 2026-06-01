@@ -37,7 +37,6 @@ Implemented platform features:
 
 Public game catalog in this source cut:
 
-- Drift Racer
 - Chaos-Kommando
 - Draw & Guess
 - Word Tiles
@@ -53,6 +52,7 @@ Optional local game repos:
 - Imposter (`local-games/imposter` when cloned locally)
 - Schaetzorama (`local-games/schaetzorama` when cloned locally)
 - Light Trails (`local-games/light-trails` when cloned locally)
+- Drift Racer (`local-games/drift-racer` when cloned locally)
 
 ## Quick Start
 
@@ -124,6 +124,7 @@ git clone https://github.com/Hartwich/tabu.git local-games/tabu
 git clone https://github.com/Hartwich/imposter.git local-games/imposter
 git clone https://github.com/Hartwich/schaetzorama.git local-games/schaetzorama
 git clone https://github.com/Hartwich/light-trails.git local-games/light-trails
+git clone https://github.com/Hartwich/drift-racer.git local-games/drift-racer
 npm run games:sync-local
 ```
 

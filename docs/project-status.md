@@ -20,7 +20,6 @@ Platform:
 
 Games:
 
-- Drift Racer
 - Chaos-Kommando
 - Draw & Guess
 - Word Tiles
@@ -36,6 +35,7 @@ Optional local game repos:
 - Imposter can be loaded from `local-games/imposter` when cloned locally.
 - Schaetzorama can be loaded from `local-games/schaetzorama` when cloned locally.
 - Light Trails can be loaded from `local-games/light-trails` when cloned locally.
+- Drift Racer can be loaded from `local-games/drift-racer` when cloned locally.
 
 Draw & Guess:
 

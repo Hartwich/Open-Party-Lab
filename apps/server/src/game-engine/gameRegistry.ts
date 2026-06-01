@@ -10,7 +10,6 @@ import { arenaSurvivorServerGame } from "../games/arena-survivor/server/ArenaSur
 import { chaosKommandoServerGame } from "../games/chaos-kommando/server/ChaosKommandoServerGame.js";
 import { minionsTdServerGame } from "../games/minions-td/server/MinionsTdServerGame.js";
 import { zeichnenUndErratenServerGame } from "../games/zeichnen-und-erraten/server/zeichnenUndErratenServerGame.js";
-import { driftRacerServerGame } from "../games/drift-racer/server/DriftRacerServerGame.js";
 import { wordTilesServerGame } from "../games/word-tiles/server/wordTilesServerGame.js";
 import { externalServerGameEntries } from "./.generated/externalGames.js";
 
@@ -21,10 +20,6 @@ export interface ServerGameEntry {
 
 export class GameRegistry {
   private readonly games = new Map<string, ServerGameEntry>([
-    [
-      driftRacerServerGame.manifest.id,
-      { manifest: driftRacerServerGame.manifest, serverGame: driftRacerServerGame }
-    ],
     [
       arenaSurvivorServerGame.manifest.id,
       { manifest: arenaSurvivorServerGame.manifest, serverGame: arenaSurvivorServerGame }
