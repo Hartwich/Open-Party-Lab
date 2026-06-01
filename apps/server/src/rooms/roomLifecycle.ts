@@ -1,14 +1,8 @@
-import {
-  minionsTdSetupConfig,
-  type AvailableGameDto,
-  type RoomLifecycle,
-  type RoomSnapshot
+import type {
+  AvailableGameDto,
+  RoomLifecycle,
+  RoomSnapshot
 } from "@open-party-lab/protocol";
-import {
-  minionsTdRoomSettingKeys,
-  listMinionsTdMaps,
-  resolveMinionsTdMap
-} from "../games/minions-td/server/minionsTdConfig.js";
 import type { RoomRecord } from "./roomStore.js";
 
 export function deriveRoomLifecycle(room: RoomRecord): RoomLifecycle {
@@ -164,37 +158,9 @@ export function toRoomSnapshot(
   room: RoomRecord,
   availableGames: AvailableGameDto[]
 ): RoomSnapshot {
-  const minionsTdSettings = room.gameSettingsByGameId["minions-td"] ?? {};
-  const minionsTdConfiguredMapId =
-    typeof minionsTdSettings[minionsTdRoomSettingKeys.selectedMapId] === "string"
-      ? (minionsTdSettings[minionsTdRoomSettingKeys.selectedMapId] as string)
-      : null;
-  const minionsTdStartingLives =
-    typeof minionsTdSettings[minionsTdRoomSettingKeys.startingLives] === "number"
-      ? (minionsTdSettings[minionsTdRoomSettingKeys.startingLives] as number)
-      : minionsTdSetupConfig.startingLives.defaultValue;
-  const minionsTdStartingGold =
-    typeof minionsTdSettings[minionsTdRoomSettingKeys.startingGold] === "number"
-      ? (minionsTdSettings[minionsTdRoomSettingKeys.startingGold] as number)
-      : minionsTdSetupConfig.startingGold.defaultValue;
   const selectedGame = room.selectedGameId
     ? availableGames.find((game) => game.id === room.selectedGameId)
     : undefined;
-  const minionsTdLobby =
-    room.selectedGameId === "minions-td"
-      ? {
-          maps: listMinionsTdMaps(),
-          selectedMapId: resolveMinionsTdMap(minionsTdConfiguredMapId, room.roundCounter + 1).id,
-          startingLives: Math.max(
-            minionsTdSetupConfig.startingLives.min,
-            Math.min(minionsTdSetupConfig.startingLives.max, minionsTdStartingLives)
-          ),
-          startingGold: Math.max(
-            minionsTdSetupConfig.startingGold.min,
-            Math.min(minionsTdSetupConfig.startingGold.max, minionsTdStartingGold)
-          )
-        }
-      : undefined;
   return {
     code: room.code,
     createdAt: room.createdAt,
@@ -205,7 +171,6 @@ export function toRoomSnapshot(
     selectedGameId: room.selectedGameId,
     selectedGameSettings: toPublicSelectedGameSettings(room),
     availableGames,
-    minionsTdLobby,
     players: [...room.players.values()]
       .sort((left, right) => left.joinedAt - right.joinedAt)
       .map((player) => ({

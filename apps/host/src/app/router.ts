@@ -8,7 +8,6 @@ export const hostSceneKeys = {
   boot: "BootScene",
   lobby: "LobbyScene",
   gameSelect: "GameSelectScene",
-  minionsTdSetup: "MinionsTdSetupScene",
   roundIntro: "RoundIntroScene",
   scoreboard: "ScoreboardScene"
 } as const;
@@ -84,13 +83,6 @@ function resolveSceneKey(state: HostAppState): string {
 
   if (phase === "result" || phase === "scoreboard" || phase === "finished") {
     return hostSceneKeys.scoreboard;
-  }
-
-  if (
-    state.room.selectedGameId === "minions-td" &&
-    state.preferredLobbyScreen !== "catalog"
-  ) {
-    return hostSceneKeys.minionsTdSetup;
   }
 
   if (state.room.selectedGameId) {

@@ -1,7 +1,6 @@
-﻿import type { ControllerLayoutKey } from "@open-party-lab/game-core";
+import type { ControllerLayoutKey } from "@open-party-lab/game-core";
 import type { ControllerAppState } from "../../app/controllerSocketClient.js";
 import { buildChaosKommandoControllerModel } from "./chaos-kommando/ChaosKommandoController.js";
-import { buildMinionsTdControllerModel } from "./minions-td/MinionsTdController.js";
 import type {
   ControllerLayoutModel,
   ReadyLayoutModel
@@ -91,14 +90,7 @@ const internalControllerGameRegistry: Record<string, ControllerGameRegistration>
         context.state.room?.language === "en" ? "Next Match" : "Naechstes Match"
       );
     }
-  },
-  "minions-td": {
-    id: "minions-td",
-    layoutKey: "tower_defense",
-    buildLayout(context) {
-      return buildMinionsTdControllerModel(context);
-    }
-  },
+  }
 };
 
 export const controllerGameRegistry: Record<string, ControllerGameRegistration> = {

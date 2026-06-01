@@ -21,24 +21,6 @@ export const gameCatalog = [
       resultMs: 5_200,
       scoreboardMs: 5_000
     }
-  },
-  {
-    id: "minions-td",
-    displayName: "MinionsTD",
-    description: "Baue Tower, schicke Minions weiter und halte deine Lane laenger als die anderen.",
-    minPlayers: 2,
-    maxPlayers: 4,
-    hostView: "MinionsTdHostScene",
-    controllerView: "minions-td",
-    controllerLayout: "tower_defense",
-    supportsTeams: false,
-    estimatedRoundDurationMs: 180_000,
-    phaseDurations: {
-      roundIntroMs: 1_800,
-      countdownMs: 2_200,
-      resultMs: 4_500,
-      scoreboardMs: 4_500
-    }
   }
 ] as const satisfies readonly GameManifest[];
 

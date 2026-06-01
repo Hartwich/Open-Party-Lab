@@ -1,6 +1,6 @@
 # Project Status
 
-Snapshot date: 2026-05-31
+Snapshot date: 2026-06-01
 
 ## Available In This Public Cut
 
@@ -21,8 +21,6 @@ Platform:
 Games:
 
 - Chaos-Kommando
-- Arena Survivor
-- MinionsTD
 
 Optional local game repos:
 
@@ -36,6 +34,8 @@ Optional local game repos:
 - Drift Racer can be loaded from `local-games/drift-racer` when cloned locally.
 - Word Tiles can be loaded from `local-games/word-tiles` when cloned locally.
 - Zeichnen & Erraten can be loaded from `local-games/zeichnen-und-erraten` when cloned locally.
+- Arena Survivor can be loaded from `local-games/arena-survivor` when cloned locally.
+- MinionsTD can be loaded from `local-games/minions-td` when cloned locally.
 
 Lobby/setup:
 

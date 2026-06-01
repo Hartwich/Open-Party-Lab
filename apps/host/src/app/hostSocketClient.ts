@@ -13,7 +13,7 @@ import type {
 import { io, type Socket } from "socket.io-client";
 import { readStoredHostLanguage, writeStoredHostLanguage } from "../i18n/hostText.js";
 
-export type HostLobbyScreen = "catalog" | "minions-td-setup" | null;
+export type HostLobbyScreen = "catalog" | null;
 export type HostSceneOverride = "catalog" | null;
 
 export interface HostAppState {
@@ -46,10 +46,6 @@ function resolvePreferredLobbyScreen(
 ): HostLobbyScreen {
   if (!room || room.currentRound) {
     return currentPreference === "catalog" ? "catalog" : null;
-  }
-
-  if (room.selectedGameId === "minions-td") {
-    return currentPreference === "catalog" ? "catalog" : "minions-td-setup";
   }
 
   return "catalog";
@@ -149,10 +145,7 @@ export class HostSocketClient {
 
     this.updateState({
       sceneOverride: null,
-      preferredLobbyScreen:
-        gameId === "minions-td"
-          ? "minions-td-setup"
-          : "catalog",
+      preferredLobbyScreen: "catalog",
       error: null
     });
     this.socket.emit("game:select", { roomCode, gameId });
@@ -225,13 +218,6 @@ export class HostSocketClient {
 
     if (selectedGame?.roundCompletionMode === "wait_for_ready") {
       this.updateState({ sceneOverride: null });
-      return;
-    }
-
-    if (selectedGame?.id === "minions-td" && this.state.preferredLobbyScreen === "catalog") {
-      this.updateState({
-        error: "Bitte MinionsTD erst im Setup-Bildschirm konfigurieren und dort starten."
-      });
       return;
     }
 

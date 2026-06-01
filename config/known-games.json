@@ -99,5 +99,14 @@
     "alternateLocalPaths": [
       "../arena-survivor"
     ]
+  },
+  {
+    "id": "minions-td",
+    "package": "@open-party-lab/game-minions-td",
+    "repo": "https://github.com/Hartwich/minions-td.git",
+    "defaultLocalPath": "local-games/minions-td",
+    "alternateLocalPaths": [
+      "../minions-td"
+    ]
   }
 ]

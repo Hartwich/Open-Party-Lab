@@ -7,7 +7,6 @@ export * from "./events/eventNames.js";
 export * from "./events/serverToClient.js";
 export * from "./games/lightTrails.js";
 export * from "./games/chaosKommando.js";
-export * from "./games/minionsTd.js";
 export * from "./games/tabu.js";
 export * from "./games/driftRacer.js";
 export * from "./games/schaetzorama.js";

@@ -75,6 +75,7 @@ export interface HostText {
   arenaNeedsCharacterLine: string;
   autoReadyLine: string;
   spaceStartLine: string;
+  setupControlsLine: string;
   minionsSetupLine: string;
   arenaContinuesLine: string;
   arenaReadyLine: string;
@@ -169,6 +170,7 @@ const hostText = {
     arenaNeedsCharacterLine: "Alle Spieler brauchen fuer Arena Survivor zuerst eine Charakterwahl.",
     autoReadyLine: "Alle Spieler muessen am Handy bereit sein.",
     spaceStartLine: "SPACE startet die Runde, sobald genug Spieler verbunden sind.",
+    setupControlsLine: "Dieses Spiel hat Setup-Optionen, die direkt hier gesetzt werden.",
     minionsSetupLine: "MinionsTD nutzt ein Setup fuer Map, Leben und Startgeld.",
     arenaContinuesLine: "Arena Survivor laeuft weiter, auch wenn der Host ins Hauptmenue wechselt.",
     arenaReadyLine: "Nach der Charakterwahl startet die Runde ueber Bereitschaft.",
@@ -261,6 +263,7 @@ const hostText = {
     arenaNeedsCharacterLine: "All players need to choose an Arena Survivor character first.",
     autoReadyLine: "All players need to be ready on their phones.",
     spaceStartLine: "SPACE starts the round once enough players are connected.",
+    setupControlsLine: "This game has setup options that can be configured here.",
     minionsSetupLine: "Minions TD uses setup for map, lives, and starting gold.",
     arenaContinuesLine: "Arena Survivor keeps running when the host opens the main menu.",
     arenaReadyLine: "After character selection, the round starts through readiness.",

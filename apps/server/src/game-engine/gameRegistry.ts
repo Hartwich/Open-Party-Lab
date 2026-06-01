@@ -7,7 +7,6 @@
 } from "@open-party-lab/game-core";
 import type { AvailableGameDto } from "@open-party-lab/protocol";
 import { chaosKommandoServerGame } from "../games/chaos-kommando/server/ChaosKommandoServerGame.js";
-import { minionsTdServerGame } from "../games/minions-td/server/MinionsTdServerGame.js";
 import { externalServerGameEntries } from "./.generated/externalGames.js";
 
 export interface ServerGameEntry {
@@ -20,10 +19,6 @@ export class GameRegistry {
     [
       chaosKommandoServerGame.manifest.id,
       { manifest: chaosKommandoServerGame.manifest, serverGame: chaosKommandoServerGame }
-    ],
-    [
-      minionsTdServerGame.manifest.id,
-      { manifest: minionsTdServerGame.manifest, serverGame: minionsTdServerGame }
     ],
     ...externalServerGameEntries.map((entry) => [
       entry.manifest.id,

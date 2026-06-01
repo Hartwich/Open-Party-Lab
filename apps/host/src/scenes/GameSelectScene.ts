@@ -192,7 +192,7 @@ export class GameSelectScene extends Phaser.Scene {
       (selectedGame.lobbySetup?.fields.length ?? 0) > 0 || selectedGame.lobbySetup?.confirmation
     );
     const setupPanelHeight = hasLobbySetupControls
-      ? this.measureLobbySetupHeight(selectedGame)
+      ? this.measureLobbySetupHeight(selectedGame, heroWidth)
       : 0;
     const heroBlockHeight = heroHeight + (hasLobbySetupControls ? 12 + setupPanelHeight : 0);
     renderSelectedGamePanel(this, {
@@ -230,8 +230,8 @@ export class GameSelectScene extends Phaser.Scene {
           : autoStartsWithReady
             ? text.autoReadyLine
             : text.spaceStartLine,
-      selectedGame.id === "minions-td"
-        ? text.minionsSetupLine
+      hasLobbySetupControls
+        ? (selectedGame.lobbySetup?.description ?? text.setupControlsLine)
         : selectedGame.id === "arena-survivor"
             ? roundActive
               ? text.arenaContinuesLine
@@ -247,7 +247,7 @@ export class GameSelectScene extends Phaser.Scene {
       y: infoY,
       width: stacked ? contentWidth : sideWidth,
       height: infoHeight,
-      title: selectedGame.id === "minions-td" ? text.setupFollowsTitle : text.readyToStartTitle,
+      title: hasLobbySetupControls ? text.setupFollowsTitle : text.readyToStartTitle,
       lines: guidanceLines,
       accent: getVisualAccent(selectedGame.id),
       language,
@@ -269,13 +269,14 @@ export class GameSelectScene extends Phaser.Scene {
     renderScrollBar(this, this.scrollY, this.maxScroll);
   }
 
-  private measureLobbySetupHeight(game: AvailableGameDto): number {
+  private measureLobbySetupHeight(game: AvailableGameDto, width: number): number {
     const fields = game.lobbySetup?.fields ?? [];
     const confirmation = game.lobbySetup?.confirmation;
+    const fieldWidth = Math.max(120, width - 24);
 
     return 54 + fields.reduce((height, field) => {
       if (field.kind === "select") {
-        return height + 46;
+        return height + this.measureLobbySelectFieldHeight(field, fieldWidth);
       }
 
       if (field.kind === "number") {
@@ -284,6 +285,32 @@ export class GameSelectScene extends Phaser.Scene {
 
       return height;
     }, 0) + (confirmation ? 52 : 0);
+  }
+
+  private resolveLobbySelectGrid(
+    field: NonNullable<AvailableGameDto["lobbySetup"]>["fields"][number] & { kind: "select" },
+    width: number
+  ): { buttonWidth: number; columns: number; gap: number; rows: number } {
+    const gap = 8;
+    const optionCount = Math.max(1, field.options.length);
+    const minButtonWidth = 132;
+    const columns = Math.max(
+      1,
+      Math.min(optionCount, Math.floor((width + gap) / (minButtonWidth + gap)))
+    );
+    const rows = Math.ceil(optionCount / columns);
+    const buttonWidth = Math.floor((width - gap * (columns - 1)) / columns);
+
+    return { buttonWidth, columns, gap, rows };
+  }
+
+  private measureLobbySelectFieldHeight(
+    field: NonNullable<AvailableGameDto["lobbySetup"]>["fields"][number] & { kind: "select" },
+    width: number
+  ): number {
+    const { gap, rows } = this.resolveLobbySelectGrid(field, width);
+
+    return 22 + rows * 34 + Math.max(0, rows - 1) * gap + 8;
   }
 
   private renderLobbySetupControls(options: {
@@ -323,6 +350,7 @@ export class GameSelectScene extends Phaser.Scene {
 
     fields.forEach((field) => {
       if (field.kind === "select") {
+        const fieldHeight = this.measureLobbySelectFieldHeight(field, width - 24);
         this.renderLobbySelectField({
           x: x + 12,
           y: cursorY,
@@ -332,7 +360,7 @@ export class GameSelectScene extends Phaser.Scene {
           value: settings[field.settingKey ?? field.id] ?? field.defaultValue,
           disabled
         });
-        cursorY += 46;
+        cursorY += fieldHeight;
         return;
       }
 
@@ -418,33 +446,41 @@ export class GameSelectScene extends Phaser.Scene {
     disabled: boolean;
   }): void {
     const { x, y, width, game, field, value, disabled } = options;
-    const gap = 10;
-    const optionCount = Math.max(1, field.options.length);
-    const buttonWidth = Math.floor((width - gap * (optionCount - 1)) / optionCount);
+    const { buttonWidth, columns, gap } = this.resolveLobbySelectGrid(field, width);
+
+    this.add.text(x, y, field.label, {
+      fontFamily: hostTheme.bodyFont,
+      fontSize: "14px",
+      color: "#cbd5e1"
+    });
 
     field.options.forEach((option, index) => {
       const selected = value === option.id;
-      const buttonX = x + index * (buttonWidth + gap);
-      const buttonY = y;
+      const col = index % columns;
+      const row = Math.floor(index / columns);
+      const buttonX = x + col * (buttonWidth + gap);
+      const buttonY = y + 20 + row * (34 + gap);
       const fill = selected ? 0x0ea5e9 : 0x0b1320;
       const stroke = selected ? 0x7dd3fc : 0xffffff;
       const textColor = selected ? "#082f49" : "#dbeafe";
 
       this.add
-        .rectangle(buttonX, buttonY, buttonWidth, 30, fill, disabled ? 0.58 : 0.96)
+        .rectangle(buttonX, buttonY, buttonWidth, 34, fill, disabled ? 0.58 : 0.96)
         .setOrigin(0)
         .setStrokeStyle(selected ? 2 : 1, stroke, selected ? 0.92 : 0.12);
-      this.add.text(buttonX + 12, buttonY + 6, option.label, {
+      this.add.text(buttonX + buttonWidth / 2, buttonY + 17, option.label, {
         fontFamily: hostTheme.bodyFont,
-        fontSize: "15px",
-        color: textColor
-      });
+        fontSize: buttonWidth < 124 ? "12px" : "14px",
+        color: textColor,
+        align: "center",
+        wordWrap: { width: buttonWidth - 10 }
+      }).setOrigin(0.5);
 
       if (disabled) {
         return;
       }
 
-      const zone = this.add.zone(buttonX, buttonY, buttonWidth, 30).setOrigin(0).setInteractive({ useHandCursor: true });
+      const zone = this.add.zone(buttonX, buttonY, buttonWidth, 34).setOrigin(0).setInteractive({ useHandCursor: true });
       zone.on("pointerdown", () => {
         this.client?.sendGameHostAction(game.id, {
           type: "configure-lobby",

@@ -4,7 +4,6 @@ import { airHockeyText } from "./games/airHockey.js";
 import { arenaSurvivorText } from "./games/arenaSurvivor.js";
 import { chaosKommandoText } from "./games/chaosKommando.js";
 import { imposterText } from "./games/imposter.js";
-import { minionsTdText } from "./games/minionsTd.js";
 import { pantomimeText } from "./games/pantomime.js";
 import { tabuText } from "./games/tabu.js";
 import { zeichnenUndErratenText } from "./games/zeichnenUndErraten.js";
@@ -16,7 +15,6 @@ const gameTextCatalog = {
   "chaos-kommando": chaosKommandoText,
   "zeichnen-und-erraten": zeichnenUndErratenText,
   "arena-survivor": arenaSurvivorText,
-  "minions-td": minionsTdText,
   imposter: imposterText,
   tabu: tabuText,
   pantomime: pantomimeText,

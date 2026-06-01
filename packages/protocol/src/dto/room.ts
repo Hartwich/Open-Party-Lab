@@ -1,6 +1,5 @@
 import type { AvailableGameDto, PublicGamePhase } from "./gameState.js";
 import type { SupportedLanguage } from "@open-party-lab/game-core";
-import type { MinionsTdLobbyState } from "../games/minionsTd.js";
 import type { PlayerSnapshot } from "./player.js";
 
 export type RoomLifecycle =
@@ -36,7 +35,6 @@ export interface RoomSnapshot {
   selectedGameSettings?: Record<string, string | number | boolean>;
   availableGames: AvailableGameDto[];
   players: PlayerSnapshot[];
-  minionsTdLobby?: MinionsTdLobbyState;
   currentRound: RoundSummary | null;
 }
 

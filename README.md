@@ -38,8 +38,6 @@ Implemented platform features:
 Public game catalog in this source cut:
 
 - Chaos-Kommando
-- Arena Survivor
-- MinionsTD
 
 Optional local game repos:
 
@@ -53,6 +51,8 @@ Optional local game repos:
 - Drift Racer (`local-games/drift-racer` when cloned locally)
 - Word Tiles (`local-games/word-tiles` when cloned locally)
 - Zeichnen & Erraten (`local-games/zeichnen-und-erraten` when cloned locally)
+- Arena Survivor (`local-games/arena-survivor` when cloned locally)
+- MinionsTD (`local-games/minions-td` when cloned locally)
 
 ## Quick Start
 
