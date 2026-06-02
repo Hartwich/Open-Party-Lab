@@ -85,8 +85,25 @@ export function createApp(environment: AppEnv = loadEnv()) {
     httpServer,
     io,
     async start(): Promise<void> {
-      await new Promise<void>((resolve) => {
-        httpServer.listen(environment.port, () => resolve());
+      await new Promise<void>((resolve, reject) => {
+        const handleListenError = (error: NodeJS.ErrnoException) => {
+          if (error.code === "EADDRINUSE") {
+            reject(
+              new Error(
+                `Port ${environment.port} is already in use. Stop the existing dev server with npm run dev:stop or set PORT to a free port.`
+              )
+            );
+            return;
+          }
+
+          reject(error);
+        };
+
+        httpServer.once("error", handleListenError);
+        httpServer.listen(environment.port, () => {
+          httpServer.off("error", handleListenError);
+          resolve();
+        });
       });
 
       roundTimerService.start();
