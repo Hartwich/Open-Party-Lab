@@ -117,7 +117,14 @@ Open-Party-Lab/
     tap-race/
 ```
 
-Clone optional games:
+Clone recommended games:
+
+```bash
+npm run games:clone-recommended
+npm run games:sync-local
+```
+
+Clone optional games manually:
 
 ```bash
 git clone https://github.com/Hartwich/magic-arena.git local-games/magic-arena
@@ -148,6 +155,43 @@ For AI browser checks, use the in-app browser for screenshots. Virtual controlle
 ```bash
 npm run ai:controllers -- --room DEBU --players 4 --ready true --hold-ms 600000
 ```
+
+## Ways To Contribute
+
+You do not need to understand the whole platform to help. Good contributions include:
+
+- playtest one game and open a playtest report;
+- improve controller text, layout, or feedback on phones;
+- improve host-screen readability for a shared TV or monitor;
+- propose balance, pacing, scoring, or rule-clarity improvements;
+- add screenshots, docs, or setup notes;
+- add small smoke tests for room creation, joining, reconnect, or round flow;
+- build a new mini-game repo using the Mini-Game SDK.
+
+Start with small, vertical changes. For behavior changes, update the server logic, protocol types, host view, controller model, and docs together when needed.
+
+## For AI Coding Agents
+
+This repo is intentionally structured for AI-assisted development. Start with:
+
+- [AGENTS.md](AGENTS.md)
+- [docs/agent-task-guide.md](docs/agent-task-guide.md)
+- [docs/architecture.md](docs/architecture.md)
+- [docs/minigame-sdk.md](docs/minigame-sdk.md)
+- [docs/multi-repo-games.md](docs/multi-repo-games.md)
+- [docs/create-a-game.md](docs/create-a-game.md)
+- [docs/playtesting.md](docs/playtesting.md)
+
+Recommended verification:
+
+```bash
+npm run games:list
+npm run games:sync-local
+npm run typecheck
+npm run build
+```
+
+If a check cannot be run, state that clearly in the pull request. Keep generated output, logs, temporary browser profiles, and build artifacts out of source control.
 
 ## LAN Setup
 

@@ -1,0 +1,53 @@
+name: Feature request
+description: Suggest a platform, game, tooling, or documentation improvement
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What would this improve for players, developers, playtesters, or AI agents?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the smallest useful version of the change.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - Small polish
+        - Single game
+        - Platform behavior
+        - Shared protocol/packages
+        - Documentation/onboarding
+        - Build/test tooling
+        - Larger design discussion needed
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Possible acceptance criteria
+      value: |
+        - [ ] The change is documented where needed.
+        - [ ] `npm run typecheck` passes.
+        - [ ] `npm run build` passes if runtime or packaging changed.
+    validations:
+      required: false

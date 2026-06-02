@@ -1,0 +1,80 @@
+name: Agent-ready task
+description: Small, testable task suitable for AI coding agents
+title: "[agent] "
+labels: ["agent-ready"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for focused tasks that can be completed and verified by a human developer or an AI coding agent.
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should be changed?
+      placeholder: Describe the desired behavior or improvement in one or two sentences.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Add relevant background, links, screenshots, or existing behavior.
+    validations:
+      required: false
+
+  - type: textarea
+    id: relevant-files
+    attributes:
+      label: Relevant files or folders
+      description: List likely files, folders, packages, or game repos.
+      placeholder: |
+        apps/server/src/...
+        apps/host/src/...
+        apps/controller/src/...
+        packages/protocol/src/...
+        local-games/<game-id>/...
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      value: |
+        - Keep the server authoritative for gameplay rules, timers, scoring, and round transitions.
+        - Keep controllers as input devices. Do not let controllers decide game outcomes.
+        - Do not add static imports for optional game repos.
+        - Keep changes small and reviewable.
+        - Do not add assets or generated media unless their rights are clear.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - [ ] The change is focused and easy to review.
+        - [ ] `npm run typecheck` passes.
+        - [ ] `npm run build` passes if runtime, bundling, shared packages, or release-facing behavior changed.
+        - [ ] UI changes include screenshots, clips, or a short visual QA note.
+        - [ ] `docs/project-status.md` is updated if functionality or limitations changed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-verification
+    attributes:
+      label: Suggested verification
+      value: |
+        ```bash
+        npm run games:list
+        npm run games:sync-local
+        npm run typecheck
+        npm run build
+        ```
+    validations:
+      required: false

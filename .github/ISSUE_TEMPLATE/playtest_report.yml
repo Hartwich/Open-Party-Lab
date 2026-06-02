@@ -1,0 +1,76 @@
+name: Playtest report
+description: Report playtest feedback without needing to change code
+title: "[playtest] "
+labels: ["playtest-needed"]
+body:
+  - type: input
+    id: game
+    attributes:
+      label: Game
+      placeholder: magic-arena, magic-duell, schaetzorama, ...
+    validations:
+      required: true
+
+  - type: input
+    id: players
+    attributes:
+      label: Number of players
+      placeholder: "4"
+    validations:
+      required: true
+
+  - type: input
+    id: session-length
+    attributes:
+      label: Session length
+      placeholder: "30 minutes / 3 rounds / 2 matches"
+    validations:
+      required: false
+
+  - type: textarea
+    id: setup
+    attributes:
+      label: Setup
+      value: |
+        - Host device/browser:
+        - Controller devices/browsers:
+        - LAN/Wi-Fi setup:
+    validations:
+      required: false
+
+  - type: textarea
+    id: what-worked
+    attributes:
+      label: What worked well?
+    validations:
+      required: true
+
+  - type: textarea
+    id: confusing
+    attributes:
+      label: What was confusing?
+      description: Rules, UI, scoring, controls, pacing, feedback, setup, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: balance
+    attributes:
+      label: Balance and pacing notes
+      description: Was anything too strong, too weak, too slow, too random, or unclear?
+    validations:
+      required: false
+
+  - type: textarea
+    id: bugs
+    attributes:
+      label: Bugs or technical problems
+    validations:
+      required: false
+
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: Suggested improvements
+    validations:
+      required: false
