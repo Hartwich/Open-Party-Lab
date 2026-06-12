@@ -216,6 +216,22 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
 
   const sortedPlayers = [...model.players].sort((left, right) => right.score - left.score);
   const currentPlayer = model.players.find((player) => player.playerId === model.currentPlayerId);
+  const pendingMove = model.pendingMove;
+  const activeTurn = model.activeTurn;
+  const pendingMoveWords = pendingMove?.words.map((word) => word.word).join(", ") ?? "";
+  const isPendingMoveOwner = pendingMove?.playerId === model.currentPlayerId;
+  const acceptedPendingMove = Boolean(pendingMove?.acceptedByPlayerIds.includes(model.currentPlayerId));
+  const pendingAcceptCount = pendingMove?.acceptedByPlayerIds.length ?? 0;
+  const pendingRequiredCount = pendingMove?.requiredAcceptancePlayerIds.length ?? 0;
+  const pendingMoveStatus = pendingMove
+    ? pendingMove.challengedByName
+      ? en
+        ? `Challenged by ${pendingMove.challengedByName}`
+        : `Angezweifelt von ${pendingMove.challengedByName}`
+      : en
+        ? `${pendingAcceptCount}/${pendingRequiredCount} accepted`
+        : `${pendingAcceptCount}/${pendingRequiredCount} akzeptiert`
+    : "";
 
   return (
     <div style={{ display: "grid", gap: 10 }}>
@@ -244,7 +260,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
       <section
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
           gap: 6
         }}
       >
@@ -259,6 +275,10 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
         <div style={metricStyle}>
           <span style={metricLabelStyle}>{en ? "Rack" : "Rack"}</span>
           <strong>{currentPlayer?.rackCount ?? model.rack.length}</strong>
+        </div>
+        <div style={metricStyle}>
+          <span style={metricLabelStyle}>{en ? "Turn" : "Zug"}</span>
+          <strong>{activeTurn?.score ?? 0}</strong>
         </div>
       </section>
 
@@ -417,42 +437,171 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
         </div>
       </section>
 
-      <section style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 6 }}>
-        <button type="button" disabled={model.disabled || draft.length === 0} onClick={submitDraft} style={primaryButtonStyle}>
-          {en ? "Play" : "Legen"}
-        </button>
-        <button
-          type="button"
-          disabled={model.disabled || draft.length === 0}
-          onClick={() => {
-            setDraft([]);
-            setSelectedTileId(null);
+      {activeTurn ? (
+        <section
+          style={{
+            display: "grid",
+            gap: 5,
+            padding: 9,
+            borderRadius: 14,
+            border: "1px solid rgba(34, 197, 94, 0.28)",
+            background: "rgba(20, 83, 45, 0.2)"
           }}
-          style={secondaryButtonStyle}
         >
-          {en ? "Recall" : "Zurueck"}
-        </button>
-        <button
-          type="button"
-          disabled={!model.canAct || draft.length > 0}
-          onClick={() => {
-            if (exchangeMode && exchangeTileIds.length > 0) {
-              model.onExchange(exchangeTileIds);
-              return;
-            }
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
+            <strong>{en ? "This turn" : "Dieser Zug"}</strong>
+            <span style={{ color: "#86efac", fontWeight: 900 }}>
+              {activeTurn.score} P
+              {activeTurn.bingoEligible ? " +50" : ""}
+            </span>
+          </div>
+          <span style={{ color: "var(--text-muted)", fontSize: "0.84rem", lineHeight: 1.35 }}>
+            {activeTurn.acceptedMoveCount} {en ? "accepted placement(s)" : "akzeptierte Abschnitt(e)"}
+            {activeTurn.words.length > 0 ? ` | ${activeTurn.words.map((word) => word.word).join(", ")}` : ""}
+          </span>
+        </section>
+      ) : null}
 
-            setExchangeMode((current) => !current);
-            setSelectedTileId(null);
-            setExchangeTileIds([]);
+      {pendingMove ? (
+        <section
+          style={{
+            display: "grid",
+            gap: 8,
+            padding: 10,
+            borderRadius: 14,
+            border: pendingMove.challengedByName ? "1px solid rgba(248, 113, 113, 0.45)" : "1px solid rgba(250, 204, 21, 0.34)",
+            background: pendingMove.challengedByName ? "rgba(127, 29, 29, 0.28)" : "rgba(120, 53, 15, 0.24)"
           }}
-          style={exchangeMode ? warningButtonStyle : secondaryButtonStyle}
         >
-          {exchangeMode ? (en ? "OK" : "OK") : (en ? "Swap" : "Tausch")}
-        </button>
-        <button type="button" disabled={!model.canAct || draft.length > 0 || exchangeMode} onClick={model.onPass} style={secondaryButtonStyle}>
-          {en ? "Pass" : "Pass"}
-        </button>
-      </section>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
+            <strong>{en ? "Open move" : "Offener Zug"}</strong>
+            <span style={{ color: pendingMove.challengedByName ? "#fca5a5" : "#fde68a", fontWeight: 850 }}>
+              {pendingMoveStatus}
+            </span>
+          </div>
+          <span style={{ color: "var(--text-muted)", lineHeight: 1.35 }}>
+            {pendingMove.playerName}: {pendingMove.score} P
+            {pendingMoveWords ? ` | ${pendingMoveWords}` : ""}
+          </span>
+          <span style={{ color: "var(--text-muted)", fontSize: "0.84rem", lineHeight: 1.35 }}>
+            {isPendingMoveOwner
+              ? pendingMove.challengedByName
+                ? en
+                  ? "Resolve the challenge after checking externally."
+                  : "Entscheide nach der externen Pruefung."
+                : en
+                  ? "Waiting for the other players to accept or challenge."
+                  : "Warte auf Akzeptieren oder Anzweifeln der anderen."
+              : acceptedPendingMove
+                ? en
+                  ? "You accepted this placement."
+                  : "Du hast diesen Abschnitt akzeptiert."
+              : en
+                ? "Accept to let the turn continue, or challenge for an external check."
+                : "Akzeptiere zum Weiterspielen oder zweifle fuer eine externe Pruefung an."}
+          </span>
+        </section>
+      ) : null}
+
+      {pendingMove ? (
+        <section
+          style={{
+            display: "grid",
+            gridTemplateColumns: isPendingMoveOwner && pendingMove.challengedByName ? "repeat(2, minmax(0, 1fr))" : isPendingMoveOwner ? "1fr" : "repeat(2, minmax(0, 1fr))",
+            gap: 6
+          }}
+        >
+          {isPendingMoveOwner ? (
+            <>
+              {pendingMove.challengedByName ? (
+                <>
+                  <button
+                    type="button"
+                    disabled={!model.canRecallPendingMove}
+                    onClick={() => model.onRecallPendingMove(pendingMove.id)}
+                    style={dangerButtonStyle}
+                  >
+                    {en ? "Recall" : "Zuruecknehmen"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!model.canResolvePendingMove}
+                    onClick={() => model.onConfirmPendingMove(pendingMove.id)}
+                    style={primaryButtonStyle}
+                  >
+                    {en ? "Play" : "Legen"}
+                  </button>
+                </>
+              ) : (
+                <button type="button" disabled style={secondaryButtonStyle}>
+                  {en ? "Waiting" : "Warten"}
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                disabled={!model.canChallenge}
+                onClick={() => model.onChallenge(pendingMove.id)}
+                style={warningButtonStyle}
+              >
+                {en ? "Challenge" : "Anzweifeln"}
+              </button>
+              <button
+                type="button"
+                disabled={!model.canAcceptPendingMove}
+                onClick={() => model.onAcceptPendingMove(pendingMove.id)}
+                style={acceptedPendingMove ? secondaryButtonStyle : primaryButtonStyle}
+              >
+                {acceptedPendingMove ? (en ? "Accepted" : "Akzeptiert") : (en ? "Accept" : "Akzeptieren")}
+              </button>
+            </>
+          )}
+        </section>
+      ) : (
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 6 }}>
+          <button type="button" disabled={model.disabled || draft.length === 0} onClick={submitDraft} style={primaryButtonStyle}>
+            {en ? "Play" : "Legen"}
+          </button>
+          <button
+            type="button"
+            disabled={model.disabled || draft.length === 0}
+            onClick={() => {
+              setDraft([]);
+              setSelectedTileId(null);
+            }}
+            style={secondaryButtonStyle}
+          >
+            {en ? "Recall" : "Zurueck"}
+          </button>
+          <button
+            type="button"
+            disabled={activeTurn ? !model.canFinishTurn || draft.length > 0 || exchangeMode : !model.canAct || draft.length > 0}
+            onClick={() => {
+              if (activeTurn) {
+                model.onFinishTurn();
+                return;
+              }
+
+              if (exchangeMode && exchangeTileIds.length > 0) {
+                model.onExchange(exchangeTileIds);
+                return;
+              }
+
+              setExchangeMode((current) => !current);
+              setSelectedTileId(null);
+              setExchangeTileIds([]);
+            }}
+            style={activeTurn ? primaryButtonStyle : exchangeMode ? warningButtonStyle : secondaryButtonStyle}
+          >
+            {activeTurn ? (en ? "Finish" : "Fertig") : exchangeMode ? (en ? "OK" : "OK") : (en ? "Swap" : "Tausch")}
+          </button>
+          <button type="button" disabled={!model.canAct || Boolean(activeTurn) || draft.length > 0 || exchangeMode} onClick={model.onPass} style={secondaryButtonStyle}>
+            {en ? "Pass" : "Pass"}
+          </button>
+        </section>
+      )}
 
       {model.lastMove ? (
         <section style={{ color: "var(--text-muted)", fontSize: "0.86rem", lineHeight: 1.4 }}>
@@ -574,5 +723,14 @@ const warningButtonStyle = {
   borderRadius: 12,
   background: "linear-gradient(180deg, #fdba74, #f97316)",
   color: "#431407",
+  fontWeight: 950
+} as const;
+
+const dangerButtonStyle = {
+  minHeight: 50,
+  border: "1px solid rgba(248, 113, 113, 0.5)",
+  borderRadius: 12,
+  background: "linear-gradient(180deg, #fca5a5, #ef4444)",
+  color: "#450a0a",
   fontWeight: 950
 } as const;

@@ -65,6 +65,34 @@ export interface WordTilesMoveSummaryState {
   reason?: string;
 }
 
+export interface WordTilesPendingMoveState {
+  id: string;
+  playerId: string;
+  playerName: string;
+  score: number;
+  words: WordTilesWordScoreState[];
+  placements: WordTilesPlacementState[];
+  bingo: boolean;
+  createdAt: number;
+  acceptedByPlayerIds: string[];
+  acceptedByNames: string[];
+  requiredAcceptancePlayerIds: string[];
+  challengedByPlayerId?: string;
+  challengedByName?: string;
+  challengedAt?: number;
+}
+
+export interface WordTilesActiveTurnState {
+  playerId: string;
+  playerName: string;
+  score: number;
+  words: WordTilesWordScoreState[];
+  placements: WordTilesPlacementState[];
+  acceptedMoveCount: number;
+  placedTileCount: number;
+  bingoEligible: boolean;
+}
+
 export interface WordTilesPublicState {
   boardSize: number;
   board: WordTilesBoardCellState[];
@@ -78,6 +106,8 @@ export interface WordTilesPublicState {
   winnerPlayerId?: string;
   winnerName?: string;
   lastMove?: WordTilesMoveSummaryState;
+  pendingMove?: WordTilesPendingMoveState;
+  activeTurn?: WordTilesActiveTurnState;
   lastError?: string;
   tileValues: Record<string, number>;
 }
@@ -85,6 +115,11 @@ export interface WordTilesPublicState {
 export interface WordTilesControllerState extends WordTilesPublicState {
   rack: WordTilesRackTileState[];
   canAct: boolean;
+  canAcceptPendingMove: boolean;
+  canChallenge: boolean;
+  canResolvePendingMove: boolean;
+  canRecallPendingMove: boolean;
+  canFinishTurn: boolean;
 }
 
 export interface WordTilesPlayInput extends PlayerInput {
@@ -101,4 +136,36 @@ export interface WordTilesExchangeInput extends PlayerInput {
   tileIds: string[];
 }
 
-export type WordTilesInput = WordTilesPlayInput | WordTilesPassInput | WordTilesExchangeInput;
+export interface WordTilesChallengeInput extends PlayerInput {
+  type: "word-tiles:challenge";
+  pendingMoveId: string;
+}
+
+export interface WordTilesAcceptInput extends PlayerInput {
+  type: "word-tiles:accept";
+  pendingMoveId: string;
+}
+
+export interface WordTilesConfirmInput extends PlayerInput {
+  type: "word-tiles:confirm";
+  pendingMoveId: string;
+}
+
+export interface WordTilesRecallInput extends PlayerInput {
+  type: "word-tiles:recall";
+  pendingMoveId: string;
+}
+
+export interface WordTilesFinishTurnInput extends PlayerInput {
+  type: "word-tiles:finish";
+}
+
+export type WordTilesInput =
+  | WordTilesPlayInput
+  | WordTilesPassInput
+  | WordTilesExchangeInput
+  | WordTilesChallengeInput
+  | WordTilesAcceptInput
+  | WordTilesConfirmInput
+  | WordTilesRecallInput
+  | WordTilesFinishTurnInput;

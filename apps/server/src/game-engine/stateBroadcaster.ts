@@ -60,6 +60,28 @@ export class StateBroadcaster {
     this.io.to(room.code).emit("room:state", { room: this.createRoomSnapshot(room) });
   }
 
+  sendControllerGameState(
+    socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>,
+    room: RoomRecord
+  ): void {
+    if (socket.data.role !== "controller") {
+      return;
+    }
+
+    const controllerGameState = socket.data.playerId
+      ? this.gameRuntime.getControllerGameStateForPlayer(room, socket.data.playerId)
+      : this.gameRuntime.getPublicGameState(room, "controller");
+
+    if (!controllerGameState) {
+      return;
+    }
+
+    socket.compress(false).emit("game:state", {
+      roomCode: room.code,
+      game: controllerGameState
+    });
+  }
+
   clearGameStateCache(roomCode: string): void {
     this.lightTrailsHostCache.delete(roomCode);
     this.lastHostEmitAtByRoom.delete(roomCode);

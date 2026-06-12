@@ -307,6 +307,7 @@ export function registerSocketHandlers({
       stateBroadcaster.broadcastScoreboard(room);
 
       if (room.currentRound) {
+        stateBroadcaster.sendControllerGameState(socket, room);
         stateBroadcaster.broadcastGameState(room);
       }
     });
@@ -366,6 +367,7 @@ export function registerSocketHandlers({
       stateBroadcaster.broadcastScoreboard(room);
 
       if (room.currentRound) {
+        stateBroadcaster.sendControllerGameState(socket, room);
         stateBroadcaster.broadcastGameState(room);
       }
     });

@@ -576,11 +576,23 @@ export interface WordTilesLayoutModel {
   moveNumber: number;
   ownScore: number;
   lastMove?: import("@open-party-lab/protocol").WordTilesMoveSummaryState;
+  pendingMove?: import("@open-party-lab/protocol").WordTilesPendingMoveState;
+  activeTurn?: import("@open-party-lab/protocol").WordTilesActiveTurnState;
   lastError?: string;
   tileValues: Record<string, number>;
+  canAcceptPendingMove: boolean;
+  canChallenge: boolean;
+  canResolvePendingMove: boolean;
+  canRecallPendingMove: boolean;
+  canFinishTurn: boolean;
   onPlay: (placements: import("@open-party-lab/protocol").WordTilesPlacementState[]) => void;
   onPass: () => void;
   onExchange: (tileIds: string[]) => void;
+  onAcceptPendingMove: (pendingMoveId: string) => void;
+  onChallenge: (pendingMoveId: string) => void;
+  onConfirmPendingMove: (pendingMoveId: string) => void;
+  onRecallPendingMove: (pendingMoveId: string) => void;
+  onFinishTurn: () => void;
 }
 
 export interface MagicArenaLayoutModel {

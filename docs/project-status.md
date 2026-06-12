@@ -34,7 +34,7 @@ Optional local game repos:
 - Imposter can be loaded from `local-games/imposter` when cloned locally.
 - Light Trails can be loaded from `local-games/light-trails` when cloned locally.
 - Drift Racer can be loaded from `local-games/drift-racer` when cloned locally. It is under construction and currently not playable.
-- Word Tiles can be loaded from `local-games/word-tiles` when cloned locally.
+- Word Tiles can be loaded from `local-games/word-tiles` when cloned locally. It supports multiple accepted word placements per turn and uses table-driven word challenges instead of an internal dictionary check.
 - Chaos-Kommando can be loaded from `local-games/chaos-kommando` when cloned locally.
 
 Lobby/setup:
