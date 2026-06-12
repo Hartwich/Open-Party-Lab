@@ -190,6 +190,29 @@ function createInput(template, playerId) {
   };
 }
 
+function resolveAutoSetupValue(playerSetup, index) {
+  if (!playerSetup) {
+    return null;
+  }
+
+  if (playerSetup.kind === "choice") {
+    const option = playerSetup.options[index % playerSetup.options.length];
+    return option ? option.id : null;
+  }
+
+  if (playerSetup.kind === "multi-select") {
+    if (Array.isArray(playerSetup.defaultValue) && playerSetup.defaultValue.length > 0) {
+      return [...playerSetup.defaultValue];
+    }
+
+    return playerSetup.options
+      .slice(0, playerSetup.maxSelections)
+      .map((option) => option.id);
+  }
+
+  return null;
+}
+
 async function joinVirtualControllers(args) {
   const controllers = [];
 
@@ -221,14 +244,16 @@ async function joinVirtualControllers(args) {
       const selectedGame = joined.room.availableGames.find(
         (game) => game.id === joined.room.selectedGameId
       );
-      const playerSetupOptions = selectedGame?.playerSetup?.options ?? [];
-      const character = playerSetupOptions[index % playerSetupOptions.length];
+      const playerSetup = selectedGame?.playerSetup;
+      const setupValue = resolveAutoSetupValue(playerSetup, index);
+      const selectionKey = playerSetup?.selectionKey ?? "character";
 
-      if (character) {
-        socket.emit("player:select-character", {
+      if (setupValue) {
+        socket.emit("player:set-setup", {
           roomCode: args.room,
           playerId: controller.playerId,
-          characterId: character.id
+          selectionKey,
+          value: setupValue
         });
       }
     }

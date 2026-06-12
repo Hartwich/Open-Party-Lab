@@ -1,6 +1,7 @@
 import type {
   ClientToServerEvents,
   GameStateEnvelope,
+  PlayerSetupValue,
   PlayerSnapshot,
   RoomSnapshot,
   ScoreboardSnapshot,
@@ -375,6 +376,34 @@ export class ControllerSocketClient {
       playerId: this.state.player.id,
       characterId
     });
+  }
+
+  setPlayerSetup(selectionKey: string, value: PlayerSetupValue): void {
+    if (!this.state.room || !this.state.player) {
+      return;
+    }
+
+    this.socket.emit(
+      "player:set-setup",
+      {
+        roomCode: this.state.room.code,
+        playerId: this.state.player.id,
+        selectionKey,
+        value
+      },
+      (result) => {
+        if (!result.ok) {
+          this.updateState({ error: result.error });
+          return;
+        }
+
+        this.updateState({
+          room: result.data.room,
+          player: result.data.player,
+          error: null
+        });
+      }
+    );
   }
 
   sendInput(input: unknown): void {

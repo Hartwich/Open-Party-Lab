@@ -1,9 +1,10 @@
-import { normalizeLanguage } from "@open-party-lab/game-core";
+import { normalizeLanguage, type GamePlayerSetupDefinition } from "@open-party-lab/game-core";
 import { hasActiveRound } from "@open-party-lab/protocol";
 import type {
   AckResult,
   ClientToServerEvents,
   InterServerEvents,
+  PlayerSetupValue,
   ServerToClientEvents,
   SocketData
 } from "@open-party-lab/protocol";
@@ -35,6 +36,33 @@ export interface RegisterSocketHandlersDeps {
 
 function ackError<T>(message: string): AckResult<T> {
   return { ok: false, error: message };
+}
+
+function getPlayerSetupSelectionKey(setup: GamePlayerSetupDefinition): string {
+  return setup.selectionKey ?? "character";
+}
+
+function normalizePlayerSetupValue(
+  setup: GamePlayerSetupDefinition,
+  value: PlayerSetupValue
+): PlayerSetupValue | null {
+  const validOptionIds = new Set(setup.options.map((option) => option.id));
+
+  if (setup.kind === "choice") {
+    return typeof value === "string" && validOptionIds.has(value) ? value : null;
+  }
+
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const normalized = [...new Set(value.filter((entry) => validOptionIds.has(entry)))].slice(0, setup.maxSelections);
+
+  if (normalized.length !== value.length) {
+    return null;
+  }
+
+  return normalized;
 }
 
 function socketText(en: boolean) {
@@ -109,18 +137,42 @@ export function registerSocketHandlers({
     room: NonNullable<ReturnType<RoomManager["getRoom"]>>,
     selectedGame: ReturnType<typeof getSelectedGame>
   ): void {
-    const optionIds = new Set(selectedGame?.playerSetup?.options.map((option) => option.id) ?? []);
+    const setup = selectedGame?.playerSetup;
+
+    if (!selectedGame || !setup) {
+      for (const player of room.players.values()) {
+        player.selectedCharacterId = null;
+      }
+
+      return;
+    }
+
+    const selectionKey = getPlayerSetupSelectionKey(setup);
 
     for (const player of room.players.values()) {
-      if (!player.selectedCharacterId) {
+      const currentSelections = player.setupSelectionsByGameId[selectedGame.id] ?? {};
+      const value = currentSelections[selectionKey];
+      const normalized = value === undefined ? undefined : normalizePlayerSetupValue(setup, value);
+
+      if (normalized !== null && normalized !== undefined) {
+        if (setup.kind === "choice") {
+          player.selectedCharacterId = normalized as string;
+        }
+
         continue;
       }
 
-      if (optionIds.has(player.selectedCharacterId)) {
-        continue;
-      }
+      const nextSelections = { ...currentSelections };
+      delete nextSelections[selectionKey];
 
-      player.selectedCharacterId = null;
+      player.setupSelectionsByGameId = {
+        ...player.setupSelectionsByGameId,
+        [selectedGame.id]: nextSelections
+      };
+
+      if (setup.kind === "choice") {
+        player.selectedCharacterId = null;
+      }
     }
   }
 
@@ -510,7 +562,8 @@ export function registerSocketHandlers({
       }
 
       const selectedGame = getSelectedGame(room);
-      const playerSetupOptions = selectedGame?.playerSetup?.options ?? [];
+      const playerSetup = selectedGame?.playerSetup;
+      const playerSetupOptions = playerSetup?.kind === "choice" ? playerSetup.options : [];
 
       if (!playerSetupOptions.some((option) => option.id === payload.characterId)) {
         stateBroadcaster.emitError(socket, "player/not-found", text.characterOrPlayerNotFound);
@@ -523,6 +576,74 @@ export function registerSocketHandlers({
         stateBroadcaster.emitError(socket, "player/not-found", text.characterOrPlayerNotFound);
         return;
       }
+
+      if (selectedGame && playerSetup) {
+        playerManager.setPlayerSetup(
+          room,
+          payload.playerId,
+          selectedGame.id,
+          getPlayerSetupSelectionKey(playerSetup),
+          payload.characterId
+        );
+      }
+
+      stateBroadcaster.broadcastRoomState(room);
+      maybeAutoStartReadyRound(room.code);
+    });
+
+    socket.on("player:set-setup", (payload, ack) => {
+      const room = roomManager.getRoom(payload.roomCode);
+
+      if (!room) {
+        ack(ackError("Raum nicht gefunden."));
+        return;
+      }
+      const text = socketText(room.language === "en");
+
+      if (socket.data.role !== "controller" || socket.data.playerId !== payload.playerId) {
+        ack(ackError(text.ownCharacterOnly));
+        return;
+      }
+
+      const selectedGame = getSelectedGame(room);
+      const setup = selectedGame?.playerSetup;
+
+      if (!selectedGame || !setup || getPlayerSetupSelectionKey(setup) !== payload.selectionKey) {
+        ack(ackError(text.characterOrPlayerNotFound));
+        return;
+      }
+
+      const normalizedValue = normalizePlayerSetupValue(setup, payload.value);
+
+      if (normalizedValue === null) {
+        ack(ackError(text.characterOrPlayerNotFound));
+        return;
+      }
+
+      const player = playerManager.setPlayerSetup(
+        room,
+        payload.playerId,
+        selectedGame.id,
+        payload.selectionKey,
+        normalizedValue
+      );
+
+      if (!player) {
+        ack(ackError(text.playerNotFound));
+        return;
+      }
+
+      if (setup.kind === "choice" && typeof normalizedValue === "string") {
+        player.selectedCharacterId = normalizedValue;
+      }
+
+      ack({
+        ok: true,
+        data: {
+          room: stateBroadcaster.createRoomSnapshot(room),
+          player: playerManager.toSnapshot(player)
+        }
+      });
 
       stateBroadcaster.broadcastRoomState(room);
       maybeAutoStartReadyRound(room.code);

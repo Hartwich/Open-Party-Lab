@@ -1,6 +1,7 @@
 import {
   canManagePlayerRoster,
   type JoinRoomRequest,
+  type PlayerSetupValue,
   type PlayerSnapshot
 } from "@open-party-lab/protocol";
 import { createId } from "../core/ids/createId.js";
@@ -49,6 +50,8 @@ export class PlayerManager {
     const existingPlayer = this.playerStore.findByDeviceId(room, request.deviceId);
 
     if (existingPlayer) {
+      existingPlayer.setupSelectionsByGameId ??= {};
+
       if (request.playerName.trim()) {
         existingPlayer.name = request.playerName.trim();
       }
@@ -68,6 +71,7 @@ export class PlayerManager {
       name: request.playerName.trim(),
       color: request.preferredColor ?? this.pickColor(room),
       selectedCharacterId: null,
+      setupSelectionsByGameId: {},
       score: 0,
       isReady: false,
       connected: true,
@@ -123,6 +127,32 @@ export class PlayerManager {
     }
 
     player.selectedCharacterId = characterId;
+    return player;
+  }
+
+  setPlayerSetup(
+    room: RoomRecord,
+    playerId: string,
+    gameId: string,
+    selectionKey: string,
+    value: PlayerSetupValue
+  ): PlayerRecord | null {
+    const player = this.playerStore.get(room, playerId);
+
+    if (!player) {
+      return null;
+    }
+
+    const currentGameSelections = player.setupSelectionsByGameId[gameId] ?? {};
+    player.setupSelectionsByGameId = {
+      ...player.setupSelectionsByGameId,
+      [gameId]: {
+        ...currentGameSelections,
+        [selectionKey]: Array.isArray(value) ? [...value] : value
+      }
+    };
+    player.isReady = false;
+
     return player;
   }
 
@@ -189,12 +219,15 @@ export class PlayerManager {
   }
 
   toSnapshot(player: PlayerRecord): PlayerSnapshot {
+    const setupSelections = Object.assign({}, ...Object.values(player.setupSelectionsByGameId ?? {}));
+
     return {
       id: player.id,
       name: player.name,
       color: player.color,
       selectedCharacterId: player.selectedCharacterId,
       selectedCharacterName: null,
+      setupSelections,
       isReady: player.isReady,
       connected: player.connected,
       presence: player.presence,

@@ -1,5 +1,6 @@
 export type ConnectionRole = "host" | "controller";
 export type PlayerPresence = "online" | "reconnecting" | "offline";
+export type PlayerSetupValue = string | string[];
 
 export interface PlayerSnapshot {
   id: string;
@@ -7,6 +8,7 @@ export interface PlayerSnapshot {
   color: string;
   selectedCharacterId: string | null;
   selectedCharacterName: string | null;
+  setupSelections: Record<string, PlayerSetupValue>;
   isReady: boolean;
   connected: boolean;
   presence: PlayerPresence;

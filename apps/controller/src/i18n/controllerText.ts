@@ -57,6 +57,10 @@ export interface ControllerText {
   ready: string;
   notReady: string;
   chooseCharacterFirst: string;
+  chooseSetupFirst: string;
+  setup: string;
+  setupChooseTitle: string;
+  selectionCount: (selected: number, min: number, max: number) => string;
   characterChooseTitle: string;
   characterChooseDescription: string;
   yourCharacter: string;
@@ -114,6 +118,11 @@ const controllerText = {
     ready: "Bereit",
     notReady: "Nicht bereit",
     chooseCharacterFirst: "Erst Charakter waehlen",
+    chooseSetupFirst: "Erst Setup waehlen",
+    setup: "Setup",
+    setupChooseTitle: "Setup waehlen",
+    selectionCount: (selected: number, min: number, max: number) =>
+      `${selected}/${max} gewaehlt, mindestens ${min}`,
     characterChooseTitle: "Charakter waehlen",
     characterChooseDescription: "Bitte zuerst einen Charakter fuer den Run auswaehlen. Danach kannst du dich bereit setzen.",
     yourCharacter: "Dein Charakter",
@@ -190,6 +199,11 @@ const controllerText = {
     ready: "Ready",
     notReady: "Not ready",
     chooseCharacterFirst: "Choose character first",
+    chooseSetupFirst: "Choose setup first",
+    setup: "Setup",
+    setupChooseTitle: "Choose Setup",
+    selectionCount: (selected: number, min: number, max: number) =>
+      `${selected}/${max} selected, at least ${min}`,
     characterChooseTitle: "Choose Character",
     characterChooseDescription: "Choose a character for the run first. Then you can ready up.",
     yourCharacter: "Your character",

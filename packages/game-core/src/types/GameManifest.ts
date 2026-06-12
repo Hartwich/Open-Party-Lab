@@ -49,6 +49,7 @@ export interface GamePlayerSetupOption {
   title?: string;
   archetype?: string;
   description?: string;
+  iconPath?: string;
   portraitPath?: string;
   visual?: {
     primaryColor: string;
@@ -57,13 +58,31 @@ export interface GamePlayerSetupOption {
   };
 }
 
-export interface GamePlayerSetupDefinition {
-  kind: "choice";
+interface GamePlayerSetupDefinitionBase {
   title?: string;
   description?: string;
   required?: boolean;
+  selectionKey?: string;
+}
+
+export interface GamePlayerSetupChoiceDefinition extends GamePlayerSetupDefinitionBase {
+  kind: "choice";
   options: readonly GamePlayerSetupOption[];
 }
+
+export interface GamePlayerSetupMultiSelectDefinition extends GamePlayerSetupDefinitionBase {
+  kind: "multi-select";
+  selectionKey: string;
+  minSelections: number;
+  maxSelections: number;
+  defaultValue?: readonly string[];
+  readyBlockedLabel?: string;
+  options: readonly GamePlayerSetupOption[];
+}
+
+export type GamePlayerSetupDefinition =
+  | GamePlayerSetupChoiceDefinition
+  | GamePlayerSetupMultiSelectDefinition;
 
 export interface GameManifest {
   id: string;

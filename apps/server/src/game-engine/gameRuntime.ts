@@ -407,7 +407,7 @@ export class GameRuntime {
     return {
       roomCode: room.code,
       roundNumber,
-      players: roomPlayersToSummaries(room),
+      players: roomPlayersToSummaries(room, selectedGame.id),
       now: this.getNow(),
       deltaMs,
       language: room.language,

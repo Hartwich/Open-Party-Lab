@@ -91,7 +91,7 @@ The platform generates registry imports only for local repos that exist and buil
 
 The platform owns generic lobby/setup rendering, navigation, room snapshots, and start-button behavior. Game repos own game-specific setup declarations and validation.
 
-For common setup controls, add `lobbySetup` to the game manifest. The platform currently renders reusable `select` and `number` fields and sends host actions shaped like:
+For common host setup controls, add `lobbySetup` to the game manifest. The platform currently renders reusable `select` and `number` fields and sends host actions shaped like:
 
 ```ts
 {
@@ -101,6 +101,8 @@ For common setup controls, add `lobbySetup` to the game manifest. The platform c
 ```
 
 The game server must validate that action and persist trusted values through `roomSettings`. Do not add static Platform imports for optional game setup data.
+
+For common controller-side player setup, add `playerSetup` to the game manifest. The platform renders reusable `choice` and `multi-select` flows and persists trusted values per player for the selected game. Game servers receive those values through `context.players[].setupSelections`.
 
 ## AI Agent Workflow
 

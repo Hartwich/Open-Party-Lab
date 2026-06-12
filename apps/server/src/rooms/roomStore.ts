@@ -1,5 +1,5 @@
 import type { ScoreEntry, SupportedLanguage } from "@open-party-lab/game-core";
-import type { PublicGamePhase } from "@open-party-lab/protocol";
+import type { PlayerSetupValue, PublicGamePhase } from "@open-party-lab/protocol";
 import { MemoryStore } from "../persistence/memoryStore.js";
 
 export type PlayerPresenceState = "online" | "reconnecting" | "offline";
@@ -10,6 +10,7 @@ export interface PlayerRecord {
   name: string;
   color: string;
   selectedCharacterId: string | null;
+  setupSelectionsByGameId: Record<string, Record<string, PlayerSetupValue>>;
   score: number;
   isReady: boolean;
   connected: boolean;

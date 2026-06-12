@@ -12,6 +12,7 @@ export interface GamePlayerSummary {
   isReady: boolean;
   connected: boolean;
   selectedCharacterId?: string | null;
+  setupSelections?: Readonly<Record<string, string | string[]>>;
 }
 
 export interface PreviousRoundContext {

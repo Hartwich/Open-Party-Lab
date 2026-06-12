@@ -1,6 +1,6 @@
 import type { SupportedLanguage } from "@open-party-lab/game-core";
 import type { RoomSnapshot } from "../dto/room.js";
-import type { PlayerSnapshot } from "../dto/player.js";
+import type { PlayerSetupValue, PlayerSnapshot } from "../dto/player.js";
 
 export interface OkResult<T> {
   ok: true;
@@ -41,6 +41,13 @@ export interface PlayerSelectCharacterRequest {
   roomCode: string;
   playerId: string;
   characterId: string;
+}
+
+export interface PlayerSetupRequest {
+  roomCode: string;
+  playerId: string;
+  selectionKey: string;
+  value: PlayerSetupValue;
 }
 
 export interface GameSelectRequest {
@@ -101,6 +108,11 @@ export interface KickPlayerSuccess {
   room: RoomSnapshot;
 }
 
+export interface PlayerSetupSuccess {
+  room: RoomSnapshot;
+  player: PlayerSnapshot;
+}
+
 export interface RoundAbortSuccess {
   room: RoomSnapshot;
 }
@@ -141,6 +153,10 @@ export interface ClientToServerEvents {
   ) => void;
   "player:ready": (payload: PlayerReadyRequest) => void;
   "player:select-character": (payload: PlayerSelectCharacterRequest) => void;
+  "player:set-setup": (
+    payload: PlayerSetupRequest,
+    ack: (result: AckResult<PlayerSetupSuccess>) => void
+  ) => void;
   "game:select": (payload: GameSelectRequest) => void;
   "game:host-action": (payload: GameHostActionRequest) => void;
   "game:input": (payload: GameInputRequest) => void;

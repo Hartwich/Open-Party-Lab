@@ -82,7 +82,7 @@ export function ControllerApp() {
           error={state.error}
           onLeaveRoom={() => controllerClient.leaveRoom()}
           onSetReady={(isReady) => controllerClient.setReady(isReady)}
-          onSelectCharacter={(characterId) => controllerClient.selectCharacter(characterId)}
+          onSetPlayerSetup={(selectionKey, value) => controllerClient.setPlayerSetup(selectionKey, value)}
         />
       ) : null}
 

@@ -40,6 +40,7 @@ Optional local game repos:
 Lobby/setup:
 
 - common setup controls are rendered by the platform from `manifest.lobbySetup`;
+- common controller-side player setup is rendered from `manifest.playerSetup` with `choice` and `multi-select` support;
 - game repos keep their own setup field declarations and server-side validation.
 
 ## Not Production-Ready Yet

@@ -5,6 +5,10 @@ import type {
 } from "@open-party-lab/protocol";
 import type { RoomRecord } from "./roomStore.js";
 
+type PlayerRecord = RoomRecord["players"] extends Map<string, infer TPlayer> ? TPlayer : never;
+type PlayerSetupValue = string | string[];
+type PlayerSetupDefinition = NonNullable<AvailableGameDto["playerSetup"]>;
+
 export function deriveRoomLifecycle(room: RoomRecord): RoomLifecycle {
   if (room.currentRound) {
     return room.currentRound.phase;
@@ -29,16 +33,89 @@ function isArenaSurvivorContinuingRun(room: RoomRecord): boolean {
   return room.currentRound.phase === "finished" && roundState.result?.outcome === "survived";
 }
 
-function areRequiredPlayerSetupChoicesSelected(room: RoomRecord, selectedGame: AvailableGameDto): boolean {
-  if (selectedGame.playerSetup?.required !== true) {
+function getPlayerSetupSelectionKey(setup: PlayerSetupDefinition): string {
+  return setup.selectionKey ?? "character";
+}
+
+function getPlayerSetupValue(
+  selectedGame: AvailableGameDto,
+  player: PlayerRecord
+): PlayerSetupValue | undefined {
+  const setup = selectedGame.playerSetup;
+
+  if (!setup) {
+    return undefined;
+  }
+
+  const selectionKey = getPlayerSetupSelectionKey(setup);
+  const storedValue = player.setupSelectionsByGameId[selectedGame.id]?.[selectionKey];
+
+  if (storedValue !== undefined) {
+    return storedValue;
+  }
+
+  if (setup.kind === "choice" && selectionKey === "character") {
+    return player.selectedCharacterId ?? undefined;
+  }
+
+  if (setup.kind === "multi-select" && setup.defaultValue) {
+    return [...setup.defaultValue];
+  }
+
+  return undefined;
+}
+
+function getPublicPlayerSetupSelections(
+  selectedGame: AvailableGameDto | undefined,
+  player: PlayerRecord
+): Record<string, PlayerSetupValue> {
+  if (!selectedGame?.playerSetup) {
+    return {};
+  }
+
+  const setup = selectedGame.playerSetup;
+  const selectionKey = getPlayerSetupSelectionKey(setup);
+  const value = getPlayerSetupValue(selectedGame, player);
+
+  return value === undefined ? {} : { [selectionKey]: Array.isArray(value) ? [...value] : value };
+}
+
+function getSelectedPlayerSetupChoiceId(
+  selectedGame: AvailableGameDto | undefined,
+  player: PlayerRecord
+): string | null {
+  if (selectedGame?.playerSetup?.kind !== "choice") {
+    return null;
+  }
+
+  const value = getPlayerSetupValue(selectedGame, player);
+  return typeof value === "string" ? value : null;
+}
+
+function isPlayerSetupComplete(selectedGame: AvailableGameDto, player: PlayerRecord): boolean {
+  const setup = selectedGame.playerSetup;
+
+  if (!setup || setup.required !== true) {
     return true;
   }
 
-  const validOptionIds = new Set(selectedGame.playerSetup.options.map((option) => option.id));
+  const validOptionIds = new Set(setup.options.map((option) => option.id));
+  const value = getPlayerSetupValue(selectedGame, player);
 
-  return [...room.players.values()].every(
-    (player) => Boolean(player.selectedCharacterId) && validOptionIds.has(player.selectedCharacterId ?? "")
-  );
+  if (setup.kind === "choice") {
+    return typeof value === "string" && validOptionIds.has(value);
+  }
+
+  if (!Array.isArray(value)) {
+    return false;
+  }
+
+  const uniqueValidValues = [...new Set(value)].filter((entry) => validOptionIds.has(entry));
+  return uniqueValidValues.length >= setup.minSelections && uniqueValidValues.length <= setup.maxSelections;
+}
+
+function areRequiredPlayerSetupChoicesSelected(room: RoomRecord, selectedGame: AvailableGameDto): boolean {
+  return [...room.players.values()].every((player) => isPlayerSetupComplete(selectedGame, player));
 }
 
 function isLobbySetupConfirmed(room: RoomRecord, selectedGame: AvailableGameDto): boolean {
@@ -132,11 +209,8 @@ export function explainCannotStartRound(
   }
 
   if (!areRequiredPlayerSetupChoicesSelected(room, selectedGame)) {
-    const validOptionIds = new Set(selectedGame.playerSetup?.options.map((option) => option.id) ?? []);
     const missingChoices = players
-      .filter(
-        (player) => !player.selectedCharacterId || !validOptionIds.has(player.selectedCharacterId)
-      )
+      .filter((player) => !isPlayerSetupComplete(selectedGame, player))
       .map((player) => player.name)
       .join(", ");
 
@@ -173,22 +247,27 @@ export function toRoomSnapshot(
     availableGames,
     players: [...room.players.values()]
       .sort((left, right) => left.joinedAt - right.joinedAt)
-      .map((player) => ({
-        id: player.id,
-        name: player.name,
-        color: player.color,
-        selectedCharacterId: player.selectedCharacterId,
-        selectedCharacterName: player.selectedCharacterId
-          ? selectedGame?.playerSetup?.options.find((option) => option.id === player.selectedCharacterId)?.name ?? null
-          : null,
-        isReady: player.isReady,
-        connected: player.connected,
-        presence: player.presence,
-        score: player.score,
-        joinedAt: player.joinedAt,
-        lastSeenAt: player.lastSeenAt,
-        reconnectGraceEndsAt: player.reconnectGraceEndsAt
-      })),
+      .map((player) => {
+        const selectedChoiceId = getSelectedPlayerSetupChoiceId(selectedGame, player);
+
+        return {
+          id: player.id,
+          name: player.name,
+          color: player.color,
+          selectedCharacterId: selectedChoiceId,
+          selectedCharacterName: selectedChoiceId
+            ? selectedGame?.playerSetup?.options.find((option) => option.id === selectedChoiceId)?.name ?? null
+            : null,
+          setupSelections: getPublicPlayerSetupSelections(selectedGame, player),
+          isReady: player.isReady,
+          connected: player.connected,
+          presence: player.presence,
+          score: player.score,
+          joinedAt: player.joinedAt,
+          lastSeenAt: player.lastSeenAt,
+          reconnectGraceEndsAt: player.reconnectGraceEndsAt
+        };
+      }),
     currentRound: room.currentRound
       ? {
           gameId: room.currentRound.gameId,
