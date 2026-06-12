@@ -1,6 +1,6 @@
 # Project Status
 
-Snapshot date: 2026-06-01
+Snapshot date: 2026-06-12
 
 ## Available In This Public Cut
 
@@ -26,7 +26,7 @@ Optional local game repos:
 - Arena Survivor can be loaded from `local-games/arena-survivor` when cloned locally. It is currently beta and recommended.
 - MinionsTD can be loaded from `local-games/minions-td` when cloned locally. It is currently beta and recommended.
 - Zeichnen & Erraten can be loaded from `local-games/zeichnen-und-erraten` when cloned locally. It is currently beta and recommended.
-- Schaetzorama can be loaded from `local-games/schaetzorama` when cloned locally. It is currently beta and recommended.
+- Schaetzorama can be loaded from `local-games/schaetzorama` when cloned locally. It is currently beta and recommended; the answer-setting phase has no timer, repeated question IDs are avoided within a 10-round session, and directly math-solvable prompts are excluded from the active pool.
 - Tap Race can be loaded from `local-games/tap-race` when cloned locally.
 - Pantomime can be loaded from `local-games/pantomime` when cloned locally.
 - Air Hockey can be loaded from `local-games/air-hockey` when cloned locally.

@@ -551,7 +551,9 @@ function formatTimer(model: SchaetzoramaLayoutModel): string {
   const end = model.stage === "joker" ? model.jokerEndsAt : model.answerEndsAt;
 
   if (!end || model.stage === "revealed") {
-    return model.stage === "revealed" ? (model.language === "en" ? "Reveal" : "Auswertung") : "Live";
+    return model.stage === "revealed"
+      ? (model.language === "en" ? "Reveal" : "Auswertung")
+      : (model.language === "en" ? "No limit" : "Ohne Limit");
   }
 
   const seconds = Math.max(0, Math.ceil((end - Date.now()) / 1000));
