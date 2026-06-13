@@ -130,7 +130,7 @@ export interface VirtualJoystickLayoutModel {
   onMoveChange: (moveX: number, moveY: number) => void;
 }
 
-export type RacingControlKey = "left" | "right" | "throttle" | "brake" | "drift" | "boost";
+export type RacingControlKey = "drift" | "boost" | "fire";
 
 export interface RacingControlsState {
   steering: number;
@@ -138,6 +138,7 @@ export interface RacingControlsState {
   brake: boolean;
   drift: boolean;
   boost: boolean;
+  fire: boolean;
 }
 
 export interface RacingControlsLayoutModel {

@@ -7,6 +7,7 @@ export interface DriftRacerDriveInput extends PlayerInput {
   brake: boolean;
   drift: boolean;
   boost: boolean;
+  fire: boolean;
 }
 
 export type DriftRacerInput = DriftRacerDriveInput;
@@ -26,6 +27,7 @@ export interface DriftRacerControlState {
   brake: boolean;
   drift: boolean;
   boost: boolean;
+  fire: boolean;
 }
 
 export interface DriftRacerRacerState {

@@ -33,7 +33,7 @@ Optional local game repos:
 - Tabu can be loaded from `local-games/tabu` when cloned locally.
 - Imposter can be loaded from `local-games/imposter` when cloned locally.
 - Light Trails can be loaded from `local-games/light-trails` when cloned locally.
-- Drift Racer can be loaded from `local-games/drift-racer` when cloned locally. It is under construction and currently not playable.
+- Drift Racer can be loaded from `local-games/drift-racer` when cloned locally. It is under construction and currently not playable; its phone controller uses a left virtual drive stick plus Boost, Fire, and Drift action buttons.
 - Word Tiles can be loaded from `local-games/word-tiles` when cloned locally. It supports multiple accepted word placements per turn and uses table-driven word challenges instead of an internal dictionary check.
 - Chaos-Kommando can be loaded from `local-games/chaos-kommando` when cloned locally.
 
