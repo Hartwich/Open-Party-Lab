@@ -51,8 +51,20 @@ function exposeHostAutomationBridge(hostClient: HostSocketClient): void {
   };
 }
 
+function resolveDefaultServerUrl(): string {
+  const hostname = window.location.hostname;
+
+  if (!hostname || hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") {
+    return "http://localhost:3000";
+  }
+
+  const host = hostname.includes(":") ? `[${hostname}]` : hostname;
+  const protocol = window.location.protocol === "https:" ? "https:" : "http:";
+  return `${protocol}//${host}:3000`;
+}
+
 export function bootstrapHostApp(): Phaser.Game {
-  const serverUrl = import.meta.env.VITE_SERVER_URL ?? "http://localhost:3000";
+  const serverUrl = import.meta.env.VITE_SERVER_URL ?? resolveDefaultServerUrl();
   const hostClient = new HostSocketClient(serverUrl);
   const preferredFps = readHostFpsPreference();
   const fpsConfig = createHostFpsConfig(preferredFps);

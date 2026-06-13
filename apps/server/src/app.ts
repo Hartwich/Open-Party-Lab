@@ -100,7 +100,7 @@ export function createApp(environment: AppEnv = loadEnv()) {
         };
 
         httpServer.once("error", handleListenError);
-        httpServer.listen(environment.port, () => {
+        httpServer.listen(environment.port, environment.host, () => {
           httpServer.off("error", handleListenError);
           resolve();
         });
@@ -109,6 +109,7 @@ export function createApp(environment: AppEnv = loadEnv()) {
       roundTimerService.start();
 
       logger.info("Party platform server listening.", {
+        host: environment.host,
         port: environment.port,
         controllerOrigin: environment.publicControllerOrigin,
         roomCode: primaryRoom.code,

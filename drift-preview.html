@@ -1,0 +1,1272 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Drift Racer – 3D Preview</title>
+<style>html,body{margin:0;height:100%;background:#b8cfe0;overflow:hidden;font-family:system-ui}#app{position:fixed;inset:0}
+#hb{position:fixed;bottom:10px;right:12px;z-index:9;color:#0b1324;background:rgba(255,255,255,.7);padding:6px 10px;border-radius:8px;font-size:13px}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js"}}</script>
+</head><body><div id="app"></div><div id="hb">Kamera: Taste C wechselt &middot; 1=Dynamisch 2=Cinematic 3=Chase 4=Übersicht 5=Top-down</div>
+<script type="module">
+import * as THREE from "three";
+const driftRacerTrackConfig = {
+    worldWidth: 3_200,
+    worldHeight: 2_200,
+    trackWidth: 300,
+    lapsToWin: 3,
+    maxRaceMs: 150_000,
+    carRadius: 30,
+    wallHeight: 90
+};
+// Hand-authored clockwise circuit. Start/finish sits on the long bottom
+// straight; the loop has fast sweepers, a top chicane and two jump straights.
+const WAYPOINTS = [
+    [1100, 1805],
+    [1500, 1830],
+    [2300, 1770],
+    [2800, 1470],
+    [2950, 1060],
+    [2790, 650],
+    [2250, 470],
+    [1780, 560],
+    [1500, 470],
+    [980, 560],
+    [560, 820],
+    [380, 1250],
+    [560, 1620],
+    [760, 1755]
+];
+const SAMPLE_STEP = 28;
+function catmullRom(p0, p1, p2, p3, t) {
+    const t2 = t * t;
+    const t3 = t2 * t;
+    return [
+        0.5 *
+            (2 * p1[0] +
+                (-p0[0] + p2[0]) * t +
+                (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 +
+                (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
+        0.5 *
+            (2 * p1[1] +
+                (-p0[1] + p2[1]) * t +
+                (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 +
+                (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3)
+    ];
+}
+function buildCenterline() {
+    const count = WAYPOINTS.length;
+    const dense = [];
+    for (let i = 0; i < count; i += 1) {
+        const p0 = WAYPOINTS[(i - 1 + count) % count];
+        const p1 = WAYPOINTS[i];
+        const p2 = WAYPOINTS[(i + 1) % count];
+        const p3 = WAYPOINTS[(i + 2) % count];
+        for (let s = 0; s < 40; s += 1) {
+            dense.push(catmullRom(p0, p1, p2, p3, s / 40));
+        }
+    }
+    const hyp = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+    const cumulative = [0];
+    let total = 0;
+    for (let i = 1; i < dense.length; i += 1) {
+        total += hyp(dense[i - 1], dense[i]);
+        cumulative.push(total);
+    }
+    total += hyp(dense[dense.length - 1], dense[0]);
+    const sampleCount = Math.round(total / SAMPLE_STEP);
+    const step = total / sampleCount;
+    const points = [];
+    let denseIndex = 0;
+    for (let k = 0; k < sampleCount; k += 1) {
+        const target = k * step;
+        while (denseIndex < cumulative.length - 1 && cumulative[denseIndex + 1] < target) {
+            denseIndex += 1;
+        }
+        const segLength = (cumulative[denseIndex + 1] ?? total) - cumulative[denseIndex];
+        const f = segLength > 0 ? (target - cumulative[denseIndex]) / segLength : 0;
+        const a = dense[denseIndex];
+        const b = dense[(denseIndex + 1) % dense.length];
+        points.push({ x: a[0] + (b[0] - a[0]) * f, y: a[1] + (b[1] - a[1]) * f });
+    }
+    return points;
+}
+function createTrack() {
+    const rawPoints = buildCenterline();
+    const lengths = rawPoints.map((point, index) => {
+        const next = rawPoints[(index + 1) % rawPoints.length];
+        return Math.hypot(next.x - point.x, next.y - point.y);
+    });
+    let accumulatedDistance = 0;
+    const points = rawPoints.map((point, index) => {
+        const trackPoint = {
+            ...point,
+            distance: accumulatedDistance
+        };
+        accumulatedDistance += lengths[index];
+        return trackPoint;
+    });
+    const length = accumulatedDistance;
+    const segments = points.map((point, index) => {
+        const nextIndex = (index + 1) % points.length;
+        const next = points[nextIndex];
+        const segmentLength = lengths[index] || 1;
+        const tangentX = (next.x - point.x) / segmentLength;
+        const tangentY = (next.y - point.y) / segmentLength;
+        return {
+            startIndex: index,
+            endIndex: nextIndex,
+            startDistance: point.distance,
+            length: segmentLength,
+            tangentX,
+            tangentY,
+            normalX: -tangentY,
+            normalY: tangentX
+        };
+    });
+    return { points, segments, length };
+}
+const driftRacerTrack = createTrack();
+// Jump ramps, positioned by fraction of the lap so they land on (mostly)
+// straight sections. The lip is at startDistance + length.
+const driftRacerRamps = [
+    { startDistance: 0.115 * driftRacerTrack.length - 240, length: 240, peak: 95 },
+    { startDistance: 0.66 * driftRacerTrack.length - 200, length: 200, peak: 60 }
+].map((ramp) => ({
+    ...ramp,
+    startDistance: (ramp.startDistance + driftRacerTrack.length) % driftRacerTrack.length
+}));
+function wrapTrackDistance(distance) {
+    const wrapped = distance % driftRacerTrack.length;
+    return wrapped >= 0 ? wrapped : wrapped + driftRacerTrack.length;
+}
+/** Ramp surface height (and slope) at a track distance. */
+function sampleRampHeight(distance) {
+    const d = wrapTrackDistance(distance);
+    for (const ramp of driftRacerRamps) {
+        const end = ramp.startDistance + ramp.length;
+        if (d >= ramp.startDistance && d <= end) {
+            return { height: (ramp.peak * (d - ramp.startDistance)) / ramp.length, slope: ramp.peak / ramp.length };
+        }
+    }
+    return { height: 0, slope: 0 };
+}
+function sampleDriftRacerTrack(distance) {
+    const wrappedDistance = wrapTrackDistance(distance);
+    const segment = driftRacerTrack.segments.find((entry) => wrappedDistance >= entry.startDistance && wrappedDistance <= entry.startDistance + entry.length) ?? driftRacerTrack.segments[driftRacerTrack.segments.length - 1];
+    const start = driftRacerTrack.points[segment.startIndex];
+    const t = Math.max(0, Math.min(1, (wrappedDistance - segment.startDistance) / segment.length));
+    return {
+        x: start.x + segment.tangentX * segment.length * t,
+        y: start.y + segment.tangentY * segment.length * t,
+        distance: wrappedDistance,
+        angleRad: Math.atan2(segment.tangentY, segment.tangentX),
+        normalX: segment.normalX,
+        normalY: segment.normalY
+    };
+}
+function projectPointToDriftRacerTrack(x, y) {
+    let bestProjection = null;
+    let bestDistanceSq = Number.POSITIVE_INFINITY;
+    for (const segment of driftRacerTrack.segments) {
+        const start = driftRacerTrack.points[segment.startIndex];
+        const dx = x - start.x;
+        const dy = y - start.y;
+        const t = Math.max(0, Math.min(1, (dx * segment.tangentX + dy * segment.tangentY) / segment.length));
+        const projectedX = start.x + segment.tangentX * segment.length * t;
+        const projectedY = start.y + segment.tangentY * segment.length * t;
+        const offsetX = x - projectedX;
+        const offsetY = y - projectedY;
+        const distanceSq = offsetX * offsetX + offsetY * offsetY;
+        if (distanceSq >= bestDistanceSq) {
+            continue;
+        }
+        const signedLateralDistance = offsetX * segment.normalX + offsetY * segment.normalY;
+        bestDistanceSq = distanceSq;
+        bestProjection = {
+            x: projectedX,
+            y: projectedY,
+            distance: wrapTrackDistance(segment.startDistance + segment.length * t),
+            angleRad: Math.atan2(segment.tangentY, segment.tangentX),
+            normalX: segment.normalX,
+            normalY: segment.normalY,
+            signedLateralDistance,
+            lateralDistance: Math.abs(signedLateralDistance)
+        };
+    }
+    if (!bestProjection) {
+        const fallback = sampleDriftRacerTrack(0);
+        return { ...fallback, signedLateralDistance: 0, lateralDistance: 0 };
+    }
+    return bestProjection;
+}
+//# sourceMappingURL=driftRacerTrack.js.map
+
+/**
+ * Full 3D renderer for Drift Racer.
+ *
+ * The server simulates an arcade racer in world space (x / y / angle) plus a
+ * vertical axis (z) for jumps. This module renders it as a fully 3D RC scene: a
+ * tabletop play-mat, a 3D road ribbon with curbs and barriers (Banden) built
+ * from the track centreline, jump ramps (Sprungschanzen), colourful mini RC
+ * cars and a cinematic flying camera with several switchable angles.
+ */
+// ---------------------------------------------------------------------------
+// Tuning constants
+// ---------------------------------------------------------------------------
+/** World pixels -> Three.js scene units. */
+const WORLD_SCALE = 0.02;
+const POS_LERP_RATE = 14;
+const ANGLE_LERP_RATE = 12;
+const HEIGHT_LERP_RATE = 20;
+const SKID_POOL = 240;
+const SKID_LIFE_MS = 2600;
+const SKID_MIN_STEP = 0.14;
+const CAMERA_MODES = ["dynamic", "cinematic", "chase", "overview", "topdown"];
+const CAMERA_LABELS = {
+    dynamic: { de: "Dynamisch (alle)", en: "Dynamic (all)" },
+    cinematic: { de: "Cinematic", en: "Cinematic" },
+    chase: { de: "Verfolgung", en: "Chase" },
+    overview: { de: "Übersicht", en: "Overview" },
+    topdown: { de: "Vogel", en: "Top-down" }
+};
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+function parseColor(color, fallback = "#38bdf8") {
+    try {
+        return new THREE.Color(color ?? fallback);
+    }
+    catch {
+        return new THREE.Color(fallback);
+    }
+}
+function shortestAngleDelta(from, to) {
+    let delta = (to - from) % (Math.PI * 2);
+    if (delta > Math.PI)
+        delta -= Math.PI * 2;
+    if (delta < -Math.PI)
+        delta += Math.PI * 2;
+    return delta;
+}
+function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+}
+function disposeObject(object) {
+    object.traverse((child) => {
+        const mesh = child;
+        if (mesh.geometry)
+            mesh.geometry.dispose();
+        const material = mesh.material;
+        if (Array.isArray(material)) {
+            material.forEach((entry) => entry.dispose());
+        }
+        else if (material) {
+            material.dispose();
+        }
+    });
+}
+// ---------------------------------------------------------------------------
+// Renderer
+// ---------------------------------------------------------------------------
+class DriftRacerRenderer {
+    root;
+    hud;
+    renderer;
+    scene;
+    camera;
+    trackGroup;
+    carGroup;
+    skidGroup;
+    skidPool = [];
+    skidCursor = 0;
+    cars = new Map();
+    state = null;
+    en = false;
+    trackBuilt = false;
+    offsetX = 0;
+    offsetZ = 0;
+    // Cached scene-space track geometry for sampling (ramps, etc.).
+    trackCentre = [];
+    trackNormals = [];
+    trackDistances = [];
+    trackLen = 1;
+    halfWidthScene = 3;
+    cameraMode = "dynamic";
+    camPos = new THREE.Vector3(0, 30, 30);
+    camLook = new THREE.Vector3(0, 0, 0);
+    cameraInitialised = false;
+    animationId = null;
+    lastFrame = 0;
+    lastWidth = 0;
+    lastHeight = 0;
+    keyHandler;
+    // ---- lifecycle -------------------------------------------------------
+    mount(parent) {
+        parent.style.position = parent.style.position || "relative";
+        const root = document.createElement("div");
+        Object.assign(root.style, {
+            position: "absolute",
+            inset: "0",
+            overflow: "hidden",
+            background: "#b8cfe0",
+            pointerEvents: "none",
+            zIndex: "1"
+        });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.05;
+        renderer.domElement.style.width = "100%";
+        renderer.domElement.style.height = "100%";
+        renderer.domElement.style.display = "block";
+        root.appendChild(renderer.domElement);
+        const hud = document.createElement("div");
+        Object.assign(hud.style, {
+            position: "absolute",
+            inset: "0",
+            pointerEvents: "none",
+            fontFamily: '"Nunito Sans", Inter, system-ui, sans-serif',
+            color: "#f8fafc"
+        });
+        root.appendChild(hud);
+        parent.appendChild(root);
+        this.root = root;
+        this.hud = hud;
+        this.renderer = renderer;
+        this.createScene();
+        this.keyHandler = (event) => {
+            const key = event.key.toLowerCase();
+            if (key === "c") {
+                this.cycleCamera();
+            }
+            else if (key >= "1" && key <= "5") {
+                this.setCameraMode(CAMERA_MODES[Number(key) - 1]);
+            }
+        };
+        window.addEventListener("keydown", this.keyHandler);
+        this.updateCameraLabel();
+        this.startLoop();
+    }
+    dispose() {
+        if (this.animationId !== null) {
+            window.cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+        if (this.keyHandler) {
+            window.removeEventListener("keydown", this.keyHandler);
+            this.keyHandler = undefined;
+        }
+        this.cars.clear();
+        if (this.scene) {
+            this.scene.traverse((child) => {
+                const mesh = child;
+                if (mesh.geometry)
+                    mesh.geometry.dispose();
+            });
+            this.scene.clear();
+        }
+        this.renderer?.dispose();
+        this.root?.remove();
+        this.root = undefined;
+        this.hud = undefined;
+        this.renderer = undefined;
+        this.scene = undefined;
+        this.camera = undefined;
+        this.trackGroup = undefined;
+        this.carGroup = undefined;
+        this.skidGroup = undefined;
+        this.skidPool = [];
+        this.state = null;
+        this.trackBuilt = false;
+    }
+    // ---- public state feed ----------------------------------------------
+    setState(state, en) {
+        this.en = en;
+        this.state = state;
+        if (!state) {
+            return;
+        }
+        if (!this.trackBuilt) {
+            this.offsetX = (state.worldWidth * WORLD_SCALE) / 2;
+            this.offsetZ = (state.worldHeight * WORLD_SCALE) / 2;
+            this.buildTrack(state);
+            this.trackBuilt = true;
+        }
+        this.syncCars(state);
+        this.updateHud(state);
+    }
+    sx(worldX) {
+        return worldX * WORLD_SCALE - this.offsetX;
+    }
+    sz(worldY) {
+        return worldY * WORLD_SCALE - this.offsetZ;
+    }
+    // ---- scene / environment --------------------------------------------
+    createScene() {
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color("#b8cfe0");
+        scene.fog = new THREE.Fog("#b8cfe0", 90, 190);
+        const camera = new THREE.PerspectiveCamera(50, 16 / 9, 0.1, 600);
+        camera.position.copy(this.camPos);
+        camera.lookAt(this.camLook);
+        scene.add(new THREE.HemisphereLight("#ffffff", "#41584f", 1.0));
+        const sun = new THREE.DirectionalLight("#fff6e0", 2.0);
+        sun.position.set(26, 48, 18);
+        sun.castShadow = true;
+        sun.shadow.mapSize.set(2048, 2048);
+        sun.shadow.camera.near = 1;
+        sun.shadow.camera.far = 160;
+        const span = 46;
+        sun.shadow.camera.left = -span;
+        sun.shadow.camera.right = span;
+        sun.shadow.camera.top = span;
+        sun.shadow.camera.bottom = -span;
+        sun.shadow.bias = -0.0004;
+        scene.add(sun);
+        const mat = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: "#2f6f60", roughness: 0.95, metalness: 0 }));
+        mat.rotation.x = -Math.PI / 2;
+        mat.position.y = -0.02;
+        mat.receiveShadow = true;
+        scene.add(mat);
+        const grid = new THREE.GridHelper(200, 100, 0x3f8576, 0x3a7a6b);
+        grid.material.transparent = true;
+        grid.material.opacity = 0.32;
+        scene.add(grid);
+        const trackGroup = new THREE.Group();
+        const carGroup = new THREE.Group();
+        const skidGroup = new THREE.Group();
+        scene.add(trackGroup, skidGroup, carGroup);
+        this.scene = scene;
+        this.camera = camera;
+        this.trackGroup = trackGroup;
+        this.carGroup = carGroup;
+        this.skidGroup = skidGroup;
+        this.buildSkidPool();
+        this.cars.clear();
+    }
+    buildSkidPool() {
+        if (!this.skidGroup)
+            return;
+        const geometry = new THREE.PlaneGeometry(0.34, 0.18);
+        for (let i = 0; i < SKID_POOL; i += 1) {
+            const material = new THREE.MeshBasicMaterial({
+                color: 0x141414,
+                transparent: true,
+                opacity: 0,
+                depthWrite: false
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.y = 0.028;
+            mesh.visible = false;
+            this.skidGroup.add(mesh);
+            this.skidPool.push({ mesh, born: 0 });
+        }
+    }
+    // ---- track -----------------------------------------------------------
+    buildTrack(state) {
+        const group = this.trackGroup;
+        if (!group)
+            return;
+        const points = state.track;
+        const count = points.length;
+        const halfWidth = (state.trackWidth * WORLD_SCALE) / 2;
+        this.halfWidthScene = halfWidth;
+        this.trackLen = state.trackLength;
+        const centre = points.map((p) => new THREE.Vector2(this.sx(p.x), this.sz(p.y)));
+        const normals = centre.map((_, i) => {
+            const prev = centre[(i - 1 + count) % count];
+            const next = centre[(i + 1) % count];
+            const tx = next.x - prev.x;
+            const tz = next.y - prev.y;
+            const len = Math.hypot(tx, tz) || 1;
+            return new THREE.Vector2(-tz / len, tx / len);
+        });
+        this.trackCentre = centre;
+        this.trackNormals = normals;
+        this.trackDistances = points.map((p) => p.distance);
+        // Road surface ribbon.
+        const roadPos = [];
+        const roadIndex = [];
+        for (let i = 0; i < count; i += 1) {
+            const c = centre[i];
+            const n = normals[i];
+            roadPos.push(c.x + n.x * halfWidth, 0.02, c.y + n.y * halfWidth);
+            roadPos.push(c.x - n.x * halfWidth, 0.02, c.y - n.y * halfWidth);
+        }
+        for (let i = 0; i < count; i += 1) {
+            const a = i * 2;
+            const b = i * 2 + 1;
+            const cIdx = ((i + 1) % count) * 2;
+            const d = ((i + 1) % count) * 2 + 1;
+            roadIndex.push(a, b, d, a, d, cIdx);
+        }
+        const roadGeo = new THREE.BufferGeometry();
+        roadGeo.setAttribute("position", new THREE.Float32BufferAttribute(roadPos, 3));
+        roadGeo.setIndex(roadIndex);
+        roadGeo.computeVertexNormals();
+        const road = new THREE.Mesh(roadGeo, new THREE.MeshStandardMaterial({ color: "#3b414e", roughness: 0.9, metalness: 0.02 }));
+        road.receiveShadow = true;
+        group.add(road);
+        // Curbs + barriers (Banden) on both sides.
+        group.add(this.buildCurb(centre, normals, halfWidth, 1));
+        group.add(this.buildCurb(centre, normals, halfWidth, -1));
+        const wallHeight = state.wallHeight * WORLD_SCALE;
+        group.add(this.buildWall(centre, normals, halfWidth, wallHeight, 1));
+        group.add(this.buildWall(centre, normals, halfWidth, wallHeight, -1));
+        // Dashed centre line.
+        const dashGeo = new THREE.PlaneGeometry(0.5, 0.1);
+        const dashMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc, transparent: true, opacity: 0.5 });
+        for (let i = 0; i < count; i += 3) {
+            const c = centre[i];
+            const n = normals[i];
+            const dash = new THREE.Mesh(dashGeo, dashMat);
+            dash.rotation.x = -Math.PI / 2;
+            dash.rotation.z = Math.atan2(n.x, n.y);
+            dash.position.set(c.x, 0.03, c.y);
+            group.add(dash);
+        }
+        // Start / finish checkered band.
+        group.add(this.buildStartLine(centre[0], normals[0], halfWidth));
+        // Jump ramps (Sprungschanzen).
+        for (const ramp of state.ramps) {
+            group.add(this.buildRamp(ramp.startDistance, ramp.length, ramp.peak));
+        }
+    }
+    buildCurb(centre, normals, halfWidth, side) {
+        const count = centre.length;
+        const inner = halfWidth;
+        const outer = halfWidth + 0.32;
+        const pos = [];
+        const colors = [];
+        const index = [];
+        const red = new THREE.Color("#ef4444");
+        const white = new THREE.Color("#f8fafc");
+        for (let i = 0; i < count; i += 1) {
+            const c = centre[i];
+            const n = normals[i];
+            pos.push(c.x + n.x * inner * side, 0.035, c.y + n.y * inner * side);
+            pos.push(c.x + n.x * outer * side, 0.035, c.y + n.y * outer * side);
+            const col = i % 2 === 0 ? red : white;
+            colors.push(col.r, col.g, col.b, col.r, col.g, col.b);
+        }
+        for (let i = 0; i < count; i += 1) {
+            const a = i * 2;
+            const b = i * 2 + 1;
+            const cIdx = ((i + 1) % count) * 2;
+            const d = ((i + 1) % count) * 2 + 1;
+            index.push(a, b, d, a, d, cIdx);
+        }
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+        geo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+        geo.setIndex(index);
+        geo.computeVertexNormals();
+        const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7 }));
+        mesh.receiveShadow = true;
+        return mesh;
+    }
+    buildWall(centre, normals, halfWidth, wallHeight, side) {
+        const count = centre.length;
+        const off = halfWidth + 0.36;
+        const pos = [];
+        const colors = [];
+        const index = [];
+        const red = new THREE.Color("#dc2626");
+        const white = new THREE.Color("#f1f5f9");
+        for (let i = 0; i < count; i += 1) {
+            const c = centre[i];
+            const n = normals[i];
+            const bx = c.x + n.x * off * side;
+            const bz = c.y + n.y * off * side;
+            pos.push(bx, 0, bz); // base
+            pos.push(bx, wallHeight, bz); // top
+            const col = Math.floor(i / 2) % 2 === 0 ? red : white;
+            colors.push(col.r, col.g, col.b, col.r, col.g, col.b);
+        }
+        for (let i = 0; i < count; i += 1) {
+            const a = i * 2;
+            const b = i * 2 + 1;
+            const cIdx = ((i + 1) % count) * 2;
+            const d = ((i + 1) % count) * 2 + 1;
+            index.push(a, b, d, a, d, cIdx);
+        }
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+        geo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+        geo.setIndex(index);
+        geo.computeVertexNormals();
+        const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.55, side: THREE.DoubleSide }));
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        return mesh;
+    }
+    buildStartLine(centre, normal, halfWidth) {
+        const canvas = document.createElement("canvas");
+        canvas.width = 64;
+        canvas.height = 16;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+            const cols = 16;
+            const rows = 4;
+            const cw = canvas.width / cols;
+            const ch = canvas.height / rows;
+            for (let r = 0; r < rows; r += 1) {
+                for (let c = 0; c < cols; c += 1) {
+                    ctx.fillStyle = (r + c) % 2 === 0 ? "#0f172a" : "#f8fafc";
+                    ctx.fillRect(c * cw, r * ch, cw, ch);
+                }
+            }
+        }
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.magFilter = THREE.NearestFilter;
+        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(halfWidth * 2, 0.7), new THREE.MeshBasicMaterial({ map: texture }));
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.rotation.z = Math.atan2(normal.x, normal.y);
+        mesh.position.set(centre.x, 0.032, centre.y);
+        return mesh;
+    }
+    /** Sample scene-space centreline position + normal at a world distance. */
+    sampleCentre(distance) {
+        const len = this.trackLen;
+        const d = ((distance % len) + len) % len;
+        const dist = this.trackDistances;
+        const count = this.trackCentre.length;
+        let i = 0;
+        for (let k = 0; k < count; k += 1) {
+            const a = dist[k];
+            const b = k + 1 < count ? dist[k + 1] : len;
+            if (d >= a && d < b) {
+                i = k;
+                break;
+            }
+        }
+        const a = dist[i];
+        const b = i + 1 < count ? dist[i + 1] : len;
+        const t = b > a ? (d - a) / (b - a) : 0;
+        const c0 = this.trackCentre[i];
+        const c1 = this.trackCentre[(i + 1) % count];
+        const n0 = this.trackNormals[i];
+        const n1 = this.trackNormals[(i + 1) % count];
+        return {
+            x: c0.x + (c1.x - c0.x) * t,
+            z: c0.y + (c1.y - c0.y) * t,
+            nx: n0.x + (n1.x - n0.x) * t,
+            nz: n0.y + (n1.y - n0.y) * t
+        };
+    }
+    buildRamp(startDistance, length, peak) {
+        const grp = new THREE.Group();
+        const steps = 12;
+        const hw = this.halfWidthScene;
+        const peakScene = peak * WORLD_SCALE;
+        const lt = [];
+        const rt = [];
+        for (let s = 0; s <= steps; s += 1) {
+            const t = s / steps;
+            const c = this.sampleCentre(startDistance + length * t);
+            const h = peakScene * t;
+            lt.push(new THREE.Vector3(c.x + c.nx * hw, h + 0.02, c.z + c.nz * hw));
+            rt.push(new THREE.Vector3(c.x - c.nx * hw, h + 0.02, c.z - c.nz * hw));
+        }
+        // Deck surface.
+        const deckPos = [];
+        const deckIdx = [];
+        for (let s = 0; s <= steps; s += 1) {
+            deckPos.push(lt[s].x, lt[s].y, lt[s].z, rt[s].x, rt[s].y, rt[s].z);
+        }
+        for (let s = 0; s < steps; s += 1) {
+            const a = s * 2;
+            const b = s * 2 + 1;
+            const c = (s + 1) * 2;
+            const d = (s + 1) * 2 + 1;
+            deckIdx.push(a, b, d, a, d, c);
+        }
+        const deckGeo = new THREE.BufferGeometry();
+        deckGeo.setAttribute("position", new THREE.Float32BufferAttribute(deckPos, 3));
+        deckGeo.setIndex(deckIdx);
+        deckGeo.computeVertexNormals();
+        const deck = new THREE.Mesh(deckGeo, new THREE.MeshStandardMaterial({ color: "#f59e0b", roughness: 0.6, side: THREE.DoubleSide }));
+        deck.castShadow = true;
+        deck.receiveShadow = true;
+        grp.add(deck);
+        // Dark skirt: side walls + take-off lip face.
+        const skirtPos = [];
+        const skirtIdx = [];
+        const push = (v) => {
+            skirtPos.push(v.x, v.y, v.z);
+            return skirtPos.length / 3 - 1;
+        };
+        for (let s = 0; s < steps; s += 1) {
+            // left side
+            const l0 = push(lt[s]);
+            const l0g = push(new THREE.Vector3(lt[s].x, 0, lt[s].z));
+            const l1 = push(lt[s + 1]);
+            const l1g = push(new THREE.Vector3(lt[s + 1].x, 0, lt[s + 1].z));
+            skirtIdx.push(l0, l0g, l1g, l0, l1g, l1);
+            // right side
+            const r0 = push(rt[s]);
+            const r0g = push(new THREE.Vector3(rt[s].x, 0, rt[s].z));
+            const r1 = push(rt[s + 1]);
+            const r1g = push(new THREE.Vector3(rt[s + 1].x, 0, rt[s + 1].z));
+            skirtIdx.push(r0, r1g, r0g, r0, r1, r1g);
+        }
+        // lip end cap (vertical take-off face)
+        const e = steps;
+        const a0 = push(lt[e]);
+        const a1 = push(rt[e]);
+        const a2 = push(new THREE.Vector3(rt[e].x, 0, rt[e].z));
+        const a3 = push(new THREE.Vector3(lt[e].x, 0, lt[e].z));
+        skirtIdx.push(a0, a1, a2, a0, a2, a3);
+        const skirtGeo = new THREE.BufferGeometry();
+        skirtGeo.setAttribute("position", new THREE.Float32BufferAttribute(skirtPos, 3));
+        skirtGeo.setIndex(skirtIdx);
+        skirtGeo.computeVertexNormals();
+        const skirt = new THREE.Mesh(skirtGeo, new THREE.MeshStandardMaterial({ color: "#b45309", roughness: 0.8, side: THREE.DoubleSide }));
+        skirt.castShadow = true;
+        grp.add(skirt);
+        return grp;
+    }
+    // ---- cars ------------------------------------------------------------
+    createCar(color) {
+        const group = new THREE.Group();
+        const body = new THREE.Group();
+        group.add(body);
+        const paint = parseColor(color);
+        const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.18, 0.26, 0.62), new THREE.MeshStandardMaterial({ color: paint, roughness: 0.45, metalness: 0.15 }));
+        chassis.position.y = 0.24;
+        chassis.castShadow = true;
+        body.add(chassis);
+        const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.22, 0.5), new THREE.MeshStandardMaterial({ color: "#dbeafe", roughness: 0.2, metalness: 0.3 }));
+        cabin.position.set(0.02, 0.46, 0);
+        cabin.castShadow = true;
+        body.add(cabin);
+        const nose = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.14, 0.66), new THREE.MeshStandardMaterial({ color: paint.clone().offsetHSL(0, 0, -0.08), roughness: 0.5 }));
+        nose.position.set(0.58, 0.18, 0);
+        nose.castShadow = true;
+        body.add(nose);
+        const spoiler = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.18, 0.7), new THREE.MeshStandardMaterial({ color: "#1f2937", roughness: 0.6 }));
+        spoiler.position.set(-0.6, 0.42, 0);
+        spoiler.castShadow = true;
+        body.add(spoiler);
+        const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.5, 6), new THREE.MeshStandardMaterial({ color: "#111827" }));
+        antenna.position.set(-0.45, 0.74, 0.22);
+        body.add(antenna);
+        const ball = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 10), new THREE.MeshStandardMaterial({ color: paint, emissive: paint, emissiveIntensity: 0.4 }));
+        ball.position.set(-0.45, 1.0, 0.22);
+        body.add(ball);
+        const boostFlame = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.6, 12), new THREE.MeshBasicMaterial({
+            color: "#fb923c",
+            transparent: true,
+            opacity: 0.9,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        }));
+        boostFlame.rotation.z = Math.PI / 2;
+        boostFlame.position.set(-0.95, 0.22, 0);
+        boostFlame.visible = false;
+        body.add(boostFlame);
+        const wheelGeo = new THREE.CylinderGeometry(0.19, 0.19, 0.14, 16);
+        wheelGeo.rotateX(Math.PI / 2);
+        const wheelMat = new THREE.MeshStandardMaterial({ color: "#0f172a", roughness: 0.85 });
+        const hubMat = new THREE.MeshStandardMaterial({ color: "#e5e7eb", roughness: 0.4, metalness: 0.4 });
+        const wheels = [];
+        const frontPivots = [];
+        const offsets = [
+            { x: 0.42, z: 0.34, front: true },
+            { x: 0.42, z: -0.34, front: true },
+            { x: -0.42, z: 0.34, front: false },
+            { x: -0.42, z: -0.34, front: false }
+        ];
+        for (const off of offsets) {
+            const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+            wheel.castShadow = true;
+            const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.16, 10), hubMat);
+            hub.rotateX(Math.PI / 2);
+            wheel.add(hub);
+            if (off.front) {
+                const pivot = new THREE.Group();
+                pivot.position.set(off.x, 0.19, off.z);
+                pivot.add(wheel);
+                group.add(pivot);
+                frontPivots.push(pivot);
+            }
+            else {
+                wheel.position.set(off.x, 0.19, off.z);
+                group.add(wheel);
+            }
+            wheels.push(wheel);
+        }
+        return {
+            group,
+            body,
+            frontPivots,
+            wheels,
+            boostFlame,
+            color,
+            x: 0,
+            z: 0,
+            height: 0,
+            angle: 0,
+            targetX: 0,
+            targetZ: 0,
+            targetHeight: 0,
+            targetAngle: 0,
+            speed: 0,
+            steer: 0,
+            vz: 0,
+            airborne: false,
+            drifting: false,
+            boost: false,
+            finished: false,
+            wheelSpin: 0,
+            lastSkid: new THREE.Vector2(0, 0)
+        };
+    }
+    syncCars(state) {
+        const carGroup = this.carGroup;
+        if (!carGroup)
+            return;
+        const seen = new Set();
+        for (const racer of state.racers) {
+            seen.add(racer.playerId);
+            let car = this.cars.get(racer.playerId);
+            if (!car) {
+                car = this.createCar(racer.color);
+                carGroup.add(car.group);
+                car.x = this.sx(racer.x);
+                car.z = this.sz(racer.y);
+                car.angle = racer.angleRad;
+                car.lastSkid.set(car.x, car.z);
+                this.cars.set(racer.playerId, car);
+            }
+            car.targetX = this.sx(racer.x);
+            car.targetZ = this.sz(racer.y);
+            car.targetHeight = racer.z * WORLD_SCALE;
+            car.targetAngle = racer.angleRad;
+            car.speed = racer.speed;
+            car.steer = racer.steerInput;
+            car.vz = racer.vz;
+            car.airborne = racer.airborne;
+            car.drifting = racer.drifting;
+            car.boost = racer.boostActive;
+            car.finished = racer.finished;
+        }
+        for (const [playerId, car] of this.cars) {
+            if (!seen.has(playerId)) {
+                carGroup.remove(car.group);
+                disposeObject(car.group);
+                this.cars.delete(playerId);
+            }
+        }
+    }
+    // ---- render loop -----------------------------------------------------
+    startLoop() {
+        this.lastFrame = performance.now();
+        const loop = () => {
+            this.animationId = window.requestAnimationFrame(loop);
+            const now = performance.now();
+            const dt = Math.min(0.05, Math.max(0.0001, (now - this.lastFrame) / 1000));
+            this.lastFrame = now;
+            this.update(dt, now);
+        };
+        loop();
+    }
+    update(dt, now) {
+        const renderer = this.renderer;
+        const scene = this.scene;
+        const camera = this.camera;
+        if (!renderer || !scene || !camera)
+            return;
+        this.ensureSize();
+        const posK = 1 - Math.exp(-POS_LERP_RATE * dt);
+        const angK = 1 - Math.exp(-ANGLE_LERP_RATE * dt);
+        const hK = 1 - Math.exp(-HEIGHT_LERP_RATE * dt);
+        for (const car of this.cars.values()) {
+            car.x += (car.targetX - car.x) * posK;
+            car.z += (car.targetZ - car.z) * posK;
+            car.height += (car.targetHeight - car.height) * hK;
+            car.angle += shortestAngleDelta(car.angle, car.targetAngle) * angK;
+            car.group.position.set(car.x, car.height, car.z);
+            car.group.rotation.y = -car.angle;
+            const sceneSpeed = car.speed * WORLD_SCALE;
+            car.wheelSpin -= (sceneSpeed / 0.19) * dt;
+            for (const wheel of car.wheels) {
+                wheel.rotation.z = car.wheelSpin;
+            }
+            const steerAngle = car.steer * 0.5;
+            for (const pivot of car.frontPivots) {
+                pivot.rotation.y = steerAngle;
+            }
+            // Roll into the corner (x), pitch from vertical velocity (z).
+            const roll = car.steer * (car.drifting ? 0.22 : 0.08);
+            const pitch = clamp(car.vz * 0.0016, -0.5, 0.5);
+            car.body.rotation.set(roll, 0, pitch);
+            car.boostFlame.visible = car.boost;
+            if (car.boost) {
+                const flick = 0.8 + Math.sin(now * 0.05) * 0.25;
+                car.boostFlame.scale.set(flick, 1, 1);
+            }
+            if (car.drifting && !car.airborne && !car.finished) {
+                const moved = Math.hypot(car.x - car.lastSkid.x, car.z - car.lastSkid.y);
+                if (moved > SKID_MIN_STEP) {
+                    this.placeSkid(car, now);
+                    car.lastSkid.set(car.x, car.z);
+                }
+            }
+        }
+        this.fadeSkids(now);
+        this.updateCamera(dt, now);
+        renderer.render(scene, camera);
+    }
+    placeSkid(car, now) {
+        if (this.skidPool.length === 0)
+            return;
+        const cos = Math.cos(-car.angle);
+        const sin = Math.sin(-car.angle);
+        for (const lz of [0.34, -0.34]) {
+            const lx = -0.42;
+            const wx = car.x + lx * cos - lz * sin;
+            const wz = car.z + lx * sin + lz * cos;
+            const entry = this.skidPool[this.skidCursor];
+            this.skidCursor = (this.skidCursor + 1) % this.skidPool.length;
+            entry.born = now;
+            entry.mesh.visible = true;
+            entry.mesh.position.set(wx, 0.028, wz);
+            entry.mesh.rotation.x = -Math.PI / 2;
+            entry.mesh.rotation.z = -car.angle;
+        }
+    }
+    fadeSkids(now) {
+        for (const entry of this.skidPool) {
+            if (!entry.mesh.visible)
+                continue;
+            const age = now - entry.born;
+            if (age >= SKID_LIFE_MS) {
+                entry.mesh.visible = false;
+                continue;
+            }
+            entry.mesh.material.opacity = (1 - age / SKID_LIFE_MS) * 0.5;
+        }
+    }
+    // ---- camera ----------------------------------------------------------
+    cycleCamera() {
+        const index = CAMERA_MODES.indexOf(this.cameraMode);
+        this.setCameraMode(CAMERA_MODES[(index + 1) % CAMERA_MODES.length]);
+    }
+    setCameraMode(mode) {
+        this.cameraMode = mode;
+        this.updateCameraLabel();
+    }
+    findLeader() {
+        const state = this.state;
+        if (!state || state.racers.length === 0)
+            return null;
+        let leader = state.racers[0];
+        for (const racer of state.racers) {
+            if (racer.rank < leader.rank)
+                leader = racer;
+        }
+        return this.cars.get(leader.playerId) ?? null;
+    }
+    centroid() {
+        const out = new THREE.Vector3();
+        if (this.cars.size === 0)
+            return out;
+        for (const car of this.cars.values()) {
+            out.x += car.x;
+            out.z += car.z;
+        }
+        out.x /= this.cars.size;
+        out.z /= this.cars.size;
+        return out;
+    }
+    updateCamera(dt, now) {
+        const camera = this.camera;
+        if (!camera)
+            return;
+        const targetPos = new THREE.Vector3();
+        const targetLook = new THREE.Vector3();
+        let rate = 4;
+        const leader = this.findLeader();
+        if (this.cameraMode === "dynamic") {
+            // Frame ALL cars so every player always sees their car (shared screen).
+            const cars = [...this.cars.values()];
+            let cx = 0;
+            let cz = 0;
+            let maxH = 0;
+            for (const c of cars) {
+                cx += c.x;
+                cz += c.z;
+                maxH = Math.max(maxH, c.height);
+            }
+            const n = Math.max(1, cars.length);
+            cx /= n;
+            cz /= n;
+            let radius = 9;
+            for (const c of cars) {
+                radius = Math.max(radius, Math.hypot(c.x - cx, c.z - cz) + 4);
+            }
+            const halfV = (50 * Math.PI) / 180 / 2;
+            const dist = clamp(radius / Math.tan(halfV) * 1.12, 18, 78);
+            const pitch = (53 * Math.PI) / 180;
+            targetPos.set(cx, dist * Math.sin(pitch) + maxH * 0.5, cz + dist * Math.cos(pitch));
+            targetLook.set(cx, 0, cz);
+            rate = 2.6;
+        }
+        else if ((this.cameraMode === "cinematic" || this.cameraMode === "chase") && leader) {
+            const a = leader.angle;
+            const fwd = new THREE.Vector3(Math.cos(a), 0, Math.sin(a));
+            const pos = new THREE.Vector3(leader.x, leader.height, leader.z);
+            if (this.cameraMode === "cinematic") {
+                targetPos.copy(pos).addScaledVector(fwd, -5.6).add(new THREE.Vector3(0, 2.6, 0));
+                targetLook.copy(pos).addScaledVector(fwd, 3.2).add(new THREE.Vector3(0, 0.4, 0));
+                rate = 5;
+            }
+            else {
+                targetPos.copy(pos).addScaledVector(fwd, -7.6).add(new THREE.Vector3(0, 4.8, 0));
+                targetLook.copy(pos).addScaledVector(fwd, 1.5);
+                rate = 4;
+            }
+        }
+        else if (this.cameraMode === "topdown") {
+            const c = this.centroid();
+            targetPos.set(c.x, 40, c.z + 0.01);
+            targetLook.set(c.x, 0, c.z);
+            rate = 3.5;
+        }
+        else {
+            const orbit = now * 0.00006;
+            targetPos.set(Math.sin(orbit) * 20, 56, Math.cos(orbit) * 40);
+            targetLook.set(0, 0, 0);
+            rate = 1.4;
+        }
+        if (!this.cameraInitialised) {
+            this.camPos.copy(targetPos);
+            this.camLook.copy(targetLook);
+            this.cameraInitialised = true;
+        }
+        else {
+            const k = 1 - Math.exp(-rate * dt);
+            this.camPos.lerp(targetPos, k);
+            this.camLook.lerp(targetLook, k);
+        }
+        camera.position.copy(this.camPos);
+        camera.lookAt(this.camLook);
+    }
+    ensureSize() {
+        const root = this.root;
+        const renderer = this.renderer;
+        const camera = this.camera;
+        if (!root || !renderer || !camera)
+            return;
+        const width = Math.max(1, root.clientWidth);
+        const height = Math.max(1, root.clientHeight);
+        if (width === this.lastWidth && height === this.lastHeight)
+            return;
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        this.lastWidth = width;
+        this.lastHeight = height;
+    }
+    // ---- HUD -------------------------------------------------------------
+    ensureHudStructure() {
+        const hud = this.hud;
+        let board = hud.querySelector("[data-board]");
+        let info = hud.querySelector("[data-info]");
+        let banner = hud.querySelector("[data-banner]");
+        let hint = hud.querySelector("[data-hint]");
+        if (!board) {
+            board = document.createElement("div");
+            board.dataset.board = "1";
+            Object.assign(board.style, {
+                position: "absolute",
+                top: "18px",
+                left: "18px",
+                minWidth: "210px",
+                padding: "12px 14px",
+                borderRadius: "14px",
+                background: "rgba(2,6,23,0.55)",
+                backdropFilter: "blur(6px)",
+                boxShadow: "0 6px 22px rgba(0,0,0,0.35)"
+            });
+            hud.appendChild(board);
+        }
+        if (!info) {
+            info = document.createElement("div");
+            info.dataset.info = "1";
+            Object.assign(info.style, {
+                position: "absolute",
+                top: "18px",
+                right: "18px",
+                textAlign: "right",
+                padding: "12px 14px",
+                borderRadius: "14px",
+                background: "rgba(2,6,23,0.55)",
+                backdropFilter: "blur(6px)",
+                boxShadow: "0 6px 22px rgba(0,0,0,0.35)"
+            });
+            hud.appendChild(info);
+        }
+        if (!banner) {
+            banner = document.createElement("div");
+            banner.dataset.banner = "1";
+            Object.assign(banner.style, {
+                position: "absolute",
+                top: "26%",
+                left: "0",
+                right: "0",
+                textAlign: "center",
+                fontSize: "clamp(34px, 6vw, 76px)",
+                fontWeight: "900",
+                letterSpacing: "2px",
+                textShadow: "0 4px 18px rgba(0,0,0,0.6)",
+                display: "none"
+            });
+            hud.appendChild(banner);
+        }
+        if (!hint) {
+            hint = document.createElement("div");
+            hint.dataset.hint = "1";
+            Object.assign(hint.style, {
+                position: "absolute",
+                bottom: "16px",
+                left: "18px",
+                fontSize: "13px",
+                opacity: "0.75",
+                background: "rgba(2,6,23,0.4)",
+                padding: "6px 10px",
+                borderRadius: "10px"
+            });
+            hud.appendChild(hint);
+        }
+        return { board, info, banner, hint };
+    }
+    updateCameraLabel() {
+        if (!this.hud)
+            return;
+        const { hint } = this.ensureHudStructure();
+        const label = CAMERA_LABELS[this.cameraMode][this.en ? "en" : "de"];
+        hint.textContent = (this.en ? "Camera (C): " : "Kamera (C): ") + label;
+    }
+    updateHud(state) {
+        if (!this.hud)
+            return;
+        const { board, info, banner } = this.ensureHudStructure();
+        const en = this.en;
+        const ranked = [...state.racers].sort((a, b) => a.rank - b.rank);
+        board.innerHTML = "";
+        const title = document.createElement("div");
+        title.textContent = en ? "Standings" : "Platzierung";
+        Object.assign(title.style, {
+            fontSize: "12px",
+            letterSpacing: "1px",
+            textTransform: "uppercase",
+            opacity: "0.65",
+            marginBottom: "8px"
+        });
+        board.appendChild(title);
+        ranked.forEach((racer, index) => {
+            const row = document.createElement("div");
+            Object.assign(row.style, {
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "3px 0",
+                fontSize: "15px",
+                fontWeight: "700",
+                opacity: racer.finished ? "0.7" : "1"
+            });
+            const pos = document.createElement("span");
+            pos.textContent = String(index + 1);
+            Object.assign(pos.style, { width: "16px", opacity: "0.7" });
+            const dot = document.createElement("span");
+            Object.assign(dot.style, {
+                width: "12px",
+                height: "12px",
+                borderRadius: "50%",
+                background: racer.color,
+                boxShadow: "0 0 8px " + racer.color
+            });
+            const name = document.createElement("span");
+            name.textContent = racer.name;
+            Object.assign(name.style, { flex: "1", whiteSpace: "nowrap" });
+            const lap = document.createElement("span");
+            const lapNum = Math.min(state.lapsToWin, racer.finished ? state.lapsToWin : racer.lap + 1);
+            lap.textContent = lapNum + "/" + state.lapsToWin;
+            Object.assign(lap.style, { opacity: "0.75", fontVariantNumeric: "tabular-nums" });
+            row.append(pos, dot, name, lap);
+            board.appendChild(row);
+        });
+        const leader = ranked[0];
+        const elapsed = Math.floor(state.elapsedMs / 1000);
+        const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
+        const ss = String(elapsed % 60).padStart(2, "0");
+        const speed = leader ? Math.round(Math.abs(leader.speed) * 0.18) : 0;
+        info.innerHTML = "";
+        const lapLine = document.createElement("div");
+        lapLine.style.fontSize = "26px";
+        lapLine.style.fontWeight = "900";
+        const leadLap = leader ? Math.min(state.lapsToWin, leader.finished ? state.lapsToWin : leader.lap + 1) : 1;
+        lapLine.textContent = (en ? "Lap" : "Runde") + " " + leadLap + "/" + state.lapsToWin;
+        const timeLine = document.createElement("div");
+        timeLine.style.fontSize = "15px";
+        timeLine.style.opacity = "0.8";
+        timeLine.textContent = (en ? "Time" : "Zeit") + " " + mm + ":" + ss;
+        const speedLine = document.createElement("div");
+        speedLine.style.fontSize = "15px";
+        speedLine.style.opacity = "0.8";
+        speedLine.textContent = (en ? "Lead speed" : "Tempo") + " " + speed;
+        info.append(lapLine, timeLine, speedLine);
+        if (state.winnerName) {
+            banner.style.display = "block";
+            banner.style.color = "#fde047";
+            banner.textContent = state.isTimedOut
+                ? state.winnerName + " " + (en ? "leads!" : "führt!")
+                : state.winnerName + " " + (en ? "wins!" : "gewinnt!");
+        }
+        else {
+            banner.style.display = "none";
+        }
+        this.updateCameraLabel();
+    }
+}
+//# sourceMappingURL=DriftRacerRenderer.js.map
+// ---- mock multiplayer ----
+const TR=driftRacerTrack,C=driftRacerTrackConfig,RAMPS=driftRacerRamps,project=projectPointToDriftRacerTrack,sample=sampleDriftRacerTrack,rampH=sampleRampHeight;
+const accel=660,rDrag=1.05,maxF=780,maxR=-170,steerRate=2.45,grav=760,jF=1.5,minJ=240,airS=0.35,wScrub=0.5;
+const cl=(v,a,b)=>Math.min(b,Math.max(a,v));
+const nm=a=>{const f=Math.PI*2;const n=a%f;return n>=-Math.PI?n:n+f;};
+const len=TR.length;
+const COLORS=["#ef4444","#22d3ee","#a3e635","#f59e0b"],NAMES=["Rot","Cyan","Lime","Gold"];
+function mk(i){const d=110+i*70;const s=sample(d);const lane=[-0.22,0.0,0.22,-0.11][i]*C.trackWidth;
+ return {playerId:"p"+i,name:NAMES[i],color:COLORS[i],x:s.x+s.normalX*lane,y:s.y+s.normalY*lane,z:0,vz:0,airborne:false,
+ angleRad:s.angleRad,speed:0,lap:0,lapProgress:d,totalProgress:d,prev:d,rank:i+1,drifting:false,steerInput:0,boostFuel:.4,lane,aggro:0.95+0.04*i};}
+const cars=[0,1,2,3].map(mk);
+function stepCar(r,dt){const p=project(r.x,r.y);const aim=sample(p.distance+170);
+ const ax=aim.x+aim.normalX*r.lane,ay=aim.y+aim.normalY*r.lane;let d=nm(Math.atan2(ay-r.y,ax-r.x)-r.angleRad);
+ r.steerInput=cl(d*2.2,-1,1);const sharp=Math.abs(d)>0.85&&r.speed>520;let speed=r.speed;const air=r.airborne;
+ speed+=accel*dt*r.aggro;if(sharp)speed-=920*dt;speed-=speed*rDrag*dt;speed=cl(speed,maxR,maxF);
+ r.drifting=sharp&&r.speed>360&&!air;const sf=cl(Math.abs(speed)/maxF,.12,1.18);
+ const tr=steerRate*(air?airS:1)*(r.drifting?1.3:1);const dir=speed>=0?1:-1;
+ r.angleRad=nm(r.angleRad+r.steerInput*tr*sf*dir*dt);
+ r.x=cl(r.x+Math.cos(r.angleRad)*speed*dt,C.carRadius,C.worldWidth-C.carRadius);
+ r.y=cl(r.y+Math.sin(r.angleRad)*speed*dt,C.carRadius,C.worldHeight-C.carRadius);r.speed=speed;
+ const pr=project(r.x,r.y);const dist=pr.distance;
+ if(!r.airborne){const mx=C.trackWidth*.5-C.carRadius;if(pr.lateralDistance>mx){const sg=pr.signedLateralDistance>=0?1:-1;const ov=pr.lateralDistance-mx;
+  r.x-=pr.normalX*sg*ov;r.y-=pr.normalY*sg*ov;r.speed*=1-wScrub*Math.min(1,ov/C.carRadius);}}
+ if(r.airborne){r.z+=r.vz*dt;r.vz-=grav*dt;const g=rampH(dist).height;if(r.z<=g){r.z=g;r.vz=0;r.airborne=false;}}
+ else{const rp=rampH(dist),ah=rampH(dist+Math.max(0,r.speed)*dt);
+  if(rp.height>1&&ah.height<rp.height&&r.speed>minJ){r.z=rp.height;r.vz=r.speed*rp.slope*jF;r.airborne=true;}else{r.z=rp.height;r.vz=0;}}
+ if(r.prev>len*.78&&dist<len*.22&&r.speed>70)r.lap++;r.prev=dist;r.lapProgress=dist;r.totalProgress=r.lap*len+dist;}
+function buildState(el){const rk=[...cars].sort((a,b)=>b.totalProgress-a.totalProgress);rk.forEach((c,i)=>c.rank=i+1);
+ return {worldWidth:C.worldWidth,worldHeight:C.worldHeight,trackWidth:C.trackWidth,trackLength:len,wallHeight:C.wallHeight,
+ lapsToWin:C.lapsToWin,maxRaceMs:C.maxRaceMs,elapsedMs:el,tick:0,isTimedOut:false,track:TR.points,ramps:RAMPS,
+ racers:cars.map(c=>({playerId:c.playerId,name:c.name,color:c.color,x:c.x,y:c.y,z:c.z,vz:c.vz,airborne:c.airborne,angleRad:c.angleRad,
+ speed:c.speed,lap:c.lap,lapProgress:c.lapProgress,totalProgress:c.totalProgress,rank:c.rank,finished:false,finishMs:null,
+ offTrack:false,drifting:c.drifting,boostFuel:c.boostFuel,boostActive:false,steerInput:c.steerInput}))};}
+const renderer=new DriftRacerRenderer();renderer.mount(document.getElementById("app"));
+let el=0;setInterval(()=>{for(const c of cars)stepCar(c,1/30);el+=1000/30;renderer.setState(buildState(el),false);},33);
+const cam=new URLSearchParams(location.search).get("cam");
+if(cam)setTimeout(()=>window.dispatchEvent(new KeyboardEvent("keydown",{key:cam})),500);
+
+</script></body></html>

@@ -64,6 +64,12 @@ Default local URLs:
 - Host: `http://localhost:5173`
 - Controller: `http://localhost:5174`
 
+For phone controllers, open the host through the computer's LAN address and make sure the QR code points to the same address, for example `http://192.168.0.156:5174`. On Windows, `npm run dev:all` tries to detect this automatically. If the QR code shows the wrong IP, restart the stack with an explicit LAN IP:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\dev-all.ps1 -LanIp 192.168.0.156
+```
+
 If a dev port is already occupied, stop the running stack first:
 
 ```bash

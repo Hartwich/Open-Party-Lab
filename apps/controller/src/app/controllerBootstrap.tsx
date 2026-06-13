@@ -11,9 +11,19 @@ import { readPrefilledRoomCode } from "./deviceSession.js";
 import { mountControllerFullscreenOverlay } from "./fullscreenOverlay.js";
 import { ControllerSocketClient, type ControllerAppState } from "./controllerSocketClient.js";
 
-const controllerClient = new ControllerSocketClient(
-  import.meta.env.VITE_SERVER_URL ?? "http://localhost:3000"
-);
+function resolveDefaultServerUrl(): string {
+  const hostname = window.location.hostname;
+
+  if (!hostname || hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") {
+    return "http://localhost:3000";
+  }
+
+  const host = hostname.includes(":") ? `[${hostname}]` : hostname;
+  const protocol = window.location.protocol === "https:" ? "https:" : "http:";
+  return `${protocol}//${host}:3000`;
+}
+
+const controllerClient = new ControllerSocketClient(import.meta.env.VITE_SERVER_URL ?? resolveDefaultServerUrl());
 
 function resolvePage(state: ControllerAppState): "join" | "reconnect" | "lobby" | "controller" | "missing" {
   if (!state.room || !state.player) {
