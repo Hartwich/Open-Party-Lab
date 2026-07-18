@@ -2,6 +2,8 @@ import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
 
 const LOBBY_TRACK_ID = "lobby";
 const LOOKUP_DEFAULT_TRACK_ID = "default";
+const ARENA_SURVIVOR_FROSTFIRE_TRACK_ID = "arena-survivor:frostfire-saga";
+const ARENA_SURVIVOR_VISUAL_THEME_SETTING_KEY = "arenaSurvivorVisualTheme";
 const MUSIC_UNLOCK_EVENTS = ["pointerdown", "keydown", "touchstart"] as const;
 
 interface MusicTemplate {
@@ -77,6 +79,24 @@ const musicTemplates: Record<string, MusicTemplate> = {
     padGain: 0.065,
     drumGain: 0.18,
     lowpassHz: 2_400
+  },
+  frostfire: {
+    leadPattern: [0, null, 3, null, 7, null, 10, null, 7, null, 12, null, 10, null, 3, null],
+    bassPattern: [0, null, null, null, -5, null, null, null, -2, null, null, null, -5, null, null, null],
+    padPattern: [0, null, 3, null],
+    barProgression: [0, -5, -2, 3],
+    kickPattern: [0.72, 0, 0, 0, 0.42, 0, 0, 0, 0.72, 0, 0, 0, 0.42, 0, 0, 0],
+    snarePattern: [0, 0, 0, 0, 0, 0, 0.34, 0, 0, 0, 0, 0, 0, 0, 0.34, 0],
+    hatPattern: [0.08, 0, 0.06, 0, 0.1, 0, 0.06, 0, 0.08, 0, 0.06, 0, 0.1, 0, 0.06, 0],
+    leadWave: "triangle",
+    bassWave: "sine",
+    padWave: "sine",
+    padChordIntervals: [0, 3, 7, 12],
+    leadGain: 0.075,
+    bassGain: 0.12,
+    padGain: 0.075,
+    drumGain: 0.11,
+    lowpassHz: 1_900
   },
   chase: {
     leadPattern: [0, 3, 7, 10, 12, 10, 7, 3, 0, 3, 7, 10, 12, 15, 10, 7],
@@ -245,6 +265,11 @@ const musicProfiles: Record<string, MusicProfile> = {
     rootMidi: 45,
     masterGain: 0.18
   }),
+  [ARENA_SURVIVOR_FROSTFIRE_TRACK_ID]: createProfile(musicTemplates.frostfire, {
+    bpm: 92,
+    rootMidi: 50,
+    masterGain: 0.15
+  }),
   "minions-td": createProfile(musicTemplates.strategy, {
     bpm: 96,
     rootMidi: 43,
@@ -284,6 +309,15 @@ const musicProfiles: Record<string, MusicProfile> = {
 
 function resolveDesiredTrackId(state: HostAppState): string {
   const selectedGameId = state.room?.selectedGameId;
+
+  if (
+    selectedGameId === "arena-survivor" &&
+    state.room?.selectedGameSettings?.[ARENA_SURVIVOR_VISUAL_THEME_SETTING_KEY] ===
+      "frostfire-saga"
+  ) {
+    return ARENA_SURVIVOR_FROSTFIRE_TRACK_ID;
+  }
+
   return selectedGameId ? selectedGameId : LOBBY_TRACK_ID;
 }
 

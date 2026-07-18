@@ -42,6 +42,7 @@ Lobby/setup:
 - common setup controls are rendered by the platform from `manifest.lobbySetup`;
 - common controller-side player setup is rendered from `manifest.playerSetup` with `choice` and `multi-select` support;
 - player setup portraits can react to a selected lobby setting through `portraitPathBySetting`, allowing phones to mirror host-selected visual themes before a round starts;
+- the host background-music controller can select a theme-specific Arena Survivor profile from the current room settings while retaining its shared audio unlock and crossfade behavior;
 - game repos keep their own setup field declarations and server-side validation.
 
 ## Not Production-Ready Yet
