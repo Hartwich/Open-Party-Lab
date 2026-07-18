@@ -329,6 +329,7 @@ async function listGames() {
 async function syncLocalGames() {
   const knownGames = await readKnownGames();
   const linkedGames = [];
+  const failedGameIds = [];
 
   for (const game of knownGames) {
     const localPath = resolveLocalPath(game);
@@ -345,6 +346,7 @@ async function syncLocalGames() {
     if (!prepared) {
       await removePackageLink(game);
       await removePublicAssets(game);
+      failedGameIds.push(game.id);
       continue;
     }
 
@@ -355,6 +357,12 @@ async function syncLocalGames() {
   }
 
   await writeGeneratedFiles(linkedGames);
+
+  if (failedGameIds.length > 0) {
+    throw new Error(
+      `[games] Failed to prepare installed local games: ${failedGameIds.join(", ")}`
+    );
+  }
 }
 
 async function clearLocalGames() {
