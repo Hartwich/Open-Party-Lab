@@ -38,6 +38,21 @@ const recommendedGames = [
     id: "schaetzorama",
     repo: "https://github.com/Hartwich/schaetzorama.git",
     path: "local-games/schaetzorama"
+  },
+  {
+    id: "chaos-kommando",
+    repo: "https://github.com/Hartwich/chaos-kommando.git",
+    path: "local-games/chaos-kommando"
+  },
+  {
+    id: "word-tiles",
+    repo: "https://github.com/Hartwich/word-tiles.git",
+    path: "local-games/word-tiles"
+  },
+  {
+    id: "drift-racer",
+    repo: "https://github.com/Hartwich/drift-racer.git",
+    path: "local-games/drift-racer"
   }
 ];
 

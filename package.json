@@ -13,6 +13,7 @@
     "games:sync-local": "node scripts/local-games.mjs sync-local",
     "games:clear-local": "node scripts/local-games.mjs clear-local",
     "games:clone-recommended": "node scripts/clone-recommended-games.mjs",
+    "games:clone-all": "node scripts/clone-all-games.mjs",
     "screenshots:readme": "node scripts/capture-readme-screenshots.mjs",
     "ai:controllers": "node scripts/virtual-controllers.mjs",
     "postinstall": "node scripts/local-games.mjs ensure-generated",
@@ -24,6 +25,7 @@
     "dev:host": "npm run build:packages && npm run games:sync-local && npm run dev --workspace @open-party-lab/host",
     "dev:controller": "npm run build:packages && npm run games:sync-local && npm run dev --workspace @open-party-lab/controller",
     "build": "npm run build:packages && npm run games:sync-local && npm run build --workspace @open-party-lab/server && npm run build --workspace @open-party-lab/host && npm run build --workspace @open-party-lab/controller",
+    "release:windows": "node scripts/build-release.mjs",
     "typecheck": "npm run build:packages && npm run games:sync-local && npm run typecheck --workspace @open-party-lab/utils && npm run typecheck --workspace @open-party-lab/ui-kit && npm run typecheck --workspace @open-party-lab/game-core && npm run typecheck --workspace @open-party-lab/protocol && npm run typecheck --workspace @open-party-lab/server && npm run typecheck --workspace @open-party-lab/host && npm run typecheck --workspace @open-party-lab/controller",
     "verify": "npm run typecheck && npm run build",
     "lint": "npm run typecheck"

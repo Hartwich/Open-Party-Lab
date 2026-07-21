@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { createServer, type IncomingMessage, type Server as HttpServer, type ServerResponse } from "node:http";
-import { join } from "node:path";
+import { extname, join, relative, resolve } from "node:path";
 import type { PerfLogPayload } from "@open-party-lab/game-core";
 import type { AppEnv } from "../../core/config/env.js";
 import { serverPerfRegistry } from "../../core/perf/serverPerfRegistry.js";
@@ -11,6 +11,63 @@ const corsHeaders = {
   "access-control-allow-methods": "GET,POST,OPTIONS",
   "access-control-allow-headers": "content-type"
 } as const;
+
+const contentTypes: Record<string, string> = {
+  ".css": "text/css; charset=utf-8",
+  ".html": "text/html; charset=utf-8",
+  ".ico": "image/x-icon",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".js": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".webp": "image/webp",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2"
+};
+
+async function serveWebAsset(
+  webRoot: string,
+  pathname: string,
+  request: IncomingMessage,
+  response: ServerResponse
+): Promise<boolean> {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return false;
+  }
+
+  const isController = pathname === "/controller" || pathname.startsWith("/controller/");
+  const surface = isController ? "controller" : "host";
+  const surfacePath = isController ? pathname.replace(/^\/controller\/?/, "") : pathname.slice(1);
+  const requestedPath = surfacePath || "index.html";
+  const surfaceRoot = resolve(webRoot, surface);
+  let filePath = resolve(surfaceRoot, requestedPath);
+
+  if (relative(surfaceRoot, filePath).startsWith("..")) {
+    return false;
+  }
+
+  try {
+    if (!(await stat(filePath)).isFile()) {
+      filePath = resolve(surfaceRoot, "index.html");
+    }
+  } catch {
+    filePath = resolve(surfaceRoot, "index.html");
+  }
+
+  try {
+    const body = await readFile(filePath);
+    response.writeHead(200, {
+      "cache-control": extname(filePath) === ".html" ? "no-cache" : "public, max-age=31536000, immutable",
+      "content-type": contentTypes[extname(filePath).toLowerCase()] ?? "application/octet-stream"
+    });
+    response.end(request.method === "HEAD" ? undefined : body);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function writeJson(
   response: ServerResponse,
@@ -125,6 +182,15 @@ export function createHttpServer(env: AppEnv): HttpServer {
 
     if (url.pathname === "/health") {
       writeJson(response, 200, { status: "ok", port: env.port });
+      return;
+    }
+
+    if (env.webRoot) {
+      void serveWebAsset(env.webRoot, url.pathname, request, response).then((served) => {
+        if (!served && !response.headersSent) {
+          writeJson(response, 404, { status: "not_found" });
+        }
+      });
       return;
     }
 

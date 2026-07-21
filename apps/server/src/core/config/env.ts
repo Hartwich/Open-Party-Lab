@@ -9,6 +9,7 @@ export interface AppEnv {
   roundTickMs: number;
   jsonSnapshotPath: string;
   fixedPrimaryRoomCode: string | null;
+  webRoot: string | null;
 }
 
 function readNumber(value: string | undefined, fallbackValue: number): number {
@@ -52,6 +53,12 @@ function readPublicControllerOrigin(source: NodeJS.ProcessEnv): string {
   }
 
   const lanIPv4 = findLanIPv4();
+
+  if (source.OPEN_PARTY_LAB_WEB_ROOT) {
+    const port = source.PORT?.trim() || "3000";
+    return `http://${lanIPv4 ?? "localhost"}:${port}/controller/`;
+  }
+
   return `http://${lanIPv4 ?? "localhost"}:5174`;
 }
 
@@ -74,6 +81,7 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): AppEnv {
     playerReconnectWindowMs: readNumber(source.PLAYER_RECONNECT_WINDOW_MS, 45_000),
     roundTickMs: readNumber(source.ROUND_TICK_MS, 16),
     jsonSnapshotPath: source.JSON_SNAPSHOT_PATH ?? "./data/room-snapshots.json",
-    fixedPrimaryRoomCode: readFixedPrimaryRoomCode(source)
+    fixedPrimaryRoomCode: readFixedPrimaryRoomCode(source),
+    webRoot: source.OPEN_PARTY_LAB_WEB_ROOT?.trim() || null
   };
 }

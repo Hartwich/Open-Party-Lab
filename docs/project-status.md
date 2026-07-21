@@ -1,6 +1,6 @@
 # Project Status
 
-Snapshot date: 2026-06-12
+Snapshot date: 2026-07-21
 
 ## Available In This Public Cut
 
@@ -18,6 +18,7 @@ Platform:
 - optional local game-repo discovery through `npm run games:list` and `npm run games:sync-local`
 - virtual controller helper for AI browser checks through `npm run ai:controllers`
 - host DEV automation bridge for browser checks exposed only by the Vite dev host
+- portable Windows release assembly with a one-click launcher, bundled Node.js runtime, same-origin host/controller assets, and all known games
 
 Optional local game repos:
 
@@ -33,9 +34,9 @@ Optional local game repos:
 - Tabu can be loaded from `local-games/tabu` when cloned locally.
 - Imposter can be loaded from `local-games/imposter` when cloned locally.
 - Light Trails can be loaded from `local-games/light-trails` when cloned locally.
-- Drift Racer can be loaded from `local-games/drift-racer` when cloned locally. It is under construction and currently not playable; its phone controller uses a left virtual drive stick plus Boost, Fire, and Drift action buttons.
-- Word Tiles can be loaded from `local-games/word-tiles` when cloned locally. It supports multiple accepted word placements per turn and uses table-driven word challenges instead of an internal dictionary check.
-- Chaos-Kommando can be loaded from `local-games/chaos-kommando` when cloned locally.
+- Drift Racer can be loaded from `local-games/drift-racer` when cloned locally. It is recommended alpha; its phone controller uses a left virtual drive stick plus Boost, Fire, and Drift action buttons.
+- Word Tiles can be loaded from `local-games/word-tiles` when cloned locally. It is recommended alpha, supports multiple accepted word placements per turn, and uses table-driven word challenges instead of an internal dictionary check.
+- Chaos-Kommando can be loaded from `local-games/chaos-kommando` when cloned locally. It is recommended alpha. Its host uses a continuous modular toasted-marshmallow rig with a fixed world pivot, aim-tracking eyes, procedural locomotion, weapon-specific hand grips, and dedicated carry art for all 16 weapons.
 
 Lobby/setup:
 
@@ -49,7 +50,7 @@ Lobby/setup:
 ## Not Production-Ready Yet
 
 - most included games are still alpha and may need rule, pacing, scoring, UI, and balancing changes;
-- Magic Arena, Magic Duell, Arena Survivor, MinionsTD, Zeichnen & Erraten, and Schaetzorama are already in advanced alpha or beta shape, but still need normal playtesting and refinement;
+- Magic Arena, Magic Duell, Arena Survivor, MinionsTD, Zeichnen & Erraten, Schaetzorama, Chaos-Kommando, Word Tiles, and Drift Racer are the recommended alpha/beta set, but still need normal playtesting and refinement;
 - persistent storage is not wired for production use;
 - no hosted deployment configuration is included;
 - no formal end-to-end test suite exists yet;

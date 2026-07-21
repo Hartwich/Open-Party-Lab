@@ -8,9 +8,27 @@ Open Party Lab is a local-first browser party-game platform for shared screens a
 
 This is a playable local prototype, not a hosted production service. It is designed for devices on the same LAN.
 
-Most games are still alpha. The current recommended games are already good to play locally, but rules, pacing, scoring, content, UI, and balancing are expected to keep changing.
+Most games are still alpha or beta. The recommended set is already suitable for local sessions, but rules, pacing, scoring, content, UI, and balancing will continue to evolve.
 
-![Recommended Open Party Lab games](docs/screenshots/recommended-games-collage.png)
+## Game Showcase
+
+### Arena Survivor — three complete visual themes
+
+Arena Survivor is a cooperative survival run with character selection, escalating enemy waves, upgrades, and three synchronized host/controller art sets. The theme changes the complete presentation without changing game balance.
+
+| Frostfire Saga | Obsidian Relay | Classic Arena |
+| --- | --- | --- |
+| ![Arena Survivor Frostfire Saga theme](docs/screenshots/arena-survivor-frostfire-saga.jpg) | ![Arena Survivor Obsidian Relay theme](docs/screenshots/arena-survivor-obsidian-relay.jpg) | ![Arena Survivor Classic Arena theme](docs/screenshots/arena-survivor-classic.jpg) |
+
+### More recommended games
+
+| Chaos-Kommando | MinionsTD |
+| --- | --- |
+| ![Chaos-Kommando artillery match](docs/screenshots/chaos-kommando.png) | ![MinionsTD tower-defense match](docs/screenshots/minions-td.png) |
+| **Word Tiles** | **Drift Racer** |
+| ![Word Tiles shared board](docs/screenshots/word-tiles.png) | ![Drift Racer race](docs/screenshots/drift-racer.png) |
+
+Chaos-Kommando is a turn-based destructible-terrain artillery game, MinionsTD combines tower building with competitive minion sending, Word Tiles turns the shared screen into a table word board, and Drift Racer brings arcade racing with phone steering controls.
 
 ## How It Works
 
@@ -30,6 +48,18 @@ Shared platform code lives in workspace packages:
 The platform supports optional multi-repo games. The core platform stays here; individual games can live in separate Git repos under `local-games/`. Missing optional games are normal and are skipped by the generator.
 
 ## Quick Start
+
+### Download a portable Windows build
+
+GitHub Releases provide `Open-Party-Lab-windows-x64.zip`. It contains the server, host, phone controller, every known game, and its own Node.js runtime:
+
+1. Download and extract the complete ZIP.
+2. Double-click `Open-Party-Lab.exe`.
+3. The host opens in the default browser; players join from phones on the same LAN/Wi-Fi using the QR code.
+
+No Node.js or npm installation is required for the portable build. Windows may show a SmartScreen warning because community builds are currently not code-signed. Port 3000 must be free, and Windows Firewall must allow private-network access.
+
+### Run from source
 
 Requirements:
 
@@ -95,6 +125,9 @@ Recommended optional local game repos:
 | MinionsTD | beta, recommended | `local-games/minions-td` |
 | Zeichnen & Erraten | beta, recommended | `local-games/zeichnen-und-erraten` |
 | Schaetzorama | beta, recommended | `local-games/schaetzorama` |
+| Chaos-Kommando | alpha, recommended | `local-games/chaos-kommando` |
+| Word Tiles | alpha, recommended | `local-games/word-tiles` |
+| Drift Racer | alpha, recommended | `local-games/drift-racer` |
 
 Other optional local game repos:
 
@@ -106,9 +139,6 @@ Other optional local game repos:
 | Tabu | playable prototype | `local-games/tabu` |
 | Imposter | playable prototype | `local-games/imposter` |
 | Light Trails | playable prototype | `local-games/light-trails` |
-| Drift Racer | under construction, currently not playable | `local-games/drift-racer` |
-| Word Tiles | playable prototype | `local-games/word-tiles` |
-| Chaos-Kommando | playable prototype | `local-games/chaos-kommando` |
 
 Manual clone example:
 
@@ -129,12 +159,14 @@ npm run games:list
 npm run games:sync-local
 npm run games:clear-local
 npm run games:clone-recommended
+npm run games:clone-all
 npm run ai:controllers
 npm run screenshots:readme
 npm run dev:all
 npm run dev:stop
 npm run typecheck
 npm run build
+npm run release:windows
 ```
 
 For AI browser checks, use virtual controllers instead of opening multiple phone browser windows:

@@ -23,6 +23,9 @@ Start with the currently recommended alpha/beta games:
 - MinionsTD
 - Zeichnen & Erraten
 - Schaetzorama
+- Chaos-Kommando
+- Word Tiles
+- Drift Racer
 
 Other games can still be tested, but some may be earlier prototypes or need deeper construction work.
 

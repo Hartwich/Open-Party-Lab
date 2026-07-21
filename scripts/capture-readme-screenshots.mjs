@@ -35,6 +35,18 @@ const recommendedGames = [
   {
     name: "Schaetzorama",
     path: "local-games/schaetzorama/docs/screenshots/host.png"
+  },
+  {
+    name: "Chaos-Kommando",
+    path: "local-games/chaos-kommando/docs/screenshots/host.png"
+  },
+  {
+    name: "Word Tiles",
+    path: "local-games/word-tiles/docs/screenshots/host.png"
+  },
+  {
+    name: "Drift Racer",
+    path: "local-games/drift-racer/docs/screenshots/host.png"
   }
 ];
 
@@ -390,7 +402,7 @@ async function createCollageHtml() {
     html, body {
       margin: 0;
       width: 1400px;
-      height: 760px;
+      height: 1028px;
       overflow: hidden;
       background: #06111f;
       color: #f8fafc;
@@ -488,7 +500,7 @@ async function captureCollage(cdpOrigin, args) {
   const target = await newTarget(cdpOrigin, pathToFileURL(htmlPath).href);
   const page = new Page(target);
   await page.open();
-  await page.setViewport(1400, 760);
+  await page.setViewport(1400, 1028);
   await page.waitFor("document.images.length > 0 && Array.from(document.images).every((image) => image.complete)", 20_000);
   await wait(500);
 
