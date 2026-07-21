@@ -509,6 +509,31 @@ export class GameSelectScene extends Phaser.Scene {
       color: hostTheme.text
     });
 
+    const menuButtonWidth = width < 520 ? 92 : 164;
+    const menuButtonX = x + width - menuButtonWidth - 16;
+    const menuButtonY = y + 14;
+    this.add
+      .rectangle(menuButtonX, menuButtonY, menuButtonWidth, 34, 0x182235, 0.96)
+      .setOrigin(0)
+      .setStrokeStyle(1, 0x94a3b8, 0.68);
+    this.add
+      .text(
+        menuButtonX + menuButtonWidth / 2,
+        menuButtonY + 17,
+        width < 520 ? (en ? "Menu" : "Menue") : (en ? "Back to menu" : "Zum Hauptmenue"),
+        {
+          fontFamily: hostTheme.bodyFont,
+          fontSize: width < 520 ? "15px" : "16px",
+          color: "#e2e8f0"
+        }
+      )
+      .setOrigin(0.5);
+    this.add
+      .zone(menuButtonX, menuButtonY, menuButtonWidth, 34)
+      .setOrigin(0)
+      .setInteractive({ useHandCursor: true })
+      .on("pointerdown", () => this.client?.returnToGameSelection());
+
     if (players.length === 0) {
       this.add.text(x + 20, y + 70, text.noPlayersJoined, {
         fontFamily: hostTheme.bodyFont,

@@ -120,11 +120,17 @@ export class ControllerSocketClient {
         : this.state.player;
 
       writeStoredControllerLanguage(room.language);
+      const currentGame =
+        room.currentRound &&
+        this.state.game?.gameId === room.currentRound.gameId &&
+        this.state.game.roundNumber === room.currentRound.roundNumber
+          ? this.state.game
+          : null;
       this.updateState({
         room,
         preferredLanguage: room.language,
         player: player ?? null,
-        game: room.currentRound ? this.state.game : null
+        game: currentGame
       });
     });
 
@@ -162,7 +168,8 @@ export class ControllerSocketClient {
         player,
         preferredLanguage: room.language,
         hasStoredSession: true,
-        storedSession
+        storedSession,
+        game: null
       });
     });
 
@@ -220,6 +227,7 @@ export class ControllerSocketClient {
           preferredLanguage: result.data.room.language,
           hasStoredSession: true,
           storedSession,
+          game: null,
           error: null
         });
         writeStoredControllerLanguage(result.data.room.language);

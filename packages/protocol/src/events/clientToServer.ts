@@ -52,7 +52,7 @@ export interface PlayerSetupRequest {
 
 export interface GameSelectRequest {
   roomCode: string;
-  gameId: string;
+  gameId: string | null;
 }
 
 export interface GameHostActionRequest<TAction = unknown> {
