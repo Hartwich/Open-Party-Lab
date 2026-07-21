@@ -32,8 +32,11 @@ export class GameRuntime {
     private readonly getNow: () => number = now
   ) {}
 
-  selectGame(room: RoomRecord, gameId: string): void {
-    this.gameRegistry.require(gameId);
+  selectGame(room: RoomRecord, gameId: string | null): void {
+    if (gameId) {
+      this.gameRegistry.require(gameId);
+    }
+
     room.selectedGameId = gameId;
     room.currentRound = null;
   }

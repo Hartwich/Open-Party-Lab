@@ -264,9 +264,14 @@ export class HostSocketClient {
     }
 
     const showCatalog = (nextRoom = room) => {
+      this.socket.emit("game:select", { roomCode: nextRoom.code, gameId: null });
       this.updateState({
-        room: nextRoom,
-        game: nextRoom.currentRound ? this.state.game : null,
+        room: {
+          ...nextRoom,
+          selectedGameId: null,
+          currentRound: null
+        },
+        game: null,
         sceneOverride: "catalog",
         preferredLobbyScreen: "catalog",
         error: null
