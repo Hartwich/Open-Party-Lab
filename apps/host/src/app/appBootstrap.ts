@@ -74,7 +74,8 @@ export function bootstrapHostApp(): Phaser.Game {
   const fpsConfig = createHostFpsConfig(preferredFps);
 
   const game = new Phaser.Game({
-    type: Phaser.AUTO,
+    // Canvas keeps SVG-backed game art reliable across Chromium/WebGL driver combinations.
+    type: Phaser.CANVAS,
     parent: "app",
     width: 1280,
     height: 720,

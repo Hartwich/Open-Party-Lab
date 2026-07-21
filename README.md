@@ -20,15 +20,21 @@ Arena Survivor is a cooperative survival run with character selection, escalatin
 | --- | --- | --- |
 | ![Arena Survivor Frostfire Saga theme](docs/screenshots/arena-survivor-frostfire-saga.jpg) | ![Arena Survivor Obsidian Relay theme](docs/screenshots/arena-survivor-obsidian-relay.jpg) | ![Arena Survivor Classic Arena theme](docs/screenshots/arena-survivor-classic.jpg) |
 
-### More recommended games
+### All recommended games
 
-| Chaos-Kommando | MinionsTD |
+Arena Survivor remains recommended alongside the complete existing set. The gallery below shows every other recommended game; none of the earlier recommendations were removed.
+
+| Magic Arena | Magic Duell |
 | --- | --- |
-| ![Chaos-Kommando artillery match](docs/screenshots/chaos-kommando.png) | ![MinionsTD tower-defense match](docs/screenshots/minions-td.png) |
+| ![Magic Arena match](docs/screenshots/magic-arena.png) | ![Magic Duell match](docs/screenshots/magic-duell.png) |
+| **MinionsTD** | **Chaos-Kommando** |
+| ![MinionsTD tower-defense match in progress](docs/screenshots/minions-td-ingame.jpg) | ![Chaos-Kommando artillery match in progress](docs/screenshots/chaos-kommando-ingame.jpg) |
+| **Zeichnen & Erraten** | **Schaetzorama** |
+| ![Zeichnen und Erraten drawing round](docs/screenshots/zeichnen-und-erraten.png) | ![Schaetzorama estimation round](docs/screenshots/schaetzorama.png) |
 | **Word Tiles** | **Drift Racer** |
 | ![Word Tiles shared board](docs/screenshots/word-tiles.png) | ![Drift Racer race](docs/screenshots/drift-racer.png) |
 
-Chaos-Kommando is a turn-based destructible-terrain artillery game, MinionsTD combines tower building with competitive minion sending, Word Tiles turns the shared screen into a table word board, and Drift Racer brings arcade racing with phone steering controls.
+The recommended collection covers arena combat, duels, cooperative survival, tower defense, drawing, estimation, artillery, word play, and arcade racing. Every game uses the shared-screen host and phone-controller flow.
 
 ## How It Works
 

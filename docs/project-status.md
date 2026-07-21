@@ -10,6 +10,7 @@ Platform:
 - room code and QR join flow
 - phone controller app
 - Phaser host screen
+- Canvas-backed Phaser rendering so SVG game art remains visible across Chromium/WebGL driver combinations
 - authoritative Socket.IO server
 - reconnect/session recovery
 - shared round lifecycle
