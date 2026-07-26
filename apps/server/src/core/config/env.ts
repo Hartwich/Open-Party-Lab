@@ -52,6 +52,12 @@ function readPublicControllerOrigin(source: NodeJS.ProcessEnv): string {
     return configuredOrigin.replace(/\/$/, "");
   }
 
+  const renderExternalUrl = source.RENDER_EXTERNAL_URL?.trim();
+
+  if (renderExternalUrl) {
+    return `${renderExternalUrl.replace(/\/$/, "")}/controller`;
+  }
+
   const lanIPv4 = findLanIPv4();
 
   if (source.OPEN_PARTY_LAB_WEB_ROOT) {

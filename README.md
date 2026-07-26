@@ -65,6 +65,10 @@ GitHub Releases provide `Open-Party-Lab-windows-x64.zip`. It contains the server
 
 No Node.js or npm installation is required for the portable build. Windows may show a SmartScreen warning because community builds are currently not code-signed. Port 3000 must be free, and Windows Firewall must allow private-network access.
 
+## Hosted deployment
+
+Open Party Lab can also run as a single HTTPS web service, without a Windows installation. The included Render Blueprint builds all known games and serves the host and phone controller from the same public origin. See [Render deployment](docs/render-deployment.md).
+
 ### Run from source
 
 Requirements:
@@ -142,7 +146,7 @@ Other optional local game repos:
 | Tap Race | playable prototype | `local-games/tap-race` |
 | Pantomime | playable prototype | `local-games/pantomime` |
 | Air Hockey | playable prototype | `local-games/air-hockey` |
-| Tabu | playable prototype | `local-games/tabu` |
+| Buzzwort | playable prototype | `local-games/buzzwort` |
 | Imposter | playable prototype | `local-games/imposter` |
 | Light Trails | playable prototype | `local-games/light-trails` |
 

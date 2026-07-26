@@ -52,7 +52,7 @@ function exposeHostAutomationBridge(hostClient: HostSocketClient): void {
 }
 
 function resolveDefaultServerUrl(): string {
-  if (window.location.port === "3000") {
+  if (import.meta.env.PROD || window.location.port === "3000") {
     return window.location.origin;
   }
 

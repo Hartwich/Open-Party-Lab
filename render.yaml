@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: open-party-lab
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm ci && npm run games:clone-all && npm run build:hosted
+    startCommand: node apps/server/dist/main.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22.23.1
+      - key: OPEN_PARTY_LAB_WEB_ROOT
+        value: artifacts/hosted/web

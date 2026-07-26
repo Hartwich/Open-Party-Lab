@@ -12,7 +12,7 @@ import { mountControllerFullscreenOverlay } from "./fullscreenOverlay.js";
 import { ControllerSocketClient, type ControllerAppState } from "./controllerSocketClient.js";
 
 function resolveDefaultServerUrl(): string {
-  if (window.location.port === "3000") {
+  if (import.meta.env.PROD || window.location.port === "3000") {
     return window.location.origin;
   }
 
