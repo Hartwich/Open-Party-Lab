@@ -3,6 +3,7 @@ import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
 const LOBBY_TRACK_ID = "lobby";
 const LOOKUP_DEFAULT_TRACK_ID = "default";
 const ARENA_SURVIVOR_FROSTFIRE_TRACK_ID = "arena-survivor:frostfire-saga";
+const ARENA_SURVIVOR_MARSHMALLOW_TRACK_ID = "arena-survivor:marshmallow-mayhem";
 const ARENA_SURVIVOR_VISUAL_THEME_SETTING_KEY = "arenaSurvivorVisualTheme";
 const MUSIC_UNLOCK_EVENTS = ["pointerdown", "keydown", "touchstart"] as const;
 
@@ -290,6 +291,11 @@ const musicProfiles: Record<string, MusicProfile> = {
     rootMidi: 50,
     masterGain: 0.15
   }),
+  [ARENA_SURVIVOR_MARSHMALLOW_TRACK_ID]: createProfile(musicTemplates.sugarCountry, {
+    bpm: 114,
+    rootMidi: 52,
+    masterGain: 0.14
+  }),
   "minions-td": createProfile(musicTemplates.strategy, {
     bpm: 96,
     rootMidi: 43,
@@ -341,6 +347,14 @@ function resolveDesiredTrackId(state: HostAppState): string {
       "frostfire-saga"
   ) {
     return ARENA_SURVIVOR_FROSTFIRE_TRACK_ID;
+  }
+
+  if (
+    selectedGameId === "arena-survivor" &&
+    state.room?.selectedGameSettings?.[ARENA_SURVIVOR_VISUAL_THEME_SETTING_KEY] ===
+      "marshmallow-mayhem"
+  ) {
+    return ARENA_SURVIVOR_MARSHMALLOW_TRACK_ID;
   }
 
   return selectedGameId ? selectedGameId : LOBBY_TRACK_ID;
