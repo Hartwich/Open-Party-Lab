@@ -37,6 +37,10 @@ const arenaSurvivorSetupBackgrounds: Record<string, { path: string; svg: boolean
   "frostfire-saga": {
     path: "/arena-survivor/themes/frostfire-saga/backgrounds/frostfire-arena.png",
     svg: false
+  },
+  "marshmallow-mayhem": {
+    path: "/arena-survivor/themes/marshmallow-mayhem/backgrounds/cocoa-clearing.png",
+    svg: false
   }
 };
 
@@ -471,7 +475,9 @@ export class GameSelectScene extends Phaser.Scene {
             ? text.arenaReadyLine
             : (game.lobbySetup?.description ?? text.setupControlsLine)
       ],
-      accent: theme === "frostfire-saga" ? 0xfb923c : getVisualAccent(game.id),
+      accent: theme === "frostfire-saga" || theme === "marshmallow-mayhem"
+        ? 0xfb923c
+        : getVisualAccent(game.id),
       language,
       error
     });
@@ -502,7 +508,11 @@ export class GameSelectScene extends Phaser.Scene {
     this.add
       .rectangle(x, y, width, height, 0x07111d, 0.9)
       .setOrigin(0)
-      .setStrokeStyle(2, theme === "frostfire-saga" ? 0xfb923c : 0x38bdf8, 0.38);
+      .setStrokeStyle(
+        2,
+        theme === "frostfire-saga" || theme === "marshmallow-mayhem" ? 0xfb923c : 0x38bdf8,
+        0.38
+      );
     this.add.text(x + 20, y + 16, en ? "Your squad" : "Euer Trupp", {
       fontFamily: hostTheme.titleFont,
       fontSize: "26px",
