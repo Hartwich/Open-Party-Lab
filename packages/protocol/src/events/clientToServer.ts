@@ -17,6 +17,7 @@ export type AckResult<T> = OkResult<T> | ErrorResult;
 export interface CreateRoomRequest {
   hostName?: string;
   language?: SupportedLanguage;
+  roomCode?: string;
 }
 
 export interface JoinRoomRequest {

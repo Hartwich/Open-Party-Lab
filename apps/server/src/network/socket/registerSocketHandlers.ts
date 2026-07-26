@@ -251,6 +251,14 @@ export function registerSocketHandlers({
   }
 
   io.on("connection", (socket) => {
+    socket.use((_event, next) => {
+      const roomCode = socket.data.roomCode;
+      const room = roomCode ? roomManager.getRoom(roomCode) : undefined;
+
+      if (room) roomManager.touch(room);
+      next();
+    });
+
     socket.emit("server:hello", {
       serverTime: now(),
       recoveryEnabled: true
@@ -258,7 +266,16 @@ export function registerSocketHandlers({
 
     socket.on("room:create", (payload, ack) => {
       const hostName = payload.hostName?.trim() || "Host";
-      const room = roomManager.ensurePrimaryRoom(hostName, normalizeLanguage(payload.language));
+      const requestedRoomCode = payload.roomCode?.trim().toUpperCase();
+      const room = requestedRoomCode
+        ? roomManager.getRoom(requestedRoomCode)
+        : roomManager.createRoom(hostName, normalizeLanguage(payload.language));
+
+      if (!room) {
+        ack(ackError("Raumcode nicht gefunden."));
+        return;
+      }
+
       const previousHostSocketId = roomManager.attachHostSocket(room, socket.id, hostName);
 
       if (previousHostSocketId) {
@@ -340,6 +357,7 @@ export function registerSocketHandlers({
 
       const result = playerManager.joinPlayer(room, payload, socket.id);
       const player = result.player;
+      roomManager.touch(room);
 
       socket.data.role = "controller";
       socket.data.roomCode = room.code;
@@ -391,6 +409,8 @@ export function registerSocketHandlers({
         ack(ackError(text.sessionRestoreFailed));
         return;
       }
+
+      roomManager.touch(room);
 
       socket.data.role = "controller";
       socket.data.roomCode = room.code;
@@ -865,6 +885,7 @@ export function registerSocketHandlers({
 
       if (socket.data.role === "controller") {
         playerManager.disconnectPlayer(room, socket.id);
+        roomManager.touch(room);
         stateBroadcaster.broadcastRoomState(room);
       }
     });

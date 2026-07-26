@@ -36,6 +36,19 @@ export class SocketSessionStore {
     return removed;
   }
 
+  removeByRoomCode(roomCode: string): number {
+    let removed = 0;
+
+    for (const [reconnectToken, session] of this.sessions.entries()) {
+      if (session.roomCode === roomCode) {
+        this.sessions.delete(reconnectToken);
+        removed += 1;
+      }
+    }
+
+    return removed;
+  }
+
   attachSocket(reconnectToken: string, socketId: string, updatedAt: number): void {
     const session = this.sessions.get(reconnectToken);
 

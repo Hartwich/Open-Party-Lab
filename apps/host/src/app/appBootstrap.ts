@@ -67,9 +67,9 @@ function resolveDefaultServerUrl(): string {
   return `${protocol}//${host}:3000`;
 }
 
-export function bootstrapHostApp(): Phaser.Game {
+export function bootstrapHostApp(requestedRoomCode: string | null = null): Phaser.Game {
   const serverUrl = import.meta.env.VITE_SERVER_URL ?? resolveDefaultServerUrl();
-  const hostClient = new HostSocketClient(serverUrl);
+  const hostClient = new HostSocketClient(serverUrl, requestedRoomCode);
   const preferredFps = readHostFpsPreference();
   const fpsConfig = createHostFpsConfig(preferredFps);
 

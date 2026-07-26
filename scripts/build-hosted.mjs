@@ -17,7 +17,8 @@ function runNpm(args) {
     cwd: projectRoot,
     env: {
       ...process.env,
-      OPEN_PARTY_LAB_RELEASE_BUILD: "1"
+      OPEN_PARTY_LAB_RELEASE_BUILD: "1",
+      VITE_OPEN_PARTY_LAB_HOSTED: "1"
     },
     stdio: "inherit",
     shell: false

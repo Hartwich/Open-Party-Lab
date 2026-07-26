@@ -18,6 +18,7 @@ import { PlayerPresenceTracker } from "./players/playerPresenceTracker.js";
 import { PlayerStore } from "./players/playerStore.js";
 import { ReconnectService } from "./players/reconnectService.js";
 import { RoomManager } from "./rooms/roomManager.js";
+import { RoomCleanupService } from "./rooms/roomCleanupService.js";
 import { RoomStore } from "./rooms/roomStore.js";
 
 export function createApp(environment: AppEnv = loadEnv()) {
@@ -33,7 +34,6 @@ export function createApp(environment: AppEnv = loadEnv()) {
     now,
     environment.fixedPrimaryRoomCode
   );
-  const primaryRoom = roomManager.ensurePrimaryRoom("Party Room");
   const reconnectService = new ReconnectService(sessionStore, now);
   const playerPresenceTracker = new PlayerPresenceTracker(
     environment.playerReconnectWindowMs,
@@ -68,6 +68,15 @@ export function createApp(environment: AppEnv = loadEnv()) {
     gameRuntime,
     stateBroadcaster,
     environment.roundTickMs
+  );
+  const roomCleanupService = new RoomCleanupService(
+    roomStore,
+    roomManager,
+    sessionStore,
+    stateBroadcaster,
+    now,
+    environment.roomInactivityTimeoutMs,
+    environment.roomCleanupIntervalMs
   );
 
   registerSocketHandlers({
@@ -107,14 +116,15 @@ export function createApp(environment: AppEnv = loadEnv()) {
       });
 
       roundTimerService.start();
+      roomCleanupService.start();
 
       logger.info("Party platform server listening.", {
         host: environment.host,
         port: environment.port,
         controllerOrigin: environment.publicControllerOrigin,
-        roomCode: primaryRoom.code,
         reconnectWindowMs: environment.playerReconnectWindowMs,
-        roundTickMs: environment.roundTickMs
+        roundTickMs: environment.roundTickMs,
+        roomInactivityTimeoutMs: environment.roomInactivityTimeoutMs
       });
     }
   };

@@ -39,6 +39,7 @@ export interface RoundRecord {
 export interface RoomRecord {
   code: string;
   createdAt: number;
+  lastActivityAt: number;
   joinUrl: string;
   language: SupportedLanguage;
   hostName: string;
@@ -63,6 +64,10 @@ export class RoomStore {
 
   has(roomCode: string): boolean {
     return this.rooms.has(roomCode.toUpperCase());
+  }
+
+  delete(roomCode: string): boolean {
+    return this.rooms.delete(roomCode.toUpperCase());
   }
 
   values(): RoomRecord[] {

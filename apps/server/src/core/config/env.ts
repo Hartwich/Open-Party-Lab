@@ -7,6 +7,8 @@ export interface AppEnv {
   connectionRecoveryMs: number;
   playerReconnectWindowMs: number;
   roundTickMs: number;
+  roomInactivityTimeoutMs: number;
+  roomCleanupIntervalMs: number;
   jsonSnapshotPath: string;
   fixedPrimaryRoomCode: string | null;
   webRoot: string | null;
@@ -86,6 +88,8 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): AppEnv {
     connectionRecoveryMs: readNumber(source.CONNECTION_RECOVERY_MS, 120_000),
     playerReconnectWindowMs: readNumber(source.PLAYER_RECONNECT_WINDOW_MS, 45_000),
     roundTickMs: readNumber(source.ROUND_TICK_MS, 16),
+    roomInactivityTimeoutMs: readNumber(source.ROOM_INACTIVITY_TIMEOUT_MS, 600_000),
+    roomCleanupIntervalMs: readNumber(source.ROOM_CLEANUP_INTERVAL_MS, 60_000),
     jsonSnapshotPath: source.JSON_SNAPSHOT_PATH ?? "./data/room-snapshots.json",
     fixedPrimaryRoomCode: readFixedPrimaryRoomCode(source),
     webRoot: source.OPEN_PARTY_LAB_WEB_ROOT?.trim() || null

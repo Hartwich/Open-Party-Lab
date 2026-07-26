@@ -59,7 +59,10 @@ export class HostSocketClient {
   private listenersBound = false;
   private notifyScheduled = false;
 
-  constructor(private readonly serverUrl: string) {
+  constructor(
+    private readonly serverUrl: string,
+    private readonly requestedRoomCode: string | null = null
+  ) {
     this.socket = io(serverUrl, {
       autoConnect: false,
       timeout: 5_000
@@ -328,7 +331,11 @@ export class HostSocketClient {
     }
 
     this.roomRequested = true;
-    this.socket.emit("room:create", { hostName: "Host Screen", language: this.state.preferredLanguage }, (result) => {
+    this.socket.emit("room:create", {
+      hostName: "Host Screen",
+      language: this.state.preferredLanguage,
+      roomCode: this.requestedRoomCode ?? undefined
+    }, (result) => {
       this.roomRequested = false;
 
       if (!result.ok) {

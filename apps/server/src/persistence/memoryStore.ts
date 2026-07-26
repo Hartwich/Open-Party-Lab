@@ -14,6 +14,10 @@ export class MemoryStore<TValue> {
     return this.items.has(key);
   }
 
+  delete(key: string): boolean {
+    return this.items.delete(key);
+  }
+
   values(): TValue[] {
     return [...this.items.values()];
   }

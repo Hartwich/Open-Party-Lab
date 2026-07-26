@@ -11,28 +11,19 @@ export class RoomManager {
     private readonly fixedPrimaryRoomCode: string | null = null
   ) {}
 
-  ensurePrimaryRoom(hostName: string, language: SupportedLanguage = defaultLanguage): RoomRecord {
-    const existingRoom = this.roomStore.first();
-
-    if (existingRoom) {
-      if (hostName.trim()) {
-        existingRoom.hostName = hostName.trim();
-      }
-
-      existingRoom.language = normalizeLanguage(language, existingRoom.language);
-
-      return existingRoom;
-    }
-
+  createRoom(hostName: string, language: SupportedLanguage = defaultLanguage): RoomRecord {
     const fixedCode = this.fixedPrimaryRoomCode?.trim().toUpperCase() ?? null;
     const code =
       fixedCode && !this.roomStore.has(fixedCode)
         ? fixedCode
         : createRoomCode((candidate) => this.roomStore.has(candidate));
 
+    const createdAt = this.getNow();
+
     return this.roomStore.create({
       code,
-      createdAt: this.getNow(),
+      createdAt,
+      lastActivityAt: createdAt,
       joinUrl: this.createJoinUrl(code),
       language: normalizeLanguage(language),
       hostName,
@@ -45,11 +36,20 @@ export class RoomManager {
     });
   }
 
+  touch(room: RoomRecord): void {
+    room.lastActivityAt = this.getNow();
+  }
+
+  deleteRoom(roomCode: string): boolean {
+    return this.roomStore.delete(roomCode);
+  }
+
   attachHostSocket(room: RoomRecord, socketId: string, hostName: string): string | null {
     const previousHostSocketId =
       room.hostSocketId && room.hostSocketId !== socketId ? room.hostSocketId : null;
 
     room.hostSocketId = socketId;
+    this.touch(room);
 
     if (hostName.trim()) {
       room.hostName = hostName.trim();
@@ -72,6 +72,7 @@ export class RoomManager {
 
   setHostSocket(room: RoomRecord, socketId: string | null): RoomRecord {
     room.hostSocketId = socketId;
+    this.touch(room);
     return room;
   }
 
@@ -86,6 +87,7 @@ export class RoomManager {
     }
 
     room.hostSocketId = null;
+    this.touch(room);
     return true;
   }
 }
