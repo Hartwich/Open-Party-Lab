@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     region: frankfurt
-    buildCommand: npm ci --include=dev && npm run games:clone-all && npm run build:hosted
+    buildCommand: npm ci --include=dev && npm run games:clone-all -- --fresh && npm run build:hosted
     startCommand: node apps/server/dist/main.js
     healthCheckPath: /health
     envVars:

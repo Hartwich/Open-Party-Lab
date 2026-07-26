@@ -12,6 +12,8 @@ Open Party Lab can run as a single Render web service. The server remains author
 
 Render provides `PORT` and `RENDER_EXTERNAL_URL` automatically. The platform uses the external URL for controller QR codes and serves controllers below `/controller/`.
 
+The Render build refreshes every optional game below `local-games/` before compiling. This avoids incomplete cached clones while keeping normal local `npm run games:clone-all` behavior non-destructive.
+
 The hosted build opens on a room start page. Creating a room sends the browser to `/host?room=<code>`; joining an existing room opens the controller with the entered code. This landing page is enabled only by `npm run build:hosted`, so local development and portable Windows builds continue to open their host directly.
 
 Rooms stay alive while a host or controller is connected. After the last participant disconnects, an in-memory room is deleted after ten minutes of inactivity. `ROOM_INACTIVITY_TIMEOUT_MS` and `ROOM_CLEANUP_INTERVAL_MS` can override the defaults when needed.
