@@ -134,7 +134,7 @@ export function mountJoinOverlay(client: HostSocketClient): () => void {
   card.appendChild(link);
 
   const hint = document.createElement("small");
-  hint.textContent = "Wenn am Handy die Host-Seite erscheint, stattdessen den QR-Code oder Port 5174 nutzen.";
+  hint.textContent = "Am Handy immer den angezeigten Controller-Link oder QR-Code verwenden.";
   hint.style.color = "#475569";
   hint.style.lineHeight = "1.4";
   card.appendChild(hint);

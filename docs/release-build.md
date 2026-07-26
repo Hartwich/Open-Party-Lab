@@ -5,6 +5,8 @@
 3. The shared host screen opens automatically in your browser.
 4. Players scan the QR code and open the controller page on phones connected to the same LAN/Wi-Fi.
 
+The launcher prefers the computer's active private Wi-Fi address and opens the host as `http://<LAN-IP>:3000/`. It uses that same address for the QR/controller link. If no private LAN address is available, it warns and falls back to localhost until the computer is connected to a LAN or Wi-Fi network.
+
 The portable build contains the server, host, controller, all game repositories, and its own Node.js runtime. Node.js and npm do not need to be installed.
 
 Windows may show a SmartScreen warning because this community build is not code-signed. You can inspect the Apache-2.0 source at https://github.com/Hartwich/Open-Party-Lab before running it.

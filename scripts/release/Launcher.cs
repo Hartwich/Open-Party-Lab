@@ -2,10 +2,51 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Threading;
 
 internal static class Launcher
 {
+    private static bool IsPrivateIPv4(IPAddress address)
+    {
+        byte[] bytes = address.GetAddressBytes();
+        return bytes.Length == 4 && (
+            bytes[0] == 10 ||
+            (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) ||
+            (bytes[0] == 192 && bytes[1] == 168));
+    }
+
+    private static string FindLanIPv4(bool wirelessOnly)
+    {
+        foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+        {
+            if (
+                networkInterface.OperationalStatus != OperationalStatus.Up ||
+                networkInterface.NetworkInterfaceType == NetworkInterfaceType.Loopback ||
+                networkInterface.NetworkInterfaceType == NetworkInterfaceType.Tunnel ||
+                (wirelessOnly && networkInterface.NetworkInterfaceType != NetworkInterfaceType.Wireless80211))
+            {
+                continue;
+            }
+
+            foreach (UnicastIPAddressInformation addressInfo in networkInterface.GetIPProperties().UnicastAddresses)
+            {
+                if (addressInfo.Address.AddressFamily == AddressFamily.InterNetwork && IsPrivateIPv4(addressInfo.Address))
+                {
+                    return addressInfo.Address.ToString();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static string FindLanIPv4()
+    {
+        return FindLanIPv4(true) ?? FindLanIPv4(false);
+    }
+
     [STAThread]
     private static int Main()
     {
@@ -14,6 +55,10 @@ internal static class Launcher
         string appRoot = Path.Combine(root, "app");
         string serverPath = Path.Combine(appRoot, "server", "main.js");
         string logPath = Path.Combine(root, "open-party-lab.log");
+        string lanIp = FindLanIPv4();
+        string publicHost = lanIp ?? "127.0.0.1";
+        string hostUrl = "http://" + publicHost + ":3000/";
+        string controllerOrigin = hostUrl + "controller/";
 
         if (!File.Exists(nodePath) || !File.Exists(serverPath))
         {
@@ -35,10 +80,15 @@ internal static class Launcher
         };
         startInfo.EnvironmentVariables["NODE_ENV"] = "production";
         startInfo.EnvironmentVariables["OPEN_PARTY_LAB_WEB_ROOT"] = Path.Combine(appRoot, "web");
+        startInfo.EnvironmentVariables["PUBLIC_CONTROLLER_ORIGIN"] = controllerOrigin;
 
         using (var log = new StreamWriter(logPath, true))
         using (var server = new Process { StartInfo = startInfo, EnableRaisingEvents = true })
         {
+            log.WriteLine("Host URL: " + hostUrl);
+            log.WriteLine("Controller URL: " + controllerOrigin);
+            log.Flush();
+
             server.OutputDataReceived += delegate(object sender, DataReceivedEventArgs args) { if (args.Data != null) { log.WriteLine(args.Data); log.Flush(); } };
             server.ErrorDataReceived += delegate(object sender, DataReceivedEventArgs args) { if (args.Data != null) { log.WriteLine(args.Data); log.Flush(); } };
 
@@ -78,7 +128,16 @@ internal static class Launcher
                 return 1;
             }
 
-            Process.Start(new ProcessStartInfo("http://127.0.0.1:3000/") { UseShellExecute = true });
+            if (lanIp == null)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    "No private LAN IPv4 address was detected. Open Party Lab will use localhost, so phone controllers cannot connect until the computer is connected to a LAN or Wi-Fi network.",
+                    "Open Party Lab",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Warning);
+            }
+
+            Process.Start(new ProcessStartInfo(hostUrl) { UseShellExecute = true });
             server.WaitForExit();
             return server.ExitCode;
         }
