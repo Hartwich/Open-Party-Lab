@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import type { ChaosKommandoLayoutModel } from "./models.js";
 
@@ -60,14 +60,6 @@ function applyResponseMapping(x: number, y: number): ControlVector {
     x: normalizedX * scaledMagnitude,
     y: normalizedY * scaledMagnitude
   };
-}
-
-function formatCountdown(untilMs: number | undefined, nowMs: number): string {
-  if (!untilMs) {
-    return "-";
-  }
-
-  return `${Math.max(0, Math.ceil((untilMs - nowMs) / 1000))}s`;
 }
 
 const StickPad = memo(function StickPad({ label, accentColor, disabled, resetKey, onChange, size }: StickPadProps) {
@@ -226,32 +218,23 @@ const StickPad = memo(function StickPad({ label, accentColor, disabled, resetKey
   previousProps.size === nextProps.size
 );
 
+/**
+ * Muss mit `chargeWindowMs` im Chaos-Kommando-Server uebereinstimmen, sonst
+ * zeigt der Balken volle Kraft an, bevor der Server sie erreicht hat.
+ */
+const chargeWindowMs = 1_750;
+
 export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel }) {
   const en = model.language === "en";
   const [hudMode, setHudMode] = useState<"kommando" | "steuerung">("kommando");
-  const [activePanel, setActivePanel] = useState<"mercs" | "weapons">("mercs");
   const [isPortrait, setIsPortrait] = useState(() =>
     typeof window !== "undefined" ? window.innerHeight >= window.innerWidth : true
   );
   const [isCharging, setIsCharging] = useState(false);
   const [chargePct, setChargePct] = useState(0);
-  const [clockNowMs, setClockNowMs] = useState(() => Date.now());
   const chargingSinceRef = useRef<number | null>(null);
+  const endChargeRef = useRef<() => void>(() => undefined);
   const selectedWeapon = model.weapons.find((weapon) => weapon.selected) ?? model.weapons[0] ?? null;
-  const compactStats = useMemo(
-    () =>
-      (model.stats ?? [])
-        .filter((stat) => stat.label === "Zeit")
-        .map((stat) =>
-          stat.label === "Zeit"
-            ? {
-                ...stat,
-                value: formatCountdown(model.countdownEndsAtMs, clockNowMs)
-              }
-            : stat
-        ),
-    [clockNowMs, model.countdownEndsAtMs, model.stats]
-  );
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -270,21 +253,6 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
     };
   }, []);
 
-  useEffect(() => {
-    setClockNowMs(Date.now());
-
-    if (!model.countdownEndsAtMs) {
-      return undefined;
-    }
-
-    const timer = window.setInterval(() => {
-      setClockNowMs(Date.now());
-    }, 250);
-
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [model.countdownEndsAtMs]);
 
   useEffect(() => {
     chargingSinceRef.current = null;
@@ -304,7 +272,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
         return;
       }
 
-      setChargePct(Math.min(1, (Date.now() - chargingSinceRef.current) / 1400));
+      setChargePct(Math.min(1, (Date.now() - chargingSinceRef.current) / chargeWindowMs));
     }, 40);
 
     return () => {
@@ -331,6 +299,28 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
     model.onFireStart();
   }
 
+  // Firefox auf Android liefert `pointerup` nicht zuverlaessig am Button,
+  // wenn der Finger waehrend des Haltens wandert. Global mitlauschen.
+  useEffect(() => {
+    if (!isCharging || typeof window === "undefined") {
+      return undefined;
+    }
+
+    const release = () => {
+      endChargeRef.current();
+    };
+
+    for (const event of ["pointerup", "pointercancel", "touchend", "touchcancel", "blur"]) {
+      window.addEventListener(event, release);
+    }
+
+    return () => {
+      for (const event of ["pointerup", "pointercancel", "touchend", "touchcancel", "blur"]) {
+        window.removeEventListener(event, release);
+      }
+    };
+  }, [isCharging]);
+
   function endCharge(): void {
     if (chargingSinceRef.current === null) {
       return;
@@ -341,6 +331,8 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
     setChargePct(0);
     model.onFireEnd();
   }
+
+  endChargeRef.current = endCharge;
 
   function handleFirePointerDown(event: React.PointerEvent<HTMLButtonElement>): void {
     if (model.disabled) {
@@ -354,7 +346,13 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
       return;
     }
 
-    event.currentTarget.setPointerCapture(event.pointerId);
+    // setPointerCapture wirft in manchen mobilen Browsern fuer Touch-Pointer.
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      /* Pointer Capture ist optional. */
+    }
+
     beginCharge();
   }
 
@@ -373,11 +371,10 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
   const panelRadius = "clamp(20px, 5vw, 24px)";
   const tileRadius = "clamp(18px, 4.5vw, 22px)";
   const iconSize = isPortrait ? "clamp(60px, 18vw, 76px)" : "clamp(58px, 10vw, 74px)";
-  const stickSize = isPortrait ? "min(34vw, 30vh, 208px)" : "min(24vw, 42vh, 220px)";
-  const fireSize = isPortrait ? "min(25vw, 19vh, 132px)" : "min(15vw, 24vh, 132px)";
-  const jumpSize = isPortrait ? "min(18vw, 12vh, 84px)" : "min(10vw, 16vh, 82px)";
+  const stickSize = isPortrait ? "min(42vw, 36vh, 264px)" : "min(30vw, 50vh, 280px)";
+  const fireSize = isPortrait ? "min(30vw, 23vh, 164px)" : "min(19vw, 29vh, 164px)";
+  const jumpSize = isPortrait ? "min(22vw, 15vh, 104px)" : "min(13vw, 20vh, 102px)";
   const weaponColumns = isPortrait ? "repeat(4, minmax(0, 1fr))" : "repeat(5, minmax(0, 1fr))";
-  const mercenaryColumns = isPortrait ? "repeat(2, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))";
 
   return (
     <div style={{ display: "grid", gap: layoutGap, width: "100%" }}>
@@ -410,19 +407,6 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
         </button>
       </div>
 
-      {compactStats.length ? (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: chipGap }}>
-          {compactStats.map((stat) => (
-            <span
-              key={`${stat.label}:${stat.value}`}
-              style={statChipStyle(stat.highlighted ? model.accentColor ?? "#22d3ee" : "#64748b")}
-            >
-              {stat.label}: {stat.value}
-            </span>
-          ))}
-        </div>
-      ) : null}
-
       {hudMode === "kommando" ? (
         <div
           style={{
@@ -434,144 +418,63 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
             background: "linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(8, 13, 27, 0.98) 100%)"
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: "clamp(10px, 2.4vw, 12px)",
-              flexWrap: "wrap"
-            }}
-          >
-            <strong style={{ fontSize: "clamp(0.96rem, 2.6vw, 1rem)" }}>Loadout</strong>
-            <div style={{ display: "flex", gap: chipGap, flexWrap: "wrap" }}>
-              <button
-                type="button"
-                onClick={() => setActivePanel("mercs")}
-                style={toggleStyle(activePanel === "mercs", model.accentColor)}
-              >
-                TEAM
-              </button>
-              <button
-                type="button"
-                onClick={() => setActivePanel("weapons")}
-                style={toggleStyle(activePanel === "weapons", "#fb7185")}
-              >
-                {en ? "WEAPONS" : "WAFFEN"}
-              </button>
-            </div>
-          </div>
-
-          {activePanel === "weapons" && selectedWeapon ? (
+          {selectedWeapon ? (
             <div style={weaponInfoStyle}>
               <strong style={{ fontSize: "0.98rem" }}>{selectedWeapon.label}</strong>
               <span style={{ color: "var(--text-muted)", fontSize: "0.84rem" }}>{selectedWeapon.subtitle}</span>
             </div>
           ) : null}
 
-          {activePanel === "mercs" ? (
-            <div
-              style={{
-                display: "grid",
-                gap: panelGap,
-                gridTemplateColumns: mercenaryColumns
-              }}
-            >
-              {model.mercenaries.map((mercenary) => (
-                <button
-                  key={mercenary.id}
-                  type="button"
-                  disabled={mercenary.disabled}
-                  onClick={mercenary.onSelect}
-                  style={{
-                    display: "grid",
-                    justifyItems: "center",
-                    gap: "clamp(8px, 2vw, 10px)",
-                    padding: "clamp(12px, 3.4vw, 16px)",
-                    borderRadius: tileRadius,
-                    border: mercenary.selected
-                      ? `1px solid ${mercenary.teamColor ?? model.accentColor ?? "#22d3ee"}`
-                      : "1px solid rgba(148, 163, 184, 0.16)",
-                    background: mercenary.selected
-                      ? "linear-gradient(180deg, rgba(20, 184, 166, 0.18) 0%, rgba(15, 23, 42, 0.72) 100%)"
-                      : "rgba(15, 23, 42, 0.68)",
-                    color: "#f8fafc",
-                    opacity: mercenary.disabled ? 0.42 : 1
-                  }}
-                >
-                  {mercenary.iconPath ? (
-                    <img
-                      src={mercenary.iconPath}
-                      alt=""
-                      style={{
-                        width: iconSize,
-                        height: iconSize,
-                        objectFit: "contain",
-                        filter: mercenary.disabled ? "grayscale(1)" : "none"
-                      }}
-                    />
-                  ) : null}
-                  <strong style={{ fontSize: "clamp(0.9rem, 2.5vw, 0.98rem)", textAlign: "center" }}>
-                    {mercenary.label}
-                  </strong>
-                  <span style={{ color: "#e2e8f0", fontWeight: 700, fontSize: "clamp(0.78rem, 2.2vw, 0.88rem)" }}>
-                    {mercenary.hpLabel}
-                  </span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div
-              style={{
-                display: "grid",
-                gap: panelGap,
-                gridTemplateColumns: weaponColumns,
-                alignItems: "stretch"
-              }}
-            >
-              {model.weapons.map((weapon) => (
-                <button
-                  key={weapon.id}
-                  type="button"
-                  disabled={weapon.disabled}
-                  onClick={weapon.onSelect}
-                  style={{
-                    position: "relative",
-                    display: "grid",
-                    placeItems: "center",
-                    width: "100%",
-                    aspectRatio: "1 / 1",
-                    padding: "clamp(10px, 3vw, 14px)",
-                    borderRadius: tileRadius,
-                    border: weapon.selected
-                      ? `1px solid ${weapon.accentColor ?? "#fb7185"}`
-                      : "1px solid rgba(148, 163, 184, 0.16)",
-                    background: weapon.selected
-                      ? "linear-gradient(180deg, rgba(251, 113, 133, 0.18) 0%, rgba(15, 23, 42, 0.72) 100%)"
-                      : "rgba(15, 23, 42, 0.68)",
-                    color: "#f8fafc",
-                    opacity: weapon.disabled ? 0.42 : 1
-                  }}
-                >
-                  <span style={ammoBadgeStyle(weapon.selected ? weapon.accentColor ?? "#fb7185" : "#64748b")}>
-                    {weapon.ammoLabel}
-                  </span>
-                  {weapon.iconPath ? (
-                    <img
-                      src={weapon.iconPath}
-                      alt=""
-                      style={{
-                        width: "68%",
-                        height: "68%",
-                        objectFit: "contain",
-                        filter: weapon.disabled ? "grayscale(1)" : "none"
-                      }}
-                    />
-                  ) : null}
-                </button>
-              ))}
-            </div>
-          )}
+          <div
+            style={{
+              display: "grid",
+              gap: panelGap,
+              gridTemplateColumns: weaponColumns,
+              alignItems: "stretch"
+            }}
+          >
+            {model.weapons.map((weapon) => (
+              <button
+                key={weapon.id}
+                type="button"
+                disabled={weapon.disabled}
+                onClick={weapon.onSelect}
+                style={{
+                  position: "relative",
+                  display: "grid",
+                  placeItems: "center",
+                  width: "100%",
+                  aspectRatio: "1 / 1",
+                  padding: "clamp(10px, 3vw, 14px)",
+                  borderRadius: tileRadius,
+                  border: weapon.selected
+                    ? `1px solid ${weapon.accentColor ?? "#fb7185"}`
+                    : "1px solid rgba(148, 163, 184, 0.16)",
+                  background: weapon.selected
+                    ? "linear-gradient(180deg, rgba(251, 113, 133, 0.18) 0%, rgba(15, 23, 42, 0.72) 100%)"
+                    : "rgba(15, 23, 42, 0.68)",
+                  color: "#f8fafc",
+                  opacity: weapon.disabled ? 0.42 : 1
+                }}
+              >
+                <span style={ammoBadgeStyle(weapon.selected ? weapon.accentColor ?? "#fb7185" : "#64748b")}>
+                  {weapon.ammoLabel}
+                </span>
+                {weapon.iconPath ? (
+                  <img
+                    src={weapon.iconPath}
+                    alt=""
+                    style={{
+                      width: "68%",
+                      height: "68%",
+                      objectFit: "contain",
+                      filter: weapon.disabled ? "grayscale(1)" : "none"
+                    }}
+                  />
+                ) : null}
+              </button>
+            ))}
+          </div>
         </div>
       ) : (
         <div
@@ -600,7 +503,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
               onPointerDown={handleFirePointerDown}
               onPointerUp={handleFirePointerUp}
               onPointerCancel={handleFirePointerUp}
-              onLostPointerCapture={handleFirePointerUp}
+              onContextMenu={(event) => event.preventDefault()}
               style={{
                 position: "relative",
                 width: fireSize,
@@ -613,7 +516,10 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                   : "linear-gradient(180deg, rgba(251, 113, 133, 0.95) 0%, rgba(190, 24, 93, 0.96) 100%)",
                 color: "#fff1f2",
                 boxShadow: model.disabled ? "none" : "0 18px 40px rgba(190, 24, 93, 0.22)",
-                touchAction: "none"
+                touchAction: "none",
+                userSelect: "none",
+                WebkitUserSelect: "none",
+                WebkitTouchCallout: "none"
               }}
             >
               {model.fireMode === "charged" ? (

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Marshmallow Motion Lab 3D</title>
+    <link rel="stylesheet" href="./motion-lab-3d.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/vendor/three/three.module.js",
+          "three/addons/": "/vendor/three-addons/"
+        }
+      }
+    </script>
+  </head>
+  <body data-animation="idle">
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Party Platform Tool · 3D Motion Prototype</p>
+          <h1>Marshmallow Motion Lab 3D</h1>
+        </div>
+        <div class="status" aria-live="polite">
+          <span class="status-dot"></span>
+          <span id="loadStatus">3D-Rig wird aufgebaut</span>
+        </div>
+      </header>
+
+      <section class="workspace" aria-label="3D-Animationswerkbank">
+        <div class="stage-wrap">
+          <div id="viewport" aria-label="Marshmallow 3D-Vorschau"></div>
+          <div class="stage-hint">Maus bewegen: zielen · Klick: schießen · Ziehen: Kamera drehen · Rad: Zoom</div>
+        </div>
+
+        <aside class="inspector">
+          <section class="control-section">
+            <p class="section-label">Körperform</p>
+            <div class="segmented body-segmented" role="group" aria-label="Körperform">
+              <button class="body-button" data-body="wide" type="button">Breit</button>
+              <button class="body-button is-active" data-body="square" type="button">Quadrat</button>
+              <button class="body-button" data-body="tall" type="button">Hoch</button>
+            </div>
+          </section>
+
+          <section class="control-section">
+            <p class="section-label">Bewegung</p>
+            <div class="segmented movement-segmented" role="group" aria-label="Animationszustand">
+              <button class="state-button is-active" data-state="idle" type="button">Idle</button>
+              <button class="state-button" data-state="walk" type="button">Walk</button>
+              <button class="state-button" data-state="walkBack" type="button">Rückwärts</button>
+              <button class="state-button" data-state="strafe" type="button">Seitwärts</button>
+              <button class="state-button" data-state="jump" type="button">Jump</button>
+              <button class="state-button" data-state="longJump" type="button">Weitsprung</button>
+              <button class="state-button" data-state="joy" type="button">Freude</button>
+              <button class="state-button" data-state="throw" type="button">Werfen</button>
+              <button class="state-button" data-state="grenade" type="button">Granate</button>
+              <button class="state-button" data-state="shoot" type="button">Blaster 2H</button>
+              <button class="state-button" data-state="handgun" type="button">Pistole</button>
+            </div>
+          </section>
+
+          <section class="control-section">
+            <p class="section-label">Kamera</p>
+            <div class="segmented camera-segmented" role="group" aria-label="Kameraposition">
+              <button class="camera-button" data-camera="front" type="button">Front</button>
+              <button class="camera-button is-active" data-camera="three-quarter" type="button">3/4</button>
+              <button class="camera-button" data-camera="side" type="button">Seite</button>
+              <button class="camera-button" data-camera="top" type="button">Oben</button>
+            </div>
+          </section>
+
+          <section class="control-section">
+            <label class="range-label" for="speed"><span>Geschwindigkeit</span><output id="speedValue">16 fps</output></label>
+            <input id="speed" type="range" min="6" max="30" step="1" value="16" />
+
+            <label class="range-label" for="bodyRadius"><span>Körperbreite</span><output id="bodyRadiusValue">0.55</output></label>
+            <input id="bodyRadius" type="range" min="0" max="100" step="1" value="31" />
+
+            <label class="range-label" for="bodyHeight"><span>Körperhöhe</span><output id="bodyHeightValue">1.05</output></label>
+            <input id="bodyHeight" type="range" min="0" max="100" step="1" value="46" />
+
+            <label class="range-label" for="roundness"><span>Rundung</span><output id="roundnessValue">35%</output></label>
+            <input id="roundness" type="range" min="0" max="100" step="1" value="35" />
+
+            <label class="range-label" for="bodyLift"><span>Körper-Bodenabstand</span><output id="bodyLiftValue">0.30</output></label>
+            <input id="bodyLift" type="range" min="0" max="100" step="1" value="50" />
+
+            <label class="range-label" for="warp"><span>Warp-Stärke</span><output id="warpValue">55%</output></label>
+            <input id="warp" type="range" min="0" max="100" step="1" value="55" />
+
+            <label class="range-label" for="footGap"><span>Fuß-Abstand</span><output id="footGapValue">0.36</output></label>
+            <input id="footGap" type="range" min="0" max="100" step="1" value="45" />
+
+            <label class="range-label" for="footSize"><span>Fußgröße</span><output id="footSizeValue">100%</output></label>
+            <input id="footSize" type="range" min="0" max="100" step="1" value="40" />
+
+            <label class="range-label" for="legMotion"><span>Beinbewegung</span><output id="legMotionValue">60%</output></label>
+            <input id="legMotion" type="range" min="0" max="100" step="1" value="60" />
+
+            <label class="range-label" for="armHeight"><span>Arm-Höhe</span><output id="armHeightValue">50%</output></label>
+            <input id="armHeight" type="range" min="0" max="100" step="1" value="50" />
+
+            <label class="range-label" for="armGap"><span>Arm-Abstand</span><output id="armGapValue">0.50</output></label>
+            <input id="armGap" type="range" min="0" max="100" step="1" value="50" />
+
+            <label class="range-label" for="armSize"><span>Armgröße</span><output id="armSizeValue">100%</output></label>
+            <input id="armSize" type="range" min="0" max="100" step="1" value="40" />
+
+            <label class="range-label" for="toast"><span>Röstung</span><output id="toastValue">22%</output></label>
+            <input id="toast" type="range" min="0" max="100" step="1" value="22" />
+          </section>
+
+          <section class="control-section switches">
+            <label><input id="texture" type="checkbox" checked /><span>Textur</span></label>
+            <label><input id="ghosts" type="checkbox" /><span>Geisterbilder</span></label>
+            <label><input id="guides" type="checkbox" checked /><span>Bodenraster</span></label>
+            <label><input id="shadows" type="checkbox" checked /><span>Schatten</span></label>
+            <label><input id="limbs" type="checkbox" checked /><span>Hände &amp; Füße</span></label>
+            <label><input id="autoTurn" type="checkbox" checked /><span>Blick folgt Maus</span></label>
+          </section>
+
+          <section class="control-section save-panel">
+            <p class="section-label">Aktionshand</p>
+            <div class="segmented" role="group" aria-label="Aktionshand">
+              <button class="hand-button" data-hand="left" type="button">Links</button>
+              <button class="hand-button is-active" data-hand="right" type="button">Rechts</button>
+            </div>
+            <button id="holdThrow" class="save-button throw-control" type="button">Wurf gedrückt halten</button>
+            <output id="actionStatus" class="throw-control" aria-live="polite">Bereit zum Ausholen</output>
+            <button id="saveSettings" class="save-button" type="button">Aktuelles Profil speichern</button>
+            <button id="exportSettings" class="save-button secondary-save-button" type="button">Alle Profile ins Projekt schreiben</button>
+            <output id="saveStatus" aria-live="polite">Noch nicht gespeichert</output>
+          </section>
+
+          <section class="readout" aria-label="Messwerte">
+            <div><span>Technik</span><strong id="techniqueReadout">3D Warp-Rig</strong></div>
+            <div><span>Frame</span><strong id="frameReadout">01 / 16</strong></div>
+            <div><span>Blickwinkel</span><strong id="facingReadout">0°</strong></div>
+            <div><span>Waffe</span><strong id="weaponReadout">keine</strong></div>
+            <div><span>Körperhöhe</span><strong id="heightReadout">1.35 u</strong></div>
+            <div><span>Bodenlinie</span><strong>y = 0</strong></div>
+          </section>
+        </aside>
+      </section>
+
+      <footer class="transport">
+        <button id="playPause" class="play-button" type="button" aria-label="Animation pausieren">Pause</button>
+        <input id="timeline" type="range" min="0" max="15" step="1" value="0" aria-label="Frame auswählen" />
+        <p><kbd>Leertaste</kbd> Play/Pause · <kbd>←</kbd><kbd>→</kbd> Frame · <kbd>1</kbd>–<kbd>9</kbd> Zustand · <kbd>R</kbd> Kamera</p>
+      </footer>
+    </main>
+
+    <noscript>
+      <p class="fallback">Dieses Tool benötigt JavaScript und WebGL.</p>
+    </noscript>
+
+    <script type="module" src="./motion-lab-3d.js"></script>
+  </body>
+</html>

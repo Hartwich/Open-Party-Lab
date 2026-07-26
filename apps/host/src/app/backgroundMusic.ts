@@ -316,7 +316,7 @@ const musicProfiles: Record<string, MusicProfile> = {
     rootMidi: 46,
     masterGain: 0.11
   }),
-  tabu: createProfile(musicTemplates.arcade, {
+  buzzwort: createProfile(musicTemplates.arcade, {
     bpm: 124,
     rootMidi: 57,
     masterGain: 0.13

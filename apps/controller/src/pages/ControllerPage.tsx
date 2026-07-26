@@ -151,23 +151,38 @@ export function ControllerPage({ state, onLeaveRoom, onInput, onSetReady }: Cont
   const denseBoardChrome = gameId === "word-tiles";
   const joystickChrome = layoutModel.kind === "virtual_joystick" && layoutModel.minimal;
   const cleanJoystickChrome = layoutModel.kind === "virtual_joystick" && layoutModel.cleanChrome;
-  const minimalChrome = denseBoardChrome || gamepadChrome || joystickChrome;
+  const drawingGuessChrome = gameId === "zeichnen-und-erraten";
+  // Chaos-Kommando bringt eine eigene, vollflaechige Steuerung mit. Spielname,
+  // Phase, Raumcode, Punktestand und Abmelden wuerden dort nur Platz kosten;
+  // Restzeit und Spielername stehen auf dem Host.
+  const artilleryChrome = gameId === "chaos-kommando";
+  const flatterfluffChrome = gameId === "flatterfluff" || cleanJoystickChrome;
+  const minimalChrome =
+    denseBoardChrome ||
+    gamepadChrome ||
+    joystickChrome ||
+    artilleryChrome ||
+    flatterfluffChrome;
 
   return (
     <ControllerFrame
       title={minimalChrome ? "" : gameName}
-      subtitle={minimalChrome || cleanJoystickChrome ? undefined : `${text.phase}: ${text.formatPhase(game?.phase ?? text.unknown)} | ${orientation}`}
+      subtitle={minimalChrome || cleanJoystickChrome || drawingGuessChrome ? undefined : `${text.phase}: ${text.formatPhase(game?.phase ?? text.unknown)} | ${orientation}`}
       wide={gamepadChrome || denseBoardChrome}
-      bare={joystickChrome}
+      bare={joystickChrome || flatterfluffChrome}
       footer={
         minimalChrome ? undefined :
         <div style={{ display: "grid", gap: 10 }}>
-          <button type="button" onClick={onLeaveRoom} style={secondaryButtonStyle}>
-            {text.logout}
-          </button>
+          {!drawingGuessChrome ? (
+            <button type="button" onClick={onLeaveRoom} style={secondaryButtonStyle}>
+              {text.logout}
+            </button>
+          ) : null}
           {!cleanJoystickChrome ? (
             <div style={{ display: "grid", gap: 8 }}>
-              <small style={{ color: "var(--text-muted)" }}>{text.room} {state.room.code}</small>
+              {!drawingGuessChrome ? (
+                <small style={{ color: "var(--text-muted)" }}>{text.room} {state.room.code}</small>
+              ) : null}
               <small style={{ color: "var(--text-muted)" }}>
                 {text.score}: {state.scoreboard?.entries.find((entry) => entry.playerId === state.player?.id)?.total ?? state.player.score}
               </small>

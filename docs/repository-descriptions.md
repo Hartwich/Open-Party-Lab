@@ -22,8 +22,8 @@ Topics: open-party-lab party-game browser-game phaser typescript local-multiplay
 Description: Two-player arcade air hockey for Open Party Lab with phone joystick controls.
 Topics: open-party-lab party-game browser-game phaser typescript local-multiplayer air-hockey
 
-## Tabu
-Description: Taboo-inspired word explanation game for Open Party Lab with team and party flow.
+## Buzzwort
+Description: Fast-paced word explanation party game: describe the term without saying any of the blocked words while a watcher listens in.
 Topics: open-party-lab party-game browser-game phaser typescript local-multiplayer word-game
 
 ## Imposter

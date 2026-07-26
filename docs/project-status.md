@@ -27,12 +27,12 @@ Optional local game repos:
 - Magic Duell can be loaded from `local-games/magic-duell` when cloned locally. It is currently recommended alpha and playable.
 - Arena Survivor can be loaded from `local-games/arena-survivor` when cloned locally. It is currently beta and recommended.
 - MinionsTD can be loaded from `local-games/minions-td` when cloned locally. It is currently beta and recommended.
-- Zeichnen & Erraten can be loaded from `local-games/zeichnen-und-erraten` when cloned locally. It is currently beta and recommended.
+- Zeichnen & Erraten can be loaded from `local-games/zeichnen-und-erraten` when cloned locally. It is currently beta and recommended; its focused play view omits redundant phase, color-prompt, and room-code chrome while retaining the host QR join flow.
 - Schaetzorama can be loaded from `local-games/schaetzorama` when cloned locally. It is currently beta and recommended; the answer-setting phase has no timer, repeated question IDs are avoided within a 10-round session, and directly math-solvable prompts are excluded from the active pool.
 - Tap Race can be loaded from `local-games/tap-race` when cloned locally.
 - Pantomime can be loaded from `local-games/pantomime` when cloned locally.
 - Air Hockey can be loaded from `local-games/air-hockey` when cloned locally.
-- Tabu can be loaded from `local-games/tabu` when cloned locally.
+- Buzzwort can be loaded from `local-games/buzzwort` when cloned locally. It is recommended alpha. Cards now carry real forbidden words, a turn is a timed window in which the explainer can solve several terms, and a rotating watcher from the opposing side sees the card and can buzz when a blocked word is used. Team mode gives each team the same number of turns, free-for-all gives every player exactly one explaining turn and one watching turn. The host screen uses a live turn ring, team/leaderboard panels, and an event feed; phones use the new reusable `secret_card` controller layout.
 - Imposter can be loaded from `local-games/imposter` when cloned locally.
 - Light Trails can be loaded from `local-games/light-trails` when cloned locally.
 - Drift Racer can be loaded from `local-games/drift-racer` when cloned locally. It is recommended alpha; its phone controller uses a left virtual drive stick plus Boost, Fire, and Drift action buttons.

@@ -400,6 +400,7 @@ export function mountHostControlsOverlay(
     const lifecycle = getRoomPhase(room) ?? "lobby";
 
     roomBadge.textContent = room?.code ?? "----";
+    roomBadge.style.display = selectedGameId === "zeichnen-und-erraten" ? "none" : "";
     roomBadge.style.opacity = room ? "1" : "0.65";
     connectionBadge.textContent = room
       ? `${gameName}\n${connectedPlayers}/${totalPlayers} ${text.players.toLowerCase()} | ${text.lifecycle(lifecycle)}`

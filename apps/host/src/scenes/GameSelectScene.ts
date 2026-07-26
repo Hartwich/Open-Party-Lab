@@ -185,6 +185,7 @@ export class GameSelectScene extends Phaser.Scene {
           ? text.gameSelectAutoReadySubtitle
           : text.gameSelectClassicSubtitle,
       roomCode,
+      showRoomCode: selectedGame?.id !== "zeichnen-und-erraten",
       language
     };
     const headerBottom = measureSceneHeaderBottom(this, headerOptions);

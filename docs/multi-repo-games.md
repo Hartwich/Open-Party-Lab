@@ -39,7 +39,7 @@ git clone https://github.com/Hartwich/magic-arena.git local-games/magic-arena
 git clone https://github.com/Hartwich/magic-duell.git local-games/magic-duell
 git clone https://github.com/Hartwich/tap-race.git local-games/tap-race
 git clone https://github.com/Hartwich/air-hockey.git local-games/air-hockey
-git clone https://github.com/Hartwich/tabu.git local-games/tabu
+git clone https://github.com/Hartwich/buzzwort.git local-games/buzzwort
 git clone https://github.com/Hartwich/imposter.git local-games/imposter
 git clone https://github.com/Hartwich/schaetzorama.git local-games/schaetzorama
 git clone https://github.com/Hartwich/light-trails.git local-games/light-trails
@@ -83,7 +83,7 @@ External games expose only these public entrypoints:
 @open-party-lab/game-tap-race/controller
 ```
 
-For Magic Arena, Magic Duell, Air Hockey, Tabu, Imposter, Schaetzorama, Light Trails, Drift Racer, Word Tiles, Zeichnen & Erraten, Arena Survivor, MinionsTD, and Chaos-Kommando, the same contract uses the matching package name such as `@open-party-lab/game-magic-arena/...` or `@open-party-lab/game-chaos-kommando/...`.
+For Magic Arena, Magic Duell, Air Hockey, Buzzwort, Imposter, Schaetzorama, Light Trails, Drift Racer, Word Tiles, Zeichnen & Erraten, Arena Survivor, MinionsTD, and Chaos-Kommando, the same contract uses the matching package name such as `@open-party-lab/game-magic-arena/...` or `@open-party-lab/game-chaos-kommando/...`.
 
 The platform generates registry imports only for local repos that exist and build successfully. Missing repos are skipped.
 

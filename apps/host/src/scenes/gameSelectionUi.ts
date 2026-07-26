@@ -10,6 +10,7 @@ interface SceneHeaderOptions {
   title: string;
   subtitle: string;
   roomCode: string;
+  showRoomCode?: boolean;
   joinUrl?: string;
   language?: SupportedLanguage;
 }
@@ -337,7 +338,7 @@ function drawGameIcon(
       graphics.strokePath();
       break;
     }
-    case "tabu": {
+    case "buzzwort": {
       graphics.fillRoundedRect(size * 0.2, size * 0.22, size * 0.54, size * 0.42, size * 0.06);
       graphics.strokeRoundedRect(size * 0.2, size * 0.22, size * 0.54, size * 0.42, size * 0.06);
       graphics.lineStyle(secondaryLine, accent, 0.72);
@@ -659,7 +660,7 @@ export function measureSceneHeaderBottom(scene: Phaser.Scene, options: SceneHead
 
 export function renderSceneHeader(
   scene: Phaser.Scene,
-  { title, subtitle, roomCode, joinUrl, language }: SceneHeaderOptions
+  { title, subtitle, roomCode, showRoomCode = true, joinUrl, language }: SceneHeaderOptions
 ): number {
   const text = getHostText(language);
   const { x, y, width, height: headerHeight, narrow, bottom } = getSceneHeaderMetrics(scene, { subtitle, joinUrl });
@@ -684,24 +685,26 @@ export function renderSceneHeader(
     wordWrap: { width: narrow ? width - 48 : width - 320 }
   }).setVisible(subtitle.trim().length > 0);
 
-  const codeCardWidth = narrow ? width - 48 : 214;
-  const codeCardX = narrow ? x + 24 : x + width - codeCardWidth - 20;
-  const hasSubtitle = subtitle.trim().length > 0;
-  const codeCardY = narrow ? y + (joinUrl ? (hasSubtitle ? 118 : 88) : hasSubtitle ? 96 : 72) : y + 18;
-  scene.add
-    .rectangle(codeCardX, codeCardY, codeCardWidth, 70, 0x0b1320, 0.96)
-    .setOrigin(0)
-    .setStrokeStyle(1, 0xffffff, 0.08);
-  scene.add.text(codeCardX + 14, codeCardY + 10, text.roomCode, {
-    fontFamily: hostTheme.monoFont,
-    fontSize: "12px",
-    color: "#93c5fd"
-  });
-  scene.add.text(codeCardX + 14, codeCardY + 28, roomCode, {
-    fontFamily: hostTheme.titleFont,
-    fontSize: "28px",
-    color: hostTheme.text
-  });
+  if (showRoomCode) {
+    const codeCardWidth = narrow ? width - 48 : 214;
+    const codeCardX = narrow ? x + 24 : x + width - codeCardWidth - 20;
+    const hasSubtitle = subtitle.trim().length > 0;
+    const codeCardY = narrow ? y + (joinUrl ? (hasSubtitle ? 118 : 88) : hasSubtitle ? 96 : 72) : y + 18;
+    scene.add
+      .rectangle(codeCardX, codeCardY, codeCardWidth, 70, 0x0b1320, 0.96)
+      .setOrigin(0)
+      .setStrokeStyle(1, 0xffffff, 0.08);
+    scene.add.text(codeCardX + 14, codeCardY + 10, text.roomCode, {
+      fontFamily: hostTheme.monoFont,
+      fontSize: "12px",
+      color: "#93c5fd"
+    });
+    scene.add.text(codeCardX + 14, codeCardY + 28, roomCode, {
+      fontFamily: hostTheme.titleFont,
+      fontSize: "28px",
+      color: hostTheme.text
+    });
+  }
 
   if (joinUrl) {
     scene.add.text(x + 24, y + headerHeight - 30, `${text.join}: ${trimMiddle(joinUrl, narrow ? 56 : 88)}`, {

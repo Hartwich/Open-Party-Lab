@@ -6,7 +6,7 @@ export * from "./events/clientToServer.js";
 export * from "./events/eventNames.js";
 export * from "./events/serverToClient.js";
 export * from "./games/lightTrails.js";
-export * from "./games/tabu.js";
+export * from "./games/buzzwort.js";
 export * from "./games/driftRacer.js";
 export * from "./games/schaetzorama.js";
 export * from "./games/wordTiles.js";

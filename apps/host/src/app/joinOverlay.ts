@@ -189,6 +189,8 @@ export function mountJoinOverlay(client: HostSocketClient): () => void {
       return;
     }
 
+    roomCode.style.display = room.selectedGameId === "zeichnen-und-erraten" ? "none" : "block";
+
     if (!showOverlay) {
       return;
     }

@@ -72,11 +72,15 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
   const hasActionButtons = actionButtons.length > 0;
   const controlSize = minimal
     ? "min(84vw, 360px)"
-    : hasActionButtons ? "min(42vw, 220px)" : "min(78vw, 320px)";
+    : cleanChrome
+      ? "clamp(170px, min(48vw, 62dvh), 360px)"
+      : hasActionButtons ? "min(42vw, 220px)" : "min(78vw, 320px)";
   const buttonSize =
     actionButtons.length >= 4
       ? "min(19vw, 96px)"
-      : "min(34vw, 180px)";
+      : cleanChrome
+        ? "clamp(150px, min(43vw, 50dvh), 300px)"
+        : "min(34vw, 180px)";
 
   useEffect(() => {
     onMoveChangeRef.current = model.onMoveChange;
@@ -181,6 +185,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
         display: "grid",
         gap: minimal ? 0 : cleanChrome ? 12 : 18,
         minHeight: minimal ? "min(76vh, 680px)" : undefined,
+        alignContent: cleanChrome ? "center" : undefined,
         placeItems: minimal ? "center" : undefined
       }}
     >
@@ -206,7 +211,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
           display: "grid",
           gridTemplateColumns: hasActionButtons ? "minmax(0, 1fr) auto" : "minmax(0, 1fr)",
           alignItems: "center",
-          gap: 16
+          gap: cleanChrome ? 12 : 16
         }}
       >
         <div

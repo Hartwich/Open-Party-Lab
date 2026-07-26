@@ -7,6 +7,7 @@
   | "left_right_hold"
   | "tap_mash"
   | "choice"
+  | "secret_card"
   | "dpad"
   | "spell_casting"
   | "racing_controls"

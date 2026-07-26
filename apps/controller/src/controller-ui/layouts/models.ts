@@ -77,6 +77,77 @@ export interface ChoiceLayoutModel {
   feed?: string[];
 }
 
+/**
+ * Generisches Layout fuer Spiele, in denen nur einzelne Rollen eine Karte sehen
+ * duerfen (Buzzwort, Pantomime, Imposter ...). Die Karte wird nur gerendert, wenn
+ * der Server sie fuer diesen Spieler mitgeschickt hat.
+ */
+export type SecretCardRoleTone = "primary" | "watch" | "guess" | "bench";
+
+export interface SecretCardActionModel {
+  id: string;
+  label: string;
+  sublabel?: string;
+  tone: "positive" | "neutral" | "danger";
+  disabled?: boolean;
+  onPress: () => void;
+}
+
+export interface SecretCardTargetModel {
+  id: string;
+  name: string;
+  hint?: string;
+  disabled?: boolean;
+  onSelect: () => void;
+}
+
+export interface SecretCardScoreRow {
+  id: string;
+  label: string;
+  value: string;
+  accentColor?: string;
+  highlighted?: boolean;
+}
+
+export interface SecretCardFeedEntry {
+  id: string;
+  text: string;
+  tone?: "positive" | "neutral" | "danger";
+}
+
+export interface SecretCardLayoutModel {
+  kind: "secret_card";
+  title: string;
+  subtitle?: string;
+  disabled: boolean;
+  accentColor?: string;
+  roleLabel: string;
+  roleTone: SecretCardRoleTone;
+  statusLabel?: string;
+  helperText?: string;
+  /** Grosser Countdown vor Zugbeginn. */
+  countdownMs?: number | null;
+  timer?: {
+    remainingMs: number | null;
+    durationMs: number;
+  } | null;
+  card?: {
+    term: string;
+    forbidden: string[];
+    tag?: string;
+  } | null;
+  /** Platzhaltertext, wenn dieser Spieler die Karte nicht sehen darf. */
+  hiddenCardHint?: string;
+  actions?: SecretCardActionModel[];
+  targetsTitle?: string;
+  targets?: SecretCardTargetModel[];
+  scoreRows?: SecretCardScoreRow[];
+  feedTitle?: string;
+  feed?: SecretCardFeedEntry[];
+  stats?: LayoutStat[];
+  ready?: ReadyLayoutModel;
+}
+
 export interface LeftRightHoldLayoutModel {
   kind: "left_right_hold";
   title: string;
@@ -616,6 +687,7 @@ export interface MagicArenaLayoutModel {
 export type ControllerLayoutModel =
   | SingleButtonLayoutModel
   | ChoiceLayoutModel
+  | SecretCardLayoutModel
   | TapMashLayoutModel
   | LeftRightHoldLayoutModel
   | DPadLayoutModel

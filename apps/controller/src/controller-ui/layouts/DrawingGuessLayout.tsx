@@ -56,7 +56,6 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
       {model.isDrawer ? (
         <>
           <div style={{ display: "grid", gap: 8 }}>
-            <div style={{ color: "var(--text-muted)", fontSize: 13 }}>{en ? "Choose color" : "Farbe waehlen"}</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
               {(model.availableColors ?? []).map((color) => {
                 const selected = color === (model.currentColor ?? model.availableColors?.[0]);

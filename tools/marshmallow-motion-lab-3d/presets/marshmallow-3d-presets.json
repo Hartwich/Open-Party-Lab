@@ -1,0 +1,58 @@
+{
+  "formatVersion": 1,
+  "tool": "Marshmallow Motion Lab 3D",
+  "updatedAt": "2026-07-26T00:00:00.000Z",
+  "implementationGuide": "./IMPLEMENTATION.md",
+  "renderer": "three.js (node_modules/three, ueber serve.mjs unter /vendor/three ausgeliefert)",
+  "units": "1 Einheit entspricht etwa 1 Meter; Bodenlinie liegt bei y = 0",
+  "profiles": {
+    "wide": {
+      "bodyVariant": "wide",
+      "bodyRadius": 0.62,
+      "bodyHeight": 0.86,
+      "roundness": 0.3,
+      "warp": 0.55,
+      "footGap": 0.42,
+      "footSize": 1.05,
+      "legMotion": 0.5,
+      "armHeight": 0.42,
+      "armGap": 0.58,
+      "armSize": 1.05,
+      "bodyLift": 0.3,
+      "toast": 0.22,
+      "actionHand": "right"
+    },
+    "square": {
+      "bodyVariant": "square",
+      "bodyRadius": 0.55,
+      "bodyHeight": 1.05,
+      "roundness": 0.35,
+      "warp": 0.55,
+      "footGap": 0.36,
+      "footSize": 1,
+      "legMotion": 0.6,
+      "armHeight": 0.5,
+      "armGap": 0.5,
+      "armSize": 1,
+      "bodyLift": 0.3,
+      "toast": 0.22,
+      "actionHand": "right"
+    },
+    "tall": {
+      "bodyVariant": "tall",
+      "bodyRadius": 0.46,
+      "bodyHeight": 1.34,
+      "roundness": 0.28,
+      "warp": 0.55,
+      "footGap": 0.3,
+      "footSize": 0.92,
+      "legMotion": 0.6,
+      "armHeight": 0.58,
+      "armGap": 0.42,
+      "armSize": 0.95,
+      "bodyLift": 0.34,
+      "toast": 0.22,
+      "actionHand": "right"
+    }
+  }
+}
