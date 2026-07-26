@@ -20,6 +20,9 @@ const landingText = {
     creating: "Raum wird erstellt …",
     unavailable: "Der Server ist gerade nicht erreichbar. Bitte versuche es erneut.",
     invalidCode: "Bitte gib den vierstelligen Raumcode ein.",
+    closedInactive: "Der vorherige Raum wurde nach zehn Minuten ohne Aktivität geschlossen.",
+    closedExpired: "Der vorherige Raum wurde nach einer Stunde automatisch geschlossen.",
+    closedCapacity: "Der vorherige Raum hatte keine aktiven Spieler und wurde geschlossen, um Platz für einen neuen Raum zu schaffen.",
     switchLanguage: "Switch to English"
   },
   en: {
@@ -39,6 +42,9 @@ const landingText = {
     creating: "Creating room …",
     unavailable: "The server is currently unavailable. Please try again.",
     invalidCode: "Please enter the four-character room code.",
+    closedInactive: "The previous room was closed after ten minutes without activity.",
+    closedExpired: "The previous room was closed automatically after one hour.",
+    closedCapacity: "The previous room had no active players and was closed to make space for a new room.",
     switchLanguage: "Auf Deutsch wechseln"
   }
 } as const;
@@ -49,6 +55,7 @@ function normalizeRoomCode(value: string): string {
 
 export function mountHostedLanding(): void {
   let language: SupportedLanguage = readStoredHostLanguage();
+  const closedReason = new URLSearchParams(window.location.search).get("closed");
   document.title = landingText[language].title;
   document.body.classList.add("hosted-landing-page");
 
@@ -120,6 +127,10 @@ export function mountHostedLanding(): void {
 
     if (roomInput) roomInput.placeholder = text.roomCode;
     if (languageButton) languageButton.ariaLabel = text.switchLanguage;
+
+    if (closedReason === "inactive") setStatus(text.closedInactive);
+    if (closedReason === "expired") setStatus(text.closedExpired);
+    if (closedReason === "capacity") setStatus(text.closedCapacity);
   };
 
   const setStatus = (message: string, error = false) => {

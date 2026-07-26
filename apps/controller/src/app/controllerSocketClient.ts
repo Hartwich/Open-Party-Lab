@@ -158,6 +158,14 @@ export class ControllerSocketClient {
       this.updateState({ error: message });
     });
 
+    this.socket.on("room:closed", ({ message }) => {
+      this.clearStoredSession({
+        rotateDeviceId: true,
+        disconnect: false,
+        error: message
+      });
+    });
+
     this.socket.on("session:resumed", ({ room, player, reconnectToken }) => {
       this.sessionTerminated = false;
       this.sessionTerminationPending = false;

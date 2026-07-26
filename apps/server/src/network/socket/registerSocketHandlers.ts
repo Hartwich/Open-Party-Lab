@@ -16,6 +16,7 @@ import { PlayerManager } from "../../players/playerManager.js";
 import { ReconnectService } from "../../players/reconnectService.js";
 import { canStartRound, explainCannotStartRound } from "../../rooms/roomLifecycle.js";
 import { RoomManager } from "../../rooms/roomManager.js";
+import { RoomCleanupService } from "../../rooms/roomCleanupService.js";
 
 type IoServer = import("socket.io").Server<
   ClientToServerEvents,
@@ -32,6 +33,7 @@ export interface RegisterSocketHandlersDeps {
   gameRegistry: GameRegistry;
   gameRuntime: GameRuntime;
   stateBroadcaster: StateBroadcaster;
+  roomCleanupService: RoomCleanupService;
 }
 
 function ackError<T>(message: string): AckResult<T> {
@@ -127,7 +129,8 @@ export function registerSocketHandlers({
   reconnectService,
   gameRegistry,
   gameRuntime,
-  stateBroadcaster
+  stateBroadcaster,
+  roomCleanupService
 }: RegisterSocketHandlersDeps): void {
   function getSelectedGame(room: NonNullable<ReturnType<RoomManager["getRoom"]>>) {
     return room.selectedGameId ? gameRegistry.getAvailableGame(room.selectedGameId, room.language) : undefined;
@@ -267,6 +270,22 @@ export function registerSocketHandlers({
     socket.on("room:create", (payload, ack) => {
       const hostName = payload.hostName?.trim() || "Host";
       const requestedRoomCode = payload.roomCode?.trim().toUpperCase();
+
+      if (!requestedRoomCode) {
+        const capacity = roomCleanupService.prepareForRoomCreation();
+
+        if (!capacity.ok) {
+          const en = normalizeLanguage(payload.language) === "en";
+          const maxRoomCount = roomCleanupService.getMaxRoomCount();
+          ack(ackError(
+            en
+              ? `The server already has ${maxRoomCount} active rooms. Please try again later.`
+              : `Der Server hat bereits ${maxRoomCount} aktive Räume. Bitte versuche es später erneut.`
+          ));
+          return;
+        }
+      }
+
       const room = requestedRoomCode
         ? roomManager.getRoom(requestedRoomCode)
         : roomManager.createRoom(hostName, normalizeLanguage(payload.language));

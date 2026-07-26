@@ -20,6 +20,7 @@ Platform:
 - virtual controller helper for AI browser checks through `npm run ai:controllers`
 - host DEV automation bridge for browser checks exposed only by the Vite dev host
 - portable Windows release assembly with a one-click launcher, bundled Node.js runtime, same-origin host/controller assets, and all known games
+- hosted room isolation with a 20-room capacity, inactive-room eviction, ten-minute empty-room cleanup, and a one-hour maximum room lifetime
 
 Optional local game repos:
 

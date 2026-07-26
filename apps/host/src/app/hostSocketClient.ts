@@ -126,6 +126,14 @@ export class HostSocketClient {
       this.updateState({ error: message });
     });
 
+    this.socket.on("room:closed", ({ reason, message }) => {
+      this.updateState({ room: null, game: null, scoreboard: null, error: message });
+
+      if (import.meta.env.VITE_OPEN_PARTY_LAB_HOSTED === "1") {
+        window.location.replace(`/?closed=${encodeURIComponent(reason)}`);
+      }
+    });
+
     this.socket.connect();
   }
 

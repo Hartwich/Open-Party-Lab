@@ -33,6 +33,14 @@ export interface RoomErrorPayload {
   message: string;
 }
 
+export type RoomClosedReason = "inactive" | "expired" | "capacity";
+
+export interface RoomClosedPayload {
+  roomCode: string;
+  reason: RoomClosedReason;
+  message: string;
+}
+
 export interface SessionResumedPayload {
   room: RoomSnapshot;
   player: PlayerSnapshot;
@@ -55,6 +63,7 @@ export interface ServerToClientEvents {
   "game:patch": (payload: GamePatchPayload) => void;
   "scoreboard:state": (payload: ScoreboardSnapshot) => void;
   "room:error": (payload: RoomErrorPayload) => void;
+  "room:closed": (payload: RoomClosedPayload) => void;
   "session:resumed": (payload: SessionResumedPayload) => void;
   "session:terminated": (payload: SessionTerminatedPayload) => void;
 }

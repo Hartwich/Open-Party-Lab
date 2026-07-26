@@ -73,6 +73,8 @@ No Node.js or npm installation is required for the portable build. Windows may s
 
 Open Party Lab can also run as a single HTTPS web service, without a Windows installation. The included Render Blueprint builds all known games and serves the host and phone controller from the same public origin. The free test server can need about a minute to wake up after inactivity. See [Render deployment](docs/render-deployment.md).
 
+The public test server is limited to 20 simultaneous rooms. Rooms close after one hour, or after ten minutes without connected participants.
+
 ### Run from source
 
 Requirements:

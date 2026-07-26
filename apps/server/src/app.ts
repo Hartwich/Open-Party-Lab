@@ -74,9 +74,12 @@ export function createApp(environment: AppEnv = loadEnv()) {
     roomManager,
     sessionStore,
     stateBroadcaster,
+    io,
     now,
     environment.roomInactivityTimeoutMs,
-    environment.roomCleanupIntervalMs
+    environment.roomCleanupIntervalMs,
+    environment.roomMaxLifetimeMs,
+    environment.roomMaxCount
   );
 
   registerSocketHandlers({
@@ -86,7 +89,8 @@ export function createApp(environment: AppEnv = loadEnv()) {
     reconnectService,
     gameRegistry,
     gameRuntime,
-    stateBroadcaster
+    stateBroadcaster,
+    roomCleanupService
   });
 
   return {
@@ -124,7 +128,9 @@ export function createApp(environment: AppEnv = loadEnv()) {
         controllerOrigin: environment.publicControllerOrigin,
         reconnectWindowMs: environment.playerReconnectWindowMs,
         roundTickMs: environment.roundTickMs,
-        roomInactivityTimeoutMs: environment.roomInactivityTimeoutMs
+        roomInactivityTimeoutMs: environment.roomInactivityTimeoutMs,
+        roomMaxLifetimeMs: environment.roomMaxLifetimeMs,
+        roomMaxCount: environment.roomMaxCount
       });
     }
   };
