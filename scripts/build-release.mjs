@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
-import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, lstat, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -79,8 +79,17 @@ await writeFile(path.join(appRoot, "package.json"), JSON.stringify({
 }, null, 2) + "\n");
 
 run("npm", [
-  "install", "--omit=dev", "--ignore-scripts", "--no-audit", "--no-fund"
+  "install", "--omit=dev", "--ignore-scripts", "--install-links", "--no-audit", "--no-fund"
 ], appRoot);
+
+for (const dependencyName of Object.keys(dependencies).filter((name) => name.startsWith("@open-party-lab/"))) {
+  const installedPackageRoot = path.join(appRoot, "node_modules", ...dependencyName.split("/"));
+  const installedPackageStat = await lstat(installedPackageRoot);
+  if (installedPackageStat.isSymbolicLink()) {
+    throw new Error(`Portable dependency ${dependencyName} is still linked instead of copied.`);
+  }
+  await readFile(path.join(installedPackageRoot, "package.json"), "utf8");
+}
 
 await mkdir(path.join(outputRoot, "runtime"), { recursive: true });
 await cp(process.execPath, path.join(outputRoot, "runtime", process.platform === "win32" ? "node.exe" : "node"));

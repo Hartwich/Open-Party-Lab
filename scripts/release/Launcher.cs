@@ -120,7 +120,7 @@ internal static class Launcher
             if (!ready)
             {
                 System.Windows.Forms.MessageBox.Show(
-                    "Open Party Lab could not start. Check open-party-lab.log; port 3000 may already be in use.",
+                    "Open Party Lab could not start. Check open-party-lab.log for the exact server error. Port 3000 may be in use, or the downloaded package may be incomplete.",
                     "Open Party Lab",
                     System.Windows.Forms.MessageBoxButtons.OK,
                     System.Windows.Forms.MessageBoxIcon.Error);
