@@ -226,6 +226,12 @@ const StickPad = memo(function StickPad({ label, accentColor, disabled, resetKey
   previousProps.size === nextProps.size
 );
 
+/**
+ * Muss mit `chargeWindowMs` im Chaos-Kommando-Server uebereinstimmen, sonst
+ * zeigt der Balken volle Kraft an, bevor der Server sie erreicht hat.
+ */
+const chargeWindowMs = 1_750;
+
 export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel }) {
   const en = model.language === "en";
   const [hudMode, setHudMode] = useState<"kommando" | "steuerung">("kommando");
@@ -237,6 +243,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
   const [chargePct, setChargePct] = useState(0);
   const [clockNowMs, setClockNowMs] = useState(() => Date.now());
   const chargingSinceRef = useRef<number | null>(null);
+  const endChargeRef = useRef<() => void>(() => undefined);
   const selectedWeapon = model.weapons.find((weapon) => weapon.selected) ?? model.weapons[0] ?? null;
   const compactStats = useMemo(
     () =>
@@ -304,13 +311,40 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
         return;
       }
 
-      setChargePct(Math.min(1, (Date.now() - chargingSinceRef.current) / 1400));
+      setChargePct(Math.min(1, (Date.now() - chargingSinceRef.current) / chargeWindowMs));
     }, 40);
 
     return () => {
       window.clearInterval(timer);
     };
   }, [isCharging, model.resetKey]);
+
+  // Firefox auf Android liefert `pointerup` haeufig nicht am Button, wenn der
+  // Finger waehrend des Haltens minimal wandert oder eine Systemgeste greift.
+  // Deshalb wird das Loslassen zusaetzlich global abgefangen.
+  useEffect(() => {
+    if (!isCharging || typeof window === "undefined") {
+      return undefined;
+    }
+
+    const release = () => {
+      endChargeRef.current();
+    };
+
+    window.addEventListener("pointerup", release);
+    window.addEventListener("pointercancel", release);
+    window.addEventListener("touchend", release);
+    window.addEventListener("touchcancel", release);
+    window.addEventListener("blur", release);
+
+    return () => {
+      window.removeEventListener("pointerup", release);
+      window.removeEventListener("pointercancel", release);
+      window.removeEventListener("touchend", release);
+      window.removeEventListener("touchcancel", release);
+      window.removeEventListener("blur", release);
+    };
+  }, [isCharging]);
 
   useEffect(() => {
     if (model.fireMode !== "charged") {
@@ -342,6 +376,8 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
     model.onFireEnd();
   }
 
+  endChargeRef.current = endCharge;
+
   function handleFirePointerDown(event: React.PointerEvent<HTMLButtonElement>): void {
     if (model.disabled) {
       return;
@@ -354,7 +390,14 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
       return;
     }
 
-    event.currentTarget.setPointerCapture(event.pointerId);
+    // setPointerCapture wirft in manchen mobilen Browsern fuer Touch-Pointer.
+    // Das Laden darf davon nicht abhaengen, die globalen Listener greifen ohnehin.
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      /* Pointer Capture ist optional. */
+    }
+
     beginCharge();
   }
 
@@ -600,7 +643,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
               onPointerDown={handleFirePointerDown}
               onPointerUp={handleFirePointerUp}
               onPointerCancel={handleFirePointerUp}
-              onLostPointerCapture={handleFirePointerUp}
+              onContextMenu={(event) => event.preventDefault()}
               style={{
                 position: "relative",
                 width: fireSize,
@@ -613,7 +656,12 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                   : "linear-gradient(180deg, rgba(251, 113, 133, 0.95) 0%, rgba(190, 24, 93, 0.96) 100%)",
                 color: "#fff1f2",
                 boxShadow: model.disabled ? "none" : "0 18px 40px rgba(190, 24, 93, 0.22)",
-                touchAction: "none"
+                // Langes Halten darf keine Systemgeste (Textauswahl, Kontextmenue,
+                // Scrollen) ausloesen, sonst bricht der Ladevorgang auf Mobile ab.
+                touchAction: "none",
+                userSelect: "none",
+                WebkitUserSelect: "none",
+                WebkitTouchCallout: "none"
               }}
             >
               {model.fireMode === "charged" ? (

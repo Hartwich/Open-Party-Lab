@@ -16,6 +16,8 @@ Die dauerhaft eingecheckten Werte liegen in [`presets/marshmallow-rig-presets.js
 
 Die vollständige technische Übergabe mit Datenmodell, Formeln, Renderreihenfolge, Waffenankern und Granatenphasen steht in [`presets/IMPLEMENTATION.md`](./presets/IMPLEMENTATION.md).
 
+[`presets/marshmallow-motion-handoff.json`](./presets/marshmallow-motion-handoff.json) ist der kompakte Übergabeindex für Spiele. Er listet Renderraum, alle Sprite- und Warp-Rig-Zustände, Eingabearten, Granatenphasen, Ebenenreihenfolge, portable Profilfelder und optionale Assetsets. Wichtig: Die Presets enthalten die abgestimmten Maße und Anker; die eigentlichen Posegleichungen und Zeitverläufe bleiben im kanonischen Renderer `motion-lab.js`.
+
 ## Bedienung
 
 - `Idle` und `Walk` wechseln das normalisierte Sprite-Sheet.
@@ -27,7 +29,7 @@ Die vollständige technische Übergabe mit Datenmodell, Formeln, Renderreihenfol
 
 ## Zweite Option: Warp-Rig
 
-`Warp-Rig` verwendet nur einen statischen Torso. Eine minimale gegenphasige X/Y-Skalierung mit leichter Scherung erhält annähernd das Volumen und erzeugt die weiche Marshmallow-Verformung. Die Hände verwenden exakt dieselbe Blob-Zeichnung und Bewegung wie die 4×4-Vorschau. Die Füße werden aus derselben Formensprache erzeugt und folgen einem getrennten Schrittzyklus. `Warp-Stärke` und `Fuß-Abstand` lassen sich live abstimmen. Die ursprüngliche 4×4-Sprite-Variante bleibt unverändert verfügbar.
+`Warp-Rig` verwendet nur einen statischen Torso. Eine minimale gegenphasige X/Y-Skalierung mit leichter Scherung erhält annähernd das Volumen und erzeugt die weiche Marshmallow-Verformung. Hände und Füße verwenden freigestellte, geröstete Marshmallow-PNGs, werden aber weiterhin mit exakt denselben prozeduralen Maßen, Ankern, Rotationen und Bewegungsmustern wie die bisherigen Blob-Ellipsen gezeichnet. `Warp-Stärke` und `Fuß-Abstand` lassen sich live abstimmen. Die ursprüngliche 4×4-Sprite-Variante bleibt unverändert verfügbar.
 
 Für den Warp-Modus stehen drei Körperformen zur Auswahl: `Breit`, `Quadrat` und `Hoch`. Der Fußabstand besitzt einen deutlich sichtbaren 90-Pixel-Regelbereich. Armhöhe und Arm-Basisabstand sind separat einstellbar. Gesicht, Augen und Pupillen werden mit derselben Transformationsmatrix wie der Torso gewarpt; die Pupillen verfolgen den Mauszeiger weiterhin im korrekt zurückgerechneten lokalen Körperraum.
 
@@ -52,6 +54,14 @@ Die drei Testwaffen gehören vollständig zum Motion Lab:
 - `tools/marshmallow-motion-lab/assets/weapons/grenade.png`
 - `tools/marshmallow-motion-lab/assets/weapons/handgun.png`
 - `tools/marshmallow-motion-lab/assets/weapons/two-hand-blaster.png`
+
+Daneben liegt unter `assets/weapons/arsenal` ein eigenständiges, stilistisch einheitliches Paket aus 30 transparenten Waffen- und Ausrüstungs-PNGs. Es umfasst Pistolen, Gewehre, schwere Waffen, Werfer, Nahkampfwaffen, mehrere Granaten, vier Luftschlag-Marker, eine Näherungsmine, eine Nachschubkiste sowie alberne Sonderwaffen. Das Paket wird bewusst nicht vollständig in die Lab-Auswahl geladen. [`weapon-pack.json`](./assets/weapons/arsenal/weapon-pack.json) dient Spielen als maschinenlesbarer Index; [`README.md`](./assets/weapons/arsenal/README.md) beschreibt Zeichenreihenfolge, Spiegelung und die noch pro Spiel festzulegenden Waffenanker.
+
+Die gerösteten Limb-Assets liegen unter `tools/marshmallow-motion-lab/assets/limbs/hand-knob.png` und `foot-knob.png`. Beim `Blaster 2H` werden beide Handanker gegenüber dem normalen Arm-Basisabstand standardmäßig zusätzlich um `42 px` entlang des Zielvektors vom Körper weg verschoben. Der Blaster bleibt zwischen den beiden resultierenden Handpunkten zentriert.
+
+Der zusätzliche Handabstand des `Blaster 2H` ist nun über `Zweihänder-Abstand` pro Körperform einstellbar und wird im jeweiligen Preset gespeichert. Als Kopfbedeckungen stehen außerdem `Helm` und `Stirnband` zur Verfügung. Beide besitzen getrennte Höhen- und Größenregler; Auswahl, Höhe und Skalierung werden ebenfalls separat für `Breit`, `Quadrat` und `Hoch` gespeichert. Die freigestellten Assets liegen unter `tools/marshmallow-motion-lab/assets/accessories` und werden gemeinsam mit Torso und Gesicht gewarpt.
+
+Für spätere Spielerfarben liegen sechs vorbereitete, geometrisch normalisierte Stirnbänder unter `assets/accessories/headbands`: Rot, Blau, Grün, Gold, Violett und Türkis. Das Lab lädt weiterhin nur das rote Standardasset. `headband-variants.json` enthält IDs, vorgeschlagene Farben, Pfade und die gemeinsame Canvasgröße für die spätere Spielintegration.
 
 Der Regler `Arm-Basisabstand` bewahrt den bisherigen Mittelpunkt von `184 px`, reicht nach unten jetzt aber bis `0 px`. Dadurch können die Arm-Knubbel auch bei schmalen oder hohen Körperformen eng am Torso positioniert werden.
 

@@ -1,0 +1,44 @@
+{
+  "formatVersion": 1,
+  "kind": "marshmallow-headband-color-set",
+  "defaultVariant": "red",
+  "runtimePreviewAsset": "tools/marshmallow-motion-lab/assets/accessories/headband.png",
+  "geometry": {
+    "canvasWidth": 1213,
+    "canvasHeight": 571,
+    "sharedDrawAnchor": true,
+    "alphaBackground": true
+  },
+  "variants": [
+    {
+      "id": "red",
+      "suggestedColor": "#e94d3d",
+      "path": "tools/marshmallow-motion-lab/assets/accessories/headbands/headband-red.png"
+    },
+    {
+      "id": "blue",
+      "suggestedColor": "#3567b7",
+      "path": "tools/marshmallow-motion-lab/assets/accessories/headbands/headband-blue.png"
+    },
+    {
+      "id": "green",
+      "suggestedColor": "#3f8b5a",
+      "path": "tools/marshmallow-motion-lab/assets/accessories/headbands/headband-green.png"
+    },
+    {
+      "id": "gold",
+      "suggestedColor": "#d5a329",
+      "path": "tools/marshmallow-motion-lab/assets/accessories/headbands/headband-gold.png"
+    },
+    {
+      "id": "violet",
+      "suggestedColor": "#8457aa",
+      "path": "tools/marshmallow-motion-lab/assets/accessories/headbands/headband-violet.png"
+    },
+    {
+      "id": "teal",
+      "suggestedColor": "#2f9a9a",
+      "path": "tools/marshmallow-motion-lab/assets/accessories/headbands/headband-teal.png"
+    }
+  ]
+}

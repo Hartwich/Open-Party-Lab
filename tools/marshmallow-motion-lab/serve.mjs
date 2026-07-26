@@ -22,7 +22,18 @@ const profileBounds = {
   legMotion: [0, 1],
   armHeight: [0, 1],
   armGap: [0, 1],
-  armSize: [0.7, 1.4]
+  armSize: [0.7, 1.4],
+  twoHandOffset: [0, 140],
+  helmetHeight: [0, 1],
+  helmetScale: [0.5, 1.5],
+  headbandHeight: [0, 1],
+  headbandScale: [0.5, 1.5]
+};
+
+const profileDefaults = {
+  warp: 0.55, limbGap: 0.7, torsoHeight: 0.66, legSize: 1, legMotion: 0.6,
+  armHeight: 0.5, armGap: 0.5, armSize: 1, twoHandOffset: 42,
+  helmetHeight: 0.37, helmetScale: 0.8, headbandHeight: 0.73, headbandScale: 1
 };
 
 function sendJson(response, status, value) {
@@ -37,11 +48,12 @@ function sanitizeProfile(variant, value) {
   if (!value || typeof value !== "object") throw new Error(`${variant}: Profil fehlt`);
   const profile = { torsoVariant: variant };
   for (const [key, [minimum, maximum]] of Object.entries(profileBounds)) {
-    const number = Number(value[key]);
+    const number = Number(value[key] ?? profileDefaults[key]);
     if (!Number.isFinite(number)) throw new Error(`${variant}.${key}: keine Zahl`);
     profile[key] = Math.max(minimum, Math.min(maximum, number));
   }
   profile.actionHand = value.actionHand === "left" ? "left" : "right";
+  profile.headgear = ["helmet", "headband"].includes(value.headgear) ? value.headgear : "none";
   return profile;
 }
 

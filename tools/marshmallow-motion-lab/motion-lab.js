@@ -26,6 +26,16 @@
     armGapValue: document.querySelector("#armGapValue"),
     armSize: document.querySelector("#armSize"),
     armSizeValue: document.querySelector("#armSizeValue"),
+    twoHandOffset: document.querySelector("#twoHandOffset"),
+    twoHandOffsetValue: document.querySelector("#twoHandOffsetValue"),
+    helmetHeight: document.querySelector("#helmetHeight"),
+    helmetHeightValue: document.querySelector("#helmetHeightValue"),
+    helmetScale: document.querySelector("#helmetScale"),
+    helmetScaleValue: document.querySelector("#helmetScaleValue"),
+    headbandHeight: document.querySelector("#headbandHeight"),
+    headbandHeightValue: document.querySelector("#headbandHeightValue"),
+    headbandScale: document.querySelector("#headbandScale"),
+    headbandScaleValue: document.querySelector("#headbandScaleValue"),
     saveSettings: document.querySelector("#saveSettings"),
     exportSettings: document.querySelector("#exportSettings"),
     saveStatus: document.querySelector("#saveStatus"),
@@ -54,9 +64,15 @@
     armHeight: 0.5,
     armGap: 0.5,
     armSize: 1,
+    twoHandOffset: 42,
+    helmetHeight: 0.37,
+    helmetScale: 0.8,
+    headbandHeight: 0.73,
+    headbandScale: 1,
+    headgear: "none",
     actionHand: "right"
   });
-  const images = { idle: [], walk: [], rig: {}, weapons: {} };
+  const images = { idle: [], walk: [], rig: {}, limbs: {}, weapons: {}, accessories: {} };
   const state = {
     mode: "sprite",
     name: "idle",
@@ -72,6 +88,12 @@
     armHeight: 0.5,
     armGap: 0.5,
     armSize: 1,
+    twoHandOffset: 42,
+    helmetHeight: 0.37,
+    helmetScale: 0.8,
+    headbandHeight: 0.73,
+    headbandScale: 1,
+    headgear: "none",
     torsoVariant: "wide",
     actionHand: "right",
     throwPhase: "auto",
@@ -102,16 +124,24 @@
         images.rig.torso,
         images.rig.torsoSquare,
         images.rig.torsoTall,
+        images.limbs.hand,
+        images.limbs.foot,
         images.weapons.grenade,
         images.weapons.handgun,
-        images.weapons.twoHandBlaster
+        images.weapons.twoHandBlaster,
+        images.accessories.helmet,
+        images.accessories.headband
       ] = await Promise.all([
         loadImage("./assets/rig/torso-wide.png"),
         loadImage("./assets/rig/torso-square.png"),
         loadImage("./assets/rig/torso-tall.png"),
+        loadImage("./assets/limbs/hand-knob.png"),
+        loadImage("./assets/limbs/foot-knob.png"),
         loadImage("./assets/weapons/grenade.png"),
         loadImage("./assets/weapons/handgun.png"),
-        loadImage("./assets/weapons/two-hand-blaster.png")
+        loadImage("./assets/weapons/two-hand-blaster.png"),
+        loadImage("./assets/accessories/helmet.png"),
+        loadImage("./assets/accessories/headband.png")
       ]);
       state.loaded = true;
       controls.loadStatus.textContent = "Bewegungsassets bereit";
@@ -225,11 +255,20 @@
     return baseIndex;
   }
 
-  function drawArmBlob(x, y, rotation, scale, alpha, radiusX = 37, radiusY = 28) {
+  function drawArmBlob(x, y, rotation, scale, alpha, radiusX = 37, radiusY = 28, image = images.limbs.hand) {
     context.save();
     context.translate(x, y);
     context.rotate(rotation);
     context.globalAlpha = alpha;
+    if (image) {
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+      context.drawImage(image,
+        -radiusX * scale, -radiusY * scale,
+        radiusX * 2 * scale, radiusY * 2 * scale);
+      context.restore();
+      return;
+    }
     const gradient = context.createRadialGradient(
       -radiusX * 0.24 * scale,
       -radiusY * 0.29 * scale,
@@ -358,9 +397,10 @@
       const uy = dy / length;
       const recoil = shotPulse() * 13 * scale;
       const aimAngle = Math.atan2(uy, ux);
-      const rearHandX = anchorX + ux * (gap - 52 * scale - recoil * 0.5);
+      const twoHandOffset = state.twoHandOffset * scale;
+      const rearHandX = anchorX + ux * (gap - 52 * scale + twoHandOffset - recoil * 0.5);
       const rearHandY = shoulderY + uy * 42 * scale + 18 * scale;
-      const frontHandX = anchorX + ux * (gap - recoil);
+      const frontHandX = anchorX + ux * (gap + twoHandOffset - recoil);
       const frontHandY = shoulderY + uy * 58 * scale;
       const weaponCenterX = (rearHandX + frontHandX) * 0.5;
       const weaponCenterY = (rearHandY + frontHandY) * 0.5;
@@ -509,6 +549,31 @@
     context.restore();
   }
 
+  function drawHeadgear(pose, body, scale) {
+    if (state.headgear === "none") return;
+    const isHelmet = state.headgear === "helmet";
+    const image = isHelmet ? images.accessories.helmet : images.accessories.headband;
+    if (!image) return;
+    const accessoryScale = isHelmet ? state.helmetScale : state.headbandScale;
+    const width = body.width * (isHelmet ? 1.08 : 1.16) * accessoryScale;
+    const height = width * (isHelmet ? 0.56 : 0.18);
+    const heightSetting = isHelmet ? state.helmetHeight : state.headbandHeight;
+    const offset = (isHelmet
+      ? 125 - heightSetting * 115
+      : 145 - heightSetting * 150) * scale;
+    const anchorY = -body.height + offset;
+    const drawX = isHelmet ? -width * 0.5 : -width * 0.4;
+    const drawY = isHelmet ? anchorY - height : anchorY;
+
+    context.save();
+    context.translate(pose.bodyX, pose.bodyBottom);
+    context.transform(pose.scaleX, 0, pose.shearX, pose.scaleY, 0, 0);
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+    context.drawImage(image, drawX, drawY, width, height);
+    context.restore();
+  }
+
   function drawProceduralRig(anchorX, groundY, scale, now) {
     const pose = proceduralPose(anchorX, groundY, scale);
     const footScale = scale * 1.08 * state.legSize;
@@ -518,11 +583,11 @@
     const isWalk = ["walk", "walkRight"].includes(state.name);
     const drawLeftFoot = () => drawArmBlob(
       pose.bodyX - pose.limbDistance + pose.stride,
-      footCenterY - pose.leftLift, footRotation, footScale, 1, 43, 31
+      footCenterY - pose.leftLift, footRotation, footScale, 1, 43, 31, images.limbs.foot
     );
     const drawRightFoot = () => drawArmBlob(
       pose.bodyX + pose.limbDistance - pose.stride,
-      footCenterY - pose.rightLift, -footRotation, footScale, 1, 43, 31
+      footCenterY - pose.rightLift, -footRotation, footScale, 1, 43, 31, images.limbs.foot
     );
     if (state.name === "walkRight") {
       drawRightFoot();
@@ -553,6 +618,7 @@
     context.restore();
 
     drawWarpedFace(pose, body, scale, now);
+    drawHeadgear(pose, body, scale);
 
     const jumpArmLift = state.name === "jump" || state.name === "longJump"
       ? Math.sin((state.frame / FRAME_COUNT) * Math.PI) * (state.name === "longJump" ? 52 : 70) * scale
@@ -749,6 +815,14 @@
     });
   }
 
+  function setHeadgear(headgear) {
+    state.headgear = ["helmet", "headband"].includes(headgear) ? headgear : "none";
+    document.body.dataset.headgear = state.headgear;
+    document.querySelectorAll(".headgear-button").forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.headgear === state.headgear);
+    });
+  }
+
   function beginThrowHold(event) {
     event.preventDefault();
     if (state.mode !== "procedural") setMode("procedural");
@@ -785,6 +859,11 @@
     controls.armHeightValue.textContent = `${Math.round(155 + state.armHeight * 92)} px`;
     controls.armGapValue.textContent = `${Math.round(armBaseGap(state.armGap))} px`;
     controls.armSizeValue.textContent = `${Math.round(state.armSize * 100)}%`;
+    controls.twoHandOffsetValue.textContent = `${Math.round(state.twoHandOffset)} px`;
+    controls.helmetHeightValue.textContent = `${Math.round(state.helmetHeight * 100)}%`;
+    controls.helmetScaleValue.textContent = `${Math.round(state.helmetScale * 100)}%`;
+    controls.headbandHeightValue.textContent = `${Math.round(state.headbandHeight * 100)}%`;
+    controls.headbandScaleValue.textContent = `${Math.round(state.headbandScale * 100)}%`;
   }
 
   function currentSettings() {
@@ -798,18 +877,27 @@
       armHeight: state.armHeight,
       armGap: state.armGap,
       armSize: state.armSize,
+      twoHandOffset: state.twoHandOffset,
+      helmetHeight: state.helmetHeight,
+      helmetScale: state.helmetScale,
+      headbandHeight: state.headbandHeight,
+      headbandScale: state.headbandScale,
+      headgear: state.headgear,
       actionHand: state.actionHand
     };
   }
 
   function applySettings(settings, updateVariant = true) {
-    for (const key of ["warp", "limbGap", "torsoHeight", "legSize", "legMotion", "armHeight", "armGap", "armSize"]) {
-      if (Number.isFinite(settings[key])) state[key] = settings[key];
+    const mergedSettings = { ...DEFAULT_WARP_SETTINGS, ...settings };
+    for (const key of ["warp", "limbGap", "torsoHeight", "legSize", "legMotion", "armHeight", "armGap", "armSize",
+      "twoHandOffset", "helmetHeight", "helmetScale", "headbandHeight", "headbandScale"]) {
+      if (Number.isFinite(mergedSettings[key])) state[key] = mergedSettings[key];
     }
-    if (updateVariant && ["wide", "square", "tall"].includes(settings.torsoVariant)) {
-      setTorsoVariant(settings.torsoVariant, false);
+    if (updateVariant && ["wide", "square", "tall"].includes(mergedSettings.torsoVariant)) {
+      setTorsoVariant(mergedSettings.torsoVariant, false);
     }
-    if (["left", "right"].includes(settings.actionHand)) setActionHand(settings.actionHand);
+    if (["left", "right"].includes(mergedSettings.actionHand)) setActionHand(mergedSettings.actionHand);
+    setHeadgear(mergedSettings.headgear);
     controls.warp.value = String(Math.round(state.warp * 100));
     controls.limbGap.value = String(Math.round(state.limbGap * 100));
     controls.torsoHeight.value = String(Math.round(state.torsoHeight * 100));
@@ -818,6 +906,11 @@
     controls.armHeight.value = String(Math.round(state.armHeight * 100));
     controls.armGap.value = String(Math.round(state.armGap * 100));
     controls.armSize.value = String(Math.round(state.armSize * 100));
+    controls.twoHandOffset.value = String(Math.round(state.twoHandOffset));
+    controls.helmetHeight.value = String(Math.round(state.helmetHeight * 100));
+    controls.helmetScale.value = String(Math.round(state.helmetScale * 100));
+    controls.headbandHeight.value = String(Math.round(state.headbandHeight * 100));
+    controls.headbandScale.value = String(Math.round(state.headbandScale * 100));
     controls.warpValue.textContent = `${Math.round(state.warp * 100)}%`;
     syncProceduralReadouts();
   }
@@ -915,6 +1008,9 @@
   document.querySelectorAll(".hand-button").forEach((button) => {
     button.addEventListener("click", () => setActionHand(button.dataset.hand));
   });
+  document.querySelectorAll(".headgear-button").forEach((button) => {
+    button.addEventListener("click", () => setHeadgear(button.dataset.headgear));
+  });
   controls.playPause.addEventListener("click", togglePlayback);
   controls.timeline.addEventListener("input", () => {
     state.frame = Number(controls.timeline.value);
@@ -962,6 +1058,26 @@
     state.armSize = Number(controls.armSize.value) / 100;
     syncProceduralReadouts();
   });
+  controls.twoHandOffset.addEventListener("input", () => {
+    state.twoHandOffset = Number(controls.twoHandOffset.value);
+    syncProceduralReadouts();
+  });
+  controls.helmetHeight.addEventListener("input", () => {
+    state.helmetHeight = Number(controls.helmetHeight.value) / 100;
+    syncProceduralReadouts();
+  });
+  controls.helmetScale.addEventListener("input", () => {
+    state.helmetScale = Number(controls.helmetScale.value) / 100;
+    syncProceduralReadouts();
+  });
+  controls.headbandHeight.addEventListener("input", () => {
+    state.headbandHeight = Number(controls.headbandHeight.value) / 100;
+    syncProceduralReadouts();
+  });
+  controls.headbandScale.addEventListener("input", () => {
+    state.headbandScale = Number(controls.headbandScale.value) / 100;
+    syncProceduralReadouts();
+  });
   controls.saveSettings.addEventListener("click", saveSettings);
   controls.exportSettings.addEventListener("click", exportAllSettings);
   controls.holdThrow.addEventListener("pointerdown", beginThrowHold);
@@ -992,6 +1108,7 @@
 
   setMode("sprite");
   setActionHand("right");
+  setHeadgear("none");
   loadSavedSettings();
   syncProceduralReadouts();
   loadAssets();

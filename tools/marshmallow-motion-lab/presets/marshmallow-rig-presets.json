@@ -1,15 +1,24 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "tool": "Marshmallow Motion Lab",
-  "updatedAt": "2026-07-25T23:56:37.316Z",
+  "updatedAt": "2026-07-26T01:00:41.988Z",
   "implementationGuide": "./IMPLEMENTATION.md",
+  "motionHandoff": "./marshmallow-motion-handoff.json",
   "assets": {
     "torsoWide": "tools/marshmallow-motion-lab/assets/rig/torso-wide.png",
     "torsoSquare": "tools/marshmallow-motion-lab/assets/rig/torso-square.png",
     "torsoTall": "tools/marshmallow-motion-lab/assets/rig/torso-tall.png",
+    "handKnob": "tools/marshmallow-motion-lab/assets/limbs/hand-knob.png",
+    "footKnob": "tools/marshmallow-motion-lab/assets/limbs/foot-knob.png",
+    "helmet": "tools/marshmallow-motion-lab/assets/accessories/helmet.png",
+    "headband": "tools/marshmallow-motion-lab/assets/accessories/headband.png",
     "grenade": "tools/marshmallow-motion-lab/assets/weapons/grenade.png",
     "handgun": "tools/marshmallow-motion-lab/assets/weapons/handgun.png",
     "twoHandBlaster": "tools/marshmallow-motion-lab/assets/weapons/two-hand-blaster.png"
+  },
+  "optionalAssetSets": {
+    "headbandColors": "tools/marshmallow-motion-lab/assets/accessories/headbands/headband-variants.json",
+    "comicArsenal": "tools/marshmallow-motion-lab/assets/weapons/arsenal/weapon-pack.json"
   },
   "profiles": {
     "wide": {
@@ -17,36 +26,54 @@
       "warp": 0.55,
       "limbGap": 0.36,
       "torsoHeight": 0.1,
-      "legSize": 1,
-      "legMotion": 0.3,
-      "armHeight": 0.1,
+      "legSize": 1.05,
+      "legMotion": 0.5,
+      "armHeight": 0.16,
       "armGap": 0.45,
       "armSize": 1,
-      "actionHand": "left"
+      "twoHandOffset": 42,
+      "helmetHeight": 0.1,
+      "helmetScale": 1.01,
+      "headbandHeight": 0.65,
+      "headbandScale": 1.07,
+      "actionHand": "left",
+      "headgear": "headband"
     },
     "square": {
       "torsoVariant": "square",
       "warp": 0.55,
       "limbGap": 0.28,
-      "torsoHeight": 0.1,
+      "torsoHeight": 0.08,
       "legSize": 0.95,
-      "legMotion": 0.6,
+      "legMotion": 0.4,
       "armHeight": 0.26,
       "armGap": 0.38,
       "armSize": 1,
-      "actionHand": "right"
+      "twoHandOffset": 42,
+      "helmetHeight": 0.24,
+      "helmetScale": 0.85,
+      "headbandHeight": 0.6,
+      "headbandScale": 0.86,
+      "actionHand": "right",
+      "headgear": "headband"
     },
     "tall": {
       "torsoVariant": "tall",
       "warp": 0.55,
-      "limbGap": 0.27,
-      "torsoHeight": 0.12,
-      "legSize": 0.9,
-      "legMotion": 0.6,
+      "limbGap": 0.21,
+      "torsoHeight": 0.1,
+      "legSize": 0.85,
+      "legMotion": 0.4,
       "armHeight": 0.5,
       "armGap": 0.3,
       "armSize": 1,
-      "actionHand": "right"
+      "twoHandOffset": 42,
+      "helmetHeight": 0.1,
+      "helmetScale": 0.77,
+      "headbandHeight": 0.55,
+      "headbandScale": 0.78,
+      "actionHand": "right",
+      "headgear": "headband"
     }
   }
 }

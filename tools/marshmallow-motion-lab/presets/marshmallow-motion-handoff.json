@@ -1,0 +1,81 @@
+{
+  "formatVersion": 1,
+  "profileFormatVersion": 2,
+  "canonicalRenderer": "tools/marshmallow-motion-lab/motion-lab.js",
+  "profileFile": "tools/marshmallow-motion-lab/presets/marshmallow-rig-presets.json",
+  "implementationGuide": "tools/marshmallow-motion-lab/presets/IMPLEMENTATION.md",
+  "renderSpace": {
+    "canvasWidth": 960,
+    "canvasHeight": 640,
+    "anchorX": 480,
+    "groundY": 500,
+    "frameCount": 16,
+    "defaultFps": 16
+  },
+  "techniques": {
+    "sprite": {
+      "states": ["idle", "walk", "walkRight"],
+      "frameRoot": "tools/marshmallow-motion-lab/assets/frames-16",
+      "walkRightMirrors": "walk"
+    },
+    "warpRig": {
+      "states": [
+        "idle",
+        "walk",
+        "walkRight",
+        "jump",
+        "longJump",
+        "joy",
+        "throw",
+        "grenade",
+        "shoot",
+        "handgun"
+      ],
+      "aimDrivenStates": ["grenade", "shoot", "handgun"],
+      "clickRecoilStates": ["shoot", "handgun"],
+      "holdReleaseState": "grenade",
+      "grenadePhases": {
+        "windupStartFrame": 0,
+        "holdFrame": 6,
+        "releaseEndFrame": 10,
+        "recoveryEndFrame": 16
+      }
+    }
+  },
+  "renderOrder": [
+    "feet",
+    "walkRearArm",
+    "torso",
+    "faceAndEyes",
+    "headgear",
+    "frontHands",
+    "weapons"
+  ],
+  "profileVariants": ["wide", "square", "tall"],
+  "portableProfileFields": [
+    "warp",
+    "limbGap",
+    "torsoHeight",
+    "legSize",
+    "legMotion",
+    "armHeight",
+    "armGap",
+    "armSize",
+    "twoHandOffset",
+    "helmetHeight",
+    "helmetScale",
+    "headbandHeight",
+    "headbandScale",
+    "headgear",
+    "actionHand"
+  ],
+  "optionalAssetSets": {
+    "headbandColors": "tools/marshmallow-motion-lab/assets/accessories/headbands/headband-variants.json",
+    "comicArsenal": "tools/marshmallow-motion-lab/assets/weapons/arsenal/weapon-pack.json"
+  },
+  "integrationBoundary": {
+    "profilesContain": "body-form tuning, anchors, sizes and selected visual options",
+    "rendererContains": "pose equations, animation timing, aim response, recoil, throwing and draw order",
+    "gameMustProvide": "state selection, normalized frame progress, target direction and input phase"
+  }
+}

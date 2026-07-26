@@ -132,7 +132,7 @@ h1 {
   border-radius: 10px;
 }
 
-.state-button, .mode-button, .torso-button, .hand-button, .play-button, .save-button {
+.state-button, .mode-button, .torso-button, .headgear-button, .hand-button, .play-button, .save-button {
   border: 0;
   border-radius: 7px;
   padding: 9px 12px;
@@ -143,13 +143,13 @@ h1 {
 }
 
 .state-button:hover, .state-button.is-active, .mode-button:hover, .mode-button.is-active,
-.torso-button:hover, .torso-button.is-active {
+.torso-button:hover, .torso-button.is-active, .headgear-button:hover, .headgear-button.is-active {
   color: #fff8e9;
   background: #2d2922;
 }
 
 .hand-button:hover, .hand-button.is-active { color: #fff8e9; background: #2d2922; }
-.state-button:active, .mode-button:active, .torso-button:active, .hand-button:active,
+.state-button:active, .mode-button:active, .torso-button:active, .headgear-button:active, .hand-button:active,
 .play-button:active, .save-button:active { transform: scale(.97); }
 
 .procedural-control { display: none; }
@@ -160,6 +160,12 @@ body[data-mode="procedural"] input.procedural-control { display: block; }
 body[data-mode="procedural"] .procedural-panel { display: grid; }
 body[data-mode="procedural"] .warp-state { display: block; }
 .torso-segmented { grid-template-columns: repeat(3, 1fr); }
+.headgear-segmented { grid-template-columns: repeat(3, 1fr); }
+.accessory-control { display: none !important; }
+body[data-mode="procedural"][data-headgear="helmet"] .helmet-control { display: flex !important; }
+body[data-mode="procedural"][data-headgear="helmet"] input.helmet-control { display: block !important; }
+body[data-mode="procedural"][data-headgear="headband"] .headband-control { display: flex !important; }
+body[data-mode="procedural"][data-headgear="headband"] input.headband-control { display: block !important; }
 .movement-segmented { grid-template-columns: repeat(2, 1fr); }
 body[data-mode="procedural"] .movement-segmented { grid-template-columns: repeat(3, 1fr); }
 .save-button {

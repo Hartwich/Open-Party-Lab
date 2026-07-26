@@ -39,6 +39,14 @@
               <button class="torso-button" data-torso="tall" type="button">Hoch</button>
             </div>
           </section>
+          <section class="control-section procedural-panel">
+            <p class="section-label">Kopfbedeckung</p>
+            <div class="segmented headgear-segmented" role="group" aria-label="Kopfbedeckung">
+              <button class="headgear-button is-active" data-headgear="none" type="button">Keine</button>
+              <button class="headgear-button" data-headgear="helmet" type="button">Helm</button>
+              <button class="headgear-button" data-headgear="headband" type="button">Stirnband</button>
+            </div>
+          </section>
           <section class="control-section">
             <p class="section-label">Bewegung</p>
             <div class="segmented movement-segmented" role="group" aria-label="Animationszustand">
@@ -75,6 +83,16 @@
             <input class="procedural-control" id="armGap" type="range" min="0" max="100" step="1" value="50" />
             <label class="range-label procedural-control" for="armSize"><span>Armgröße</span><output id="armSizeValue">100%</output></label>
             <input class="procedural-control" id="armSize" type="range" min="70" max="140" step="1" value="100" />
+            <label class="range-label procedural-control" for="twoHandOffset"><span>Zweihänder-Abstand</span><output id="twoHandOffsetValue">42 px</output></label>
+            <input class="procedural-control" id="twoHandOffset" type="range" min="0" max="140" step="1" value="42" />
+            <label class="range-label procedural-control accessory-control helmet-control" for="helmetHeight"><span>Helm-Höhe</span><output id="helmetHeightValue">37%</output></label>
+            <input class="procedural-control accessory-control helmet-control" id="helmetHeight" type="range" min="0" max="100" step="1" value="37" />
+            <label class="range-label procedural-control accessory-control helmet-control" for="helmetScale"><span>Helm-Größe</span><output id="helmetScaleValue">80%</output></label>
+            <input class="procedural-control accessory-control helmet-control" id="helmetScale" type="range" min="50" max="150" step="1" value="80" />
+            <label class="range-label procedural-control accessory-control headband-control" for="headbandHeight"><span>Stirnband-Höhe</span><output id="headbandHeightValue">73%</output></label>
+            <input class="procedural-control accessory-control headband-control" id="headbandHeight" type="range" min="0" max="100" step="1" value="73" />
+            <label class="range-label procedural-control accessory-control headband-control" for="headbandScale"><span>Stirnband-Größe</span><output id="headbandScaleValue">100%</output></label>
+            <input class="procedural-control accessory-control headband-control" id="headbandScale" type="range" min="50" max="150" step="1" value="100" />
           </section>
           <section class="control-section switches">
             <label><input id="crossfade" type="checkbox" /><span>Zusätzlich überblenden</span></label>
