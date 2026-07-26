@@ -25,7 +25,7 @@ function shouldKeepArenaSurvivorResultScene(
 
   const arenaState = state.game?.state as { result?: { outcome?: string } } | null | undefined;
 
-  return arenaState?.result?.outcome === "survived";
+  return arenaState?.result?.outcome === "survived" || arenaState?.result?.outcome === "defeated";
 }
 
 function shouldKeepZeichnenUndErratenResultScene(
