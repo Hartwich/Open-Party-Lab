@@ -1,6 +1,6 @@
 # Project Status
 
-Snapshot date: 2026-07-25
+Snapshot date: 2026-07-26
 
 ## Available In This Public Cut
 
@@ -38,7 +38,7 @@ Optional local game repos:
 - Drift Racer can be loaded from `local-games/drift-racer` when cloned locally. It is recommended alpha; its phone controller uses a left virtual drive stick plus Boost, Fire, and Drift action buttons.
 - Word Tiles can be loaded from `local-games/word-tiles` when cloned locally. It is recommended alpha, supports multiple accepted word placements per turn, and uses table-driven word challenges instead of an internal dictionary check.
 - Chaos-Kommando can be loaded from `local-games/chaos-kommando` when cloned locally. It is recommended alpha. Its host uses a continuous modular toasted-marshmallow rig with a fixed world pivot, aim-tracking eyes, procedural locomotion, weapon-specific hand grips, and dedicated carry art for all 16 weapons. The self-contained Marshmallow Motion Lab lives in the platform repository at `tools/marshmallow-motion-lab`, owns all torso, weapon, and preview assets required by the tool, and exports reusable checked-in rig profiles plus an implementation guide under `tools/marshmallow-motion-lab/presets`.
-- Flatterfluff can be loaded from `local-games/flatterfluff` when cloned locally. It is playable alpha for 1–6 players, with timed and endless modes, server-authoritative aiming and scoring, six-shot magazines, reloads, ammunition crates, generated comic production art, dedicated effects, and a 16-bar country music profile.
+- Flatterfluff can be loaded from `local-games/flatterfluff` when cloned locally. It is playable alpha for 1–6 players, with timed and endless modes, server-authoritative aiming and scoring, six-shot magazines, uninterrupted aiming during reloads, ammunition crates, slowly growing small-target bonuses for every target, a controls-only phone layout with progressive aiming, optional controller shot haptics, compact host HUD, generated comic production art, dedicated effects, and a 16-bar country music profile.
 
 Lobby/setup:
 

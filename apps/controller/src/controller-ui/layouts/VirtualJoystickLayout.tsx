@@ -42,7 +42,9 @@ function applyResponseMapping(x: number, y: number): Vector2 {
   const normalizedX = clamped.moveX / magnitude;
   const normalizedY = clamped.moveY / magnitude;
   const scaledMagnitude = (magnitude - DEADZONE) / (1 - DEADZONE);
-  const shapedMagnitude = scaledMagnitude;
+  // Preserve fine control near the center while increasing the rate of change
+  // toward the rim, where players expect the fastest aiming response.
+  const shapedMagnitude = Math.pow(scaledMagnitude, 1.35);
 
   return {
     moveX: normalizedX * shapedMagnitude,
@@ -72,11 +74,15 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
   const hasActionButtons = actionButtons.length > 0;
   const controlSize = minimal
     ? "min(84vw, 360px)"
-    : hasActionButtons ? "min(42vw, 220px)" : "min(78vw, 320px)";
+    : cleanChrome
+      ? "min(48vw, 62dvh, 360px)"
+      : hasActionButtons ? "min(42vw, 220px)" : "min(78vw, 320px)";
   const buttonSize =
     actionButtons.length >= 4
       ? "min(19vw, 96px)"
-      : "min(34vw, 180px)";
+      : cleanChrome
+        ? "min(43vw, 50dvh, 300px)"
+        : "min(34vw, 180px)";
 
   useEffect(() => {
     onMoveChangeRef.current = model.onMoveChange;
@@ -180,7 +186,9 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
       style={{
         display: "grid",
         gap: minimal ? 0 : cleanChrome ? 12 : 18,
-        minHeight: minimal ? "min(76vh, 680px)" : undefined,
+        height: cleanChrome ? "100%" : undefined,
+        minHeight: cleanChrome ? 0 : minimal ? "min(76vh, 680px)" : undefined,
+        gridTemplateRows: cleanChrome ? "minmax(0, 1fr)" : undefined,
         placeItems: minimal ? "center" : undefined
       }}
     >
@@ -206,7 +214,8 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
           display: "grid",
           gridTemplateColumns: hasActionButtons ? "minmax(0, 1fr) auto" : "minmax(0, 1fr)",
           alignItems: "center",
-          gap: 16
+          alignContent: cleanChrome ? "center" : undefined,
+          gap: cleanChrome ? 12 : 16
         }}
       >
         <div

@@ -43,6 +43,9 @@ export function ActionButtonPad({
 
               event.preventDefault();
               event.currentTarget.setPointerCapture(event.pointerId);
+              if (button.hapticPattern !== undefined && typeof navigator.vibrate === "function") {
+                navigator.vibrate(button.hapticPattern);
+              }
               button.onPress();
             }}
             onPointerUp={() => {

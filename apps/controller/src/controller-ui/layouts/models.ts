@@ -19,6 +19,7 @@ export interface ControllerActionButtonModel {
   label: string;
   accentColor?: string;
   disabled?: boolean;
+  hapticPattern?: number | number[];
   onPress: () => void;
   onRelease?: () => void;
 }

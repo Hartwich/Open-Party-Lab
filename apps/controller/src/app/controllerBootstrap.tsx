@@ -60,11 +60,17 @@ export function ControllerApp() {
     return mountControllerDebugOverlay(controllerClient);
   }, []);
 
-  useEffect(() => {
-    return mountControllerFullscreenOverlay();
-  }, []);
-
   const page = resolvePage(state);
+  const controlsOnlyGame =
+    page === "controller" && state.room?.selectedGameId === "flatterfluff";
+
+  useEffect(() => {
+    if (controlsOnlyGame) {
+      return undefined;
+    }
+
+    return mountControllerFullscreenOverlay();
+  }, [controlsOnlyGame]);
 
   return (
     <SafeAreaLayout>

@@ -152,15 +152,17 @@ export function ControllerPage({ state, onLeaveRoom, onInput, onSetReady }: Cont
   const joystickChrome = layoutModel.kind === "virtual_joystick" && layoutModel.minimal;
   const cleanJoystickChrome = layoutModel.kind === "virtual_joystick" && layoutModel.cleanChrome;
   const minimalChrome = denseBoardChrome || gamepadChrome || joystickChrome;
+  const controlsOnlyChrome = joystickChrome || cleanJoystickChrome;
 
   return (
     <ControllerFrame
-      title={minimalChrome ? "" : gameName}
+      title={minimalChrome || cleanJoystickChrome ? "" : gameName}
       subtitle={minimalChrome || cleanJoystickChrome ? undefined : `${text.phase}: ${text.formatPhase(game?.phase ?? text.unknown)} | ${orientation}`}
       wide={gamepadChrome || denseBoardChrome}
-      bare={joystickChrome}
+      bare={controlsOnlyChrome}
+      fitViewport={cleanJoystickChrome}
       footer={
-        minimalChrome ? undefined :
+        minimalChrome || cleanJoystickChrome ? undefined :
         <div style={{ display: "grid", gap: 10 }}>
           <button type="button" onClick={onLeaveRoom} style={secondaryButtonStyle}>
             {text.logout}

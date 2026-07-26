@@ -6,7 +6,10 @@ import { applyStyles, createChromeCard, hostChrome } from "../ui/chrome/hostChro
 function shouldShowHudOverlay(
   state: Parameters<HostSocketClient["subscribe"]>[0] extends (state: infer TState) => void ? TState : never
 ): boolean {
-  if (state.room?.selectedGameId === "arena-survivor") {
+  if (
+    state.room?.selectedGameId === "arena-survivor" ||
+    state.room?.selectedGameId === "flatterfluff"
+  ) {
     return false;
   }
 
