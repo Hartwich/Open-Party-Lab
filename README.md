@@ -67,7 +67,9 @@ No Node.js or npm installation is required for the portable build. Windows may s
 
 ## Hosted deployment
 
-Open Party Lab can also run as a single HTTPS web service, without a Windows installation. The included Render Blueprint builds all known games and serves the host and phone controller from the same public origin. See [Render deployment](docs/render-deployment.md).
+**Public test server:** [https://open-party-lab.onrender.com](https://open-party-lab.onrender.com)
+
+Open Party Lab can also run as a single HTTPS web service, without a Windows installation. The included Render Blueprint builds all known games and serves the host and phone controller from the same public origin. The free test server can need about a minute to wake up after inactivity. See [Render deployment](docs/render-deployment.md).
 
 ### Run from source
 
