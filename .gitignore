@@ -40,3 +40,5 @@ pnpm-debug.log*
 
 apps/host/public/drift-racer/
 apps/controller/public/drift-racer/
+apps/host/public/flatterfluff/
+apps/controller/public/flatterfluff/

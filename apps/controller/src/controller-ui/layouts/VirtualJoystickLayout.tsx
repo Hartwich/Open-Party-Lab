@@ -64,6 +64,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
   const onMoveChangeRef = useRef(model.onMoveChange);
   const [thumbOffset, setThumbOffset] = useState({ x: 0, y: 0, active: false });
   const minimal = Boolean(model.minimal);
+  const cleanChrome = Boolean(model.cleanChrome);
   const actionButtons = minimal ? [] : model.actionButtons ?? [];
   const buttonColumns =
     model.actionButtonColumns ??
@@ -178,12 +179,12 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
     <div
       style={{
         display: "grid",
-        gap: minimal ? 0 : 18,
+        gap: minimal ? 0 : cleanChrome ? 12 : 18,
         minHeight: minimal ? "min(76vh, 680px)" : undefined,
         placeItems: minimal ? "center" : undefined
       }}
     >
-      {!minimal ? <div
+      {!minimal && !cleanChrome ? <div
         style={{
           display: "grid",
           gap: 8,
@@ -198,7 +199,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
         {model.helperText ? <span style={{ color: "var(--text-muted)" }}>{model.helperText}</span> : null}
       </div> : null}
 
-      {!minimal && model.ready ? <ReadyPanel ready={model.ready} /> : null}
+      {!minimal && !cleanChrome && model.ready ? <ReadyPanel ready={model.ready} /> : null}
 
       <div
         style={{
@@ -285,8 +286,8 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
             </div>
           </div>
 
-          {!minimal ? <div style={{ color: "var(--text-muted)", fontSize: "0.95rem", letterSpacing: "0.03em" }}>
-            Innen fein steuern, am Rand mit voller Geschwindigkeit laufen.
+          {!minimal && !cleanChrome ? <div style={{ color: "var(--text-muted)", fontSize: "0.95rem", letterSpacing: "0.03em" }}>
+            {model.stickHint ?? "Innen fein steuern, am Rand mit voller Geschwindigkeit laufen."}
           </div> : null}
         </div>
 
@@ -300,7 +301,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
         ) : null}
       </div>
 
-      {!minimal && model.stats?.length ? (
+      {!minimal && !cleanChrome && model.stats?.length ? (
         <div style={{ display: "grid", gap: 10 }}>
           {model.stats.map((stat) => (
             <div

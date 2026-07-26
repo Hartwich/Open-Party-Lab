@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Marshmallow Motion Lab</title>
+    <link rel="stylesheet" href="./motion-lab.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Party Platform Tool · Chaos-Kommando Motion Prototype</p>
+          <h1>Marshmallow Motion Lab</h1>
+        </div>
+        <div class="status" aria-live="polite">
+          <span class="status-dot"></span>
+          <span id="loadStatus">Assets werden geladen</span>
+        </div>
+      </header>
+      <section class="workspace" aria-label="Animationswerkbank">
+        <div class="stage-wrap">
+          <canvas id="stage" width="960" height="640" aria-label="Marshmallow Animationsvorschau"></canvas>
+          <div class="stage-hint">Maus: zielen · Klick: schießen · Halten/Loslassen: Granate</div>
+        </div>
+        <aside class="inspector">
+          <section class="control-section">
+            <p class="section-label">Technik</p>
+            <div class="segmented" role="group" aria-label="Animationstechnik">
+              <button class="mode-button is-active" data-mode="sprite" type="button">4×4 Sprite</button>
+              <button class="mode-button" data-mode="procedural" type="button">Warp-Rig</button>
+            </div>
+          </section>
+          <section class="control-section procedural-panel">
+            <p class="section-label">Körperform</p>
+            <div class="segmented torso-segmented" role="group" aria-label="Torso-Variante">
+              <button class="torso-button is-active" data-torso="wide" type="button">Breit</button>
+              <button class="torso-button" data-torso="square" type="button">Quadrat</button>
+              <button class="torso-button" data-torso="tall" type="button">Hoch</button>
+            </div>
+          </section>
+          <section class="control-section">
+            <p class="section-label">Bewegung</p>
+            <div class="segmented movement-segmented" role="group" aria-label="Animationszustand">
+              <button class="state-button is-active" data-state="idle" type="button">Idle</button>
+              <button class="state-button" data-state="walk" type="button">Walk links</button>
+              <button class="state-button" data-state="walkRight" type="button">Walk rechts</button>
+              <button class="state-button warp-state" data-state="jump" type="button">Jump</button>
+              <button class="state-button warp-state" data-state="longJump" type="button">Weitsprung</button>
+              <button class="state-button warp-state" data-state="joy" type="button">Freude</button>
+              <button class="state-button warp-state" data-state="throw" type="button">Werfen</button>
+              <button class="state-button warp-state" data-state="grenade" type="button">Granate</button>
+              <button class="state-button warp-state" data-state="shoot" type="button">Blaster 2H</button>
+              <button class="state-button warp-state" data-state="handgun" type="button">Pistole</button>
+            </div>
+          </section>
+          <section class="control-section">
+            <label class="range-label" for="speed"><span>Geschwindigkeit</span><output id="speedValue">16 fps</output></label>
+            <input id="speed" type="range" min="6" max="30" step="1" value="16" />
+            <label class="range-label" for="scale"><span>Darstellung</span><output id="scaleValue">100%</output></label>
+            <input id="scale" type="range" min="75" max="125" step="1" value="100" />
+            <label class="range-label procedural-control" for="warp"><span>Warp-Stärke</span><output id="warpValue">55%</output></label>
+            <input class="procedural-control" id="warp" type="range" min="0" max="100" step="1" value="55" />
+            <label class="range-label procedural-control" for="limbGap"><span>Fuß-Abstand</span><output id="limbGapValue">113 px</output></label>
+            <input class="procedural-control" id="limbGap" type="range" min="0" max="100" step="1" value="70" />
+            <label class="range-label procedural-control" for="torsoHeight"><span>Torso-Höhe</span><output id="torsoHeightValue">96 px</output></label>
+            <input class="procedural-control" id="torsoHeight" type="range" min="0" max="100" step="1" value="66" />
+            <label class="range-label procedural-control" for="legSize"><span>Fußgröße</span><output id="legSizeValue">100%</output></label>
+            <input class="procedural-control" id="legSize" type="range" min="70" max="140" step="1" value="100" />
+            <label class="range-label procedural-control" for="legMotion"><span>Beinbewegung</span><output id="legMotionValue">60%</output></label>
+            <input class="procedural-control" id="legMotion" type="range" min="0" max="100" step="1" value="60" />
+            <label class="range-label procedural-control" for="armHeight"><span>Arm-Höhe</span><output id="armHeightValue">201 px</output></label>
+            <input class="procedural-control" id="armHeight" type="range" min="0" max="100" step="1" value="50" />
+            <label class="range-label procedural-control" for="armGap"><span>Arm-Basisabstand</span><output id="armGapValue">184 px</output></label>
+            <input class="procedural-control" id="armGap" type="range" min="0" max="100" step="1" value="50" />
+            <label class="range-label procedural-control" for="armSize"><span>Armgröße</span><output id="armSizeValue">100%</output></label>
+            <input class="procedural-control" id="armSize" type="range" min="70" max="140" step="1" value="100" />
+          </section>
+          <section class="control-section switches">
+            <label><input id="crossfade" type="checkbox" /><span>Zusätzlich überblenden</span></label>
+            <label><input id="onion" type="checkbox" /><span>Onion Skin</span></label>
+            <label><input id="guides" type="checkbox" checked /><span>Ankerlinien</span></label>
+            <label><input id="arms" type="checkbox" checked /><span>Arm-Knubbel</span></label>
+          </section>
+          <section class="control-section procedural-panel save-panel">
+            <p class="section-label">Aktionshand</p>
+            <div class="segmented" role="group" aria-label="Aktionshand">
+              <button class="hand-button" data-hand="left" type="button">Links</button>
+              <button class="hand-button is-active" data-hand="right" type="button">Rechts</button>
+            </div>
+            <button id="holdThrow" class="save-button throw-control" type="button">Wurf gedrückt halten</button>
+            <output id="actionStatus" class="throw-control" aria-live="polite">Bereit zum Ausholen</output>
+            <button id="saveSettings" class="save-button" type="button">Aktuelles Profil speichern</button>
+            <button id="exportSettings" class="save-button secondary-save-button" type="button">Alle Profile ins Projekt schreiben</button>
+            <output id="saveStatus" aria-live="polite">Noch nicht gespeichert</output>
+          </section>
+          <section class="readout" aria-label="Messwerte">
+            <div><span>Technik</span><strong id="techniqueReadout">4×4 Sprite</strong></div>
+            <div><span>Frame</span><strong id="frameReadout">01 / 16</strong></div>
+            <div><span>Torso-Anker</span><strong>±0.5 px</strong></div>
+            <div><span>Bodenlinie</span><strong>fixiert</strong></div>
+            <div><span>Helligkeit</span><strong>normalisiert</strong></div>
+          </section>
+        </aside>
+      </section>
+      <footer class="transport">
+        <button id="playPause" class="play-button" type="button" aria-label="Animation pausieren">Pause</button>
+        <input id="timeline" type="range" min="0" max="15" step="1" value="0" aria-label="Frame auswählen" />
+        <p><kbd>Leertaste</kbd> Play/Pause · <kbd>←</kbd><kbd>→</kbd> Frame · <kbd>1</kbd><kbd>2</kbd> Zustand</p>
+      </footer>
+    </main>
+    <script src="./motion-lab.js" defer></script>
+  </body>
+</html>

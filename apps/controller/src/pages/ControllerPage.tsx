@@ -150,12 +150,13 @@ export function ControllerPage({ state, onLeaveRoom, onInput, onSetReady }: Cont
   const gamepadChrome = gameId === "drift-racer";
   const denseBoardChrome = gameId === "word-tiles";
   const joystickChrome = layoutModel.kind === "virtual_joystick" && layoutModel.minimal;
+  const cleanJoystickChrome = layoutModel.kind === "virtual_joystick" && layoutModel.cleanChrome;
   const minimalChrome = denseBoardChrome || gamepadChrome || joystickChrome;
 
   return (
     <ControllerFrame
       title={minimalChrome ? "" : gameName}
-      subtitle={minimalChrome ? undefined : `${text.phase}: ${text.formatPhase(game?.phase ?? text.unknown)} | ${orientation}`}
+      subtitle={minimalChrome || cleanJoystickChrome ? undefined : `${text.phase}: ${text.formatPhase(game?.phase ?? text.unknown)} | ${orientation}`}
       wide={gamepadChrome || denseBoardChrome}
       bare={joystickChrome}
       footer={
@@ -164,12 +165,14 @@ export function ControllerPage({ state, onLeaveRoom, onInput, onSetReady }: Cont
           <button type="button" onClick={onLeaveRoom} style={secondaryButtonStyle}>
             {text.logout}
           </button>
-          <div style={{ display: "grid", gap: 8 }}>
-            <small style={{ color: "var(--text-muted)" }}>{text.room} {state.room.code}</small>
-            <small style={{ color: "var(--text-muted)" }}>
-              {text.score}: {state.scoreboard?.entries.find((entry) => entry.playerId === state.player?.id)?.total ?? state.player.score}
-            </small>
-          </div>
+          {!cleanJoystickChrome ? (
+            <div style={{ display: "grid", gap: 8 }}>
+              <small style={{ color: "var(--text-muted)" }}>{text.room} {state.room.code}</small>
+              <small style={{ color: "var(--text-muted)" }}>
+                {text.score}: {state.scoreboard?.entries.find((entry) => entry.playerId === state.player?.id)?.total ?? state.player.score}
+              </small>
+            </div>
+          ) : null}
         </div>
       }
     >

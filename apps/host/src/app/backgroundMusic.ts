@@ -7,6 +7,7 @@ const ARENA_SURVIVOR_VISUAL_THEME_SETTING_KEY = "arenaSurvivorVisualTheme";
 const MUSIC_UNLOCK_EVENTS = ["pointerdown", "keydown", "touchstart"] as const;
 
 interface MusicTemplate {
+  bars?: number;
   leadPattern: Array<number | null>;
   bassPattern: Array<number | null>;
   padPattern: Array<number | null>;
@@ -224,6 +225,25 @@ const musicTemplates: Record<string, MusicTemplate> = {
     drumGain: 0.14,
     lowpassHz: 2_100
   },
+  sugarCountry: {
+    bars: 16,
+    leadPattern: [0, null, 7, 12, null, 10, 7, null, 5, null, 7, 10, null, 7, 3, null],
+    bassPattern: [0, null, 0, null, -5, null, -5, null, -2, null, -2, null, -5, null, -5, null],
+    padPattern: [0, null, 7, null],
+    barProgression: [0, -5, -2, -5, 3, -2, -5, 0],
+    kickPattern: [0.82, 0, 0.18, 0, 0.68, 0, 0.16, 0, 0.82, 0, 0.18, 0, 0.68, 0, 0.16, 0],
+    snarePattern: [0, 0, 0, 0, 0, 0, 0.62, 0, 0, 0, 0, 0, 0, 0, 0.66, 0],
+    hatPattern: [0.1, 0, 0.08, 0, 0.12, 0, 0.08, 0, 0.1, 0, 0.08, 0, 0.12, 0, 0.08, 0],
+    leadWave: "triangle",
+    bassWave: "sine",
+    padWave: "triangle",
+    padChordIntervals: [0, 7, 12],
+    leadGain: 0.075,
+    bassGain: 0.095,
+    padGain: 0.045,
+    drumGain: 0.13,
+    lowpassHz: 2_450
+  },
   strategy: {
     leadPattern: [0, null, 3, null, 7, null, 12, null, 10, null, 7, null, 5, null, 3, null],
     bassPattern: [0, null, null, null, -5, null, null, null, -2, null, null, null, -5, null, null, null],
@@ -304,6 +324,11 @@ const musicProfiles: Record<string, MusicProfile> = {
     bpm: 134,
     rootMidi: 58,
     masterGain: 0.16
+  }),
+  flatterfluff: createProfile(musicTemplates.sugarCountry, {
+    bpm: 108,
+    rootMidi: 50,
+    masterGain: 0.13
   })
 };
 
@@ -440,7 +465,7 @@ function scheduleNoiseHit(
 }
 
 async function renderTrackLoop(profile: MusicProfile): Promise<AudioBuffer> {
-  const bars = 8;
+  const bars = profile.bars ?? 8;
   const beatsPerBar = 4;
   const stepsPerBeat = 4;
   const stepsPerBar = beatsPerBar * stepsPerBeat;

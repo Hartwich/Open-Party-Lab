@@ -1,0 +1,52 @@
+{
+  "formatVersion": 1,
+  "tool": "Marshmallow Motion Lab",
+  "updatedAt": "2026-07-25T23:56:37.316Z",
+  "implementationGuide": "./IMPLEMENTATION.md",
+  "assets": {
+    "torsoWide": "tools/marshmallow-motion-lab/assets/rig/torso-wide.png",
+    "torsoSquare": "tools/marshmallow-motion-lab/assets/rig/torso-square.png",
+    "torsoTall": "tools/marshmallow-motion-lab/assets/rig/torso-tall.png",
+    "grenade": "tools/marshmallow-motion-lab/assets/weapons/grenade.png",
+    "handgun": "tools/marshmallow-motion-lab/assets/weapons/handgun.png",
+    "twoHandBlaster": "tools/marshmallow-motion-lab/assets/weapons/two-hand-blaster.png"
+  },
+  "profiles": {
+    "wide": {
+      "torsoVariant": "wide",
+      "warp": 0.55,
+      "limbGap": 0.36,
+      "torsoHeight": 0.1,
+      "legSize": 1,
+      "legMotion": 0.3,
+      "armHeight": 0.1,
+      "armGap": 0.45,
+      "armSize": 1,
+      "actionHand": "left"
+    },
+    "square": {
+      "torsoVariant": "square",
+      "warp": 0.55,
+      "limbGap": 0.28,
+      "torsoHeight": 0.1,
+      "legSize": 0.95,
+      "legMotion": 0.6,
+      "armHeight": 0.26,
+      "armGap": 0.38,
+      "armSize": 1,
+      "actionHand": "right"
+    },
+    "tall": {
+      "torsoVariant": "tall",
+      "warp": 0.55,
+      "limbGap": 0.27,
+      "torsoHeight": 0.12,
+      "legSize": 0.9,
+      "legMotion": 0.6,
+      "armHeight": 0.5,
+      "armGap": 0.3,
+      "armSize": 1,
+      "actionHand": "right"
+    }
+  }
+}

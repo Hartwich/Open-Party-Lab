@@ -1,0 +1,790 @@
+{
+  "idle": {
+    "source": "C:\\Users\\Patri\\Source\\Game\\party-platform-public\\local-games\\chaos-kommando\\tools\\marshmallow-motion-lab\\assets\\raw\\idle-16-alpha.png",
+    "frameCount": 16,
+    "commonScale": 1.39059,
+    "alignment": [
+      {
+        "sourceWidth": 225,
+        "sourceHeight": 245,
+        "torsoX": 191.746,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 227,
+        "sourceHeight": 240,
+        "torsoX": 192.137,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 228,
+        "sourceHeight": 238,
+        "torsoX": 192.137,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 229,
+        "sourceHeight": 237,
+        "torsoX": 191.528,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 230,
+        "sourceHeight": 237,
+        "torsoX": 191.528,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 229,
+        "sourceHeight": 245,
+        "torsoX": 191.528,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 228,
+        "sourceHeight": 244,
+        "torsoX": 192.137,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 229,
+        "sourceHeight": 240,
+        "torsoX": 191.528,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 230,
+        "sourceHeight": 246,
+        "torsoX": 191.528,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 232,
+        "sourceHeight": 245,
+        "torsoX": 191.918,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 232,
+        "sourceHeight": 251,
+        "torsoX": 191.918,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 232,
+        "sourceHeight": 245,
+        "torsoX": 191.918,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 230,
+        "sourceHeight": 246,
+        "torsoX": 191.528,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 229,
+        "sourceHeight": 244,
+        "torsoX": 191.528,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 228,
+        "sourceHeight": 246,
+        "torsoX": 192.137,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 229,
+        "sourceHeight": 242,
+        "torsoX": 191.528,
+        "groundY": 366
+      }
+    ],
+    "brightness": [
+      {
+        "beforeMedianRgb": [
+          252.0,
+          237.0,
+          205.0
+        ],
+        "gain": [
+          1.004,
+          1.0042,
+          1.0049
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          238.0,
+          205.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0049
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          237.0,
+          205.0
+        ],
+        "gain": [
+          1.0,
+          1.0042,
+          1.0049
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          237.0,
+          205.0
+        ],
+        "gain": [
+          1.0,
+          1.0042,
+          1.0049
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          238.0,
+          205.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0049
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          238.0,
+          205.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0049
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          238.0,
+          205.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0049
+        ],
+        "afterMedianRgb": [
+          253.0,
+          238.0,
+          206.0
+        ],
+        "maxDeviationPercent": 0.0
+      }
+    ],
+    "maxBrightnessDeviationPercent": 0.0
+  },
+  "walk": {
+    "source": "C:\\Users\\Patri\\Source\\Game\\party-platform-public\\local-games\\chaos-kommando\\tools\\marshmallow-motion-lab\\assets\\raw\\walk-16-alpha.png",
+    "frameCount": 16,
+    "commonScale": 1.39344,
+    "alignment": [
+      {
+        "sourceWidth": 237,
+        "sourceHeight": 244,
+        "torsoX": 192.246,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 232,
+        "sourceHeight": 244,
+        "torsoX": 191.639,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 242,
+        "sourceHeight": 244,
+        "torsoX": 192.033,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 232,
+        "sourceHeight": 244,
+        "torsoX": 192.246,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 238,
+        "sourceHeight": 244,
+        "torsoX": 192.246,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 231,
+        "sourceHeight": 245,
+        "torsoX": 192.246,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 232,
+        "sourceHeight": 243,
+        "torsoX": 192.246,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 231,
+        "sourceHeight": 244,
+        "torsoX": 192.246,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 231,
+        "sourceHeight": 245,
+        "torsoX": 192.246,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 231,
+        "sourceHeight": 244,
+        "torsoX": 192.246,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 232,
+        "sourceHeight": 244,
+        "torsoX": 192.246,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 233,
+        "sourceHeight": 248,
+        "torsoX": 192.246,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 231,
+        "sourceHeight": 248,
+        "torsoX": 192.246,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 231,
+        "sourceHeight": 247,
+        "torsoX": 192.246,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 232,
+        "sourceHeight": 248,
+        "torsoX": 192.246,
+        "groundY": 366
+      },
+      {
+        "sourceWidth": 232,
+        "sourceHeight": 249,
+        "torsoX": 192.246,
+        "groundY": 366
+      }
+    ],
+    "brightness": [
+      {
+        "beforeMedianRgb": [
+          253.0,
+          243.0,
+          214.0
+        ],
+        "gain": [
+          1.0,
+          1.0041,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          254.0,
+          244.0,
+          214.0
+        ],
+        "gain": [
+          0.9961,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          243.0,
+          214.0
+        ],
+        "gain": [
+          1.0,
+          1.0041,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          254.0,
+          244.0,
+          214.0
+        ],
+        "gain": [
+          0.9961,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          243.0,
+          214.0
+        ],
+        "gain": [
+          1.0,
+          1.0041,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          254.0,
+          244.0,
+          214.0
+        ],
+        "gain": [
+          0.9961,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          243.0,
+          214.0
+        ],
+        "gain": [
+          1.0,
+          1.0041,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          254.0,
+          244.0,
+          214.0
+        ],
+        "gain": [
+          0.9961,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          254.0,
+          244.0,
+          214.0
+        ],
+        "gain": [
+          0.9961,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          254.0,
+          244.0,
+          214.0
+        ],
+        "gain": [
+          0.9961,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          243.0,
+          214.0
+        ],
+        "gain": [
+          1.0,
+          1.0041,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      },
+      {
+        "beforeMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "afterMedianRgb": [
+          253.0,
+          244.0,
+          214.0
+        ],
+        "maxDeviationPercent": 0.0
+      }
+    ],
+    "maxBrightnessDeviationPercent": 0.0
+  }
+}

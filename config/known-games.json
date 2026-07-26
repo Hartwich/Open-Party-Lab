@@ -133,5 +133,14 @@
     "alternateLocalPaths": [
       "../chaos-kommando"
     ]
+  },
+  {
+    "id": "flatterfluff",
+    "package": "@open-party-lab/game-flatterfluff",
+    "repo": "https://github.com/Hartwich/flatterfluff.git",
+    "defaultLocalPath": "local-games/flatterfluff",
+    "alternateLocalPaths": [
+      "../flatterfluff"
+    ]
   }
 ]

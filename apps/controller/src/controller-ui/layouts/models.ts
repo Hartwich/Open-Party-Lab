@@ -118,7 +118,9 @@ export interface VirtualJoystickLayoutModel {
   title: string;
   subtitle?: string;
   helperText?: string;
+  stickHint?: string;
   minimal?: boolean;
+  cleanChrome?: boolean;
   disabled: boolean;
   accentColor?: string;
   resetKey: string;
