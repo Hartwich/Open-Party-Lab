@@ -1,4 +1,6 @@
 # Open Party Lab
+**Public test server:** [https://open-party-lab.onrender.com](https://open-party-lab.onrender.com)
+The free test server can need about a minute to wake up after inactivity.
 
 Open Party Lab is a local-first browser party-game platform for shared screens and phone controllers. It is also an experiment in AI-assisted software development: the platform is structured so humans and coding agents can improve games, docs, tests, and tooling in small reviewable steps.
 
