@@ -12,9 +12,9 @@ Most games are still alpha or beta. The recommended set is already suitable for 
 
 ## Game Showcase
 
-### Arena Survivor — three complete visual themes
+### Arena Survivor — four complete visual themes
 
-Arena Survivor is a cooperative survival run with character selection, escalating enemy waves, upgrades, and three synchronized host/controller art sets. The theme changes the complete presentation without changing game balance.
+Arena Survivor is a cooperative survival run with character selection, escalating enemy waves, upgrades, and four synchronized host/controller art sets. Marshmallow Mayhem adds an animated wide-body rig with moving eyes, speed-sensitive legs, headbands, and helmets; the screenshots below show Frostfire Saga, Obsidian Relay, and Classic Arena. The theme changes the complete presentation without changing game balance.
 
 | Frostfire Saga | Obsidian Relay | Classic Arena |
 | --- | --- | --- |
