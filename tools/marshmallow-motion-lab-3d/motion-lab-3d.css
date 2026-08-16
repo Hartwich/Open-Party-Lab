@@ -142,7 +142,7 @@ h1 {
   border-radius: 10px;
 }
 
-.state-button, .body-button, .camera-button, .hand-button, .play-button, .save-button {
+.state-button, .body-button, .camera-button, .hand-button, .accessory-button, .play-button, .save-button {
   border: 0;
   border-radius: 7px;
   padding: 9px 10px;
@@ -155,17 +155,20 @@ h1 {
 .state-button:hover, .state-button.is-active,
 .body-button:hover, .body-button.is-active,
 .camera-button:hover, .camera-button.is-active,
-.hand-button:hover, .hand-button.is-active {
+.hand-button:hover, .hand-button.is-active,
+.accessory-button:hover, .accessory-button.is-active {
   color: #fff8e9;
   background: #2d2922;
 }
 
 .state-button:active, .body-button:active, .camera-button:active,
-.hand-button:active, .play-button:active, .save-button:active { transform: scale(.97); }
+.hand-button:active, .accessory-button:active,
+.play-button:active, .save-button:active { transform: scale(.97); }
 
 .body-segmented { grid-template-columns: repeat(3, 1fr); }
 .movement-segmented { grid-template-columns: repeat(2, 1fr); }
 .camera-segmented { grid-template-columns: repeat(4, 1fr); }
+.accessory-segmented { grid-template-columns: repeat(2, 1fr); }
 
 .save-button {
   border: 1px solid #5a4934;

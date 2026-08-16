@@ -23,20 +23,28 @@ const mimeTypes = {
   ".svg": "image/svg+xml"
 };
 
-const profileBounds = {
-  bodyRadius: [0.3, 1.1],
-  bodyHeight: [0.4, 1.8],
-  roundness: [0, 1],
-  warp: [0, 1],
-  footGap: [0, 1],
-  footSize: [0.6, 1.6],
-  legMotion: [0, 1],
-  armHeight: [0, 1],
-  armGap: [0, 1],
-  armSize: [0.6, 1.6],
-  bodyLift: [0, 1],
-  toast: [0, 1]
+// Grenzen und Standardwerte je Profilfeld. Der Standard greift, wenn ein
+// aelteres Preset das Feld noch nicht kennt - so bleiben bestehende Dateien
+// nach einer Erweiterung weiter schreibbar.
+const profileFields = {
+  bodyRadius: { range: [0.3, 1.1], fallback: 0.55 },
+  bodyHeight: { range: [0.4, 1.8], fallback: 1.05 },
+  roundness: { range: [0, 1], fallback: 0.35 },
+  warp: { range: [0, 1], fallback: 0.55 },
+  footGap: { range: [0, 1], fallback: 0.36 },
+  footSize: { range: [0.6, 1.6], fallback: 1 },
+  legMotion: { range: [0, 1], fallback: 0.6 },
+  armHeight: { range: [0, 1], fallback: 0.5 },
+  armGap: { range: [0, 1], fallback: 0.5 },
+  armSize: { range: [0.6, 1.6], fallback: 1 },
+  bodyLift: { range: [0, 1], fallback: 0.3 },
+  toast: { range: [0, 1], fallback: 0.18 },
+  roastTop: { range: [0, 1], fallback: 0.3 },
+  roastBottom: { range: [0, 1], fallback: 0.45 },
+  roastEdge: { range: [0, 1], fallback: 0.45 }
 };
+
+const accessories = ["none", "helmet", "headband", "goggles"];
 
 function sendJson(response, status, value) {
   response.writeHead(status, {
@@ -49,12 +57,21 @@ function sendJson(response, status, value) {
 function sanitizeProfile(variant, value) {
   if (!value || typeof value !== "object") throw new Error(`${variant}: Profil fehlt`);
   const profile = { bodyVariant: variant };
-  for (const [key, [minimum, maximum]] of Object.entries(profileBounds)) {
-    const number = Number(value[key]);
+  for (const [key, field] of Object.entries(profileFields)) {
+    const [minimum, maximum] = field.range;
+    const raw = value[key];
+    // Fehlt das Feld, greift der Standard. Ist es vorhanden, aber keine Zahl,
+    // ist das ein echter Fehler und wird gemeldet.
+    if (raw === undefined || raw === null) {
+      profile[key] = field.fallback;
+      continue;
+    }
+    const number = Number(raw);
     if (!Number.isFinite(number)) throw new Error(`${variant}.${key}: keine Zahl`);
     profile[key] = Math.max(minimum, Math.min(maximum, Number(number.toFixed(4))));
   }
   profile.actionHand = value.actionHand === "left" ? "left" : "right";
+  profile.accessory = accessories.includes(value.accessory) ? value.accessory : "none";
   return profile;
 }
 

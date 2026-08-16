@@ -135,6 +135,15 @@
     ]
   },
   {
+    "id": "schattenjagd",
+    "package": "@open-party-lab/game-schattenjagd",
+    "repo": "https://github.com/Hartwich/schattenjagd.git",
+    "defaultLocalPath": "local-games/schattenjagd",
+    "alternateLocalPaths": [
+      "../schattenjagd"
+    ]
+  },
+  {
     "id": "flatterfluff",
     "package": "@open-party-lab/game-flatterfluff",
     "repo": "https://github.com/Hartwich/flatterfluff.git",

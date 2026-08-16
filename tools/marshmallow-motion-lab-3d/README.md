@@ -34,14 +34,40 @@ Die einzigen Binärdateien des Tools sind drei Texturen unter `assets/textures`,
 | `marshmallow-albedo.png` | Grundfarbe mit Zuckerkorn und Puderzucker-Staub |
 | `marshmallow-normal.png` | Oberflächenrelief derselben Struktur |
 | `marshmallow-roughness.png` | Rauheit, damit einzelne Zuckerkörner glänzen |
+| `marshmallow-roast.png` | Fleckenmaske, die die Röstkante ausfransen lässt |
 
-Alle drei kacheln nahtlos: Das Rauschen entsteht auf einem zyklischen Gitter, die Normal Map wird mit umlaufender Ableitung berechnet. Die Kachelung wird zur Laufzeit an die Körpergröße gekoppelt, damit das Korn bei jeder Körperform gleich groß bleibt. Neu erzeugen lassen sie sich jederzeit mit:
+Alle vier kacheln nahtlos: Das Rauschen entsteht auf einem zyklischen Gitter, die Normal Map wird mit umlaufender Ableitung berechnet. Die Kachelung wird zur Laufzeit an die Körpergröße gekoppelt, damit das Korn bei jeder Körperform gleich groß bleibt. Neu erzeugen lassen sie sich jederzeit mit:
 
 ```powershell
 python tools/marshmallow-motion-lab-3d/prepare_textures.py
 ```
 
-Der `Röstung`-Regler multipliziert einen Braunton über die Textur; das Albedo bleibt deshalb bewusst hell. Der Schalter `Textur` blendet alle drei Karten ab und zeigt die reine Silhouette – nützlich, um Bewegungen ohne Oberflächenablenkung zu beurteilen. Fehlen die Dateien, läuft das Lab ohne Textur weiter und weist in der Statuszeile darauf hin.
+Der Schalter `Textur` blendet Albedo, Relief und Rauheit ab und zeigt die reine Silhouette – nützlich, um Bewegungen ohne Oberflächenablenkung zu beurteilen. Die Röstung bleibt dabei erhalten. Fehlen die Dateien, läuft das Lab ohne Textur weiter und weist in der Statuszeile darauf hin.
+
+## Röstung
+
+Vier Regler steuern, wie stark die Figur am Feuer war:
+
+| Regler | Wirkung |
+| --- | --- |
+| `Grundröstung` | Gleichmäßiger Braunton über den ganzen Körper – wie lange die Figur insgesamt in der Nähe des Feuers lag. |
+| `Röstung oben` | Wie weit die Röstung vom Scheitel nach unten reicht und wie dunkel sie dort wird. |
+| `Röstung unten` | Dasselbe vom Boden nach oben. Die Füße nehmen diesen Wert anteilig mit. |
+| `Röstkante` | 0 = weicher Verlauf über den halben Körper, 1 = harte, klar abgegrenzte Kante. |
+
+Oben und unten sind unabhängig, es lässt sich also eine unten verkohlte und oben noch rohe Figur bauen – oder umgekehrt. Wenig Röstung ergibt goldbraun, viel Röstung verkohlt.
+
+Entscheidend für den Look ist die Fleckenmaske: Sie verschiebt die Röstgrenze lokal um bis zu 90 Prozent der Kantenbreite. Dadurch franst der Übergang in unregelmäßige Zungen aus, statt als sauberer Ring um den Körper zu laufen. Bei Regler 1 ist der Körper trotzdem vollständig eingefärbt – die Grenze läuft weit genug über das Körperende hinaus, um Kantenbreite und Maskenversatz mit abzudecken.
+
+## Accessoires
+
+Vier Zustände: `Keins`, `Helm`, `Stirnband` und `Brille`. Es ist immer genau eines aktiv, und die Auswahl gehört zum Profil, wird also mitgespeichert.
+
+Alle Accessoires werden mit Einheitsradius gebaut und zur Laufzeit auf den tatsächlichen, bereits verformten Körperradius skaliert. Sie sitzen dadurch bei jeder Körperform richtig und weiten sich mit, wenn sich die Figur staucht. Die Ausrichtung wird aus zwei Punkten der verformten Körperachse zurückgerechnet – neigt sich die Figur beim Laufen oder Werfen, kippt der Helm mit. Über den ganzen Bewegungsumfang sind das bis zu 31 Grad.
+
+- **Helm** – Kuppel, Krempe, Kinnriemen und ein Kamm. Die Kuppel wird so gestreckt, dass sie den Scheitel gerade überdeckt: bei einer flachen breiten Figur wird daraus eine flache Kappe, bei einer schmalen hohen ein Spitzhelm.
+- **Stirnband** – umlaufendes Band mit Knoten und zwei flatternden Enden am Hinterkopf.
+- **Brille** – zwei Ringe mit Glas auf Augenhöhe plus ein Halteband um den Körper. Die Ringe folgen den Augenpositionen und werden mit dem Gesicht mitverformt.
 
 ## Bewegungen
 
@@ -81,11 +107,13 @@ Ein Klick auf die Bühne bei `Blaster 2H` oder `Pistole` löst den Rückstoß au
 
 ## Regler
 
-`Körperbreite`, `Körperhöhe`, `Rundung` und `Körper-Bodenabstand` bestimmen die Silhouette. `Warp-Stärke` skaliert die gesamte Verformung, `Beinbewegung` gemeinsam Schrittweite, Hub und Fußrotation. `Fuß-Abstand`, `Fußgröße`, `Arm-Höhe`, `Arm-Abstand` und `Armgröße` positionieren die Knubbel. `Röstung` blendet die Körperfarbe von rohem zu geröstetem Marshmallow.
+`Körperbreite`, `Körperhöhe`, `Rundung` und `Körper-Bodenabstand` bestimmen die Silhouette. `Warp-Stärke` skaliert die gesamte Verformung, `Beinbewegung` gemeinsam Schrittweite, Hub und Fußrotation. `Fuß-Abstand`, `Fußgröße`, `Arm-Höhe`, `Arm-Abstand` und `Armgröße` positionieren die Knubbel. Die vier Röstregler sind oben beschrieben.
 
 ## Presets für Spiele speichern
 
-Die eingecheckten Werte liegen in [`presets/marshmallow-3d-presets.json`](./presets/marshmallow-3d-presets.json). `Aktuelles Profil speichern` schreibt die aktive Körperform in den Browser und in die Projektdatei, `Alle Profile ins Projekt schreiben` übernimmt Breit, Quadrat und Hoch gemeinsam. Der Server klemmt beim Schreiben jeden Wert auf seinen gültigen Bereich.
+Die eingecheckten Werte liegen in [`presets/marshmallow-3d-presets.json`](./presets/marshmallow-3d-presets.json). Ein Profil enthält Silhouette, Bewegungsparameter, alle vier Röstwerte, die Aktionshand und das Accessoire – ein Spiel kann die komplette Figur daraus aufbauen.
+
+`Aktuelles Profil speichern` schreibt die aktive Körperform in den Browser und in die Projektdatei, `Alle Profile ins Projekt schreiben` übernimmt Breit, Quadrat und Hoch gemeinsam. Der Server klemmt beim Schreiben jeden Wert auf seinen gültigen Bereich und setzt unbekannte Accessoires auf `none`. Fehlt ein Feld – etwa weil ein älteres Preset eingespielt wird –, greift der dokumentierte Standardwert; ein vorhandenes, aber unbrauchbares Feld wird dagegen als Fehler gemeldet.
 
 Die technische Übergabe mit Datenmodell, Verformungsformeln und Bewegungsphasen steht in [`presets/IMPLEMENTATION.md`](./presets/IMPLEMENTATION.md).
 

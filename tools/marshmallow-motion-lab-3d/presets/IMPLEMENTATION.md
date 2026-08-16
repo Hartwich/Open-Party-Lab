@@ -30,8 +30,12 @@ interface Marshmallow3DProfile {
   armHeight: number;    // 0 .. 1        Schulterhöhe, siehe unten
   armGap: number;       // 0 .. 1        seitlicher Handabstand, siehe unten
   armSize: number;      // 0.60 .. 1.60
-  toast: number;        // 0 .. 1        Körperfarbe roh -> geröstet
+  toast: number;        // 0 .. 1        gleichmäßige Grundröstung des Körpers
+  roastTop: number;     // 0 .. 1        Röstung vom Scheitel abwärts
+  roastBottom: number;  // 0 .. 1        Röstung vom Boden aufwärts
+  roastEdge: number;    // 0 .. 1        0 = weicher Verlauf, 1 = harte Kante
   actionHand: "left" | "right";
+  accessory: "none" | "helmet" | "headband" | "goggles";
 }
 ```
 
@@ -63,6 +67,70 @@ repeatV = Math.max(1, Math.round(bodyHeight * 2.4));
 Hände und Füße verwenden dieselben Bilder mit fester Kachelung `(2, 1)`. Da `Texture.repeat` pro Textur-Objekt gilt, braucht jedes Material eigene Klone – das Bild selbst liegt nur einmal im Speicher.
 
 `toast` wird nicht in die Textur gebacken, sondern als Materialfarbe über das Albedo multipliziert. Der Grundton ist deshalb bewusst hell (`#fffcf6` mit Textur, `#fbf1de` ohne) und wird zu `#a5622b` interpoliert. Fehlen die Texturdateien, bleibt das Rig ohne Karten voll funktionsfähig.
+
+## Röstung oben und unten
+
+Die lokale Röstung ist eine Erweiterung des `MeshStandardMaterial` über `onBeforeCompile`. Der Vertex-Shader reicht zwei Varyings durch:
+
+```glsl
+vRoastHeight = transformed.y / max(uBodyTop, 0.0001);  // 0 unten .. 1 oben
+vRoastUv     = uv * uRoastRepeat;
+```
+
+`uBodyTop` ist die **aktuell gestauchte** Höhe `bodyHeight * (1 + squash)`. Nur dadurch klebt die Röstkante am Körper, statt beim Stauchen zu wandern. Die Flecken laufen mit halber Dichte des Zuckerkorns, sonst wirkt die Kante wie Rauschen statt wie Flammenzungen.
+
+Im Fragment-Shader, direkt nach `<map_fragment>`:
+
+```glsl
+float edge   = mix(0.30, 0.02, uRoastEdge);            // Kantenbreite
+float height = clamp(vRoastHeight, 0.0, 1.0)
+             + (blotch - 0.5) * edge * 1.8;            // Maske versetzt die Kante
+float span   = 1.0 + edge * 2.0;                       // deckt Kante + Versatz ab
+
+float topLine    = 1.0 - uRoastTop * span;
+float topFactor  = smoothstep(topLine - edge, topLine + edge, height)
+                 * smoothstep(0.0, 0.05, uRoastTop);   // Regler 0 = garantiert nichts
+
+float bottomLine   = uRoastBottom * span;
+float bottomFactor = (1.0 - smoothstep(bottomLine - edge, bottomLine + edge, height))
+                   * smoothstep(0.0, 0.05, uRoastBottom);
+```
+
+Drei Details sind wichtig und sollten beim Portieren erhalten bleiben:
+
+1. **`span` statt eines festen Faktors.** Die Grenze muss über das Körperende hinauslaufen, sonst bleibt bei Regler `1.0` ein Rest ungeröstet: Die Kante ist `edge` breit und die Maske verschiebt sie um bis zu `0.9 * edge`.
+2. **Das Gate `smoothstep(0.0, 0.05, …)`.** Ohne es würde bei Regler `0` der Maskenversatz allein schon den Scheitel einfärben.
+3. **Eigener `customProgramCacheKey`.** Sonst teilt three das Programm mit anderen `MeshStandardMaterial`-Instanzen und verwirft die Injektion.
+
+Farbe und Stärke skalieren mit dem Regler – wenig Röstung ergibt goldbraun `#bd7833`, viel Röstung verkohlt `#3a2211`:
+
+```glsl
+vec3 tint = mix(uRoastColor, uCharColor, smoothstep(0.5, 1.0, uRoastTop));
+diffuseColor.rgb = mix(diffuseColor.rgb, tint, clamp(topFactor * (0.4 + 0.6 * uRoastTop), 0.0, 1.0));
+```
+
+Hände und Füße sind eigene Materialien ohne Shader-Injektion, weil `Material.clone()` `onBeforeCompile` nicht überträgt. Die Füße erhalten den unteren Röstton anteilig (`roastBottom * 0.7`) als einfache Farbmischung, sonst wirken sie bei dunklem Körperfuß wie fremde Objekte.
+
+## Accessoires
+
+Alle Modelle werden mit Einheitsradius `1` in der XZ-Ebene gebaut und zur Laufzeit auf den tatsächlichen, bereits verformten Körperradius skaliert:
+
+```ts
+function deformedRadius(unitY, pose, profile) {
+  return distance(deform(0, unitY, 0), deform(1, unitY, 0));
+}
+```
+
+Die Ausrichtung wird aus zwei Punkten der verformten Körperachse zurückgerechnet. Das ist notwendig, weil Beugung und Torsion ausschließlich in den Vertices stecken – ohne diesen Schritt stünde der Helm gerade, während sich der Körper neigt:
+
+```ts
+up = normalize(deform(0, unitY + 0.3, 0) - deform(0, unitY, 0));
+quaternion.setFromUnitVectors(UP, up);
+```
+
+Sitzhöhen in Einheitskoordinaten: Helm `0.55`, Stirnband `0.46`, Brille auf Augenhöhe `0.34`. Die Helmkuppel wird mit `(rise / radius) * 1.12` gestreckt, wobei `rise` der Abstand vom Helmrand zum Scheitel ist. Über den ganzen Reglerbereich liegt dieses Verhältnis zwischen `0.05` (breit und flach) und `2.13` (schmal und hoch), bei den Standardprofilen zwischen `0.21` und `1.03`; der Clamp `0.12 .. 2.4` ist reiner Schutz gegen entartete Werte. Aus einer flachen breiten Figur wird so eine flache Kappe, aus einer schmalen hohen ein Spitzhelm.
+
+Die Brillenringe folgen den bereits berechneten Augenpositionen und werden über `setFromUnitVectors(FORWARD, radialDirection)` nach außen gedreht.
 
 ## Verformung
 

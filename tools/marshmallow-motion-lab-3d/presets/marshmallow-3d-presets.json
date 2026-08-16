@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "tool": "Marshmallow Motion Lab 3D",
-  "updatedAt": "2026-07-26T00:00:00.000Z",
+  "updatedAt": "2026-07-31T00:00:00.000Z",
   "implementationGuide": "./IMPLEMENTATION.md",
   "renderer": "three.js (node_modules/three, ueber serve.mjs unter /vendor/three ausgeliefert)",
   "units": "1 Einheit entspricht etwa 1 Meter; Bodenlinie liegt bei y = 0",
@@ -19,8 +19,12 @@
       "armGap": 0.58,
       "armSize": 1.05,
       "bodyLift": 0.3,
-      "toast": 0.22,
-      "actionHand": "right"
+      "toast": 0.18,
+      "roastTop": 0.28,
+      "roastBottom": 0.45,
+      "roastEdge": 0.45,
+      "actionHand": "right",
+      "accessory": "none"
     },
     "square": {
       "bodyVariant": "square",
@@ -35,8 +39,12 @@
       "armGap": 0.5,
       "armSize": 1,
       "bodyLift": 0.3,
-      "toast": 0.22,
-      "actionHand": "right"
+      "toast": 0.18,
+      "roastTop": 0.3,
+      "roastBottom": 0.45,
+      "roastEdge": 0.45,
+      "actionHand": "right",
+      "accessory": "none"
     },
     "tall": {
       "bodyVariant": "tall",
@@ -51,8 +59,24 @@
       "armGap": 0.42,
       "armSize": 0.95,
       "bodyLift": 0.34,
-      "toast": 0.22,
-      "actionHand": "right"
+      "toast": 0.18,
+      "roastTop": 0.32,
+      "roastBottom": 0.4,
+      "roastEdge": 0.5,
+      "actionHand": "right",
+      "accessory": "none"
     }
-  }
+  },
+  "textures": {
+    "albedo": "tools/marshmallow-motion-lab-3d/assets/textures/marshmallow-albedo.png",
+    "normal": "tools/marshmallow-motion-lab-3d/assets/textures/marshmallow-normal.png",
+    "roughness": "tools/marshmallow-motion-lab-3d/assets/textures/marshmallow-roughness.png",
+    "roastMask": "tools/marshmallow-motion-lab-3d/assets/textures/marshmallow-roast.png"
+  },
+  "accessories": [
+    "none",
+    "helmet",
+    "headband",
+    "goggles"
+  ]
 }

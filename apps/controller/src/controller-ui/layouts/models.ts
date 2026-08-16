@@ -682,6 +682,7 @@ export interface MagicArenaLayoutModel {
   state: any;
   onPlanSlot: (slotIndex: number, action: any | null) => void;
   onReady: () => void;
+  onPlayTurn: (action: any) => void;
 }
 
 export type ControllerLayoutModel =

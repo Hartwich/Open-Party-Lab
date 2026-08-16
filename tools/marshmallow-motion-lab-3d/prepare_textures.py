@@ -6,6 +6,7 @@ Schreibt nach assets/textures/:
   marshmallow-albedo.png     Grundfarbe mit Zuckerkorn und Puderzucker
   marshmallow-normal.png     Tangent-Space Normal Map derselben Struktur
   marshmallow-roughness.png  Rauheit, damit Zuckerkoerner leicht glitzern
+  marshmallow-roast.png      Fleckenmaske, die die Roestkante unregelmaessig macht
 
 Alle Texturen sind kachelbar: das Rauschen wird auf einem Torus erzeugt, damit
 die Naht der Lathe-Geometrie bei u = 0 nicht sichtbar wird.
@@ -141,6 +142,22 @@ def build_roughness(height: np.ndarray, size: int) -> Image.Image:
     return Image.fromarray(encoded, mode="L")
 
 
+def build_roast_mask(size: int) -> Image.Image:
+    """Fleckenmaske fuer die Roestkante.
+
+    Der Shader vergleicht diese Maske mit einem Hoehenverlauf. Weil die Maske
+    grossfleckig und weich ist, franst die Grenze zwischen roh und geroestet
+    unregelmaessig aus, statt als sauberer Ring um den Koerper zu laufen -
+    so wie ein echter Marshmallow ueber dem Feuer.
+    """
+    blotches = normalise(fractal_noise(size, 3, 4, seed=131))
+    detail = normalise(fractal_noise(size, 4, 11, seed=149))
+    mask = 0.74 * blotches + 0.26 * detail
+    # Kontrast anheben, damit die Maske klare Zungen bildet statt Grauschleier.
+    mask = np.clip((normalise(mask) - 0.5) * 1.45 + 0.5, 0, 1)
+    return Image.fromarray((mask * 255).astype(np.uint8), mode="L")
+
+
 def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     height = build_height(SIZE)
@@ -152,6 +169,7 @@ def main() -> None:
         ),
         "marshmallow-normal.png": build_normal(height),
         "marshmallow-roughness.png": build_roughness(height, SIZE),
+        "marshmallow-roast.png": build_roast_mask(SIZE),
     }
     total = 0
     for name, image in outputs.items():

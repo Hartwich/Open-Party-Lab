@@ -155,6 +155,7 @@ Other optional local game repos:
 | Buzzwort | playable prototype | `local-games/buzzwort` |
 | Imposter | playable prototype | `local-games/imposter` |
 | Light Trails | playable prototype | `local-games/light-trails` |
+| Schattenjagd | playable alpha, hidden-movement chase | `local-games/schattenjagd` |
 
 Manual clone example:
 

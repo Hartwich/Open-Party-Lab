@@ -62,6 +62,11 @@ function resolveArenaSurvivorPortraitPath(
   return option?.portraitPathBySetting?.values[theme] ?? option?.portraitPath;
 }
 
+/** Spiele mit eigenen Lobby-Feldern bekommen eine eigene, fokussierte Lobby-Ansicht. */
+function hasLobbySetup(game: AvailableGameDto): boolean {
+  return Boolean((game.lobbySetup?.fields.length ?? 0) > 0 || game.lobbySetup?.confirmation);
+}
+
 export class GameSelectScene extends Phaser.Scene {
   private unsubscribe?: () => void;
   private unbindHotkeys?: () => void;
@@ -162,6 +167,19 @@ export class GameSelectScene extends Phaser.Scene {
 
     if (selectedGame?.id === "arena-survivor") {
       this.renderArenaSurvivorSetup({
+        game: selectedGame,
+        players,
+        error,
+        roomCode,
+        roundActive,
+        language,
+        settings: selectedGameSettings ?? {}
+      });
+      return;
+    }
+
+    if (selectedGame && hasLobbySetup(selectedGame)) {
+      this.renderGameLobby({
         game: selectedGame,
         players,
         error,
@@ -377,6 +395,144 @@ export class GameSelectScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Fokussierte Lobby fuer jedes Spiel mit eigenen Setup-Feldern: kein Spielekatalog
+   * darueber, sondern nur Spiel, Spieler, Einstellungen und Startinfo.
+   */
+  private renderGameLobby(options: {
+    game: AvailableGameDto;
+    players: PlayerSnapshot[];
+    error: string | null;
+    roomCode: string;
+    roundActive: boolean;
+    language: SupportedLanguage;
+    settings: Record<string, string | number | boolean>;
+  }): void {
+    const { game, players, error, roomCode, roundActive, language, settings } = options;
+    const text = getHostText(language);
+    const autoStartsWithReady = requiresReadyAutoStart(game);
+    const { x: contentX, width: contentWidth } = getSceneContentFrame(this);
+    const headerOptions = {
+      title: game.displayName,
+      subtitle: roundActive
+        ? text.gameSelectRoundActiveSubtitle
+        : (game.lobbySetup?.description ?? text.gameLobbySubtitle),
+      roomCode,
+      showRoomCode: game.id !== "zeichnen-und-erraten",
+      language
+    };
+    const headerBottom = measureSceneHeaderBottom(this, headerOptions);
+    const bodyY = headerBottom - this.scrollY;
+
+    const backBottom = this.renderBackToMenuButton(contentX, bodyY, contentWidth, language);
+    const stripBottom = renderPlayerStrip(this, {
+      x: contentX,
+      y: backBottom + 12,
+      width: contentWidth,
+      players,
+      selectedGameId: game.id,
+      title: text.playerStatusTitle,
+      language
+    });
+
+    const lowerY = stripBottom + 16;
+    const stacked = contentWidth < 1_040;
+    const gap = 22;
+    const sideWidth = stacked ? contentWidth : Math.min(380, Math.max(300, Math.floor(contentWidth * 0.34)));
+    const mainWidth = stacked ? contentWidth : contentWidth - sideWidth - gap;
+    const heroHeight = stacked ? 210 : 236;
+    const setupHeight = this.measureLobbySetupHeight(game, mainWidth);
+
+    renderSelectedGamePanel(this, {
+      x: contentX,
+      y: lowerY,
+      width: mainWidth,
+      height: heroHeight,
+      game,
+      playersCount: players.length,
+      language
+    });
+
+    this.renderLobbySetupControls({
+      x: contentX,
+      y: lowerY + heroHeight + 12,
+      width: mainWidth,
+      height: setupHeight,
+      game,
+      settings,
+      disabled: roundActive,
+      language
+    });
+
+    const mainBlockHeight = heroHeight + 12 + setupHeight;
+    const infoX = stacked ? contentX : contentX + mainWidth + gap;
+    const infoY = stacked ? lowerY + mainBlockHeight + 18 : lowerY;
+    const infoHeight = stacked
+      ? Math.max(170, this.scale.height - (infoY + this.scrollY) - 24)
+      : mainBlockHeight;
+
+    renderInfoPanel(this, {
+      x: infoX,
+      y: infoY,
+      width: stacked ? contentWidth : sideWidth,
+      height: infoHeight,
+      title: text.gameLobbySetupTitle,
+      lines: [
+        text.playersConnected(players.length, game.maxPlayers),
+        roundActive
+          ? text.activeRoundLockedLine
+          : autoStartsWithReady
+            ? text.autoReadyLine
+            : text.spaceStartLine,
+        game.lobbySetup?.description ?? text.setupControlsLine
+      ],
+      accent: getVisualAccent(game.id),
+      language,
+      error
+    });
+
+    const contentBottom =
+      Math.max(lowerY + mainBlockHeight, infoY + infoHeight) + this.scrollY;
+
+    if (this.updateScrollBounds(contentBottom)) {
+      return;
+    }
+
+    renderSceneHeader(this, headerOptions);
+    renderScrollBar(this, this.scrollY, this.maxScroll);
+  }
+
+  private renderBackToMenuButton(
+    x: number,
+    y: number,
+    width: number,
+    language: SupportedLanguage
+  ): number {
+    const text = getHostText(language);
+    const compact = width < 520;
+    const buttonWidth = compact ? 96 : 172;
+    const buttonHeight = 34;
+
+    this.add
+      .rectangle(x, y, buttonWidth, buttonHeight, 0x182235, 0.96)
+      .setOrigin(0)
+      .setStrokeStyle(1, 0x94a3b8, 0.68);
+    this.add
+      .text(x + buttonWidth / 2, y + buttonHeight / 2, compact ? text.backToMenuShort : text.backToMenu, {
+        fontFamily: hostTheme.bodyFont,
+        fontSize: compact ? "15px" : "16px",
+        color: "#e2e8f0"
+      })
+      .setOrigin(0.5);
+    this.add
+      .zone(x, y, buttonWidth, buttonHeight)
+      .setOrigin(0)
+      .setInteractive({ useHandCursor: true })
+      .on("pointerdown", () => this.client?.returnToGameSelection());
+
+    return y + buttonHeight;
+  }
+
   private renderArenaSurvivorSetup(options: {
     game: AvailableGameDto;
     players: PlayerSnapshot[];
@@ -531,7 +687,7 @@ export class GameSelectScene extends Phaser.Scene {
       .text(
         menuButtonX + menuButtonWidth / 2,
         menuButtonY + 17,
-        width < 520 ? (en ? "Menu" : "Menue") : (en ? "Back to menu" : "Zum Hauptmenue"),
+        width < 520 ? text.backToMenuShort : text.backToMenu,
         {
           fontFamily: hostTheme.bodyFont,
           fontSize: width < 520 ? "15px" : "16px",

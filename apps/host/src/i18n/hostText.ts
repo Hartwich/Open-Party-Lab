@@ -84,6 +84,10 @@ export interface HostText {
   readyVisibleLine: string;
   setupFollowsTitle: string;
   readyToStartTitle: string;
+  backToMenu: string;
+  backToMenuShort: string;
+  gameLobbySubtitle: string;
+  gameLobbySetupTitle: string;
   characterSelecting: string;
   morePlayers: (count: number) => string;
   errorLabel: string;
@@ -179,6 +183,10 @@ const hostText = {
     readyVisibleLine: "Bereitschaft und Startstatus bleiben hier sichtbar.",
     setupFollowsTitle: "Setup folgt",
     readyToStartTitle: "Startbereit",
+    backToMenu: "Zum Hauptmenue",
+    backToMenuShort: "Menue",
+    gameLobbySubtitle: "Stellt die Runde ein und startet gemeinsam.",
+    gameLobbySetupTitle: "Rundeneinstellungen",
     characterSelecting: "Charakter waehlt noch",
     morePlayers: (count: number) => `+${count} weitere Spieler`,
     errorLabel: "Fehler",
@@ -272,6 +280,10 @@ const hostText = {
     readyVisibleLine: "Readiness and start status stay visible here.",
     setupFollowsTitle: "Setup Next",
     readyToStartTitle: "Ready to Start",
+    backToMenu: "Back to menu",
+    backToMenuShort: "Menu",
+    gameLobbySubtitle: "Configure the round and start together.",
+    gameLobbySetupTitle: "Round setup",
     characterSelecting: "Choosing character",
     morePlayers: (count: number) => `+${count} more players`,
     errorLabel: "Error",

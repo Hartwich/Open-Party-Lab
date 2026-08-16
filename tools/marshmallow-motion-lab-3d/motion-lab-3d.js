@@ -26,26 +26,35 @@ const RANGES = {
   armHeight: [0, 1],
   armGap: [0, 1],
   armSize: [0.6, 1.6],
-  toast: [0, 1]
+  toast: [0, 1],
+  roastTop: [0, 1],
+  roastBottom: [0, 1],
+  roastEdge: [0, 1]
 };
 
 const SLIDER_KEYS = Object.keys(RANGES);
+
+const ACCESSORIES = ["none", "helmet", "headband", "goggles"];
+const ACCESSORY_LABELS = { none: "keins", helmet: "Helm", headband: "Stirnband", goggles: "Schutzbrille" };
 
 const DEFAULT_PROFILES = {
   wide: {
     bodyRadius: 0.62, bodyHeight: 0.86, roundness: 0.3, bodyLift: 0.3, warp: 0.55,
     footGap: 0.42, footSize: 1.05, legMotion: 0.5, armHeight: 0.42, armGap: 0.58,
-    armSize: 1.05, toast: 0.22, actionHand: "right"
+    armSize: 1.05, toast: 0.18, roastTop: 0.28, roastBottom: 0.45, roastEdge: 0.45,
+    actionHand: "right", accessory: "none"
   },
   square: {
     bodyRadius: 0.55, bodyHeight: 1.05, roundness: 0.35, bodyLift: 0.3, warp: 0.55,
     footGap: 0.36, footSize: 1, legMotion: 0.6, armHeight: 0.5, armGap: 0.5,
-    armSize: 1, toast: 0.22, actionHand: "right"
+    armSize: 1, toast: 0.18, roastTop: 0.3, roastBottom: 0.45, roastEdge: 0.45,
+    actionHand: "right", accessory: "none"
   },
   tall: {
     bodyRadius: 0.46, bodyHeight: 1.34, roundness: 0.28, bodyLift: 0.34, warp: 0.55,
     footGap: 0.3, footSize: 0.92, legMotion: 0.6, armHeight: 0.58, armGap: 0.42,
-    armSize: 0.95, toast: 0.22, actionHand: "right"
+    armSize: 0.95, toast: 0.18, roastTop: 0.32, roastBottom: 0.4, roastEdge: 0.5,
+    actionHand: "right", accessory: "none"
   }
 };
 
@@ -121,7 +130,8 @@ const dom = {
   frameReadout: document.querySelector("#frameReadout"),
   facingReadout: document.querySelector("#facingReadout"),
   heightReadout: document.querySelector("#heightReadout"),
-  weaponReadout: document.querySelector("#weaponReadout")
+  weaponReadout: document.querySelector("#weaponReadout"),
+  accessoryReadout: document.querySelector("#accessoryReadout")
 };
 
 const sliderInputs = {};
@@ -185,6 +195,9 @@ const sourceTextures = {
   normalMap: loadTexture("marshmallow-normal.png", false),
   roughnessMap: loadTexture("marshmallow-roughness.png", false)
 };
+
+/** Fleckenmaske der Röstkante. Sie wird auch ohne aktive Textur verwendet. */
+const roastMaskTexture = loadTexture("marshmallow-roast.png", false);
 
 /** Jedes Material braucht eigene Kachelwerte, teilt sich aber das Bild im Speicher. */
 function cloneTextureSet() {
@@ -324,6 +337,69 @@ function createWeaponModels() {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Accessoires                                                                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Alle Accessoires werden mit Einheitsradius 1 in der XZ-Ebene gebaut und zur
+ * Laufzeit auf den tatsaechlichen, bereits verformten Koerperradius skaliert.
+ * Dadurch sitzen sie bei jeder Koerperform und in jeder Stauchung richtig.
+ */
+function createAccessoryModels() {
+  const shell = new THREE.MeshStandardMaterial({ color: "#6d4a2e", roughness: 0.55, metalness: 0.18 });
+  const trim = new THREE.MeshStandardMaterial({ color: "#e2a45f", roughness: 0.45, metalness: 0.25 });
+  const strap = new THREE.MeshStandardMaterial({ color: "#3b332a", roughness: 0.8, metalness: 0.05 });
+  const cloth = new THREE.MeshStandardMaterial({ color: "#c2452f", roughness: 0.88, metalness: 0 });
+  const glass = new THREE.MeshStandardMaterial({
+    color: "#8fd0e0", roughness: 0.12, metalness: 0.1, transparent: true, opacity: 0.55
+  });
+
+  const part = (geometry, material, position, rotation, scale) => {
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(position[0], position[1], position[2]);
+    if (rotation) mesh.rotation.set(rotation[0], rotation[1], rotation[2]);
+    if (scale) mesh.scale.set(scale[0], scale[1], scale[2]);
+    mesh.castShadow = true;
+    return mesh;
+  };
+
+  // Helm: Kuppel, Krempe, Kinnriemen und ein kleiner Kamm.
+  const helmet = new THREE.Group();
+  const dome = part(
+    new THREE.SphereGeometry(1, 26, 16, 0, TAU, 0, Math.PI * 0.52), shell, [0, 0, 0]
+  );
+  helmet.add(dome);
+  helmet.add(part(new THREE.TorusGeometry(1.02, 0.09, 8, 30), trim, [0, 0.02, 0], [Math.PI / 2, 0, 0]));
+  helmet.add(part(new THREE.TorusGeometry(1.0, 0.045, 6, 28), strap, [0, -0.16, 0], [Math.PI / 2, 0, 0]));
+  helmet.add(part(new THREE.BoxGeometry(0.12, 0.3, 1.5), trim, [0, 0.62, 0]));
+  helmet.userData.dome = dome;
+
+  // Stirnband: umlaufendes Band mit Knoten und zwei flatternden Enden.
+  const headband = new THREE.Group();
+  headband.add(part(new THREE.TorusGeometry(1.01, 0.12, 10, 32), cloth, [0, 0, 0], [Math.PI / 2, 0, 0]));
+  headband.add(part(new THREE.SphereGeometry(0.19, 12, 10), cloth, [0, 0.02, -1.02]));
+  headband.add(part(new THREE.BoxGeometry(0.09, 0.5, 0.05), cloth, [0.14, -0.24, -1.06], [0.5, 0, 0.22]));
+  headband.add(part(new THREE.BoxGeometry(0.09, 0.62, 0.05), cloth, [-0.15, -0.3, -1.05], [0.62, 0, -0.18]));
+
+  // Schutzbrille: zwei Ringe mit Glas plus umlaufendes Halteband.
+  const goggles = new THREE.Group();
+  const lenses = [];
+  for (let index = 0; index < 2; index += 1) {
+    const lens = new THREE.Group();
+    lens.add(part(new THREE.TorusGeometry(1, 0.22, 10, 24), strap, [0, 0, 0]));
+    lens.add(part(new THREE.CircleGeometry(1, 24), glass, [0, 0, 0.02]));
+    goggles.add(lens);
+    lenses.push(lens);
+  }
+  const goggleStrap = part(new THREE.TorusGeometry(1, 0.075, 8, 30), strap, [0, 0, 0], [Math.PI / 2, 0, 0]);
+  goggles.add(goggleStrap);
+  goggles.userData.lenses = lenses;
+  goggles.userData.strap = goggleStrap;
+
+  return { helmet, headband, goggles };
+}
+
+/* -------------------------------------------------------------------------- */
 /* Rig                                                                         */
 /* -------------------------------------------------------------------------- */
 
@@ -351,7 +427,99 @@ function createRig(options = {}) {
     opacity,
     depthWrite: !ghost
   });
-  const limbMaterial = skinMaterial.clone();
+
+  // Haende und Fuesse sind eigene Materialien statt Klone: onBeforeCompile
+  // wird von Material.clone() nicht uebernommen, und die Roestung soll hier
+  // ohnehin nur als einfacher Farbton ankommen.
+  const handMaterial = new THREE.MeshStandardMaterial({
+    color: TOAST_PLAIN.clone(), roughness: 0.94, metalness: 0,
+    emissive: new THREE.Color("#41301f"), emissiveIntensity: 0.1,
+    transparent: ghost, opacity, depthWrite: !ghost
+  });
+  const footMaterial = handMaterial.clone();
+
+  // Röstung: ein Höhenverlauf über den Körper, dessen Kante von der
+  // Fleckenmaske lokal verschoben wird. Dadurch franst der Übergang
+  // unregelmäßig aus, statt als sauberer Ring um den Körper zu laufen.
+  const roastUniforms = {
+    uRoastMask: { value: roastMaskTexture },
+    uRoastRepeat: { value: new THREE.Vector2(1, 1) },
+    uBodyTop: { value: 1 },
+    uRoastTop: { value: 0 },
+    uRoastBottom: { value: 0 },
+    uRoastEdge: { value: 0.45 },
+    uRoastColor: { value: new THREE.Color("#bd7833") },
+    uCharColor: { value: new THREE.Color("#3a2211") }
+  };
+
+  skinMaterial.onBeforeCompile = (shader) => {
+    Object.assign(shader.uniforms, roastUniforms);
+
+    shader.vertexShader = shader.vertexShader
+      .replace(
+        "#include <common>",
+        `#include <common>
+        uniform float uBodyTop;
+        uniform vec2 uRoastRepeat;
+        varying float vRoastHeight;
+        varying vec2 vRoastUv;`
+      )
+      .replace(
+        "#include <begin_vertex>",
+        `#include <begin_vertex>
+        vRoastHeight = transformed.y / max(uBodyTop, 0.0001);
+        vRoastUv = uv * uRoastRepeat;`
+      );
+
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "#include <common>",
+        `#include <common>
+        uniform sampler2D uRoastMask;
+        uniform float uRoastTop;
+        uniform float uRoastBottom;
+        uniform float uRoastEdge;
+        uniform vec3 uRoastColor;
+        uniform vec3 uCharColor;
+        varying float vRoastHeight;
+        varying vec2 vRoastUv;`
+      )
+      .replace(
+        "#include <map_fragment>",
+        `#include <map_fragment>
+        {
+          float blotch = texture2D(uRoastMask, vRoastUv).r;
+          // uRoastEdge 0 = weicher Verlauf, 1 = harte Kante.
+          float edge = mix(0.30, 0.02, uRoastEdge);
+          float height = clamp(vRoastHeight, 0.0, 1.0) + (blotch - 0.5) * edge * 1.8;
+
+          // Die Grenze muss ueber das Koerperende hinauslaufen, sonst bliebe bei
+          // Regler 1.0 ein Rest ungeroestet: die Kante ist "edge" breit und die
+          // Maske verschiebt sie um bis zu 0.9 * edge. "span" deckt beides ab.
+          float span = 1.0 + edge * 2.0;
+
+          float topLine = 1.0 - uRoastTop * span;
+          float topFactor = smoothstep(topLine - edge, topLine + edge, height)
+                          * smoothstep(0.0, 0.05, uRoastTop);
+
+          float bottomLine = uRoastBottom * span;
+          float bottomFactor = (1.0 - smoothstep(bottomLine - edge, bottomLine + edge, height))
+                             * smoothstep(0.0, 0.05, uRoastBottom);
+
+          // Wenig Roestung = goldbraun, viel Roestung = verkohlt.
+          vec3 topTint = mix(uRoastColor, uCharColor, smoothstep(0.5, 1.0, uRoastTop));
+          vec3 bottomTint = mix(uRoastColor, uCharColor, smoothstep(0.5, 1.0, uRoastBottom));
+
+          diffuseColor.rgb = mix(diffuseColor.rgb, topTint,
+            clamp(topFactor * (0.4 + 0.6 * uRoastTop), 0.0, 1.0));
+          diffuseColor.rgb = mix(diffuseColor.rgb, bottomTint,
+            clamp(bottomFactor * (0.4 + 0.6 * uRoastBottom), 0.0, 1.0));
+        }`
+      );
+  };
+  // Ohne eigenen Cache-Key wuerde three das Programm mit anderen
+  // MeshStandardMaterials teilen und die Injektion verwerfen.
+  skinMaterial.customProgramCacheKey = () => "marshmallow-roast";
   const eyeMaterial = new THREE.MeshStandardMaterial({
     color: new THREE.Color("#fdfaf3"), roughness: 0.35, transparent: ghost, opacity, depthWrite: !ghost
   });
@@ -371,15 +539,15 @@ function createRig(options = {}) {
 
   const sphere = new THREE.SphereGeometry(1, 24, 18);
 
-  function makeBlob() {
-    const mesh = new THREE.Mesh(sphere, limbMaterial);
+  function makeBlob(material) {
+    const mesh = new THREE.Mesh(sphere, material);
     mesh.castShadow = !ghost;
     mesh.receiveShadow = !ghost;
     return mesh;
   }
 
-  const hands = [makeBlob(), makeBlob()];
-  const feet = [makeBlob(), makeBlob()];
+  const hands = [makeBlob(handMaterial), makeBlob(handMaterial)];
+  const feet = [makeBlob(footMaterial), makeBlob(footMaterial)];
   for (const hand of hands) bodyGroup.add(hand);
   for (const foot of feet) root.add(foot);
 
@@ -410,6 +578,14 @@ function createRig(options = {}) {
     bodyGroup.add(weapons.flash);
   }
 
+  // Accessoires haengen wie Haende und Gesicht in der Koerpergruppe.
+  const accessories = createAccessoryModels();
+  for (const model of Object.values(accessories)) {
+    model.visible = false;
+    bodyGroup.add(model);
+  }
+  let accessoryName = "none";
+
   const scratch = new THREE.Vector3();
   const eyeAnchors = [
     { x: Math.sin(0.42), y: 0.34, z: Math.cos(0.42) },
@@ -417,6 +593,39 @@ function createRig(options = {}) {
   ];
   const mouthAnchor = { x: 0, y: -0.06, z: 1 };
   const handPositions = [new THREE.Vector3(), new THREE.Vector3()];
+  const eyePositions = [new THREE.Vector3(), new THREE.Vector3()];
+
+  const UP = new THREE.Vector3(0, 1, 0);
+  const FORWARD = new THREE.Vector3(0, 0, 1);
+  const axisPoint = new THREE.Vector3();
+  const rimPoint = new THREE.Vector3();
+  const upperPoint = new THREE.Vector3();
+  const upDirection = new THREE.Vector3();
+  const outward = new THREE.Vector3();
+  const alignQuaternion = new THREE.Quaternion();
+
+  /** Tatsaechlicher Radius des verformten Koerpers auf Einheitshoehe `unitY`. */
+  function deformedRadius(unitY, pose, activeProfile) {
+    deformPoint(0, unitY, 0, pose, activeProfile, axisPoint);
+    deformPoint(1, unitY, 0, pose, activeProfile, rimPoint);
+    return Math.max(0.01, axisPoint.distanceTo(rimPoint));
+  }
+
+  /**
+   * Ausrichtung an der verformten Koerperachse. Weil Beugung und Torsion nur
+   * in den Vertices stecken, muss die Aufwaertsrichtung aus zwei Punkten der
+   * Achse zurueckgerechnet werden - sonst wuerde der Helm gerade stehen,
+   * waehrend sich der Koerper neigt.
+   */
+  function alignToBodyAxis(unitY, pose, activeProfile, target) {
+    deformPoint(0, unitY, 0, pose, activeProfile, axisPoint);
+    deformPoint(0, Math.min(1, unitY + 0.3), 0, pose, activeProfile, upperPoint);
+    upDirection.copy(upperPoint).sub(axisPoint);
+    if (upDirection.lengthSq() < 1e-8) upDirection.copy(UP);
+    upDirection.normalize();
+    target.position.copy(axisPoint);
+    target.quaternion.setFromUnitVectors(UP, upDirection);
+  }
 
   function rebuildBody(roundness) {
     const next = buildBodyGeometry(roundness);
@@ -440,11 +649,15 @@ function createRig(options = {}) {
 
     // Kachelung an die Koerpergroesse koppeln, damit das Zuckerkorn bei jeder
     // Koerperform gleich gross bleibt.
-    setTextureRepeat(
-      bodyTextures,
-      Math.max(1, Math.round(activeProfile.bodyRadius * 6)),
-      Math.max(1, Math.round(activeProfile.bodyHeight * 2.4))
-    );
+    const repeatU = Math.max(1, Math.round(activeProfile.bodyRadius * 6));
+    const repeatV = Math.max(1, Math.round(activeProfile.bodyHeight * 2.4));
+    setTextureRepeat(bodyTextures, repeatU, repeatV);
+    // Die Roestflecken laufen gröber als das Zuckerkorn, sonst wird die Kante
+    // zu kleinteilig und wirkt wie Rauschen statt wie Flammenzungen.
+    roastUniforms.uRoastRepeat.value.set(Math.max(1, repeatU * 0.5), Math.max(1, repeatV * 0.5));
+    // Bezugshoehe fuer den Roestverlauf ist die aktuell gestauchte Koerperhoehe,
+    // damit die Roestkante beim Stauchen am Koerper klebt statt zu wandern.
+    roastUniforms.uBodyTop.value = activeProfile.bodyHeight * (1 + pose.squash);
 
     bodyGroup.position.set(pose.bodyX, activeProfile.bodyLift + pose.bodyY, pose.bodyZ);
 
@@ -481,10 +694,11 @@ function createRig(options = {}) {
     for (let index = 0; index < 2; index += 1) {
       const anchor = eyeAnchors[index];
       deformPoint(anchor.x, anchor.y, anchor.z, pose, activeProfile, scratch);
-      const outward = new THREE.Vector3(scratch.x, 0, scratch.z);
+      outward.set(scratch.x, 0, scratch.z);
       if (outward.lengthSq() > 1e-6) outward.normalize().multiplyScalar(eyeRadius * 0.42);
       const eye = eyes[index];
       eye.group.position.set(scratch.x + outward.x, scratch.y, scratch.z + outward.z);
+      eyePositions[index].copy(eye.group.position);
       eye.white.scale.set(eyeRadius, eyeRadius * 1.05, eyeRadius * 0.72);
       eye.pupil.scale.setScalar(eyeRadius * 0.46);
       eye.pupil.position.set(
@@ -497,6 +711,68 @@ function createRig(options = {}) {
     deformPoint(mouthAnchor.x, mouthAnchor.y, mouthAnchor.z, pose, activeProfile, scratch);
     mouth.position.set(scratch.x, scratch.y, scratch.z + eyeRadius * 0.1);
     mouth.scale.set(eyeRadius * 0.52, eyeRadius * 0.4, eyeRadius * 0.3);
+
+    updateAccessory(pose, activeProfile, eyeRadius);
+  }
+
+  /** Setzt das aktive Accessoire auf den bereits verformten Körper. */
+  function updateAccessory(pose, activeProfile, eyeRadius) {
+    if (accessoryName === "helmet") {
+      const helmet = accessories.helmet;
+      // Sitzhöhe des Helmrandes und Radius genau dort.
+      const brimY = 0.55;
+      const radius = deformedRadius(brimY, pose, activeProfile);
+      alignToBodyAxis(brimY, pose, activeProfile, helmet);
+      helmet.scale.setScalar(radius);
+      // Die Kuppel wird so gestreckt, dass sie den Scheitel gerade überdeckt.
+      // Der Clamp ist reiner Schutz gegen entartete Werte: über den ganzen
+      // Reglerbereich liegt das Verhältnis zwischen 0.05 (breit und flach)
+      // und 2.13 (schmal und hoch), bei den Standardprofilen bei 0.21 bis 1.03.
+      deformPoint(0, 1, 0, pose, activeProfile, scratch);
+      const rise = Math.max(0.01, scratch.distanceTo(helmet.position));
+      helmet.userData.dome.scale.set(1.08, clamp((rise / radius) * 1.12, 0.12, 2.4), 1.08);
+      return;
+    }
+
+    if (accessoryName === "headband") {
+      const bandY = 0.46;
+      const radius = deformedRadius(bandY, pose, activeProfile);
+      alignToBodyAxis(bandY, pose, activeProfile, accessories.headband);
+      accessories.headband.scale.setScalar(radius);
+      return;
+    }
+
+    if (accessoryName === "goggles") {
+      const goggles = accessories.goggles;
+      goggles.position.set(0, 0, 0);
+      goggles.quaternion.identity();
+      goggles.scale.setScalar(1);
+
+      const lensRadius = eyeRadius * 1.24;
+      for (let index = 0; index < 2; index += 1) {
+        const lens = goggles.userData.lenses[index];
+        lens.position.copy(eyePositions[index]);
+        lens.scale.setScalar(lensRadius);
+        // Ringe schauen entlang der radialen Richtung nach außen.
+        outward.set(eyePositions[index].x, 0, eyePositions[index].z);
+        if (outward.lengthSq() < 1e-8) outward.copy(FORWARD);
+        outward.normalize();
+        lens.quaternion.setFromUnitVectors(FORWARD, outward);
+        lens.position.addScaledVector(outward, lensRadius * 0.16);
+      }
+
+      const strapY = eyeAnchors[0].y;
+      const radius = deformedRadius(strapY, pose, activeProfile);
+      alignToBodyAxis(strapY, pose, activeProfile, goggles.userData.strap);
+      goggles.userData.strap.scale.setScalar(radius * 1.01);
+    }
+  }
+
+  function setAccessory(name) {
+    accessoryName = ACCESSORIES.includes(name) ? name : "none";
+    for (const [key, model] of Object.entries(accessories)) {
+      model.visible = key === accessoryName;
+    }
   }
 
   /**
@@ -534,15 +810,30 @@ function createRig(options = {}) {
     }
   }
 
-  function setToast(toast, textured) {
+  /**
+   * `toast` ist die gleichmäßige Grundröstung des ganzen Körpers,
+   * `roastTop` und `roastBottom` die lokal begrenzte Röstung an den Enden.
+   */
+  function setRoast(activeProfile, textured) {
     const base = textured ? TOAST_TEXTURED : TOAST_PLAIN;
-    const color = base.clone().lerp(TOAST_DARK, clamp(toast, 0, 1));
+    const color = base.clone().lerp(TOAST_DARK, clamp(activeProfile.toast, 0, 1));
     skinMaterial.color.copy(color);
-    limbMaterial.color.copy(color).multiplyScalar(0.96);
+    handMaterial.color.copy(color).multiplyScalar(0.96);
+
+    roastUniforms.uRoastTop.value = clamp(activeProfile.roastTop, 0, 1);
+    roastUniforms.uRoastBottom.value = clamp(activeProfile.roastBottom, 0, 1);
+    roastUniforms.uRoastEdge.value = clamp(activeProfile.roastEdge, 0, 1);
+
+    // Die Füße stehen unten und sollen die untere Röstung mittragen,
+    // sonst wirken sie bei dunklem Körperfuß wie fremde Objekte.
+    const bottom = clamp(activeProfile.roastBottom, 0, 1);
+    const footTint = roastUniforms.uRoastColor.value.clone()
+      .lerp(roastUniforms.uCharColor.value, clamp((bottom - 0.5) * 2, 0, 1));
+    footMaterial.color.copy(color).lerp(footTint, bottom * 0.7);
   }
 
   function setTextured(enabled) {
-    for (const [material, set] of [[skinMaterial, bodyTextures], [limbMaterial, limbTextures]]) {
+    for (const [material, set] of [[skinMaterial, bodyTextures], [handMaterial, limbTextures], [footMaterial, limbTextures]]) {
       material.map = enabled ? set.map : null;
       material.normalMap = enabled ? set.normalMap : null;
       material.roughnessMap = enabled ? set.roughnessMap : null;
@@ -562,7 +853,10 @@ function createRig(options = {}) {
     for (const foot of feet) foot.castShadow = enabled && !ghost;
   }
 
-  return { root, apply, applyWeapon, rebuildBody, setToast, setTextured, setLimbsVisible, setShadows };
+  return {
+    root, apply, applyWeapon, rebuildBody, setRoast, setAccessory,
+    setTextured, setLimbsVisible, setShadows
+  };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1058,7 +1352,10 @@ function applyCameraPreset(name) {
 /* UI                                                                          */
 /* -------------------------------------------------------------------------- */
 
-const PERCENT_KEYS = new Set(["roundness", "warp", "legMotion", "toast", "armHeight", "footSize", "armSize"]);
+const PERCENT_KEYS = new Set([
+  "roundness", "warp", "legMotion", "toast", "armHeight", "footSize", "armSize",
+  "roastTop", "roastBottom", "roastEdge"
+]);
 
 function formatSliderOutput(key, value) {
   return PERCENT_KEYS.has(key) ? `${Math.round(value * 100)}%` : value.toFixed(2);
@@ -1078,9 +1375,13 @@ function syncSlidersFromProfile() {
   for (const button of document.querySelectorAll(".body-button")) {
     button.classList.toggle("is-active", button.dataset.body === state.bodyVariant);
   }
+  for (const button of document.querySelectorAll(".accessory-button")) {
+    button.classList.toggle("is-active", button.dataset.accessory === active.accessory);
+  }
   for (const target of allRigs) {
     target.rebuildBody(active.roundness);
-    target.setToast(active.toast, dom.texture.checked);
+    target.setRoast(active, dom.texture.checked);
+    target.setAccessory(active.accessory);
   }
 }
 
@@ -1094,8 +1395,8 @@ for (const key of SLIDER_KEYS) {
     if (key === "roundness") {
       for (const target of allRigs) target.rebuildBody(active.roundness);
     }
-    if (key === "toast") {
-      for (const target of allRigs) target.setToast(active.toast, dom.texture.checked);
+    if (key === "toast" || key === "roastTop" || key === "roastBottom" || key === "roastEdge") {
+      for (const target of allRigs) target.setRoast(active, dom.texture.checked);
     }
     dom.saveStatus.textContent = "Geändert – noch nicht gespeichert";
   });
@@ -1147,9 +1448,21 @@ dom.texture.addEventListener("change", () => {
   const active = profile();
   for (const target of allRigs) {
     target.setTextured(dom.texture.checked);
-    target.setToast(active.toast, dom.texture.checked);
+    target.setRoast(active, dom.texture.checked);
   }
 });
+
+for (const button of document.querySelectorAll(".accessory-button")) {
+  button.addEventListener("click", () => {
+    const active = profile();
+    active.accessory = ACCESSORIES.includes(button.dataset.accessory) ? button.dataset.accessory : "none";
+    for (const other of document.querySelectorAll(".accessory-button")) {
+      other.classList.toggle("is-active", other === button);
+    }
+    for (const target of allRigs) target.setAccessory(active.accessory);
+    dom.saveStatus.textContent = "Geändert – noch nicht gespeichert";
+  });
+}
 
 dom.ghosts.addEventListener("change", () => {
   for (const ghost of ghostRigs) ghost.root.visible = dom.ghosts.checked;
@@ -1243,6 +1556,8 @@ function sanitizeIncoming(variant, value) {
       if (Number.isFinite(number)) merged[key] = clamp(number, RANGES[key][0], RANGES[key][1]);
     }
     merged.actionHand = value.actionHand === "left" ? "left" : "right";
+    // Aeltere Presets kennen `accessory` noch nicht; dann bleibt der Standard stehen.
+    if (ACCESSORIES.includes(value.accessory)) merged.accessory = value.accessory;
   }
   return merged;
 }
@@ -1403,6 +1718,7 @@ function render(now) {
   dom.weaponReadout.textContent = weapon
     ? { grenade: "Granate", handgun: "Pistole", blaster: "Blaster 2H" }[weapon]
     : "keine";
+  dom.accessoryReadout.textContent = ACCESSORY_LABELS[active.accessory] ?? "keins";
 
   controls.update();
   renderer.render(scene, camera);

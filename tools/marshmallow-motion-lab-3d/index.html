@@ -107,8 +107,27 @@
             <label class="range-label" for="armSize"><span>Armgröße</span><output id="armSizeValue">100%</output></label>
             <input id="armSize" type="range" min="0" max="100" step="1" value="40" />
 
-            <label class="range-label" for="toast"><span>Röstung</span><output id="toastValue">22%</output></label>
-            <input id="toast" type="range" min="0" max="100" step="1" value="22" />
+            <label class="range-label" for="toast"><span>Grundröstung</span><output id="toastValue">18%</output></label>
+            <input id="toast" type="range" min="0" max="100" step="1" value="18" />
+
+            <label class="range-label" for="roastTop"><span>Röstung oben</span><output id="roastTopValue">30%</output></label>
+            <input id="roastTop" type="range" min="0" max="100" step="1" value="30" />
+
+            <label class="range-label" for="roastBottom"><span>Röstung unten</span><output id="roastBottomValue">45%</output></label>
+            <input id="roastBottom" type="range" min="0" max="100" step="1" value="45" />
+
+            <label class="range-label" for="roastEdge"><span>Röstkante</span><output id="roastEdgeValue">45%</output></label>
+            <input id="roastEdge" type="range" min="0" max="100" step="1" value="45" />
+          </section>
+
+          <section class="control-section">
+            <p class="section-label">Accessoire</p>
+            <div class="segmented accessory-segmented" role="group" aria-label="Kopf-Accessoire">
+              <button class="accessory-button is-active" data-accessory="none" type="button">Keins</button>
+              <button class="accessory-button" data-accessory="helmet" type="button">Helm</button>
+              <button class="accessory-button" data-accessory="headband" type="button">Stirnband</button>
+              <button class="accessory-button" data-accessory="goggles" type="button">Brille</button>
+            </div>
           </section>
 
           <section class="control-section switches">
@@ -138,6 +157,7 @@
             <div><span>Frame</span><strong id="frameReadout">01 / 16</strong></div>
             <div><span>Blickwinkel</span><strong id="facingReadout">0°</strong></div>
             <div><span>Waffe</span><strong id="weaponReadout">keine</strong></div>
+            <div><span>Accessoire</span><strong id="accessoryReadout">keins</strong></div>
             <div><span>Körperhöhe</span><strong id="heightReadout">1.35 u</strong></div>
             <div><span>Bodenlinie</span><strong>y = 0</strong></div>
           </section>
