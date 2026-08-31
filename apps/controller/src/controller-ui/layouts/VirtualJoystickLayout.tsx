@@ -196,7 +196,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
           padding: 18,
           borderRadius: 20,
           border: "1px solid var(--panel-border)",
-          background: "linear-gradient(180deg, rgba(8, 47, 73, 0.32) 0%, rgba(15, 23, 42, 0.72) 100%)"
+          background: "linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 32%, transparent) 0%, color-mix(in srgb, var(--surface) 72%, transparent) 100%)"
         }}
       >
         <strong style={{ fontSize: "1.25rem", color: model.accentColor ?? "var(--accent)" }}>{model.title}</strong>
@@ -238,12 +238,12 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
               WebkitUserSelect: "none",
               WebkitTouchCallout: "none",
               background: model.disabled
-                ? "radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.78) 0%, rgba(2, 6, 23, 0.96) 72%)"
-                : "radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.18) 0%, rgba(2, 6, 23, 0.96) 74%)",
+                ? "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--surface-raised) 78%, transparent) 0%, color-mix(in srgb, var(--paper) 96%, transparent) 72%)"
+                : "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 18%, transparent) 0%, color-mix(in srgb, var(--paper) 96%, transparent) 74%)",
               border: `1px solid ${model.accentColor ?? "var(--panel-border)"}`,
               boxShadow: model.disabled
-                ? "inset 0 0 0 1px rgba(148, 163, 184, 0.12)"
-                : "inset 0 0 0 1px rgba(125, 211, 252, 0.14), 0 20px 45px rgba(2, 6, 23, 0.35)"
+                ? "inset 0 0 0 1px color-mix(in srgb, var(--muted) 12%, transparent)"
+                : "inset 0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent), 0 20px 45px color-mix(in srgb, var(--paper) 35%, transparent)"
             }}
           >
             <div
@@ -251,7 +251,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
                 position: "absolute",
                 inset: "18%",
                 borderRadius: "999px",
-                border: "1px solid rgba(148, 163, 184, 0.16)"
+                border: "1px solid color-mix(in srgb, var(--muted) 16%, transparent)"
               }}
             />
             <div
@@ -259,7 +259,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
                 position: "absolute",
                 inset: "35%",
                 borderRadius: "999px",
-                border: "1px solid rgba(148, 163, 184, 0.12)"
+                border: "1px solid color-mix(in srgb, var(--muted) 12%, transparent)"
               }}
             />
             <div
@@ -272,15 +272,15 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
                 transform: `translate(calc(-50% + ${thumbOffset.x}px), calc(-50% + ${thumbOffset.y}px))`,
                 borderRadius: "999px",
                 background: model.disabled
-                  ? "linear-gradient(180deg, rgba(71, 85, 105, 0.86) 0%, rgba(30, 41, 59, 0.96) 100%)"
-                  : `linear-gradient(180deg, ${model.accentColor ?? "var(--accent)"} 0%, rgba(8, 145, 178, 0.92) 100%)`,
+                  ? "linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 86%, transparent) 0%, color-mix(in srgb, var(--surface-raised) 96%, transparent) 100%)"
+                  : `linear-gradient(180deg, ${model.accentColor ?? "var(--accent)"} 0%, color-mix(in srgb, var(--accent-strong) 92%, transparent) 100%)`,
                 boxShadow: thumbOffset.active
-                  ? "0 14px 30px rgba(8, 145, 178, 0.35)"
-                  : "0 10px 24px rgba(15, 23, 42, 0.28)",
-                border: "1px solid rgba(226, 232, 240, 0.22)",
+                  ? "0 14px 30px color-mix(in srgb, var(--accent-strong) 35%, transparent)"
+                  : "0 10px 24px color-mix(in srgb, var(--surface) 28%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--ink-soft) 22%, transparent)",
                 display: "grid",
                 placeItems: "center",
-                color: "rgba(248, 250, 252, 0.92)",
+                color: "color-mix(in srgb, var(--ink) 92%, transparent)",
                 fontWeight: 900,
                 letterSpacing: "0.08em",
                 fontSize: "0.72rem",
@@ -316,7 +316,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
                 justifyContent: "space-between",
                 padding: "12px 14px",
                 borderRadius: "var(--radius-md)",
-                background: stat.highlighted ? "rgba(34, 211, 238, 0.16)" : "rgba(15, 23, 42, 0.52)"
+                background: stat.highlighted ? "color-mix(in srgb, var(--accent) 16%, transparent)" : "color-mix(in srgb, var(--surface) 52%, transparent)"
               }}
             >
               <span style={{ color: "var(--text-muted)" }}>{stat.label}</span>

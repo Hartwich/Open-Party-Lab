@@ -8,7 +8,9 @@ import {
 } from "@open-party-lab/protocol";
 import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
 import { getHostText } from "../i18n/hostText.js";
-import { hostTheme } from "../ui/theme/theme.js";
+import { themeNames, type ThemeName } from "@open-party-lab/ui-kit";
+import { hostTheme, partyTheme } from "../ui/theme/theme.js";
+import { getSelectedGameChrome } from "../games/selectedGame.js";
 import {
   applyStyles,
   createChromeCard,
@@ -275,8 +277,8 @@ export function mountHostControlsOverlay(
     button.textContent = `${fps}`;
     button.style.padding = "14px 12px";
     button.style.borderRadius = "16px";
-    button.style.border = "1px solid rgba(148, 163, 184, 0.16)";
-    button.style.background = "rgba(30, 41, 59, 0.72)";
+    button.style.border = hostChrome.border.subtle;
+    button.style.background = hostTheme.panelMuted;
     button.style.color = hostTheme.text;
     button.style.fontFamily = hostTheme.titleFont;
     button.style.fontSize = "18px";
@@ -297,6 +299,45 @@ export function mountHostControlsOverlay(
       applyHostFps(game, fps);
       syncView();
     });
+  }
+
+  const themeSection = document.createElement("section");
+  themeSection.style.display = "grid";
+  themeSection.style.gap = "8px";
+  card.appendChild(themeSection);
+
+  const themeLabel = document.createElement("div");
+  themeLabel.style.fontSize = "12px";
+  themeLabel.style.letterSpacing = "0.12em";
+  themeLabel.style.textTransform = "uppercase";
+  themeLabel.style.color = hostTheme.muted;
+  themeSection.appendChild(themeLabel);
+
+  const themeButtons = document.createElement("div");
+  themeButtons.style.display = "grid";
+  themeButtons.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+  themeButtons.style.gap = "8px";
+  themeSection.appendChild(themeButtons);
+
+  const themeButtonMap = new Map<ThemeName, HTMLButtonElement>();
+
+  for (const theme of themeNames) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.style.padding = "13px 12px";
+    button.style.borderRadius = "14px";
+    button.style.border = hostChrome.border.subtle;
+    button.style.background = hostTheme.panelMuted;
+    button.style.color = hostTheme.text;
+    button.style.fontFamily = hostTheme.titleFont;
+    button.style.fontSize = "16px";
+    button.style.fontWeight = "800";
+    button.style.cursor = "pointer";
+    button.style.minHeight = "48px";
+    themeButtons.appendChild(button);
+    themeButtonMap.set(theme, button);
+
+    button.addEventListener("click", () => client.setTheme(theme));
   }
 
   const languageSection = document.createElement("section");
@@ -325,8 +366,8 @@ export function mountHostControlsOverlay(
     button.textContent = languageLabels[language];
     button.style.padding = "13px 12px";
     button.style.borderRadius = "14px";
-    button.style.border = "1px solid rgba(148, 163, 184, 0.16)";
-    button.style.background = "rgba(30, 41, 59, 0.72)";
+    button.style.border = hostChrome.border.subtle;
+    button.style.background = hostTheme.panelMuted;
     button.style.color = hostTheme.text;
     button.style.fontFamily = hostTheme.titleFont;
     button.style.fontSize = "16px";
@@ -340,6 +381,30 @@ export function mountHostControlsOverlay(
       client.setLanguage(language);
     });
   }
+
+  // Remote host control lives here rather than as a permanent banner on the
+  // shared screen: it is status, not something the room needs to look at all
+  // evening. Only the incoming *request* still interrupts.
+  const controlSection = document.createElement("section");
+  controlSection.style.display = "none";
+  controlSection.style.gap = "8px";
+  card.appendChild(controlSection);
+
+  const controlLabel = document.createElement("div");
+  controlLabel.style.fontSize = "12px";
+  controlLabel.style.letterSpacing = "0.12em";
+  controlLabel.style.textTransform = "uppercase";
+  controlLabel.style.color = hostTheme.muted;
+  controlSection.appendChild(controlLabel);
+
+  const controlStatus = document.createElement("div");
+  controlStatus.style.fontSize = "14px";
+  controlStatus.style.lineHeight = "1.4";
+  controlSection.appendChild(controlStatus);
+
+  const reclaimButton = createChromeTextButton("", "danger");
+  reclaimButton.addEventListener("click", () => client.reclaimHostControl());
+  controlSection.appendChild(reclaimButton);
 
   const playersSection = document.createElement("section");
   playersSection.style.display = "grid";
@@ -386,6 +451,21 @@ export function mountHostControlsOverlay(
     return currentState.room?.language ?? currentState.preferredLanguage;
   }
 
+  /** Shows who is driving the room, and offers to take it back. */
+  function renderHostControl(text: ReturnType<typeof getHostText>): void {
+    const holderName = currentState.room?.hostControl.holderName ?? null;
+
+    controlSection.style.display = holderName ? "grid" : "none";
+
+    if (!holderName) {
+      return;
+    }
+
+    controlLabel.textContent = text.hostControlDelegatedTitle;
+    controlStatus.textContent = text.hostControlDelegatedBody(holderName);
+    reclaimButton.textContent = text.hostControlReclaim;
+  }
+
   function renderRoomMeta(): void {
     const text = getHostText(resolveLanguage());
     const room = currentState.room;
@@ -400,7 +480,7 @@ export function mountHostControlsOverlay(
     const lifecycle = getRoomPhase(room) ?? "lobby";
 
     roomBadge.textContent = room?.code ?? "----";
-    roomBadge.style.display = selectedGameId === "zeichnen-und-erraten" ? "none" : "";
+    roomBadge.style.display = getSelectedGameChrome(currentState).roomCode ? "" : "none";
     roomBadge.style.opacity = room ? "1" : "0.65";
     connectionBadge.textContent = room
       ? `${gameName}\n${connectedPlayers}/${totalPlayers} ${text.players.toLowerCase()} | ${text.lifecycle(lifecycle)}`
@@ -427,8 +507,8 @@ export function mountHostControlsOverlay(
       empty.textContent = room ? text.noPlayersConnected : text.roomListPending;
       empty.style.padding = "12px";
       empty.style.borderRadius = hostChrome.radius.control;
-      empty.style.background = "rgba(8, 15, 30, 0.58)";
-      empty.style.border = "1px solid rgba(148, 163, 184, 0.12)";
+      empty.style.background = hostTheme.panelMuted;
+      empty.style.border = hostChrome.border.subtle;
       empty.style.color = hostTheme.muted;
       empty.style.fontSize = "13px";
       empty.style.lineHeight = "1.4";
@@ -444,8 +524,8 @@ export function mountHostControlsOverlay(
       row.style.alignItems = "center";
       row.style.padding = "10px 12px";
       row.style.borderRadius = hostChrome.radius.control;
-      row.style.background = "rgba(8, 15, 30, 0.62)";
-      row.style.border = "1px solid rgba(148, 163, 184, 0.12)";
+      row.style.background = hostTheme.panelMuted;
+      row.style.border = hostChrome.border.subtle;
 
       const details = document.createElement("div");
       details.style.display = "grid";
@@ -471,9 +551,9 @@ export function mountHostControlsOverlay(
       kickButton.title = text.kickPlayer(player.name);
       kickButton.style.padding = "10px 12px";
       kickButton.style.borderRadius = "12px";
-      kickButton.style.border = "1px solid rgba(248, 113, 113, 0.24)";
-      kickButton.style.background = "rgba(127, 29, 29, 0.78)";
-      kickButton.style.color = "#fecaca";
+      kickButton.style.border = hostChrome.border.subtle;
+      kickButton.style.background = partyTheme.color.dangerSoft;
+      kickButton.style.color = hostTheme.danger;
       kickButton.style.fontFamily = hostTheme.bodyFont;
       kickButton.style.fontSize = "13px";
       kickButton.style.fontWeight = "700";
@@ -504,25 +584,35 @@ export function mountHostControlsOverlay(
     closeButton.textContent = text.close;
     fpsLabel.textContent = text.fpsLabel;
     languageLabel.textContent = text.languageLabel;
+    themeLabel.textContent = text.themeLabel;
+
+    for (const [theme, button] of themeButtonMap) {
+      const active = (currentState.room?.theme ?? "light") === theme;
+      button.textContent = theme === "dark" ? text.themeDark : text.themeLight;
+      button.style.background = active ? hostTheme.accent : hostTheme.panelMuted;
+      button.style.borderColor = active ? hostTheme.accentStrong : hostTheme.line;
+      button.style.color = active ? hostTheme.onAccent : hostTheme.text;
+    }
     playersLabel.textContent = text.players;
+    renderHostControl(text);
     renderRoomMeta();
     renderPlayers();
 
     for (const [fps, button] of fpsButtonMap) {
       const active = fps === currentFps;
-      button.style.background = active ? "rgba(8, 47, 73, 0.88)" : "rgba(30, 41, 59, 0.72)";
-      button.style.borderColor = active ? "rgba(56, 189, 248, 0.42)" : "rgba(148, 163, 184, 0.16)";
-      button.style.boxShadow = active ? "0 0 0 1px rgba(56, 189, 248, 0.18) inset" : "none";
-      button.style.color = active ? "#e0f2fe" : hostTheme.text;
+      button.style.background = active ? hostTheme.accent : hostTheme.panelMuted;
+      button.style.borderColor = active ? hostTheme.accentStrong : hostTheme.line;
+      button.style.boxShadow = active ? hostChrome.focusRing : "none";
+      button.style.color = active ? hostTheme.onAccent : hostTheme.text;
     }
 
     const currentLanguage = resolveLanguage();
     for (const [language, button] of languageButtonMap) {
       const active = language === currentLanguage;
-      button.style.background = active ? "rgba(8, 47, 73, 0.88)" : "rgba(30, 41, 59, 0.72)";
-      button.style.borderColor = active ? "rgba(56, 189, 248, 0.42)" : "rgba(148, 163, 184, 0.16)";
-      button.style.boxShadow = active ? "0 0 0 1px rgba(56, 189, 248, 0.18) inset" : "none";
-      button.style.color = active ? "#e0f2fe" : hostTheme.text;
+      button.style.background = active ? hostTheme.accent : hostTheme.panelMuted;
+      button.style.borderColor = active ? hostTheme.accentStrong : hostTheme.line;
+      button.style.boxShadow = active ? hostChrome.focusRing : "none";
+      button.style.color = active ? hostTheme.onAccent : hostTheme.text;
     }
   }
 

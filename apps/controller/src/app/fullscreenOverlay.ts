@@ -90,17 +90,16 @@ function createFullscreenIconButton(): HTMLButtonElement {
     position: "relative",
     overflow: "hidden",
     isolation: "isolate",
-    border: "1px solid rgba(125, 211, 252, 0.28)",
+    border: "1px solid var(--line)",
     borderRadius: "999px",
     width: "52px",
     height: "52px",
     padding: "0",
-    background: "linear-gradient(145deg, rgba(15, 23, 42, 0.94), rgba(8, 47, 73, 0.86))",
-    color: "#f8fafc",
-    fontFamily: "\"Nunito Sans\", sans-serif",
+    background: "var(--surface)",
+    color: "var(--ink)",
+    fontFamily: "var(--font-body)",
     cursor: "pointer",
-    backdropFilter: "blur(14px)",
-    boxShadow: "0 18px 38px rgba(2, 6, 23, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.12)",
+    boxShadow: "var(--shadow-card)",
     display: "grid",
     placeItems: "center",
     touchAction: "manipulation",
@@ -109,8 +108,6 @@ function createFullscreenIconButton(): HTMLButtonElement {
   });
   button.setAttribute("aria-pressed", "false");
   button.innerHTML = `
-    <span aria-hidden="true" style="position: absolute; inset: 6px; z-index: -1; border-radius: 999px; background: radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.28), transparent 32%), radial-gradient(circle at 68% 72%, rgba(34, 211, 238, 0.2), transparent 42%);"></span>
-    <span aria-hidden="true" style="position: absolute; inset: 1px; z-index: -1; border-radius: 999px; box-shadow: inset 0 -10px 18px rgba(2, 6, 23, 0.3);"></span>
     <span data-controller-fullscreen-icon style="display: grid; place-items: center; transition: transform 180ms ease;">
       ${fullscreenIcon}
     </span>
@@ -119,16 +116,8 @@ function createFullscreenIconButton(): HTMLButtonElement {
   const setHover = (hovered: boolean): void => {
     const active = button.getAttribute("aria-pressed") === "true";
     button.style.transform = hovered ? "translateY(-2px) scale(1.03)" : "translateY(0) scale(1)";
-    button.style.borderColor = hovered
-      ? "rgba(186, 230, 253, 0.62)"
-      : active
-        ? "rgba(224, 242, 254, 0.74)"
-        : "rgba(125, 211, 252, 0.28)";
-    button.style.boxShadow = hovered
-      ? "0 22px 50px rgba(2, 6, 23, 0.42), 0 0 0 4px rgba(14, 165, 233, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.18)"
-      : active
-        ? "0 20px 48px rgba(14, 165, 233, 0.34), 0 0 0 5px rgba(14, 165, 233, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.42)"
-        : "0 18px 38px rgba(2, 6, 23, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.12)";
+    button.style.borderColor = hovered || active ? "var(--accent)" : "var(--line)";
+    button.style.boxShadow = hovered || active ? "var(--shadow-panel)" : "var(--shadow-card)";
 
     const icon = button.querySelector<HTMLElement>("[data-controller-fullscreen-icon]");
     if (icon) {
@@ -153,14 +142,10 @@ function setFullscreenIconButtonState(button: HTMLButtonElement, active: boolean
   button.setAttribute("aria-label", label);
   button.setAttribute("aria-pressed", active ? "true" : "false");
   button.title = active ? text.exitFullscreenHint : text.fullscreenHint;
-  button.style.background = active
-    ? "linear-gradient(145deg, rgba(125, 211, 252, 0.98), rgba(14, 165, 233, 0.92))"
-    : "linear-gradient(145deg, rgba(15, 23, 42, 0.94), rgba(8, 47, 73, 0.86))";
-  button.style.borderColor = active ? "rgba(224, 242, 254, 0.74)" : "rgba(125, 211, 252, 0.28)";
-  button.style.boxShadow = active
-    ? "0 20px 48px rgba(14, 165, 233, 0.34), 0 0 0 5px rgba(14, 165, 233, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.42)"
-    : "0 18px 38px rgba(2, 6, 23, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.12)";
-  button.style.color = active ? "#082f49" : "#f8fafc";
+  button.style.background = active ? "var(--accent)" : "var(--surface)";
+  button.style.borderColor = active ? "var(--accent-strong)" : "var(--line)";
+  button.style.boxShadow = active ? "var(--shadow-panel)" : "var(--shadow-card)";
+  button.style.color = active ? "var(--on-accent)" : "var(--ink)";
   button.style.transform = "translateY(0) scale(1)";
 
   if (icon) {

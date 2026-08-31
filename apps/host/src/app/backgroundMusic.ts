@@ -1,10 +1,9 @@
+import { resolveGameAudioTrack } from "@open-party-lab/game-core";
 import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
+import { getSelectedGame } from "../games/selectedGame.js";
 
 const LOBBY_TRACK_ID = "lobby";
 const LOOKUP_DEFAULT_TRACK_ID = "default";
-const ARENA_SURVIVOR_FROSTFIRE_TRACK_ID = "arena-survivor:frostfire-saga";
-const ARENA_SURVIVOR_MARSHMALLOW_TRACK_ID = "arena-survivor:marshmallow-mayhem";
-const ARENA_SURVIVOR_VISUAL_THEME_SETTING_KEY = "arenaSurvivorVisualTheme";
 const MUSIC_UNLOCK_EVENTS = ["pointerdown", "keydown", "touchstart"] as const;
 
 interface MusicTemplate {
@@ -265,6 +264,14 @@ const musicTemplates: Record<string, MusicTemplate> = {
   }
 };
 
+/**
+ * Platform-owned tracks.
+ *
+ * Everything else comes from the selected game's manifest: it names one of the
+ * `musicTemplates` above and tunes tempo, key and volume. The platform used to
+ * carry a table of thirteen game ids here, which meant no game could bring its
+ * own music without a platform change.
+ */
 const musicProfiles: Record<string, MusicProfile> = {
   [LOBBY_TRACK_ID]: createProfile(musicTemplates.lobby, {
     bpm: 84,
@@ -275,89 +282,61 @@ const musicProfiles: Record<string, MusicProfile> = {
     bpm: 96,
     rootMidi: 50,
     masterGain: 0.12
-  }),
-  "light-trails": createProfile(musicTemplates.chase, {
-    bpm: 144,
-    rootMidi: 57,
-    masterGain: 0.16
-  }),
-  "arena-survivor": createProfile(musicTemplates.battle, {
-    bpm: 108,
-    rootMidi: 45,
-    masterGain: 0.18
-  }),
-  [ARENA_SURVIVOR_FROSTFIRE_TRACK_ID]: createProfile(musicTemplates.frostfire, {
-    bpm: 92,
-    rootMidi: 50,
-    masterGain: 0.15
-  }),
-  [ARENA_SURVIVOR_MARSHMALLOW_TRACK_ID]: createProfile(musicTemplates.sugarCountry, {
-    bpm: 114,
-    rootMidi: 52,
-    masterGain: 0.14
-  }),
-  "minions-td": createProfile(musicTemplates.strategy, {
-    bpm: 96,
-    rootMidi: 43,
-    masterGain: 0.16
-  }),
-  pantomime: createProfile(musicTemplates.gentle, {
-    bpm: 112,
-    rootMidi: 59,
-    masterGain: 0.12
-  }),
-  "tap-race": createProfile(musicTemplates.arcade, {
-    bpm: 148,
-    rootMidi: 65,
-    masterGain: 0.16
-  }),
-  imposter: createProfile(musicTemplates.mystery, {
-    bpm: 98,
-    rootMidi: 46,
-    masterGain: 0.11
-  }),
-  buzzwort: createProfile(musicTemplates.arcade, {
-    bpm: 124,
-    rootMidi: 57,
-    masterGain: 0.13
-  }),
-  "zeichnen-und-erraten": createProfile(musicTemplates.gentle, {
-    bpm: 90,
-    rootMidi: 62,
-    masterGain: 0.11
-  }),
-  "air-hockey": createProfile(musicTemplates.sports, {
-    bpm: 134,
-    rootMidi: 58,
-    masterGain: 0.16
-  }),
-  flatterfluff: createProfile(musicTemplates.sugarCountry, {
-    bpm: 108,
-    rootMidi: 50,
-    masterGain: 0.13
   })
 };
 
+/** Tracks built on demand from game manifests, keyed by resolved track id. */
+const manifestProfiles = new Map<string, MusicProfile>();
+
+function resolveTemplate(name: string): MusicTemplate {
+  return musicTemplates[name as keyof typeof musicTemplates] ?? musicTemplates.lobby;
+}
+
+/**
+ * Builds (and caches) the profile a game asked for.
+ *
+ * Returns null when the game declares no audio, in which case the engine falls
+ * back to the default track.
+ */
+function resolveManifestProfile(state: HostAppState): { id: string; profile: MusicProfile } | null {
+  const game = getSelectedGame(state);
+  const track = resolveGameAudioTrack(game?.audio, state.room?.selectedGameSettings);
+
+  if (!game || !track) {
+    return null;
+  }
+
+  const id = `${game.id}:${track.profile}:${track.bpm ?? ""}:${track.rootMidi ?? ""}`;
+  const cached = manifestProfiles.get(id);
+
+  if (cached) {
+    return { id, profile: cached };
+  }
+
+  const profile = createProfile(resolveTemplate(track.profile), {
+    bpm: track.bpm ?? 100,
+    rootMidi: track.rootMidi ?? 50,
+    masterGain: track.masterGain ?? 0.14
+  });
+  manifestProfiles.set(id, profile);
+  return { id, profile };
+}
+
+/** Looks a track up across platform tracks and manifest-built ones. */
+function getMusicProfile(trackId: string): MusicProfile {
+  return (
+    musicProfiles[trackId] ??
+    manifestProfiles.get(trackId) ??
+    musicProfiles[LOOKUP_DEFAULT_TRACK_ID]
+  );
+}
+
 function resolveDesiredTrackId(state: HostAppState): string {
-  const selectedGameId = state.room?.selectedGameId;
-
-  if (
-    selectedGameId === "arena-survivor" &&
-    state.room?.selectedGameSettings?.[ARENA_SURVIVOR_VISUAL_THEME_SETTING_KEY] ===
-      "frostfire-saga"
-  ) {
-    return ARENA_SURVIVOR_FROSTFIRE_TRACK_ID;
+  if (!state.room?.selectedGameId) {
+    return LOBBY_TRACK_ID;
   }
 
-  if (
-    selectedGameId === "arena-survivor" &&
-    state.room?.selectedGameSettings?.[ARENA_SURVIVOR_VISUAL_THEME_SETTING_KEY] ===
-      "marshmallow-mayhem"
-  ) {
-    return ARENA_SURVIVOR_MARSHMALLOW_TRACK_ID;
-  }
-
-  return selectedGameId ? selectedGameId : LOBBY_TRACK_ID;
+  return resolveManifestProfile(state)?.id ?? LOOKUP_DEFAULT_TRACK_ID;
 }
 
 function midiToFrequency(midi: number): number {
@@ -648,8 +627,10 @@ class HostBackgroundMusicController {
   private unlockCleanup: (() => void) | null = null;
 
   constructor(private readonly client: HostSocketClient) {
+    resolveManifestProfile(client.getState());
     this.desiredTrackId = resolveDesiredTrackId(client.getState());
     this.unsubscribe = client.subscribe((state) => {
+      resolveManifestProfile(state);
       this.desiredTrackId = resolveDesiredTrackId(state);
       void this.syncTrack();
     });
@@ -785,7 +766,7 @@ class HostBackgroundMusicController {
       return cached;
     }
 
-    const profile = musicProfiles[trackId] ?? musicProfiles[LOOKUP_DEFAULT_TRACK_ID];
+    const profile = getMusicProfile(trackId);
     const promise = renderTrackLoop(profile);
     this.bufferCache.set(trackId, promise);
     return promise;

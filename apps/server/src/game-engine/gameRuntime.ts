@@ -400,6 +400,49 @@ export class GameRuntime {
     });
   }
 
+  /**
+   * Whether the game wants a finished round to flow straight into the next one.
+   *
+   * Returns null when the game has no continuation rule at all — which is the
+   * common case and must not be confused with a game answering "no". Treating
+   * the two the same is how the normal ready-up flow got blocked for every
+   * game once this replaced the old per-game special case.
+   */
+  shouldContinueRun(room: RoomRecord): boolean | null {
+    if (!room.currentRound) {
+      return null;
+    }
+
+    const entry = this.gameRegistry.get(room.currentRound.gameId);
+
+    if (!entry?.serverGame.shouldContinueRun) {
+      return null;
+    }
+
+    const context = this.buildContext(
+      room,
+      room.currentRound.roundNumber,
+      entry.manifest,
+      0
+    );
+
+    return entry.serverGame.shouldContinueRun(room.currentRound.state as never, context);
+  }
+
+  /** Context for read-only queries made outside a tick (patches, snapshots). */
+  buildPublicContext(room: RoomRecord): ServerGameContext {
+    const manifest = room.currentRound
+      ? this.gameRegistry.get(room.currentRound.gameId)?.manifest
+      : undefined;
+
+    return this.buildContext(
+      room,
+      room.currentRound?.roundNumber ?? 0,
+      manifest ?? this.gameRegistry.require(room.selectedGameId ?? "").manifest,
+      0
+    );
+  }
+
   private buildContext(
     room: RoomRecord,
     roundNumber: number,

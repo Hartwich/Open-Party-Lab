@@ -17,6 +17,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@open-party-lab/game-core": "0.1.0"
+    "@open-party-lab/game-core": "0.1.0",
+    "@open-party-lab/ui-kit": "0.1.0"
   }
 }

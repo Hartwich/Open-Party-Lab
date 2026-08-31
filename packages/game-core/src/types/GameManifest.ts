@@ -1,5 +1,13 @@
 import type { ControllerLayoutKey } from "../layouts/ControllerLayoutKey.js";
 import type { RoundPhaseTimings } from "../state/RoundPhaseTimings.js";
+import type {
+  GameAudioDefinition,
+  GameBroadcastPolicy,
+  GameControllerChromeOptions,
+  GameHostChromeOptions,
+  GameVisualDefinition,
+  HostOwnedScreen
+} from "./GameHostContract.js";
 
 export interface GameLobbySetupOption {
   id: string;
@@ -104,4 +112,29 @@ export interface GameManifest {
   roundCompletionMode?: "standard" | "wait_for_ready";
   lobbySetup?: GameLobbySetupDefinition;
   playerSetup?: GamePlayerSetupDefinition;
+
+  /**
+   * Lifecycle screens this game renders itself. The platform keeps the game's
+   * own host scene mounted for every screen listed here instead of switching
+   * to a generic one.
+   */
+  ownsScreens?: readonly HostOwnedScreen[];
+  /** Platform chrome this game wants suppressed on the shared screen. */
+  hostChrome?: GameHostChromeOptions;
+  /** Platform chrome this game wants suppressed on the phone. */
+  controllerChrome?: GameControllerChromeOptions;
+  /** Catalog card appearance. */
+  visual?: GameVisualDefinition;
+  /** Background music profile. */
+  audio?: GameAudioDefinition;
+  /** State broadcast tuning. */
+  broadcast?: GameBroadcastPolicy;
+}
+
+/** True when the game renders the given lifecycle screen itself. */
+export function ownsHostScreen(
+  manifest: Pick<GameManifest, "ownsScreens"> | undefined | null,
+  screen: HostOwnedScreen
+): boolean {
+  return Boolean(manifest?.ownsScreens?.includes(screen));
 }

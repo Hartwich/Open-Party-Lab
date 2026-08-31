@@ -16,6 +16,16 @@ export interface AvailableGameDto {
   roundCompletionMode?: GameManifest["roundCompletionMode"];
   lobbySetup?: GameManifest["lobbySetup"];
   playerSetup?: GameManifest["playerSetup"];
+  /** Lifecycle screens the game renders itself. */
+  ownsScreens?: GameManifest["ownsScreens"];
+  /** Platform chrome the game wants suppressed on the shared screen. */
+  hostChrome?: GameManifest["hostChrome"];
+  /** Platform chrome the game wants suppressed on the phone. */
+  controllerChrome?: GameManifest["controllerChrome"];
+  /** Catalog card appearance. */
+  visual?: GameManifest["visual"];
+  /** Background music profile. */
+  audio?: GameManifest["audio"];
 }
 
 export interface GameStateEnvelope<TState = unknown> {

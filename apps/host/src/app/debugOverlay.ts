@@ -13,6 +13,7 @@ import {
   hostChrome,
   trapChromePointerEvents
 } from "../ui/chrome/hostChrome.js";
+import { hostTheme, partyTheme } from "../ui/theme/theme.js";
 
 const debugPreferenceKey = "open-party-lab.host-debug-overlay";
 
@@ -106,10 +107,9 @@ export function mountDebugOverlay(game: Phaser.Game, client: HostSocketClient): 
   const card = createChromeCard("dark");
   card.style.gap = "8px";
   card.style.padding = "12px 14px";
-  card.style.background = "rgba(15, 23, 42, 0.96)";
-  card.style.boxShadow = "0 12px 28px rgba(2, 6, 23, 0.26)";
-  card.style.color = "#e2e8f0";
-  card.style.fontFamily = "\"IBM Plex Mono\", \"Consolas\", monospace";
+  card.style.boxShadow = hostChrome.shadow.card;
+  card.style.color = hostTheme.text;
+  card.style.fontFamily = hostTheme.monoFont;
   card.style.pointerEvents = "auto";
   overlay.appendChild(card);
 
@@ -129,9 +129,9 @@ export function mountDebugOverlay(game: Phaser.Game, client: HostSocketClient): 
   recordButton.type = "button";
   recordButton.style.padding = "6px 10px";
   recordButton.style.borderRadius = "10px";
-  recordButton.style.border = "1px solid rgba(248, 113, 113, 0.28)";
-  recordButton.style.background = "rgba(127, 29, 29, 0.55)";
-  recordButton.style.color = "#fecaca";
+  recordButton.style.border = hostChrome.border.subtle;
+  recordButton.style.background = partyTheme.color.dangerSoft;
+  recordButton.style.color = hostTheme.danger;
   recordButton.style.font = "inherit";
   recordButton.style.cursor = "pointer";
   controls.appendChild(recordButton);
@@ -140,9 +140,9 @@ export function mountDebugOverlay(game: Phaser.Game, client: HostSocketClient): 
   saveButton.type = "button";
   saveButton.style.padding = "6px 10px";
   saveButton.style.borderRadius = "10px";
-  saveButton.style.border = "1px solid rgba(56, 189, 248, 0.28)";
-  saveButton.style.background = "rgba(8, 47, 73, 0.65)";
-  saveButton.style.color = "#bae6fd";
+  saveButton.style.border = hostChrome.border.subtle;
+  saveButton.style.background = hostTheme.accentSoft;
+  saveButton.style.color = hostTheme.accentStrong;
   saveButton.style.font = "inherit";
   saveButton.style.cursor = "pointer";
   controls.appendChild(saveButton);
@@ -150,7 +150,7 @@ export function mountDebugOverlay(game: Phaser.Game, client: HostSocketClient): 
   const status = document.createElement("div");
   status.style.fontSize = "11px";
   status.style.lineHeight = "1.35";
-  status.style.color = "#93c5fd";
+  status.style.color = hostTheme.accentStrong;
   card.appendChild(status);
 
   const body = document.createElement("pre");
@@ -159,7 +159,7 @@ export function mountDebugOverlay(game: Phaser.Game, client: HostSocketClient): 
   body.style.fontSize = "16px";
   body.style.fontWeight = "700";
   body.style.lineHeight = "1.45";
-  body.style.color = "#cbd5e1";
+  body.style.color = hostTheme.textSoft;
   card.appendChild(body);
 
   document.body.appendChild(overlay);

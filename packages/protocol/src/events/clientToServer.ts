@@ -1,4 +1,6 @@
 import type { SupportedLanguage } from "@open-party-lab/game-core";
+import type { ThemeName } from "@open-party-lab/ui-kit";
+import type { HostControlDenyReason } from "../dto/hostControl.js";
 import type { RoomSnapshot } from "../dto/room.js";
 import type { PlayerSetupValue, PlayerSnapshot } from "../dto/player.js";
 
@@ -118,12 +120,42 @@ export interface RoundAbortSuccess {
   room: RoomSnapshot;
 }
 
+export interface HostControlRequest {
+  roomCode: string;
+  playerId: string;
+}
+
+export interface HostControlResolveRequest {
+  roomCode: string;
+  /** The requesting player, echoed back so a stale approval cannot land. */
+  playerId: string;
+  grant: boolean;
+  reason?: HostControlDenyReason;
+}
+
+export interface HostControlReleaseRequest {
+  roomCode: string;
+}
+
+export interface HostControlSuccess {
+  room: RoomSnapshot;
+}
+
 export interface RoomLanguageRequest {
   roomCode: string;
   language: SupportedLanguage;
 }
 
 export interface RoomLanguageSuccess {
+  room: RoomSnapshot;
+}
+
+export interface RoomThemeRequest {
+  roomCode: string;
+  theme: ThemeName;
+}
+
+export interface RoomThemeSuccess {
   room: RoomSnapshot;
 }
 
@@ -152,11 +184,27 @@ export interface ClientToServerEvents {
     payload: RoomLanguageRequest,
     ack: (result: AckResult<RoomLanguageSuccess>) => void
   ) => void;
+  "room:set-theme": (
+    payload: RoomThemeRequest,
+    ack: (result: AckResult<RoomThemeSuccess>) => void
+  ) => void;
   "player:ready": (payload: PlayerReadyRequest) => void;
   "player:select-character": (payload: PlayerSelectCharacterRequest) => void;
   "player:set-setup": (
     payload: PlayerSetupRequest,
     ack: (result: AckResult<PlayerSetupSuccess>) => void
+  ) => void;
+  "host-control:request": (
+    payload: HostControlRequest,
+    ack: (result: AckResult<HostControlSuccess>) => void
+  ) => void;
+  "host-control:resolve": (
+    payload: HostControlResolveRequest,
+    ack: (result: AckResult<HostControlSuccess>) => void
+  ) => void;
+  "host-control:release": (
+    payload: HostControlReleaseRequest,
+    ack: (result: AckResult<HostControlSuccess>) => void
   ) => void;
   "game:select": (payload: GameSelectRequest) => void;
   "game:host-action": (payload: GameHostActionRequest) => void;

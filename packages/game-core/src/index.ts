@@ -12,6 +12,8 @@ export * from "./state/RoundPhaseTimings.js";
 export * from "./state/roundPhaseDurations.js";
 export * from "./state/roundStateHelpers.js";
 export * from "./types/ControllerGame.js";
+export * from "./types/GameHostContract.js";
+export * from "./types/GameTheme.js";
 export * from "./types/GameManifest.js";
 export * from "./types/HostGame.js";
 export * from "./types/PlayerInput.js";

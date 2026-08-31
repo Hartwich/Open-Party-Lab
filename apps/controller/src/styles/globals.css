@@ -8,9 +8,11 @@ body,
 }
 
 body {
-  background: var(--page-bg);
-  color: var(--text-main);
-  font-family: "Nunito Sans", sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -18,6 +20,14 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.025em;
 }
 
 button,
@@ -32,8 +42,24 @@ button {
   -webkit-touch-callout: none;
 }
 
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--accent-soft);
+  outline-offset: 2px;
+}
+
 input,
 textarea {
   user-select: text;
   -webkit-user-select: text;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

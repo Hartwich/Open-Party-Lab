@@ -151,5 +151,14 @@
     "alternateLocalPaths": [
       "../flatterfluff"
     ]
+  },
+  {
+    "id": "card-table",
+    "package": "@open-party-lab/game-card-table",
+    "repo": "https://github.com/Hartwich/card-table.git",
+    "defaultLocalPath": "local-games/card-table",
+    "alternateLocalPaths": [
+      "../card-table"
+    ]
   }
 ]

@@ -1,5 +1,6 @@
 import type { PlayerSetupValue, PlayerSnapshot, RoomSnapshot } from "@open-party-lab/protocol";
 import { ControllerFrame } from "../controller-ui/layout/ControllerFrame.js";
+import { HostControlPanel } from "../controller-ui/common/HostControlPanel.js";
 import { getControllerText } from "../i18n/controllerText.js";
 
 type AvailableRoomGame = RoomSnapshot["availableGames"][number];
@@ -13,13 +14,19 @@ interface LobbyPageProps {
   onLeaveRoom: () => void;
   onSetReady: (isReady: boolean) => void;
   onSetPlayerSetup: (selectionKey: string, value: PlayerSetupValue) => void;
+  onRequestHostControl: () => void;
+  onReleaseHostControl: () => void;
+  onSelectGame: (gameId: string) => void;
+  onStartRound: () => void;
+  onBackToMenu: () => void;
+  onKickPlayer: (playerId: string) => void;
 }
 
 function getPlayerSetupVisual(option: PlayerSetupOption): NonNullable<PlayerSetupOption["visual"]> {
   return option.visual ?? {
-    primaryColor: "#38bdf8",
-    secondaryColor: "#bae6fd",
-    accentColor: "#facc15"
+    primaryColor: "var(--accent)",
+    secondaryColor: "var(--accent-soft)",
+    accentColor: "var(--amber)"
   };
 }
 
@@ -88,7 +95,7 @@ function isPlayerSetupSelectionMissing(player: PlayerSnapshot | null, selectedGa
 function renderPlayerSetupIcon(option: PlayerSetupOption | undefined, index: number, size = 27) {
   if (!option) {
     return (
-      <span style={{ color: "rgba(148, 163, 184, 0.32)", fontWeight: 900 }}>
+      <span style={{ color: "var(--line-strong)", fontWeight: 900 }}>
         {index + 1}
       </span>
     );
@@ -105,7 +112,7 @@ function renderPlayerSetupIcon(option: PlayerSetupOption | undefined, index: num
           backgroundColor: visual.accentColor,
           WebkitMask: `url(${option.iconPath}) center / contain no-repeat`,
           mask: `url(${option.iconPath}) center / contain no-repeat`,
-          filter: "drop-shadow(0 1px 5px rgba(2, 6, 23, 0.85))"
+          filter: "drop-shadow(0 1px 4px rgba(60, 43, 26, 0.25))"
         }}
       />
     );
@@ -121,7 +128,7 @@ function renderPlayerSetupIcon(option: PlayerSetupOption | undefined, index: num
         style={{
           borderRadius: 8,
           objectFit: "cover",
-          border: "1px solid rgba(148, 163, 184, 0.2)"
+          border: "1px solid var(--line)"
         }}
       />
     );
@@ -136,7 +143,7 @@ function renderPlayerSetupIcon(option: PlayerSetupOption | undefined, index: num
         display: "grid",
         placeItems: "center",
         background: visual.primaryColor,
-        color: "#020617",
+        color: "var(--on-accent)",
         fontWeight: 900
       }}
     >
@@ -181,7 +188,7 @@ function renderChoicePlayerSetupChooser(
           gap: 6,
           padding: "12px 14px",
           borderRadius: "var(--radius-md)",
-          background: "rgba(8, 47, 73, 0.4)",
+          background: "var(--surface-muted)",
           color: "var(--text-muted)"
         }}
       >
@@ -205,11 +212,11 @@ function renderChoicePlayerSetupChooser(
               style={{
                 border: selectedByCurrentPlayer
                   ? `2px solid ${visual.accentColor}`
-                  : "1px solid rgba(148, 163, 184, 0.18)",
+                  : "1px solid var(--line)",
                 borderRadius: "var(--radius-md)",
                 background: selectedByCurrentPlayer
-                  ? "linear-gradient(180deg, rgba(8, 47, 73, 0.84) 0%, rgba(15, 23, 42, 0.92) 100%)"
-                  : "rgba(15, 23, 42, 0.68)",
+                  ? "var(--accent-soft)"
+                  : "var(--surface)",
                 padding: "14px 16px",
                 color: "var(--text-main)",
                 textAlign: "left"
@@ -231,8 +238,8 @@ function renderChoicePlayerSetupChooser(
                       borderRadius: 16,
                       display: "grid",
                       placeItems: "center",
-                      border: "1px solid rgba(148, 163, 184, 0.18)",
-                      background: "rgba(15, 23, 42, 0.7)"
+                      border: "1px solid var(--line)",
+                      background: "var(--surface-muted)"
                     }}
                   >
                     {renderPlayerSetupIcon(option, 0, option.portraitPath ? 72 : 34)}
@@ -251,7 +258,7 @@ function renderChoicePlayerSetupChooser(
                         style={{
                           padding: "4px 10px",
                           borderRadius: 999,
-                          background: "rgba(255, 255, 255, 0.08)",
+                          background: "var(--paper-deep)",
                           color: "var(--text-muted)",
                           fontSize: "0.78rem",
                           textTransform: "uppercase"
@@ -329,7 +336,7 @@ function renderMultiSelectPlayerSetupChooser(
           gap: 6,
           padding: "12px 14px",
           borderRadius: "var(--radius-md)",
-          background: "rgba(8, 47, 73, 0.4)",
+          background: "var(--surface-muted)",
           color: "var(--text-muted)"
         }}
       >
@@ -349,11 +356,11 @@ function renderMultiSelectPlayerSetupChooser(
               style={{
                 minHeight: 54,
                 borderRadius: 12,
-                border: option ? `1px solid ${visual?.accentColor ?? "#38bdf8"}88` : "1px dashed rgba(148, 163, 184, 0.28)",
-                background: option ? "rgba(15, 23, 42, 0.76)" : "rgba(15, 23, 42, 0.32)",
+                border: option ? `1px solid ${visual?.accentColor ?? "var(--accent)"}` : "1px dashed var(--line-strong)",
+                background: option ? "var(--surface)" : "var(--surface-muted)",
                 display: "grid",
                 placeItems: "center",
-                boxShadow: option ? `0 0 16px ${visual?.accentColor ?? "#38bdf8"}22` : "none"
+                boxShadow: option ? "var(--shadow-card)" : "none"
               }}
             >
               {renderPlayerSetupIcon(option, index)}
@@ -375,8 +382,8 @@ function renderMultiSelectPlayerSetupChooser(
               style={{
                 minHeight: 64,
                 borderRadius: 12,
-                border: selected ? `2px solid ${visual.accentColor}` : "1px solid rgba(148, 163, 184, 0.18)",
-                background: selected ? "rgba(15, 23, 42, 0.94)" : "rgba(15, 23, 42, 0.54)",
+                border: selected ? `2px solid ${visual.accentColor}` : "1px solid var(--line)",
+                background: selected ? "var(--surface)" : "var(--surface-muted)",
                 color: "var(--text-main)",
                 display: "grid",
                 gap: 4,
@@ -438,7 +445,13 @@ export function LobbyPage({
   error,
   onLeaveRoom,
   onSetReady,
-  onSetPlayerSetup
+  onSetPlayerSetup,
+  onRequestHostControl,
+  onReleaseHostControl,
+  onSelectGame,
+  onStartRound,
+  onBackToMenu,
+  onKickPlayer
 }: LobbyPageProps) {
   const text = getControllerText(room?.language);
   const currentPlayer = room?.players.find((entry) => entry.id === player?.id) ?? player;
@@ -466,6 +479,19 @@ export function LobbyPage({
           {text.leaveRoom}
         </button>
 
+        {room ? (
+          <HostControlPanel
+            room={room}
+            player={currentPlayer}
+            onRequestControl={onRequestHostControl}
+            onReleaseControl={onReleaseHostControl}
+            onSelectGame={onSelectGame}
+            onStartRound={onStartRound}
+            onBackToMenu={onBackToMenu}
+            onKickPlayer={onKickPlayer}
+          />
+        ) : null}
+
         <button
           type="button"
           onClick={() => onSetReady(!(currentPlayer?.isReady ?? false))}
@@ -474,7 +500,7 @@ export function LobbyPage({
             border: 0,
             borderRadius: "var(--radius-md)",
             background: currentPlayer?.isReady ? "var(--success)" : "var(--accent)",
-            color: "#052e16",
+            color: "var(--on-accent)",
             padding: "16px 20px",
             fontWeight: 800,
             opacity: playerSetupSelectionMissing ? 0.55 : 1
@@ -494,7 +520,7 @@ export function LobbyPage({
               gap: 6,
               padding: "12px 14px",
               borderRadius: "var(--radius-md)",
-              background: "rgba(15, 23, 42, 0.55)",
+              background: "var(--surface-muted)",
               color: "var(--text-muted)"
             }}
           >
@@ -532,7 +558,7 @@ export function LobbyPage({
                 alignItems: "center",
                 padding: "12px 14px",
                 borderRadius: "var(--radius-md)",
-                background: "rgba(15, 23, 42, 0.55)"
+                background: "var(--surface-muted)"
               }}
             >
               <div style={{ display: "grid", gap: 4 }}>
@@ -555,9 +581,9 @@ export function LobbyPage({
 }
 
 const secondaryButtonStyle = {
-  border: "1px solid rgba(248, 113, 113, 0.45)",
+  border: "1px solid var(--danger)",
   borderRadius: "var(--radius-md)",
-  background: "rgba(127, 29, 29, 0.18)",
+  background: "var(--danger-soft)",
   color: "var(--text-main)",
   padding: "14px 18px",
   fontWeight: 700

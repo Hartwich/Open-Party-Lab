@@ -46,11 +46,7 @@ export class RoundTimerService {
           const activeGame = this.gameRegistry.getAvailableGame(room.currentRound.gameId);
 
           if (activeGame?.roundCompletionMode === "wait_for_ready") {
-            const roundState = room.currentRound.state as {
-              result?: { outcome?: string };
-            };
-            const allowReadyCarry =
-              activeGame.id === "arena-survivor" && roundState.result?.outcome === "survived";
+            const allowReadyCarry = this.gameRuntime.shouldContinueRun(room) === true;
 
             if (allowReadyCarry && canStartRound(room, activeGame)) {
               const startedState = this.gameRuntime.startRound(room);

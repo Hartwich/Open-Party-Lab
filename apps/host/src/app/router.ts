@@ -1,53 +1,47 @@
-﻿import Phaser from "phaser";
+import Phaser from "phaser";
 import { getRoomPhase } from "@open-party-lab/protocol";
 import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
 import { HostPerfTracker } from "./perfTelemetry.js";
 import { hostGameRegistry } from "../games/registry.js";
 
+/**
+ * Scenes the platform itself owns. Everything else belongs to a game.
+ */
 export const hostSceneKeys = {
   boot: "BootScene",
   lobby: "LobbyScene",
-  gameSelect: "GameSelectScene",
-  roundIntro: "RoundIntroScene",
-  scoreboard: "ScoreboardScene"
+  gameSelect: "GameSelectScene"
 } as const;
 
-function shouldKeepArenaSurvivorResultScene(
-  state: HostAppState,
-  phase: ReturnType<typeof getRoomPhase>
-): boolean {
-  if (
-    state.room?.selectedGameId !== "arena-survivor" ||
-    (phase !== "result" && phase !== "scoreboard" && phase !== "finished")
-  ) {
-    return false;
-  }
+/** Phases during which the selected game renders the screen. */
+const gameOwnedPhases = new Set([
+  "round_intro",
+  "countdown",
+  "playing",
+  "locked",
+  "result",
+  "scoreboard",
+  "finished"
+]);
 
-  const arenaState = state.game?.state as { result?: { outcome?: string } } | null | undefined;
-
-  return arenaState?.result?.outcome === "survived" || arenaState?.result?.outcome === "defeated";
+/**
+ * The game's own host scene, or null when the game is not installed.
+ *
+ * A missing scene is not something to paper over: the room falls back to the
+ * catalog rather than showing a stand-in that pretends the game is running.
+ */
+function getGameSceneKey(gameId: string | null | undefined): string | null {
+  return gameId ? hostGameRegistry[gameId]?.sceneKey ?? null : null;
 }
 
-function shouldKeepZeichnenUndErratenResultScene(
-  state: HostAppState,
-  phase: ReturnType<typeof getRoomPhase>
-): boolean {
-  return (
-    state.room?.selectedGameId === "zeichnen-und-erraten" &&
-    (phase === "result" || phase === "scoreboard" || phase === "finished")
-  );
-}
-
-function shouldKeepSchaetzoramaResultScene(
-  state: HostAppState,
-  phase: ReturnType<typeof getRoomPhase>
-): boolean {
-  return (
-    state.room?.selectedGameId === "schaetzorama" &&
-    (phase === "result" || phase === "scoreboard" || phase === "finished")
-  );
-}
-
+/**
+ * Chooses which scene should be running.
+ *
+ * The platform owns three scenes — boot, lobby, game select — and hands the
+ * screen to the selected game for the entire round, intro and result included.
+ * The router used to carry one hand-written exception per game that had
+ * outgrown the generic scoreboard; there is nothing left to except.
+ */
 function resolveSceneKey(state: HostAppState): string {
   if (!state.room) {
     return hostSceneKeys.boot;
@@ -58,31 +52,10 @@ function resolveSceneKey(state: HostAppState): string {
   }
 
   const phase = getRoomPhase(state.room);
-  const selectedGameId = state.room.selectedGameId;
+  const gameSceneKey = getGameSceneKey(state.room.selectedGameId);
 
-  if (shouldKeepArenaSurvivorResultScene(state, phase)) {
-    return hostGameRegistry["arena-survivor"]?.sceneKey ?? hostSceneKeys.roundIntro;
-  }
-
-  if (shouldKeepZeichnenUndErratenResultScene(state, phase)) {
-    return hostGameRegistry["zeichnen-und-erraten"]?.sceneKey ?? hostSceneKeys.roundIntro;
-  }
-
-  if (shouldKeepSchaetzoramaResultScene(state, phase)) {
-    return hostGameRegistry.schaetzorama?.sceneKey ?? hostSceneKeys.roundIntro;
-  }
-
-  if (phase === "round_intro" || phase === "countdown") {
-    return hostSceneKeys.roundIntro;
-  }
-
-  if (phase === "playing" || phase === "locked") {
-    const gameId = state.room.selectedGameId;
-    return gameId ? hostGameRegistry[gameId]?.sceneKey ?? hostSceneKeys.roundIntro : hostSceneKeys.roundIntro;
-  }
-
-  if (phase === "result" || phase === "scoreboard" || phase === "finished") {
-    return hostSceneKeys.scoreboard;
+  if (phase && gameSceneKey && gameOwnedPhases.has(phase)) {
+    return gameSceneKey;
   }
 
   if (state.room.selectedGameId) {

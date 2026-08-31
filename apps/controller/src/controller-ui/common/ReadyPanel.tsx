@@ -15,8 +15,8 @@ export function ReadyPanel({ ready }: ReadyPanelProps) {
         gap: 12,
         padding: 16,
         borderRadius: 18,
-        border: "1px solid rgba(56, 189, 248, 0.22)",
-        background: "linear-gradient(180deg, rgba(8, 47, 73, 0.42) 0%, rgba(15, 23, 42, 0.72) 100%)"
+        border: "1px solid color-mix(in srgb, var(--accent) 22%, transparent)",
+        background: "linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 42%, transparent) 0%, color-mix(in srgb, var(--surface) 72%, transparent) 100%)"
       }}
     >
       <strong style={{ fontSize: "1rem" }}>
@@ -36,9 +36,9 @@ export function ReadyPanel({ ready }: ReadyPanelProps) {
           padding: "12px 14px",
           fontWeight: 700,
           fontSize: "1rem",
-          color: "var(--surface-bg)",
+          color: "var(--ink-soft)",
           background: ready.currentPlayerReady
-            ? "linear-gradient(180deg, rgba(16, 185, 129, 0.96) 0%, rgba(5, 150, 105, 1) 100%)"
+            ? "linear-gradient(180deg, color-mix(in srgb, var(--sage) 96%, transparent) 0%, var(--sage-strong) 100%)"
             : "linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%)",
           touchAction: "manipulation"
         }}

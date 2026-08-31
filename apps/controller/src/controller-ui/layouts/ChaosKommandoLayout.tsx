@@ -165,9 +165,9 @@ const StickPad = memo(function StickPad({ label, accentColor, disabled, resetKey
         borderRadius: "999px",
         border: `1px solid ${accentColor}`,
         background: disabled
-          ? "radial-gradient(circle at 50% 50%, rgba(51, 65, 85, 0.7) 0%, rgba(2, 6, 23, 0.96) 78%)"
-          : "radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.18) 0%, rgba(2, 6, 23, 0.96) 78%)",
-        boxShadow: disabled ? "none" : "0 18px 42px rgba(14, 165, 233, 0.18)",
+          ? "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--line-strong) 70%, transparent) 0%, color-mix(in srgb, var(--paper) 96%, transparent) 78%)"
+          : "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 18%, transparent) 0%, color-mix(in srgb, var(--paper) 96%, transparent) 78%)",
+        boxShadow: disabled ? "none" : "0 18px 42px color-mix(in srgb, var(--accent) 18%, transparent)",
         touchAction: "none",
         userSelect: "none"
       }}
@@ -177,7 +177,7 @@ const StickPad = memo(function StickPad({ label, accentColor, disabled, resetKey
           position: "absolute",
           inset: "16%",
           borderRadius: "999px",
-          border: "1px solid rgba(148, 163, 184, 0.16)"
+          border: "1px solid color-mix(in srgb, var(--muted) 16%, transparent)"
         }}
       />
       <div
@@ -185,7 +185,7 @@ const StickPad = memo(function StickPad({ label, accentColor, disabled, resetKey
           position: "absolute",
           inset: "34%",
           borderRadius: "999px",
-          border: "1px solid rgba(148, 163, 184, 0.12)"
+          border: "1px solid color-mix(in srgb, var(--muted) 12%, transparent)"
         }}
       />
       <div
@@ -197,10 +197,10 @@ const StickPad = memo(function StickPad({ label, accentColor, disabled, resetKey
           aspectRatio: "1 / 1",
           borderRadius: "999px",
           transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))`,
-          background: `linear-gradient(180deg, ${accentColor} 0%, rgba(14, 165, 233, 0.92) 100%)`,
+          background: `linear-gradient(180deg, ${accentColor} 0%, color-mix(in srgb, var(--accent) 92%, transparent) 100%)`,
           display: "grid",
           placeItems: "center",
-          color: "#f8fafc",
+          color: "var(--ink)",
           fontWeight: 900,
           letterSpacing: "0.08em",
           fontSize: "0.72rem"
@@ -387,8 +387,8 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
           gap: chipGap,
           padding: "clamp(5px, 1.4vw, 6px)",
           borderRadius: 999,
-          border: "1px solid rgba(148, 163, 184, 0.16)",
-          background: "rgba(15, 23, 42, 0.76)"
+          border: "1px solid color-mix(in srgb, var(--muted) 16%, transparent)",
+          background: "color-mix(in srgb, var(--surface) 76%, transparent)"
         }}
       >
         <button
@@ -401,7 +401,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
         <button
           type="button"
           onClick={() => setHudMode("steuerung")}
-          style={modeToggleStyle(hudMode === "steuerung", "#fb7185")}
+          style={modeToggleStyle(hudMode === "steuerung", "var(--danger)")}
         >
           {en ? "CONTROLS" : "STEUERUNG"}
         </button>
@@ -414,8 +414,8 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
             gap: panelGap,
             padding: panelPadding,
             borderRadius: panelRadius,
-            border: "1px solid rgba(148, 163, 184, 0.16)",
-            background: "linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(8, 13, 27, 0.98) 100%)"
+            border: "1px solid color-mix(in srgb, var(--muted) 16%, transparent)",
+            background: "linear-gradient(180deg, color-mix(in srgb, var(--surface) 88%, transparent) 0%, color-mix(in srgb, var(--accent-strong) 98%, transparent) 100%)"
           }}
         >
           {selectedWeapon ? (
@@ -448,16 +448,16 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                   padding: "clamp(10px, 3vw, 14px)",
                   borderRadius: tileRadius,
                   border: weapon.selected
-                    ? `1px solid ${weapon.accentColor ?? "#fb7185"}`
-                    : "1px solid rgba(148, 163, 184, 0.16)",
+                    ? `1px solid ${weapon.accentColor ?? "var(--danger)"}`
+                    : "1px solid color-mix(in srgb, var(--muted) 16%, transparent)",
                   background: weapon.selected
-                    ? "linear-gradient(180deg, rgba(251, 113, 133, 0.18) 0%, rgba(15, 23, 42, 0.72) 100%)"
-                    : "rgba(15, 23, 42, 0.68)",
-                  color: "#f8fafc",
+                    ? "linear-gradient(180deg, color-mix(in srgb, var(--danger) 18%, transparent) 0%, color-mix(in srgb, var(--surface) 72%, transparent) 100%)"
+                    : "color-mix(in srgb, var(--surface) 68%, transparent)",
+                  color: "var(--ink)",
                   opacity: weapon.disabled ? 0.42 : 1
                 }}
               >
-                <span style={ammoBadgeStyle(weapon.selected ? weapon.accentColor ?? "#fb7185" : "#64748b")}>
+                <span style={ammoBadgeStyle(weapon.selected ? weapon.accentColor ?? "var(--danger)" : "var(--muted)")}>
                   {weapon.ammoLabel}
                 </span>
                 {weapon.iconPath ? (
@@ -488,7 +488,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
           <div style={{ display: "grid", justifyItems: "center" }}>
             <StickPad
               label="MOVE"
-              accentColor={model.accentColor ?? "#22d3ee"}
+              accentColor={model.accentColor ?? "var(--accent)"}
               disabled={model.disabled}
               resetKey={model.resetKey}
               onChange={model.onMoveChange}
@@ -510,12 +510,12 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                 aspectRatio: "1 / 1",
                 borderRadius: "999px",
                 overflow: "hidden",
-                border: "1px solid rgba(248, 113, 113, 0.34)",
+                border: "1px solid color-mix(in srgb, var(--danger) 34%, transparent)",
                 background: model.disabled
-                  ? "linear-gradient(180deg, rgba(71, 85, 105, 0.86) 0%, rgba(30, 41, 59, 0.98) 100%)"
-                  : "linear-gradient(180deg, rgba(251, 113, 133, 0.95) 0%, rgba(190, 24, 93, 0.96) 100%)",
-                color: "#fff1f2",
-                boxShadow: model.disabled ? "none" : "0 18px 40px rgba(190, 24, 93, 0.22)",
+                  ? "linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 86%, transparent) 0%, color-mix(in srgb, var(--surface-raised) 98%, transparent) 100%)"
+                  : "linear-gradient(180deg, color-mix(in srgb, var(--danger) 95%, transparent) 0%, color-mix(in srgb, var(--danger) 96%, transparent) 100%)",
+                color: "var(--ink-soft)",
+                boxShadow: model.disabled ? "none" : "0 18px 40px color-mix(in srgb, var(--danger) 22%, transparent)",
                 touchAction: "none",
                 userSelect: "none",
                 WebkitUserSelect: "none",
@@ -529,7 +529,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                     inset: 0,
                     transform: `scaleY(${chargePct})`,
                     transformOrigin: "bottom",
-                    background: "linear-gradient(180deg, rgba(255, 228, 230, 0.16) 0%, rgba(254, 205, 211, 0.46) 100%)",
+                    background: "linear-gradient(180deg, color-mix(in srgb, var(--danger-soft) 16%, transparent) 0%, color-mix(in srgb, var(--danger-soft) 46%, transparent) 100%)",
                     pointerEvents: "none"
                   }}
                 />
@@ -565,11 +565,11 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                 aspectRatio: "1 / 1",
                 marginTop: "clamp(8px, 2vw, 10px)",
                 borderRadius: "999px",
-                border: "1px solid rgba(125, 211, 252, 0.28)",
+                border: "1px solid color-mix(in srgb, var(--accent) 28%, transparent)",
                 background: model.disabled
-                  ? "linear-gradient(180deg, rgba(71, 85, 105, 0.86) 0%, rgba(30, 41, 59, 0.98) 100%)"
-                  : "linear-gradient(180deg, rgba(34, 211, 238, 0.94) 0%, rgba(8, 145, 178, 0.94) 100%)",
-                color: "#f0f9ff",
+                  ? "linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 86%, transparent) 0%, color-mix(in srgb, var(--surface-raised) 98%, transparent) 100%)"
+                  : "linear-gradient(180deg, color-mix(in srgb, var(--accent) 94%, transparent) 0%, color-mix(in srgb, var(--accent-strong) 94%, transparent) 100%)",
+                color: "var(--ink-soft)",
                 fontWeight: 800,
                 fontSize: "clamp(0.7rem, 2vw, 0.76rem)",
                 letterSpacing: "0.06em"
@@ -582,7 +582,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
           <div style={{ display: "grid", justifyItems: "center" }}>
             <StickPad
               label="AIM"
-              accentColor="#fb7185"
+              accentColor="var(--danger)"
               disabled={model.disabled}
               resetKey={model.resetKey}
               onChange={model.onAimChange}
@@ -596,14 +596,14 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
 }
 
 function modeToggleStyle(active: boolean, color: string | undefined) {
-  const resolvedColor = color ?? "#22d3ee";
+  const resolvedColor = color ?? "var(--accent)";
 
   return {
     borderRadius: 999,
     padding: "clamp(10px, 2.8vw, 12px) clamp(14px, 4vw, 16px)",
     border: `1px solid ${active ? resolvedColor : "transparent"}`,
     background: active ? `${resolvedColor}26` : "transparent",
-    color: "#f8fafc",
+    color: "var(--ink)",
     fontWeight: 800,
     fontSize: "clamp(0.76rem, 2.2vw, 0.84rem)",
     letterSpacing: "0.06em"
@@ -611,14 +611,14 @@ function modeToggleStyle(active: boolean, color: string | undefined) {
 }
 
 function toggleStyle(active: boolean, color: string | undefined) {
-  const resolvedColor = color ?? "#22d3ee";
+  const resolvedColor = color ?? "var(--accent)";
 
   return {
     borderRadius: 999,
     padding: "clamp(9px, 2.4vw, 10px) clamp(12px, 3.6vw, 16px)",
-    border: `1px solid ${active ? resolvedColor : "rgba(148, 163, 184, 0.18)"}`,
-    background: active ? `${resolvedColor}22` : "rgba(15, 23, 42, 0.6)",
-    color: "#f8fafc",
+    border: `1px solid ${active ? resolvedColor : "color-mix(in srgb, var(--muted) 18%, transparent)"}`,
+    background: active ? `${resolvedColor}22` : "color-mix(in srgb, var(--surface) 60%, transparent)",
+    color: "var(--ink)",
     fontWeight: 800,
     fontSize: "clamp(0.74rem, 2.1vw, 0.82rem)",
     letterSpacing: "0.06em"
@@ -630,7 +630,7 @@ function statChipStyle(color: string) {
     borderRadius: 999,
     padding: "clamp(6px, 1.7vw, 7px) clamp(10px, 3vw, 11px)",
     background: `${color}1f`,
-    color: "#f8fafc",
+    color: "var(--ink)",
     border: `1px solid ${color}55`,
     fontSize: "clamp(0.74rem, 2vw, 0.8rem)"
   } as const;
@@ -641,8 +641,8 @@ const weaponInfoStyle = {
   gap: 4,
   padding: "clamp(10px, 2.8vw, 12px) clamp(12px, 3.4vw, 14px)",
   borderRadius: 18,
-  border: "1px solid rgba(148, 163, 184, 0.12)",
-  background: "rgba(15, 23, 42, 0.56)"
+  border: "1px solid color-mix(in srgb, var(--muted) 12%, transparent)",
+  background: "color-mix(in srgb, var(--surface) 56%, transparent)"
 } as const;
 
 function ammoBadgeStyle(color: string) {
@@ -656,7 +656,7 @@ function ammoBadgeStyle(color: string) {
     textAlign: "center",
     background: `${color}1f`,
     border: `1px solid ${color}4d`,
-    color: "#f8fafc",
+    color: "var(--ink)",
     fontWeight: 800,
     fontSize: "clamp(0.62rem, 1.8vw, 0.68rem)",
     lineHeight: 1

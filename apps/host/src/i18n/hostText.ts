@@ -25,6 +25,9 @@ export function writeStoredHostLanguage(language: SupportedLanguage): void {
 
 export interface HostText {
   languageLabel: string;
+  themeLabel: string;
+  themeLight: string;
+  themeDark: string;
   phoneController: string;
   showPhoneController: string;
   hide: string;
@@ -72,13 +75,10 @@ export interface HostText {
   noActiveGameStartLine: string;
   playersConnected: (count: number, max: number) => string;
   activeRoundLockedLine: string;
-  arenaNeedsCharacterLine: string;
+  setupChoicePendingLine: string;
   autoReadyLine: string;
   spaceStartLine: string;
   setupControlsLine: string;
-  minionsSetupLine: string;
-  arenaContinuesLine: string;
-  arenaReadyLine: string;
   afterRoundSwitchLine: string;
   autoStartsWhenReadyLine: string;
   readyVisibleLine: string;
@@ -91,8 +91,6 @@ export interface HostText {
   characterSelecting: string;
   morePlayers: (count: number) => string;
   errorLabel: string;
-  roundFallbackTitle: string;
-  roundFallbackMessage: string;
   roomPrefix: string;
   hostCreatingRoom: string;
   hostConnecting: string;
@@ -100,21 +98,32 @@ export interface HostText {
   hostPageHint: string;
   serverOnline: string;
   serverOffline: string;
-  scoreTotal: string;
-  noPoints: string;
-  roundEndTitle: string;
   readyNextTitle: string;
-  scoreboardTitle: string;
-  gameCompleted: (gameName: string) => string;
-  roundCompleted: string;
-  nextAutoHint: string;
-  nextSpaceHint: string;
   lifecycle: (phase: RoomLifecycle | string) => string;
+  hostControlRequestTitle: string;
+  hostControlRequestBody: (name: string) => string;
+  hostControlRequestHint: string;
+  hostControlAllow: string;
+  hostControlDeny: string;
+  hostControlDelegatedTitle: string;
+  hostControlDelegatedBody: (name: string) => string;
+  hostControlReclaim: string;
 }
 
 const hostText = {
   de: {
+    hostControlRequestTitle: "Steuerung uebernehmen?",
+    hostControlRequestBody: (name: string) => `${name} moechte den Host steuern.`,
+    hostControlRequestHint: "Spielauswahl, Rundenstart und Spielerverwaltung wandern aufs Handy.",
+    hostControlAllow: "Erlauben",
+    hostControlDeny: "Ablehnen",
+    hostControlDelegatedTitle: "Handy steuert",
+    hostControlDelegatedBody: (name: string) => `${name} steuert den Host.`,
+    hostControlReclaim: "Zurueckholen",
     languageLabel: "Sprache",
+    themeLabel: "Design",
+    themeLight: "Hell",
+    themeDark: "Dunkel",
     phoneController: "Handy-Controller",
     showPhoneController: "Handy-Controller anzeigen",
     hide: "Verstecken",
@@ -171,13 +180,10 @@ const hostText = {
     playersConnected: (count: number, max: number) => `Spieler verbunden: ${count}/${max}`,
     activeRoundLockedLine:
       "Aktive Runde laeuft gerade. Die Auswahl bleibt sichtbar, ist aber bis zum Rundenende gesperrt.",
-    arenaNeedsCharacterLine: "Alle Spieler brauchen fuer Arena Survivor zuerst eine Charakterwahl.",
+    setupChoicePendingLine: "Alle Spieler muessen zuerst ihre Auswahl treffen.",
     autoReadyLine: "Alle Spieler muessen am Handy bereit sein.",
     spaceStartLine: "SPACE startet die Runde, sobald genug Spieler verbunden sind.",
     setupControlsLine: "Dieses Spiel hat Setup-Optionen, die direkt hier gesetzt werden.",
-    minionsSetupLine: "MinionsTD nutzt ein Setup fuer Map, Leben und Startgeld.",
-    arenaContinuesLine: "Arena Survivor laeuft weiter, auch wenn der Host ins Hauptmenue wechselt.",
-    arenaReadyLine: "Nach der Charakterwahl startet die Runde ueber Bereitschaft.",
     afterRoundSwitchLine: "Nach dem Rundenende kannst du hier wieder frei umschalten.",
     autoStartsWhenReadyLine: "Sobald alle wieder bereit sind, startet die Runde automatisch.",
     readyVisibleLine: "Bereitschaft und Startstatus bleiben hier sichtbar.",
@@ -190,8 +196,6 @@ const hostText = {
     characterSelecting: "Charakter waehlt noch",
     morePlayers: (count: number) => `+${count} weitere Spieler`,
     errorLabel: "Fehler",
-    roundFallbackTitle: "Runde",
-    roundFallbackMessage: "Gleich geht es los.",
     roomPrefix: "Raum",
     hostCreatingRoom: "Raum wird erstellt ...",
     hostConnecting: "Verbinde Host mit Server ...",
@@ -199,19 +203,22 @@ const hostText = {
     hostPageHint: "Am Handy immer den angezeigten Controller-Link oder QR-Code verwenden.",
     serverOnline: "Server online",
     serverOffline: "Server offline",
-    scoreTotal: "Gesamt",
-    noPoints: "Noch keine Punkte.",
-    roundEndTitle: "Rundenende",
     readyNextTitle: "Bereit fuer die naechste Runde",
-    scoreboardTitle: "Scoreboard",
-    gameCompleted: (gameName: string) => `${gameName} abgeschlossen.`,
-    roundCompleted: "Runde abgeschlossen.",
-    nextAutoHint: "Naechste Runde startet automatisch, sobald alle wieder bereit sind.",
-    nextSpaceHint: "Leertaste = Naechste Runde",
     lifecycle: (phase: RoomLifecycle | string) => phase
   },
   en: {
+    hostControlRequestTitle: "Hand over control?",
+    hostControlRequestBody: (name: string) => `${name} wants to drive the host.`,
+    hostControlRequestHint: "Game selection, round start and the roster move to the phone.",
+    hostControlAllow: "Allow",
+    hostControlDeny: "Decline",
+    hostControlDelegatedTitle: "Phone in control",
+    hostControlDelegatedBody: (name: string) => `${name} is driving the host.`,
+    hostControlReclaim: "Take back",
     languageLabel: "Language",
+    themeLabel: "Theme",
+    themeLight: "Light",
+    themeDark: "Dark",
     phoneController: "Phone Controller",
     showPhoneController: "Show phone controller",
     hide: "Hide",
@@ -268,13 +275,10 @@ const hostText = {
     playersConnected: (count: number, max: number) => `Players connected: ${count}/${max}`,
     activeRoundLockedLine:
       "An active round is running. The selection stays visible, but it is locked until the round ends.",
-    arenaNeedsCharacterLine: "All players need to choose an Arena Survivor character first.",
+    setupChoicePendingLine: "All players need to make their selection first.",
     autoReadyLine: "All players need to be ready on their phones.",
     spaceStartLine: "SPACE starts the round once enough players are connected.",
     setupControlsLine: "This game has setup options that can be configured here.",
-    minionsSetupLine: "Minions TD uses setup for map, lives, and starting gold.",
-    arenaContinuesLine: "Arena Survivor keeps running when the host opens the main menu.",
-    arenaReadyLine: "After character selection, the round starts through readiness.",
     afterRoundSwitchLine: "After the round ends, you can switch freely again.",
     autoStartsWhenReadyLine: "As soon as everyone is ready again, the round starts automatically.",
     readyVisibleLine: "Readiness and start status stay visible here.",
@@ -287,8 +291,6 @@ const hostText = {
     characterSelecting: "Choosing character",
     morePlayers: (count: number) => `+${count} more players`,
     errorLabel: "Error",
-    roundFallbackTitle: "Round",
-    roundFallbackMessage: "Starting soon.",
     roomPrefix: "Room",
     hostCreatingRoom: "Creating room ...",
     hostConnecting: "Connecting host to server ...",
@@ -296,15 +298,7 @@ const hostText = {
     hostPageHint: "Always use the displayed controller link or QR code on the phone.",
     serverOnline: "Server online",
     serverOffline: "Server offline",
-    scoreTotal: "Total",
-    noPoints: "No points yet.",
-    roundEndTitle: "Round End",
     readyNextTitle: "Ready for the next round",
-    scoreboardTitle: "Scoreboard",
-    gameCompleted: (gameName: string) => `${gameName} complete.`,
-    roundCompleted: "Round complete.",
-    nextAutoHint: "The next round starts automatically once everyone is ready again.",
-    nextSpaceHint: "Space = Next round",
     lifecycle: (phase: RoomLifecycle | string) => {
       switch (phase) {
         case "lobby":

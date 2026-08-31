@@ -100,7 +100,7 @@ function Stick({ label, accentColor, disabled, resetKey, onChange }: StickProps)
         aspectRatio: "1 / 1",
         borderRadius: "999px",
         border: `1px solid ${accentColor ?? "var(--panel-border)"}`,
-        background: "radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.2) 0%, rgba(2, 6, 23, 0.95) 78%)",
+        background: "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 20%, transparent) 0%, color-mix(in srgb, var(--paper) 95%, transparent) 78%)",
         touchAction: "none"
       }}
     >
@@ -109,7 +109,7 @@ function Stick({ label, accentColor, disabled, resetKey, onChange }: StickProps)
           position: "absolute",
           inset: "37%",
           borderRadius: "999px",
-          border: "1px solid rgba(148,163,184,0.2)"
+          border: "1px solid color-mix(in srgb, var(--muted) 20%, transparent)"
         }}
       />
       <div
@@ -121,10 +121,10 @@ function Stick({ label, accentColor, disabled, resetKey, onChange }: StickProps)
           aspectRatio: "1 / 1",
           borderRadius: "999px",
           transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))`,
-          background: `linear-gradient(180deg, ${accentColor ?? "#22d3ee"}, #0ea5e9)`,
+          background: `linear-gradient(180deg, ${accentColor ?? "var(--accent)"}, var(--accent))`,
           display: "grid",
           placeItems: "center",
-          color: "#e2e8f0",
+          color: "var(--ink-soft)",
           fontWeight: 700,
           fontSize: "0.72rem"
         }}
@@ -175,7 +175,7 @@ export function TwinStickLayout({ model }: { model: TwinStickLayoutModel }) {
 
         <Stick
           label={model.rightStickLabel ?? "AIM"}
-          accentColor="#f97316"
+          accentColor="var(--amber)"
           disabled={model.disabled}
           resetKey={model.resetKey}
           onChange={model.onAimChange}

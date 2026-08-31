@@ -1,3 +1,4 @@
+import { resolveControllerChrome } from "@open-party-lab/game-core";
 import { Profiler, useEffect, useMemo, useRef } from "react";
 import { ControllerPerfTracker } from "../app/perfTelemetry.js";
 import type { ControllerAppState } from "../app/controllerSocketClient.js";
@@ -147,40 +148,34 @@ export function ControllerPage({ state, onLeaveRoom, onInput, onSetReady }: Cont
   const layoutModel = layoutResult.model;
   const perfCounters = resolveControllerPerfCounters(state, layoutModel);
   const fallbackReady = resolveAutoReadyFallback(state, onSetReady, layoutModel, text);
-  const gamepadChrome = gameId === "drift-racer";
-  const denseBoardChrome = gameId === "word-tiles";
+  // Chrome preferences come from the game's manifest. Layout-driven variants
+  // (a joystick that asked for a clean frame) still win, because those depend
+  // on the layout model rather than the game.
+  const chrome = resolveControllerChrome(selectedGame?.controllerChrome);
   const joystickChrome = layoutModel.kind === "virtual_joystick" && layoutModel.minimal;
   const cleanJoystickChrome = layoutModel.kind === "virtual_joystick" && layoutModel.cleanChrome;
-  const drawingGuessChrome = gameId === "zeichnen-und-erraten";
-  // Chaos-Kommando bringt eine eigene, vollflaechige Steuerung mit. Spielname,
-  // Phase, Raumcode, Punktestand und Abmelden wuerden dort nur Platz kosten;
-  // Restzeit und Spielername stehen auf dem Host.
-  const artilleryChrome = gameId === "chaos-kommando";
-  const flatterfluffChrome = gameId === "flatterfluff" || cleanJoystickChrome;
-  const minimalChrome =
-    denseBoardChrome ||
-    gamepadChrome ||
-    joystickChrome ||
-    artilleryChrome ||
-    flatterfluffChrome;
+  const bareChrome = chrome.bare || joystickChrome || cleanJoystickChrome;
+  const wideChrome = chrome.wide;
+  const minimalChrome = chrome.minimal || bareChrome || joystickChrome;
+  const hideSubtitle = chrome.hideSubtitle || cleanJoystickChrome;
 
   return (
     <ControllerFrame
       title={minimalChrome ? "" : gameName}
-      subtitle={minimalChrome || cleanJoystickChrome || drawingGuessChrome ? undefined : `${text.phase}: ${text.formatPhase(game?.phase ?? text.unknown)} | ${orientation}`}
-      wide={gamepadChrome || denseBoardChrome}
-      bare={joystickChrome || flatterfluffChrome}
+      subtitle={minimalChrome || hideSubtitle ? undefined : `${text.phase}: ${text.formatPhase(game?.phase ?? text.unknown)} | ${orientation}`}
+      wide={wideChrome}
+      bare={bareChrome}
       footer={
         minimalChrome ? undefined :
         <div style={{ display: "grid", gap: 10 }}>
-          {!drawingGuessChrome ? (
+          {!hideSubtitle ? (
             <button type="button" onClick={onLeaveRoom} style={secondaryButtonStyle}>
               {text.logout}
             </button>
           ) : null}
           {!cleanJoystickChrome ? (
             <div style={{ display: "grid", gap: 8 }}>
-              {!drawingGuessChrome ? (
+              {!hideSubtitle ? (
                 <small style={{ color: "var(--text-muted)" }}>{text.room} {state.room.code}</small>
               ) : null}
               <small style={{ color: "var(--text-muted)" }}>
@@ -224,9 +219,9 @@ export function ControllerPage({ state, onLeaveRoom, onInput, onSetReady }: Cont
 }
 
 const secondaryButtonStyle = {
-  border: "1px solid rgba(248, 113, 113, 0.45)",
+  border: "1px solid var(--danger)",
   borderRadius: "var(--radius-md)",
-  background: "rgba(127, 29, 29, 0.18)",
+  background: "var(--danger-soft)",
   color: "var(--text-main)",
   padding: "14px 18px",
   fontWeight: 700

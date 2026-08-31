@@ -54,7 +54,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
           padding: 18,
           borderRadius: 22,
           border: "1px solid var(--panel-border)",
-          background: "linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(8, 47, 73, 0.82) 100%)"
+          background: "linear-gradient(180deg, color-mix(in srgb, var(--surface) 94%, transparent) 0%, color-mix(in srgb, var(--accent-soft) 82%, transparent) 100%)"
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline" }}>
@@ -72,8 +72,8 @@ export function ShopLayout({ model }: ShopLayoutProps) {
             gap: 12,
             padding: 18,
             borderRadius: 22,
-            border: "1px solid rgba(56, 189, 248, 0.35)",
-            background: "linear-gradient(180deg, rgba(8, 47, 73, 0.5) 0%, rgba(15, 23, 42, 0.86) 100%)"
+            border: "1px solid color-mix(in srgb, var(--accent) 35%, transparent)",
+            background: "linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 50%, transparent) 0%, color-mix(in srgb, var(--surface) 86%, transparent) 100%)"
           }}
         >
           <div style={{ display: "grid", gap: 4 }}>
@@ -94,8 +94,8 @@ export function ShopLayout({ model }: ShopLayoutProps) {
               opacity: model.disabled ? 0.55 : 1,
               minHeight: 64,
               background: model.ready.currentPlayerReady
-                ? "linear-gradient(180deg, rgba(16, 185, 129, 0.94) 0%, rgba(5, 150, 105, 0.98) 100%)"
-                : "linear-gradient(180deg, #38bdf8 0%, #0ea5e9 100%)"
+                ? "linear-gradient(180deg, color-mix(in srgb, var(--sage) 94%, transparent) 0%, color-mix(in srgb, var(--sage-strong) 98%, transparent) 100%)"
+                : "linear-gradient(180deg, var(--accent) 0%, var(--accent) 100%)"
             }}
           >
             {model.ready.currentPlayerReady ? (en ? "Not ready" : "Nicht bereit") : model.ready.label}
@@ -114,7 +114,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
           style={{
             padding: 14,
             borderRadius: 18,
-            background: "rgba(15, 23, 42, 0.52)",
+            background: "color-mix(in srgb, var(--surface) 52%, transparent)",
             border: "1px solid var(--panel-border)"
           }}
         >
@@ -126,7 +126,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
             style={{
               padding: 14,
               borderRadius: 18,
-              background: "rgba(15, 23, 42, 0.52)",
+              background: "color-mix(in srgb, var(--surface) 52%, transparent)",
               border: "1px solid var(--panel-border)"
             }}
           >
@@ -154,12 +154,12 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                   borderRadius: 16,
                   background:
                     selectedWeapon?.weaponInstanceId === weapon.weaponInstanceId
-                      ? "rgba(14, 165, 233, 0.2)"
-                      : "rgba(8, 47, 73, 0.34)",
+                      ? "color-mix(in srgb, var(--accent) 20%, transparent)"
+                      : "color-mix(in srgb, var(--accent-soft) 34%, transparent)",
                   border:
                     selectedWeapon?.weaponInstanceId === weapon.weaponInstanceId
-                      ? "1px solid rgba(56, 189, 248, 0.44)"
-                      : "1px solid rgba(56, 189, 248, 0.18)",
+                      ? "1px solid color-mix(in srgb, var(--accent) 44%, transparent)"
+                      : "1px solid color-mix(in srgb, var(--accent) 18%, transparent)",
                   color: "var(--text-main)",
                   textAlign: "left",
                   cursor: "pointer"
@@ -174,8 +174,8 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                     style={{
                       borderRadius: 10,
                       objectFit: "contain",
-                      background: "rgba(15, 23, 42, 0.68)",
-                      border: "1px solid rgba(148, 163, 184, 0.18)",
+                      background: "color-mix(in srgb, var(--surface) 68%, transparent)",
+                      border: "1px solid color-mix(in srgb, var(--muted) 18%, transparent)",
                       padding: 4
                     }}
                   />
@@ -192,7 +192,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                       style={{
                         display: "block",
                         marginTop: 2,
-                        color: "#86efac",
+                        color: "var(--ink-soft)",
                         fontSize: "0.68rem",
                         fontWeight: 700
                       }}
@@ -213,8 +213,8 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                   gap: 12,
                   padding: "12px 14px",
                   borderRadius: 16,
-                  background: "rgba(15, 23, 42, 0.42)",
-                  border: "1px solid rgba(148, 163, 184, 0.16)"
+                  background: "color-mix(in srgb, var(--surface) 42%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--muted) 16%, transparent)"
                 }}
               >
                 <span>{item.displayName}</span>
@@ -231,8 +231,8 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                 fontSize: "clamp(1.05rem, 2.7vw, 1.35rem)",
                 opacity: selectedWeapon.canCombine ? 1 : 0.55,
                 background: selectedWeapon.canCombine
-                  ? "linear-gradient(180deg, rgba(16, 185, 129, 0.94) 0%, rgba(5, 150, 105, 0.98) 100%)"
-                  : "rgba(30, 41, 59, 0.82)"
+                  ? "linear-gradient(180deg, color-mix(in srgb, var(--sage) 94%, transparent) 0%, color-mix(in srgb, var(--sage-strong) 98%, transparent) 100%)"
+                  : "color-mix(in srgb, var(--surface-raised) 82%, transparent)"
               }}
             >
               {selectedWeapon.canCombine
@@ -251,8 +251,8 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                 gap: 10,
                 padding: 14,
                 borderRadius: 18,
-                background: "rgba(8, 47, 73, 0.28)",
-                border: "1px solid rgba(56, 189, 248, 0.2)"
+                background: "color-mix(in srgb, var(--accent-soft) 28%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--accent) 20%, transparent)"
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline" }}>
@@ -277,11 +277,11 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                         padding: "8px 10px",
                         borderRadius: 12,
                         border: stat.highlighted
-                          ? "1px solid rgba(56, 189, 248, 0.34)"
-                          : "1px solid rgba(148, 163, 184, 0.14)",
+                          ? "1px solid color-mix(in srgb, var(--accent) 34%, transparent)"
+                          : "1px solid color-mix(in srgb, var(--muted) 14%, transparent)",
                         background: stat.highlighted
-                          ? "rgba(8, 47, 73, 0.5)"
-                          : "rgba(15, 23, 42, 0.36)"
+                          ? "color-mix(in srgb, var(--accent-soft) 50%, transparent)"
+                          : "color-mix(in srgb, var(--surface) 36%, transparent)"
                       }}
                     >
                       <span style={{ color: "var(--text-muted)", fontSize: "0.7rem", letterSpacing: "0.04em" }}>
@@ -302,8 +302,8 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                     fontSize: "clamp(1.2rem, 3vw, 1.5rem)",
                     opacity: selectedWeapon.sellable ? 1 : 0.55,
                     background: selectedWeapon.sellable
-                      ? "linear-gradient(180deg, rgba(249, 115, 22, 0.94) 0%, rgba(234, 88, 12, 0.98) 100%)"
-                      : "rgba(30, 41, 59, 0.82)"
+                      ? "linear-gradient(180deg, color-mix(in srgb, var(--amber) 94%, transparent) 0%, color-mix(in srgb, var(--amber) 98%, transparent) 100%)"
+                      : "color-mix(in srgb, var(--surface-raised) 82%, transparent)"
                   }}
                 >
                   {selectedWeapon.sellable
@@ -321,8 +321,8 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                       fontSize: "clamp(1.1rem, 2.7vw, 1.4rem)",
                       opacity: selectedWeapon.canCombine ? 1 : 0.55,
                       background: selectedWeapon.canCombine
-                        ? "linear-gradient(180deg, rgba(16, 185, 129, 0.94) 0%, rgba(5, 150, 105, 0.98) 100%)"
-                        : "rgba(30, 41, 59, 0.82)"
+                        ? "linear-gradient(180deg, color-mix(in srgb, var(--sage) 94%, transparent) 0%, color-mix(in srgb, var(--sage-strong) 98%, transparent) 100%)"
+                        : "color-mix(in srgb, var(--surface-raised) 82%, transparent)"
                     }}
                   >
                     {selectedWeapon.canCombine
@@ -348,7 +348,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                 minHeight: 52,
                 fontSize: "clamp(1.2rem, 3vw, 1.5rem)",
                 opacity: model.disabled || !model.reroll.affordable ? 0.55 : 1,
-                background: "linear-gradient(180deg, rgba(249, 115, 22, 0.94) 0%, rgba(234, 88, 12, 0.98) 100%)"
+                background: "linear-gradient(180deg, color-mix(in srgb, var(--amber) 94%, transparent) 0%, color-mix(in srgb, var(--amber) 98%, transparent) 100%)"
               }}
             >
               {`${en ? "Reroll" : "Neu wuerfeln"} ${model.reroll.cost} M`}
@@ -372,10 +372,10 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                 borderRadius: 20,
                 border: "1px solid var(--panel-border)",
                 background: offer.purchased
-                  ? "linear-gradient(180deg, rgba(16, 185, 129, 0.16), rgba(15, 23, 42, 0.72))"
+                  ? "linear-gradient(180deg, color-mix(in srgb, var(--sage) 16%, transparent), color-mix(in srgb, var(--surface) 72%, transparent))"
                   : offer.affordable
-                    ? "linear-gradient(180deg, rgba(14, 165, 233, 0.14), rgba(15, 23, 42, 0.72))"
-                    : "rgba(15, 23, 42, 0.72)"
+                    ? "linear-gradient(180deg, color-mix(in srgb, var(--accent) 14%, transparent), color-mix(in srgb, var(--surface) 72%, transparent))"
+                    : "color-mix(in srgb, var(--surface) 72%, transparent)"
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
@@ -389,8 +389,8 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                       style={{
                         borderRadius: 12,
                         objectFit: "cover",
-                        background: "rgba(15, 23, 42, 0.7)",
-                        border: "1px solid rgba(148, 163, 184, 0.18)"
+                        background: "color-mix(in srgb, var(--surface) 70%, transparent)",
+                        border: "1px solid color-mix(in srgb, var(--muted) 18%, transparent)"
                       }}
                     />
                   ) : null}
@@ -406,7 +406,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                     alignSelf: "start",
                     padding: "4px 8px",
                     borderRadius: 999,
-                    background: offer.affordable ? "rgba(34, 197, 94, 0.16)" : "rgba(148, 163, 184, 0.14)",
+                    background: offer.affordable ? "color-mix(in srgb, var(--sage) 16%, transparent)" : "color-mix(in srgb, var(--muted) 14%, transparent)",
                     color: "var(--text-main)",
                     fontWeight: 800,
                     fontSize: "0.86rem"
@@ -439,11 +439,11 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                         padding: "8px 10px",
                         borderRadius: 12,
                         border: stat.highlighted
-                          ? "1px solid rgba(56, 189, 248, 0.34)"
-                          : "1px solid rgba(148, 163, 184, 0.14)",
+                          ? "1px solid color-mix(in srgb, var(--accent) 34%, transparent)"
+                          : "1px solid color-mix(in srgb, var(--muted) 14%, transparent)",
                         background: stat.highlighted
-                          ? "rgba(8, 47, 73, 0.5)"
-                          : "rgba(15, 23, 42, 0.36)"
+                          ? "color-mix(in srgb, var(--accent-soft) 50%, transparent)"
+                          : "color-mix(in srgb, var(--surface) 36%, transparent)"
                       }}
                     >
                       <span style={{ color: "var(--text-muted)", fontSize: "0.7rem", letterSpacing: "0.04em" }}>
@@ -465,10 +465,10 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                   fontWeight: 900,
                   letterSpacing: "0.04em",
                   background: offer.purchased
-                    ? "rgba(16, 185, 129, 0.18)"
+                    ? "color-mix(in srgb, var(--sage) 18%, transparent)"
                     : offer.affordable
                       ? "linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%)"
-                      : "rgba(30, 41, 59, 0.82)",
+                      : "color-mix(in srgb, var(--surface-raised) 82%, transparent)",
                   color: "var(--text-main)",
                   opacity: model.disabled ? 0.5 : 1,
                   cursor: model.disabled || offer.purchased || !offer.affordable ? "not-allowed" : "pointer",

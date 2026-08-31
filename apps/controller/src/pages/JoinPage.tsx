@@ -65,7 +65,7 @@ export function JoinPage({ defaultRoomCode, connected, error, language, onJoin }
 const inputStyle = {
   borderRadius: "var(--radius-md)",
   border: "1px solid var(--panel-border)",
-  background: "rgba(15, 23, 42, 0.6)",
+  background: "var(--surface)",
   color: "var(--text-main)",
   padding: "14px 16px"
 } as const;
@@ -74,7 +74,7 @@ const primaryButtonStyle = {
   border: 0,
   borderRadius: "var(--radius-md)",
   background: "linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%)",
-  color: "#042f2e",
+  color: "var(--on-accent)",
   padding: "16px 20px",
   fontWeight: 800
 } as const;

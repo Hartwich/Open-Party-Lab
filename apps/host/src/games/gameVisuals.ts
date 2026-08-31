@@ -1,103 +1,81 @@
+import { mixColors, palette, toColorNumber } from "@open-party-lab/ui-kit";
+import type { AvailableGameDto } from "@open-party-lab/protocol";
+
 export interface GameVisual {
+  /** Strong per-game hue used for borders, bars and icons. */
   accent: number;
+  /** Tinted fill behind icons and badges. */
   accentSoft: number;
+  /** Card background. */
   surface: number;
+  /** Card background while hovered. */
   surfaceHover: number;
+  /** Readable text colour on top of `accent`. */
+  onAccent: string;
   eyebrow: string;
+  /** Optional SVG the game ships instead of a platform-drawn icon. */
+  iconPath?: string;
 }
 
-const defaultVisual: GameVisual = {
-  accent: 0x38bdf8,
-  accentSoft: 0x7dd3fc,
-  surface: 0x0f172a,
-  surfaceHover: 0x162033,
-  eyebrow: "Party"
-};
+/**
+ * Catalog appearance for a game.
+ *
+ * The hue comes from the game's manifest; the platform derives the card
+ * surfaces from it so every entry keeps the same lightness and the grid reads
+ * calmly. The platform no longer holds a table of game ids — a game that
+ * declares no visual simply gets the house accent.
+ */
+const DEFAULT_ACCENT = palette.accent;
+const DEFAULT_EYEBROW = "Party";
 
-const gameVisuals: Record<string, GameVisual> = {
-  "chaos-kommando": {
-    accent: 0xf97316,
-    accentSoft: 0xfdba74,
-    surface: 0x24130a,
-    surfaceHover: 0x351d10,
-    eyebrow: "Artillery"
-  },
-  "zeichnen-und-erraten": {
-    accent: 0x38bdf8,
-    accentSoft: 0xbae6fd,
-    surface: 0x0a1a2a,
-    surfaceHover: 0x10283d,
-    eyebrow: "Drawing"
-  },
-  schaetzorama: {
-    accent: 0xfacc15,
-    accentSoft: 0x7dd3fc,
-    surface: 0x1f1534,
-    surfaceHover: 0x32204f,
-    eyebrow: "Quiz"
-  },
-  "arena-survivor": {
-    accent: 0xf97316,
-    accentSoft: 0xfb923c,
-    surface: 0x22130e,
-    surfaceHover: 0x31201a,
-    eyebrow: "Arena"
-  },
-  "minions-td": {
-    accent: 0x22c55e,
-    accentSoft: 0x86efac,
-    surface: 0x0b1f1c,
-    surfaceHover: 0x14302d,
-    eyebrow: "Tower Defense"
-  },
-  imposter: {
-    accent: 0xc084fc,
-    accentSoft: 0xe9d5ff,
-    surface: 0x1d1230,
-    surfaceHover: 0x2a1946,
-    eyebrow: "Bluff"
-  },
-  buzzwort: {
-    accent: 0x60a5fa,
-    accentSoft: 0xbfdbfe,
-    surface: 0x0c1930,
-    surfaceHover: 0x132547,
-    eyebrow: "Words"
-  },
-  pantomime: {
-    accent: 0xa78bfa,
-    accentSoft: 0xddd6fe,
-    surface: 0x17132b,
-    surfaceHover: 0x211b42,
-    eyebrow: "Acting"
-  },
-  "tap-race": {
-    accent: 0x14b8a6,
-    accentSoft: 0x99f6e4,
-    surface: 0x0b201f,
-    surfaceHover: 0x12302e,
-    eyebrow: "Mash"
-  },
-  "air-hockey": {
-    accent: 0x06b6d4,
-    accentSoft: 0xa5f3fc,
-    surface: 0x08202a,
-    surfaceHover: 0x0d3040,
-    eyebrow: "Duel"
-  },
-  "light-trails": {
-    accent: 0xa78bfa,
-    accentSoft: 0xddd6fe,
-    surface: 0x16132b,
-    surfaceHover: 0x1f1b3f,
-    eyebrow: "Arcade"
+function buildVisual(accent: string, eyebrow: string, iconPath?: string): GameVisual {
+  return {
+    accent: toColorNumber(accent),
+    // A light tint of the hue — used as the icon plate and badge fill.
+    accentSoft: toColorNumber(mixColors(accent, palette.surface, 0.82)),
+    // Barely-tinted paper so cards stay readable side by side.
+    surface: toColorNumber(mixColors(palette.surface, accent, 0.05)),
+    surfaceHover: toColorNumber(mixColors(palette.surface, accent, 0.13)),
+    onAccent: palette.white,
+    eyebrow,
+    iconPath
+  };
+}
+
+const visualCache = new Map<string, GameVisual>();
+const fallbackVisual = buildVisual(DEFAULT_ACCENT, DEFAULT_EYEBROW);
+
+/**
+ * Resolves and caches the visual for a game.
+ *
+ * `game` may be undefined while the catalog is still loading, in which case the
+ * house accent is used.
+ */
+export function getGameVisual(game: AvailableGameDto | undefined): GameVisual {
+  if (!game) {
+    return fallbackVisual;
   }
-};
 
-export function getGameVisual(gameId: string): GameVisual {
-  return gameVisuals[gameId] ?? defaultVisual;
+  const cached = visualCache.get(game.id);
+
+  if (cached) {
+    return cached;
+  }
+
+  const visual = buildVisual(
+    game.visual?.accent ?? DEFAULT_ACCENT,
+    game.visual?.eyebrow ?? DEFAULT_EYEBROW,
+    game.visual?.iconPath
+  );
+  visualCache.set(game.id, visual);
+  return visual;
 }
 
-export function getVisualAccent(gameId: string | null | undefined): number {
-  return gameId ? getGameVisual(gameId).accent : defaultVisual.accent;
+export function getVisualAccent(game: AvailableGameDto | undefined): number {
+  return getGameVisual(game).accent;
+}
+
+/** Clears the cache when the catalog changes language or is reloaded. */
+export function clearGameVisualCache(): void {
+  visualCache.clear();
 }

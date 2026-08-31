@@ -43,7 +43,7 @@ export function LeftRightHoldLayout({ model }: LeftRightHoldLayoutProps) {
           padding: 18,
           borderRadius: 20,
           border: "1px solid var(--panel-border)",
-          background: "rgba(8, 47, 73, 0.28)"
+          background: "color-mix(in srgb, var(--accent-soft) 28%, transparent)"
         }}
       >
         <strong style={{ fontSize: "1.2rem", color: model.accentColor ?? "var(--accent)" }}>
@@ -82,7 +82,7 @@ export function LeftRightHoldLayout({ model }: LeftRightHoldLayoutProps) {
                 gap: 12,
                 padding: "12px 14px",
                 borderRadius: 16,
-                background: stat.highlighted ? "rgba(34, 211, 238, 0.14)" : "rgba(15, 23, 42, 0.45)",
+                background: stat.highlighted ? "color-mix(in srgb, var(--accent) 14%, transparent)" : "color-mix(in srgb, var(--surface) 45%, transparent)",
                 border: "1px solid var(--panel-border)"
               }}
             >

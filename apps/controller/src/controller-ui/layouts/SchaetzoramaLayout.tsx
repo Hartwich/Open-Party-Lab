@@ -230,8 +230,8 @@ function renderQuestionBody(
                   }
                   style={{
                     ...segmentButtonStyle,
-                    background: assignments[term.id] === zone ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.12)",
-                    color: assignments[term.id] === zone ? "#111827" : "#f8fafc"
+                    background: assignments[term.id] === zone ? "color-mix(in srgb, var(--on-accent) 92%, transparent)" : "color-mix(in srgb, var(--on-accent) 12%, transparent)",
+                    color: assignments[term.id] === zone ? "var(--surface)" : "var(--ink)"
                   }}
                 >
                   {zoneLabel(zone, language)}
@@ -393,7 +393,7 @@ function CopyReviewView({
 function AnswerPreview({ title, text }: { title: string; text: string }) {
   return (
     <div style={answerPreviewStyle}>
-      <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.82rem" }}>{title}</span>
+      <span style={{ color: "color-mix(in srgb, var(--on-accent) 70%, transparent)", fontSize: "0.82rem" }}>{title}</span>
       <strong>{text}</strong>
     </div>
   );
@@ -628,12 +628,12 @@ const headerStyle = {
   alignItems: "center",
   padding: 14,
   borderRadius: 14,
-  background: "linear-gradient(135deg, rgba(236, 72, 153, 0.86), rgba(14, 165, 233, 0.86) 52%, rgba(250, 204, 21, 0.86))",
-  color: "#fff"
+  background: "linear-gradient(135deg, color-mix(in srgb, var(--danger) 86%, transparent), color-mix(in srgb, var(--accent) 86%, transparent) 52%, color-mix(in srgb, var(--amber) 86%, transparent))",
+  color: "var(--on-accent)"
 } as const;
 
 const subtleTextStyle = {
-  color: "rgba(255,255,255,0.72)",
+  color: "color-mix(in srgb, var(--on-accent) 72%, transparent)",
   fontSize: "0.92rem"
 } as const;
 
@@ -642,7 +642,7 @@ const timerPillStyle = {
   textAlign: "center",
   padding: "8px 10px",
   borderRadius: 999,
-  background: "rgba(2, 6, 23, 0.32)",
+  background: "color-mix(in srgb, var(--paper) 32%, transparent)",
   fontWeight: 800
 } as const;
 
@@ -658,10 +658,10 @@ const questionGridStyle = {
 } as const;
 
 const colorByCategory: Record<SchaetzoramaCategoryId, string> = {
-  number: "rgba(34, 197, 94, 0.72)",
-  percent: "rgba(59, 130, 246, 0.72)",
-  rank: "rgba(236, 72, 153, 0.72)",
-  assign: "rgba(249, 115, 22, 0.72)"
+  number: "color-mix(in srgb, var(--sage) 72%, transparent)",
+  percent: "color-mix(in srgb, var(--accent) 72%, transparent)",
+  rank: "color-mix(in srgb, var(--danger) 72%, transparent)",
+  assign: "color-mix(in srgb, var(--amber) 72%, transparent)"
 };
 
 function panelStyle(categoryId: SchaetzoramaCategoryId) {
@@ -670,15 +670,15 @@ function panelStyle(categoryId: SchaetzoramaCategoryId) {
     gap: 10,
     padding: 14,
     borderRadius: 14,
-    border: "1px solid rgba(255,255,255,0.16)",
-    background: `linear-gradient(135deg, ${colorByCategory[categoryId]}, rgba(15, 23, 42, 0.84))`
+    border: "1px solid color-mix(in srgb, var(--on-accent) 16%, transparent)",
+    background: `linear-gradient(135deg, ${colorByCategory[categoryId]}, color-mix(in srgb, var(--surface) 84%, transparent))`
   } as const;
 }
 
 const questionTextStyle = {
   margin: 0,
   lineHeight: 1.35,
-  color: "rgba(255,255,255,0.92)"
+  color: "color-mix(in srgb, var(--on-accent) 92%, transparent)"
 } as const;
 
 const numberInputWrapStyle = {
@@ -688,7 +688,7 @@ const numberInputWrapStyle = {
   gap: 12,
   padding: "8px 10px",
   borderRadius: 12,
-  background: "rgba(2, 6, 23, 0.24)"
+  background: "color-mix(in srgb, var(--paper) 24%, transparent)"
 } as const;
 
 const numberInputStyle = {
@@ -707,16 +707,16 @@ const rankRowStyle = {
   gap: 10,
   padding: 10,
   borderRadius: 12,
-  background: "rgba(2, 6, 23, 0.24)"
+  background: "color-mix(in srgb, var(--paper) 24%, transparent)"
 } as const;
 
 const miniButtonStyle = {
   minWidth: 54,
   minHeight: 38,
   borderRadius: 10,
-  border: "1px solid rgba(255,255,255,0.24)",
-  background: "rgba(255,255,255,0.13)",
-  color: "#fff",
+  border: "1px solid color-mix(in srgb, var(--on-accent) 24%, transparent)",
+  background: "color-mix(in srgb, var(--on-accent) 13%, transparent)",
+  color: "var(--on-accent)",
   fontWeight: 800
 } as const;
 
@@ -724,7 +724,7 @@ const assignLegendStyle = {
   display: "grid",
   gridTemplateColumns: "1fr 1fr 1fr",
   gap: 6,
-  color: "rgba(255,255,255,0.74)",
+  color: "color-mix(in srgb, var(--on-accent) 74%, transparent)",
   fontSize: "0.78rem",
   textAlign: "center"
 } as const;
@@ -734,7 +734,7 @@ const assignRowStyle = {
   gap: 8,
   padding: 10,
   borderRadius: 12,
-  background: "rgba(2, 6, 23, 0.24)"
+  background: "color-mix(in srgb, var(--paper) 24%, transparent)"
 } as const;
 
 const segmentedStyle = {
@@ -746,7 +746,7 @@ const segmentedStyle = {
 const segmentButtonStyle = {
   minHeight: 38,
   borderRadius: 10,
-  border: "1px solid rgba(255,255,255,0.2)",
+  border: "1px solid color-mix(in srgb, var(--on-accent) 20%, transparent)",
   fontWeight: 800
 } as const;
 
@@ -754,8 +754,8 @@ const primaryButtonStyle = {
   minHeight: 54,
   borderRadius: 14,
   border: "none",
-  background: "linear-gradient(135deg, #facc15, #fb7185 48%, #38bdf8)",
-  color: "#111827",
+  background: "linear-gradient(135deg, var(--amber), var(--danger) 48%, var(--accent))",
+  color: "var(--on-accent)",
   fontWeight: 900,
   fontSize: "1rem"
 } as const;
@@ -763,7 +763,7 @@ const primaryButtonStyle = {
 const selectLabelStyle = {
   display: "grid",
   gap: 6,
-  color: "rgba(255,255,255,0.82)"
+  color: "color-mix(in srgb, var(--on-accent) 82%, transparent)"
 } as const;
 
 const selectStyle = {
@@ -779,8 +779,8 @@ const copyPanelStyle = {
   gap: 12,
   padding: 14,
   borderRadius: 14,
-  border: "1px solid rgba(255,255,255,0.18)",
-  background: "linear-gradient(135deg, rgba(14, 165, 233, 0.58), rgba(124, 58, 237, 0.56), rgba(249, 115, 22, 0.46))"
+  border: "1px solid color-mix(in srgb, var(--on-accent) 18%, transparent)",
+  background: "linear-gradient(135deg, color-mix(in srgb, var(--accent) 58%, transparent), color-mix(in srgb, var(--accent) 56%, transparent), color-mix(in srgb, var(--amber) 46%, transparent))"
 } as const;
 
 const copySelectGridStyle = {
@@ -801,9 +801,9 @@ const answerPreviewStyle = {
   minHeight: 88,
   padding: 12,
   borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.16)",
-  background: "rgba(2, 6, 23, 0.3)",
-  color: "#ffffff"
+  border: "1px solid color-mix(in srgb, var(--on-accent) 16%, transparent)",
+  background: "color-mix(in srgb, var(--paper) 30%, transparent)",
+  color: "var(--on-accent)"
 } as const;
 
 const copyButtonGridStyle = {
@@ -815,9 +815,9 @@ const copyButtonGridStyle = {
 const secondaryActionStyle = {
   minHeight: 54,
   borderRadius: 14,
-  border: "1px solid rgba(255,255,255,0.26)",
-  background: "rgba(255,255,255,0.12)",
-  color: "#ffffff",
+  border: "1px solid color-mix(in srgb, var(--on-accent) 26%, transparent)",
+  background: "color-mix(in srgb, var(--on-accent) 12%, transparent)",
+  color: "var(--on-accent)",
   fontWeight: 900,
   fontSize: "1rem"
 } as const;
@@ -827,8 +827,8 @@ const resultsPanelStyle = {
   gap: 12,
   padding: 14,
   borderRadius: 14,
-  border: "1px solid rgba(255,255,255,0.18)",
-  background: "linear-gradient(135deg, rgba(34, 197, 94, 0.44), rgba(14, 165, 233, 0.42), rgba(244, 114, 182, 0.38))"
+  border: "1px solid color-mix(in srgb, var(--on-accent) 18%, transparent)",
+  background: "linear-gradient(135deg, color-mix(in srgb, var(--sage) 44%, transparent), color-mix(in srgb, var(--accent) 42%, transparent), color-mix(in srgb, var(--accent) 38%, transparent))"
 } as const;
 
 const resultRowStyle = {
@@ -837,7 +837,7 @@ const resultRowStyle = {
   gap: 12,
   padding: "10px 12px",
   borderRadius: 12,
-  background: "rgba(2, 6, 23, 0.3)"
+  background: "color-mix(in srgb, var(--paper) 30%, transparent)"
 } as const;
 
 const solutionGridStyle = {
@@ -850,7 +850,7 @@ const solutionPillStyle = {
   gap: 4,
   padding: "10px 12px",
   borderRadius: 12,
-  background: "rgba(255,255,255,0.11)"
+  background: "color-mix(in srgb, var(--on-accent) 11%, transparent)"
 } as const;
 
 const leaderboardStyle = {
@@ -863,7 +863,7 @@ const leaderboardPillStyle = {
   border: "2px solid",
   borderRadius: 999,
   padding: "7px 10px",
-  background: "rgba(15, 23, 42, 0.54)",
+  background: "color-mix(in srgb, var(--surface) 54%, transparent)",
   color: "var(--text-main)",
   fontSize: "0.84rem",
   fontWeight: 800
@@ -879,7 +879,7 @@ const progressDotStyle = {
   border: "2px solid",
   borderRadius: 999,
   padding: "6px 9px",
-  background: "rgba(15, 23, 42, 0.58)",
+  background: "color-mix(in srgb, var(--surface) 58%, transparent)",
   color: "var(--text-main)",
   fontSize: "0.82rem"
 } as const;

@@ -64,4 +64,29 @@ export interface ServerGame<
     context: ServerGameContext,
     playerId: string
   ): TPublicState;
+
+  /**
+   * Whether a finished round should flow straight into the next one.
+   *
+   * Only games with a persistent run (survive-and-continue, campaign, best-of)
+   * implement this. Returning false actively *blocks* the next round, so a game
+   * that simply wants the normal "everyone readies up again" flow must leave
+   * this out rather than returning false.
+   */
+  shouldContinueRun?(state: TState, context: ServerGameContext): boolean;
+
+  /**
+   * Builds an incremental host patch relative to the last public state the host
+   * received, or null when a full state must be sent instead.
+   *
+   * Games with large per-tick state implement this to cut bandwidth. The
+   * platform used to compute one game's delta itself, which required the
+   * broadcaster to know that game's state shape; it now only carries the
+   * previous snapshot and hands it back.
+   */
+  buildHostPatch?(
+    state: TPublicState,
+    previousState: TPublicState | null,
+    context: ServerGameContext
+  ): unknown | null;
 }

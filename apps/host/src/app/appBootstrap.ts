@@ -1,5 +1,6 @@
 ﻿import Phaser from "phaser";
-import { hostTheme } from "../ui/theme/theme.js";
+import { HOST_THEME_REGISTRY_KEY } from "@open-party-lab/game-core";
+import { hostTheme, partyTheme } from "../ui/theme/theme.js";
 import { mountDebugOverlay } from "./debugOverlay.js";
 import { mountHudOverlay } from "./hudOverlay.js";
 import { mountFullscreenOverlay } from "./fullscreenOverlay.js";
@@ -8,6 +9,7 @@ import { mountBackgroundMusic } from "./backgroundMusic.js";
 import { createHostRouter } from "./router.js";
 import { HostSocketClient, type HostAppState } from "./hostSocketClient.js";
 import { mountJoinOverlay } from "./joinOverlay.js";
+import { mountHostControlOverlay } from "./hostControlOverlay.js";
 import {
   applyHostFps,
   createHostFpsConfig,
@@ -17,8 +19,6 @@ import {
 import { BootScene } from "../scenes/BootScene.js";
 import { LobbyScene } from "../scenes/LobbyScene.js";
 import { GameSelectScene } from "../scenes/GameSelectScene.js";
-import { RoundIntroScene } from "../scenes/RoundIntroScene.js";
-import { ScoreboardScene } from "../scenes/ScoreboardScene.js";
 import { externalHostScenes } from "../games/.generated/externalGames.js";
 
 interface HostAutomationBridge {
@@ -89,19 +89,30 @@ export function bootstrapHostApp(requestedRoomCode: string | null = null): Phase
       BootScene,
       LobbyScene,
       GameSelectScene,
-      RoundIntroScene,
-      ScoreboardScene,
       ...externalHostScenes
     ]
   });
 
   applyHostFps(game, preferredFps);
   game.registry.set("hostClient", hostClient);
+  // Games paint with the same tokens as the platform. The object is mutated in
+  // place on a theme switch, so one registry entry is enough for the lifetime
+  // of the app.
+  game.registry.set(HOST_THEME_REGISTRY_KEY, partyTheme);
+  // The canvas clear colour is set once at construction, so it has to be
+  // refreshed whenever the room switches theme.
+  hostClient.subscribe(() => {
+    if (hostClient.consumeThemeChange()) {
+      game.scene.getScenes(true).forEach((scene) => scene.scene.restart());
+      game.canvas.style.background = hostTheme.background;
+    }
+  });
   createHostRouter(game, hostClient);
   mountJoinOverlay(hostClient);
   mountHudOverlay(hostClient);
   mountDebugOverlay(game, hostClient);
   mountHostControlsOverlay(game, hostClient);
+  mountHostControlOverlay(hostClient);
   mountFullscreenOverlay(hostClient);
   mountScreenWakeLock();
   mountBackgroundMusic(hostClient);

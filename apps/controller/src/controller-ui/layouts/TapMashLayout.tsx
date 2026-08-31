@@ -24,7 +24,7 @@ export function TapMashLayout({ model }: TapMashLayoutProps) {
         style={{
           borderRadius: "999px",
           overflow: "hidden",
-          background: "rgba(15, 23, 42, 0.56)",
+          background: "color-mix(in srgb, var(--surface) 56%, transparent)",
           height: 18
         }}
       >
@@ -32,7 +32,7 @@ export function TapMashLayout({ model }: TapMashLayoutProps) {
           style={{
             width: `${progressPercent}%`,
             height: "100%",
-            background: "linear-gradient(90deg, #22d3ee 0%, #10b981 100%)"
+            background: "linear-gradient(90deg, var(--accent) 0%, var(--sage) 100%)"
           }}
         />
       </div>
@@ -58,7 +58,7 @@ export function TapMashLayout({ model }: TapMashLayoutProps) {
               justifyContent: "space-between",
               padding: "12px 14px",
               borderRadius: "var(--radius-md)",
-              background: row.highlighted ? "rgba(34, 211, 238, 0.16)" : "rgba(15, 23, 42, 0.52)"
+              background: row.highlighted ? "color-mix(in srgb, var(--accent) 16%, transparent)" : "color-mix(in srgb, var(--surface) 52%, transparent)"
             }}
           >
             <span style={{ color: "var(--text-muted)" }}>{row.label}</span>

@@ -18,11 +18,11 @@ export function ControllerFrame({ title, subtitle, footer, wide = false, bare = 
         width: "100%",
         minHeight: bare ? "min(82vh, 760px)" : undefined,
         margin: "0 auto",
-        background: bare ? "transparent" : wide ? "rgba(2, 6, 23, 0.64)" : "var(--panel-bg)",
-        border: bare ? "0" : wide ? "1px solid rgba(148, 163, 184, 0.14)" : "1px solid var(--panel-border)",
+        background: bare ? "transparent" : wide ? "color-mix(in srgb, var(--paper) 64%, transparent)" : "var(--panel-bg)",
+        border: bare ? "0" : wide ? "1px solid color-mix(in srgb, var(--muted) 14%, transparent)" : "1px solid var(--panel-border)",
         borderRadius: bare ? 0 : wide ? 18 : "var(--radius-lg)",
         padding: bare ? 0 : wide ? 8 : 14,
-        boxShadow: bare ? "none" : wide ? "0 18px 36px rgba(2, 6, 23, 0.24)" : "var(--button-shadow)",
+        boxShadow: bare ? "none" : wide ? "0 18px 36px color-mix(in srgb, var(--paper) 24%, transparent)" : "var(--button-shadow)",
         backdropFilter: bare ? "none" : "blur(10px)"
       }}
     >

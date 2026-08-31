@@ -10,6 +10,7 @@ import { driftRacerText } from "./games/driftRacer.js";
 import { schaetzoramaText } from "./games/schaetzorama.js";
 import { wordTilesText } from "./games/wordTiles.js";
 import { schattenjagdText } from "./games/schattenjagd.js";
+import { cardTableText } from "./games/cardTable.js";
 
 const gameTextCatalog = {
   "zeichnen-und-erraten": zeichnenUndErratenText,
@@ -22,7 +23,8 @@ const gameTextCatalog = {
   schaetzorama: schaetzoramaText,
   "word-tiles": wordTilesText,
   "light-trails": lightTrailsText,
-  schattenjagd: schattenjagdText
+  schattenjagd: schattenjagdText,
+  "card-table": cardTableText
 } as const satisfies Record<string, LocalizedGameTextMap>;
 
 export const gameTextById: Record<string, LocalizedGameTextMap> = gameTextCatalog;

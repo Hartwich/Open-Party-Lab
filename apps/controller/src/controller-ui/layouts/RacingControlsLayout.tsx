@@ -194,12 +194,12 @@ function RacingStick({ disabled, accentColor, steering, throttle, brake, onDrive
           WebkitUserSelect: "none",
           WebkitTouchCallout: "none",
           background: disabled
-            ? "radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.82) 0%, rgba(2, 6, 23, 0.96) 72%)"
-            : "radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.2) 0%, rgba(2, 6, 23, 0.96) 74%)",
-          border: `1px solid ${disabled ? "rgba(148, 163, 184, 0.22)" : accentColor}`,
+            ? "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--surface-raised) 82%, transparent) 0%, color-mix(in srgb, var(--paper) 96%, transparent) 72%)"
+            : "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 20%, transparent) 0%, color-mix(in srgb, var(--paper) 96%, transparent) 74%)",
+          border: `1px solid ${disabled ? "color-mix(in srgb, var(--muted) 22%, transparent)" : accentColor}`,
           boxShadow: disabled
-            ? "inset 0 0 0 1px rgba(148, 163, 184, 0.1)"
-            : "inset 0 0 0 1px rgba(125, 211, 252, 0.14), 0 22px 48px rgba(2, 6, 23, 0.36)"
+            ? "inset 0 0 0 1px color-mix(in srgb, var(--muted) 10%, transparent)"
+            : "inset 0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent), 0 22px 48px color-mix(in srgb, var(--paper) 36%, transparent)"
         }}
       >
         <div
@@ -209,7 +209,7 @@ function RacingStick({ disabled, accentColor, steering, throttle, brake, onDrive
             right: "10%",
             top: "50%",
             height: 2,
-            background: "rgba(226, 232, 240, 0.12)"
+            background: "color-mix(in srgb, var(--ink-soft) 12%, transparent)"
           }}
         />
         <div
@@ -219,7 +219,7 @@ function RacingStick({ disabled, accentColor, steering, throttle, brake, onDrive
             bottom: "10%",
             left: "50%",
             width: 2,
-            background: "rgba(226, 232, 240, 0.12)"
+            background: "color-mix(in srgb, var(--ink-soft) 12%, transparent)"
           }}
         />
         <div
@@ -227,7 +227,7 @@ function RacingStick({ disabled, accentColor, steering, throttle, brake, onDrive
             position: "absolute",
             inset: "19%",
             borderRadius: "999px",
-            border: "1px solid rgba(148, 163, 184, 0.18)"
+            border: "1px solid color-mix(in srgb, var(--muted) 18%, transparent)"
           }}
         />
         <div
@@ -235,7 +235,7 @@ function RacingStick({ disabled, accentColor, steering, throttle, brake, onDrive
             position: "absolute",
             inset: "36%",
             borderRadius: "999px",
-            border: "1px solid rgba(148, 163, 184, 0.14)"
+            border: "1px solid color-mix(in srgb, var(--muted) 14%, transparent)"
           }}
         />
         <div
@@ -248,15 +248,15 @@ function RacingStick({ disabled, accentColor, steering, throttle, brake, onDrive
             transform: `translate(calc(-50% + ${thumbOffset.x}px), calc(-50% + ${thumbOffset.y}px))`,
             borderRadius: "999px",
             background: disabled
-              ? "linear-gradient(180deg, rgba(71, 85, 105, 0.86) 0%, rgba(30, 41, 59, 0.98) 100%)"
-              : `linear-gradient(180deg, ${accentColor} 0%, rgba(8, 145, 178, 0.94) 100%)`,
-            border: "1px solid rgba(226, 232, 240, 0.24)",
+              ? "linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 86%, transparent) 0%, color-mix(in srgb, var(--surface-raised) 98%, transparent) 100%)"
+              : `linear-gradient(180deg, ${accentColor} 0%, color-mix(in srgb, var(--accent-strong) 94%, transparent) 100%)`,
+            border: "1px solid color-mix(in srgb, var(--ink-soft) 24%, transparent)",
             boxShadow: thumbOffset.active
-              ? "0 16px 34px rgba(8, 145, 178, 0.34)"
-              : "0 10px 24px rgba(15, 23, 42, 0.28)",
+              ? "0 16px 34px color-mix(in srgb, var(--accent-strong) 34%, transparent)"
+              : "0 10px 24px color-mix(in srgb, var(--surface) 28%, transparent)",
             display: "grid",
             placeItems: "center",
-            color: "#f8fafc",
+            color: "var(--ink)",
             fontWeight: 950,
             fontSize: "clamp(0.68rem, 2.2vw, 0.9rem)",
             letterSpacing: "0.06em",
@@ -269,7 +269,7 @@ function RacingStick({ disabled, accentColor, steering, throttle, brake, onDrive
       <div
         style={{
           minHeight: 18,
-          color: "rgba(226, 232, 240, 0.74)",
+          color: "color-mix(in srgb, var(--ink-soft) 74%, transparent)",
           fontSize: "clamp(0.72rem, 2.5vw, 0.92rem)",
           fontWeight: 800,
           letterSpacing: "0.06em"
@@ -338,19 +338,19 @@ function TriangleButton({
       style={{
         position: "absolute",
         padding: 0,
-        border: "3px solid rgba(2, 6, 23, 0.92)",
+        border: "3px solid color-mix(in srgb, var(--paper) 92%, transparent)",
         clipPath,
         background: disabled
-          ? "linear-gradient(180deg, rgba(71, 85, 105, 0.9) 0%, rgba(30, 41, 59, 0.98) 100%)"
+          ? "linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 90%, transparent) 0%, color-mix(in srgb, var(--surface-raised) 98%, transparent) 100%)"
           : active
             ? `linear-gradient(180deg, ${color} 0%, ${color} 100%)`
             : `linear-gradient(180deg, ${color} 0%, ${color} 100%)`,
-        color: "#f8fafc",
+        color: "var(--ink)",
         fontWeight: 950,
         fontSize: "clamp(0.72rem, 2.6vw, 1.02rem)",
         letterSpacing: "0.04em",
-        textShadow: "0 2px 8px rgba(0, 0, 0, 0.48)",
-        boxShadow: active ? `0 0 26px ${color}` : "0 18px 34px rgba(2, 6, 23, 0.24)",
+        textShadow: "0 2px 8px color-mix(in srgb, var(--paper) 48%, transparent)",
+        boxShadow: active ? `0 0 26px ${color}` : "0 18px 34px color-mix(in srgb, var(--paper) 24%, transparent)",
         touchAction: "none",
         WebkitTapHighlightColor: "transparent",
         ...style
@@ -387,7 +387,7 @@ function ActionTriangle({ controls, disabled, onButtonChange }: ActionTrianglePr
         width: "min(43vw, 60dvh, 280px)",
         minWidth: 156,
         aspectRatio: "1 / 0.92",
-        filter: "drop-shadow(0 20px 34px rgba(2, 6, 23, 0.34))"
+        filter: "drop-shadow(0 20px 34px color-mix(in srgb, var(--paper) 34%, transparent))"
       }}
     >
       <TriangleButton
@@ -395,7 +395,7 @@ function ActionTriangle({ controls, disabled, onButtonChange }: ActionTrianglePr
         control="boost"
         active={controls.boost}
         disabled={disabled}
-        color="#22c55e"
+        color="var(--sage)"
         clipPath="polygon(50% 0%, 100% 100%, 0% 100%)"
         labelTop="72%"
         style={{
@@ -412,7 +412,7 @@ function ActionTriangle({ controls, disabled, onButtonChange }: ActionTrianglePr
         control="fire"
         active={controls.fire}
         disabled={disabled}
-        color="#ef1d27"
+        color="var(--danger)"
         clipPath="polygon(0% 100%, 100% 100%, 94% 0%)"
         labelTop="76%"
         style={{
@@ -429,7 +429,7 @@ function ActionTriangle({ controls, disabled, onButtonChange }: ActionTrianglePr
         control="drift"
         active={controls.drift}
         disabled={disabled}
-        color="#3f43c9"
+        color="var(--accent)"
         clipPath="polygon(6% 0%, 100% 100%, 0% 100%)"
         labelTop="76%"
         style={{
@@ -449,7 +449,7 @@ export function RacingControlsLayout({ model }: RacingControlsLayoutProps) {
   const [controls, setControls] = useState<RacingControlsState>(idleControls);
   const controlsRef = useRef(controls);
   const onControlsChangeRef = useRef(model.onControlsChange);
-  const accentColor = model.accentColor ?? "#22d3ee";
+  const accentColor = model.accentColor ?? "var(--accent)";
 
   useEffect(() => {
     onControlsChangeRef.current = model.onControlsChange;

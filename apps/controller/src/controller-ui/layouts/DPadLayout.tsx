@@ -68,7 +68,7 @@ function DirectionButton({
         border: "1px solid var(--panel-border)",
         background: active
           ? accentColor ?? "linear-gradient(160deg, var(--accent) 0%, var(--accent-strong) 100%)"
-          : "rgba(15, 23, 42, 0.72)",
+          : "color-mix(in srgb, var(--surface) 72%, transparent)",
         color: "var(--text-main)",
         fontSize: "clamp(1.1rem, 4vw, 1.65rem)",
         fontWeight: 900,
@@ -124,11 +124,11 @@ function InlineActionButton({
         height: size,
         aspectRatio: "1 / 1",
         borderRadius: "50%",
-        border: "1px solid rgba(125, 211, 252, 0.3)",
+        border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)",
         background: disabled
-          ? "rgba(51, 65, 85, 0.86)"
-          : `linear-gradient(180deg, ${accentColor ?? "#22d3ee"} 0%, rgba(8, 145, 178, 0.92) 100%)`,
-        color: disabled ? "rgba(226, 232, 240, 0.72)" : "#f8fafc",
+          ? "color-mix(in srgb, var(--line-strong) 86%, transparent)"
+          : `linear-gradient(180deg, ${accentColor ?? "var(--accent)"} 0%, color-mix(in srgb, var(--accent-strong) 92%, transparent) 100%)`,
+        color: disabled ? "color-mix(in srgb, var(--ink-soft) 72%, transparent)" : "var(--ink)",
         fontSize: "clamp(1rem, 3.4vw, 1.45rem)",
         fontWeight: 900,
         letterSpacing: "0.04em",
@@ -299,7 +299,7 @@ export function DPadLayout({ model }: DPadLayoutProps) {
           placeItems: "center",
           borderRadius: 24,
           border: "1px solid var(--panel-border)",
-          background: "rgba(15, 23, 42, 0.52)",
+          background: "color-mix(in srgb, var(--surface) 52%, transparent)",
           color: "var(--text-muted)",
           fontWeight: 800,
           letterSpacing: "0.12em"
@@ -338,7 +338,7 @@ export function DPadLayout({ model }: DPadLayoutProps) {
             padding: 18,
             borderRadius: 20,
             border: "1px solid var(--panel-border)",
-            background: "rgba(8, 47, 73, 0.28)"
+            background: "color-mix(in srgb, var(--accent-soft) 28%, transparent)"
           }}
         >
           <strong style={{ fontSize: "1.25rem", color: model.accentColor ?? "var(--accent)" }}>{model.title}</strong>
@@ -378,7 +378,7 @@ export function DPadLayout({ model }: DPadLayoutProps) {
                 justifyContent: "space-between",
                 padding: "12px 14px",
                 borderRadius: "var(--radius-md)",
-                background: stat.highlighted ? "rgba(34, 211, 238, 0.16)" : "rgba(15, 23, 42, 0.52)"
+                background: stat.highlighted ? "color-mix(in srgb, var(--accent) 16%, transparent)" : "color-mix(in srgb, var(--surface) 52%, transparent)"
               }}
             >
               <span style={{ color: "var(--text-muted)" }}>{stat.label}</span>

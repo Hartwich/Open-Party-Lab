@@ -1,4 +1,5 @@
 ﻿export type ControllerLayoutKey =
+  | "card_hand"
   | "chaos_kommando_controls"
   | "drawing_guess"
   | "schaetzorama"

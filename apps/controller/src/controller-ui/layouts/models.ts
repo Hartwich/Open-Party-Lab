@@ -685,6 +685,50 @@ export interface MagicArenaLayoutModel {
   onPlayTurn: (action: any) => void;
 }
 
+/**
+ * Handkarten im Querformat.
+ *
+ * Generisches Modell für Kartenspiele: der gemeinsame Tisch, die eigene Hand
+ * und die Aktionen, die der Server für das aktuelle Regelwerk liefert. Neue
+ * Kartenspiele füllen dieselbe Form und bekommen dieselbe Oberfläche.
+ */
+export interface CardHandLayoutModel {
+  kind: "card_hand";
+  title: string;
+  subtitle: string;
+  helperText: string;
+  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  disabled: boolean;
+  canAct: boolean;
+  resetKey: string;
+  deckLabel: string;
+  backStyle: import("@open-party-lab/protocol").CardTableBackStyle;
+  hand: import("@open-party-lab/protocol").CardTableHandCardState[];
+  stacks: import("@open-party-lab/protocol").CardTableStackState[];
+  seats: import("@open-party-lab/protocol").CardTableSeatState[];
+  actions: import("@open-party-lab/protocol").CardTableActionState[];
+  currentPlayerId: string;
+  activePlayerId: string | null;
+  activePlayerName: string | null;
+  direction: 1 | -1;
+  turnNumber: number;
+  conditionLabel?: string;
+  conditionSymbol?: string;
+  conditionColor?: import("@open-party-lab/protocol").CardTableColor;
+  pendingChoice?: import("@open-party-lab/protocol").CardTableChoiceState;
+  pendingChoiceCardIds: string[];
+  /** Hinweis, den nur dieser Spieler sieht, z. B. der eigene Handwert. */
+  privateNote?: string;
+  log: import("@open-party-lab/protocol").CardTableLogEntryState[];
+  lastError?: string;
+  gameOver: boolean;
+  winnerName?: string;
+  ready?: ReadyLayoutModel;
+  onPlayCard: (cardId: string, choiceId?: string) => void;
+  onDraw: () => void;
+  onAction: (actionId: string) => void;
+}
+
 export type ControllerLayoutModel =
   | SingleButtonLayoutModel
   | ChoiceLayoutModel
@@ -703,6 +747,7 @@ export type ControllerLayoutModel =
   | DrawingGuessLayoutModel
   | SchaetzoramaLayoutModel
   | WordTilesLayoutModel
-  | MagicArenaLayoutModel;
+  | MagicArenaLayoutModel
+  | CardHandLayoutModel;
 
 // TODO: Fuer spaetere Minispiele hier weitere Layout-Modelle wie Choice und Swipe ergaenzen.

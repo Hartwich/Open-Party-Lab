@@ -97,6 +97,12 @@ export function ControllerApp() {
           onLeaveRoom={() => controllerClient.leaveRoom()}
           onSetReady={(isReady) => controllerClient.setReady(isReady)}
           onSetPlayerSetup={(selectionKey, value) => controllerClient.setPlayerSetup(selectionKey, value)}
+          onRequestHostControl={() => controllerClient.requestHostControl()}
+          onReleaseHostControl={() => controllerClient.releaseHostControl()}
+          onSelectGame={(gameId) => controllerClient.selectGame(gameId)}
+          onStartRound={() => controllerClient.startRound()}
+          onBackToMenu={() => controllerClient.returnToGameSelection()}
+          onKickPlayer={(playerId) => controllerClient.kickPlayer(playerId)}
         />
       ) : null}
 

@@ -1,6 +1,4 @@
 import type {
-  LightTrailsHostPatch,
-  LightTrailsState,
   ClientToServerEvents,
   GamePatchPayload,
   InterServerEvents,
@@ -17,8 +15,9 @@ import { GameRegistry } from "./gameRegistry.js";
 import { GameRuntime } from "./gameRuntime.js";
 import { ScoreManager } from "./scoreManager.js";
 
-const playingHostStateIntervalMs = 33;
-const chaosKommandoControllerStateIntervalMs = 100;
+/** Default cadence while a round is live; games may raise it in their manifest. */
+const defaultHostStateIntervalMs = 33;
+const defaultControllerStateIntervalMs = 0;
 
 export class StateBroadcaster {
   constructor(
@@ -33,14 +32,13 @@ export class StateBroadcaster {
     private readonly scoreManager: ScoreManager
   ) {}
 
-  private readonly lightTrailsHostCache = new Map<
+  /**
+   * Last public host state emitted per room, so games that support patches can
+   * diff against exactly what the host already has.
+   */
+  private readonly lastHostStateByRoom = new Map<
     string,
-    {
-      roundNumber: number;
-      phase: string;
-      tick: number;
-      segmentCountsByPlayerId: Map<string, number>;
-    }
+    { roundNumber: number; phase: string; state: unknown }
   >();
   private readonly lastHostEmitAtByRoom = new Map<string, number>();
   private readonly lastControllerEmitAtByRoom = new Map<string, number>();
@@ -83,7 +81,7 @@ export class StateBroadcaster {
   }
 
   clearGameStateCache(roomCode: string): void {
-    this.lightTrailsHostCache.delete(roomCode);
+    this.lastHostStateByRoom.delete(roomCode);
     this.lastHostEmitAtByRoom.delete(roomCode);
     this.lastControllerEmitAtByRoom.delete(roomCode);
   }
@@ -236,95 +234,99 @@ export class StateBroadcaster {
     socket.emit("room:error", { code, message });
   }
 
+  /**
+   * Asks the selected game for a delta against the last state we sent.
+   *
+   * Returns null whenever anything is out of step — different round, different
+   * phase, no previous state, or the game declining — in which case the caller
+   * falls back to a full state emit.
+   */
   private buildHostPatchPayload(
     room: RoomRecord,
     hostGameState: NonNullable<ReturnType<GameRuntime["getPublicGameState"]>>
-  ): GamePatchPayload<LightTrailsHostPatch> | null {
-    if (hostGameState.gameId !== "light-trails" || hostGameState.phase !== "playing") {
-      this.lightTrailsHostCache.delete(room.code);
-      return null;
-    }
-
-    const currentState = hostGameState.state as LightTrailsState;
-    const cache = this.lightTrailsHostCache.get(room.code);
+  ): GamePatchPayload | null {
+    const entry = this.gameRegistry.get(hostGameState.gameId);
 
     if (
-      !cache ||
-      cache.roundNumber !== hostGameState.roundNumber ||
-      cache.phase !== hostGameState.phase ||
-      currentState.tick <= cache.tick
+      !entry?.serverGame.buildHostPatch ||
+      entry.manifest.broadcast?.supportsHostPatches !== true ||
+      hostGameState.phase !== "playing"
     ) {
       return null;
     }
 
-    const players = Object.fromEntries(
-      Object.values(currentState.players).map((player) => {
-        const startIndex = cache.segmentCountsByPlayerId.get(player.playerId) ?? 0;
+    const previous = this.lastHostStateByRoom.get(room.code);
 
-        return [
-          player.playerId,
-          {
-            playerId: player.playerId,
-            name: player.name,
-            color: player.color,
-            x: player.x,
-            y: player.y,
-            angleRad: player.angleRad,
-            alive: player.alive,
-            turnInput: player.turnInput,
-            trailSegments: player.trailSegments.slice(startIndex),
-            eliminatedAt: player.eliminatedAt,
-            collisionReason: player.collisionReason
-          }
-        ];
-      })
+    if (
+      !previous ||
+      previous.roundNumber !== hostGameState.roundNumber ||
+      previous.phase !== hostGameState.phase
+    ) {
+      return null;
+    }
+
+    const patch = entry.serverGame.buildHostPatch(
+      hostGameState.state as never,
+      previous.state as never,
+      this.gameRuntime.buildPublicContext(room)
     );
 
-    const payload: GamePatchPayload<LightTrailsHostPatch> = {
+    if (patch === null || patch === undefined) {
+      return null;
+    }
+
+    this.rememberHostState(room, hostGameState);
+
+    return {
       roomCode: room.code,
       gameId: hostGameState.gameId,
       roundNumber: hostGameState.roundNumber,
       phase: hostGameState.phase,
       updatedAt: hostGameState.updatedAt,
       message: hostGameState.message,
-      patch: {
-        arenaWidth: currentState.arenaWidth,
-        arenaHeight: currentState.arenaHeight,
-        cellSize: currentState.cellSize,
-        trailThickness: currentState.trailThickness,
-        tick: currentState.tick,
-        alivePlayerIds: currentState.alivePlayerIds,
-        winnerPlayerId: currentState.winnerPlayerId,
-        winnerName: currentState.winnerName,
-        isDraw: currentState.isDraw,
-        finishAt: currentState.finishAt,
-        players
-      }
+      patch
     };
-
-    this.rememberHostState(room, hostGameState);
-    return payload;
   }
 
+  /** Remembers what the host now has, for the next diff. */
   private rememberHostState(
     room: RoomRecord,
     hostGameState: NonNullable<ReturnType<GameRuntime["getPublicGameState"]>>
   ): void {
-    if (hostGameState.gameId !== "light-trails" || hostGameState.phase !== "playing") {
-      this.lightTrailsHostCache.delete(room.code);
-      return;
-    }
-
-    const currentState = hostGameState.state as LightTrailsState;
-
-    this.lightTrailsHostCache.set(room.code, {
+    this.lastHostStateByRoom.set(room.code, {
       roundNumber: hostGameState.roundNumber,
       phase: hostGameState.phase,
-      tick: currentState.tick,
-      segmentCountsByPlayerId: new Map(
-        Object.values(currentState.players).map((player) => [player.playerId, player.trailSegments.length])
-      )
+      state: hostGameState.state
     });
+  }
+
+  /** Broadcast tuning the selected game asked for, if any. */
+  private getBroadcastPolicy(gameId: string) {
+    return this.gameRegistry.get(gameId)?.manifest.broadcast;
+  }
+
+  private shouldEmit(
+    cache: Map<string, number>,
+    roomCode: string,
+    gameState: NonNullable<ReturnType<GameRuntime["getPublicGameState"]>>,
+    nowMs: number,
+    intervalMs: number
+  ): boolean {
+    const isLivePhase = gameState.phase === "playing" || gameState.phase === "locked";
+
+    if (!isLivePhase || intervalMs <= 0) {
+      cache.delete(roomCode);
+      return true;
+    }
+
+    const lastEmittedAtMs = cache.get(roomCode) ?? Number.NEGATIVE_INFINITY;
+
+    if (nowMs - lastEmittedAtMs < intervalMs) {
+      return false;
+    }
+
+    cache.set(roomCode, nowMs);
+    return true;
   }
 
   private shouldEmitHostState(
@@ -332,19 +334,11 @@ export class StateBroadcaster {
     hostGameState: NonNullable<ReturnType<GameRuntime["getPublicGameState"]>>,
     nowMs: number
   ): boolean {
-    if (hostGameState.phase !== "playing" && hostGameState.phase !== "locked") {
-      this.lastHostEmitAtByRoom.delete(roomCode);
-      return true;
-    }
+    const interval =
+      this.getBroadcastPolicy(hostGameState.gameId)?.hostStateIntervalMs ??
+      defaultHostStateIntervalMs;
 
-    const lastEmittedAtMs = this.lastHostEmitAtByRoom.get(roomCode) ?? Number.NEGATIVE_INFINITY;
-
-    if (nowMs - lastEmittedAtMs < playingHostStateIntervalMs) {
-      return false;
-    }
-
-    this.lastHostEmitAtByRoom.set(roomCode, nowMs);
-    return true;
+    return this.shouldEmit(this.lastHostEmitAtByRoom, roomCode, hostGameState, nowMs, interval);
   }
 
   private shouldEmitControllerState(
@@ -352,22 +346,16 @@ export class StateBroadcaster {
     controllerGameState: NonNullable<ReturnType<GameRuntime["getPublicGameState"]>>,
     nowMs: number
   ): boolean {
-    const isChaosKommando = controllerGameState.gameId === "chaos-kommando";
-    const isLivePhase =
-      controllerGameState.phase === "playing" || controllerGameState.phase === "locked";
+    const interval =
+      this.getBroadcastPolicy(controllerGameState.gameId)?.controllerStateIntervalMs ??
+      defaultControllerStateIntervalMs;
 
-    if (!isChaosKommando || !isLivePhase) {
-      this.lastControllerEmitAtByRoom.delete(roomCode);
-      return true;
-    }
-
-    const lastEmittedAtMs = this.lastControllerEmitAtByRoom.get(roomCode) ?? Number.NEGATIVE_INFINITY;
-
-    if (nowMs - lastEmittedAtMs < chaosKommandoControllerStateIntervalMs) {
-      return false;
-    }
-
-    this.lastControllerEmitAtByRoom.set(roomCode, nowMs);
-    return true;
+    return this.shouldEmit(
+      this.lastControllerEmitAtByRoom,
+      roomCode,
+      controllerGameState,
+      nowMs,
+      interval
+    );
   }
 }

@@ -58,15 +58,15 @@ export function ActionButtonPad({
               width: buttonSize,
               aspectRatio: "1 / 1",
               borderRadius: "999px",
-              border: "1px solid rgba(125, 211, 252, 0.3)",
+              border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)",
               background: buttonDisabled
-                ? "linear-gradient(180deg, rgba(71, 85, 105, 0.9) 0%, rgba(51, 65, 85, 1) 100%)"
-                : `linear-gradient(180deg, ${button.accentColor ?? "#22d3ee"} 0%, rgba(8, 145, 178, 0.92) 100%)`,
-              color: buttonDisabled ? "rgba(226, 232, 240, 0.72)" : "#f8fafc",
+                ? "linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 90%, transparent) 0%, var(--line-strong) 100%)"
+                : `linear-gradient(180deg, ${button.accentColor ?? "var(--accent)"} 0%, color-mix(in srgb, var(--accent-strong) 92%, transparent) 100%)`,
+              color: buttonDisabled ? "color-mix(in srgb, var(--ink-soft) 72%, transparent)" : "var(--ink)",
               fontWeight: 900,
               fontSize: "clamp(1rem, 4vw, 1.3rem)",
               letterSpacing: "0.08em",
-              boxShadow: buttonDisabled ? "none" : "0 16px 34px rgba(8, 145, 178, 0.22)"
+              boxShadow: buttonDisabled ? "none" : "0 16px 34px color-mix(in srgb, var(--accent-strong) 22%, transparent)"
             }}
           >
             {button.label}

@@ -1,5 +1,6 @@
 import type { ScoreEntry, SupportedLanguage } from "@open-party-lab/game-core";
 import type { PlayerSetupValue, PublicGamePhase } from "@open-party-lab/protocol";
+import type { ThemeName } from "@open-party-lab/ui-kit";
 import { MemoryStore } from "../persistence/memoryStore.js";
 
 export type PlayerPresenceState = "online" | "reconnecting" | "offline";
@@ -36,14 +37,27 @@ export interface RoundRecord {
   scoreCommittedAt: number | null;
 }
 
+/**
+ * Remote host control state.
+ *
+ * Keyed by player id, not socket id, so a phone that reconnects keeps the
+ * permission it was granted.
+ */
+export interface HostControlRecord {
+  holderPlayerId: string | null;
+  pendingRequest: { playerId: string; requestedAt: number } | null;
+}
+
 export interface RoomRecord {
   code: string;
   createdAt: number;
   lastActivityAt: number;
   joinUrl: string;
   language: SupportedLanguage;
+  theme: ThemeName;
   hostName: string;
   hostSocketId: string | null;
+  hostControl: HostControlRecord;
   selectedGameId: string | null;
   gameSettingsByGameId: Record<string, Record<string, unknown>>;
   roundCounter: number;

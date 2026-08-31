@@ -123,11 +123,11 @@ export function mountControllerDebugOverlay(client: ControllerSocketClient): () 
   card.style.gap = "8px";
   card.style.padding = "12px 14px";
   card.style.borderRadius = "16px";
-  card.style.border = "1px solid rgba(148, 163, 184, 0.18)";
-  card.style.background = "rgba(2, 6, 23, 0.84)";
+  card.style.border = "1px solid var(--line)";
+  card.style.background = "var(--surface)";
   card.style.backdropFilter = "blur(10px)";
-  card.style.boxShadow = "0 18px 36px rgba(2, 6, 23, 0.35)";
-  card.style.color = "#e2e8f0";
+  card.style.boxShadow = "var(--shadow-panel)";
+  card.style.color = "var(--ink)";
   card.style.fontFamily = "\"IBM Plex Mono\", \"Consolas\", monospace";
   card.style.pointerEvents = "auto";
   overlay.appendChild(card);
@@ -148,9 +148,9 @@ export function mountControllerDebugOverlay(client: ControllerSocketClient): () 
   recordButton.type = "button";
   recordButton.style.padding = "6px 10px";
   recordButton.style.borderRadius = "10px";
-  recordButton.style.border = "1px solid rgba(248, 113, 113, 0.28)";
-  recordButton.style.background = "rgba(127, 29, 29, 0.55)";
-  recordButton.style.color = "#fecaca";
+  recordButton.style.border = "1px solid var(--danger)";
+  recordButton.style.background = "var(--danger-soft)";
+  recordButton.style.color = "var(--danger)";
   recordButton.style.font = "inherit";
   recordButton.style.cursor = "pointer";
   controls.appendChild(recordButton);
@@ -159,9 +159,9 @@ export function mountControllerDebugOverlay(client: ControllerSocketClient): () 
   saveButton.type = "button";
   saveButton.style.padding = "6px 10px";
   saveButton.style.borderRadius = "10px";
-  saveButton.style.border = "1px solid rgba(56, 189, 248, 0.28)";
-  saveButton.style.background = "rgba(8, 47, 73, 0.65)";
-  saveButton.style.color = "#bae6fd";
+  saveButton.style.border = "1px solid var(--accent)";
+  saveButton.style.background = "var(--accent-soft)";
+  saveButton.style.color = "var(--accent-strong)";
   saveButton.style.font = "inherit";
   saveButton.style.cursor = "pointer";
   controls.appendChild(saveButton);
@@ -169,7 +169,7 @@ export function mountControllerDebugOverlay(client: ControllerSocketClient): () 
   const status = document.createElement("div");
   status.style.fontSize = "11px";
   status.style.lineHeight = "1.35";
-  status.style.color = "#93c5fd";
+  status.style.color = "var(--accent-strong)";
   card.appendChild(status);
 
   const body = document.createElement("pre");
@@ -177,7 +177,7 @@ export function mountControllerDebugOverlay(client: ControllerSocketClient): () 
   body.style.whiteSpace = "pre-wrap";
   body.style.fontSize = "12px";
   body.style.lineHeight = "1.45";
-  body.style.color = "#cbd5e1";
+  body.style.color = "var(--ink-soft)";
   card.appendChild(body);
 
   document.body.appendChild(overlay);

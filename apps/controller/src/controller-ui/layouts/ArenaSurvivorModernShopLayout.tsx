@@ -88,13 +88,13 @@ function iconInitial(label: string): string {
 function resolveLevelFrameColor(level?: number): string | null {
   switch (level) {
     case 1:
-      return "#22c55e";
+      return "var(--sage)";
     case 2:
-      return "#38bdf8";
+      return "var(--accent)";
     case 3:
-      return "#a78bfa";
+      return "var(--accent-soft)";
     case 4:
-      return "#ef4444";
+      return "var(--danger)";
     default:
       return null;
   }
@@ -215,8 +215,8 @@ function IconFrame({
     width: size,
     height: size,
     borderRadius: 8,
-    border: levelColor ? `2px solid ${levelColor}` : "1px solid rgba(148, 163, 184, 0.18)",
-    background: "rgba(8, 13, 25, 0.78)",
+    border: levelColor ? `2px solid ${levelColor}` : "1px solid color-mix(in srgb, var(--muted) 18%, transparent)",
+    background: "color-mix(in srgb, var(--paper) 78%, transparent)",
     flex: "0 0 auto",
     boxShadow: levelColor ? `0 0 0 1px ${levelColor}44, 0 0 18px ${levelColor}2f` : undefined
   };
@@ -244,7 +244,7 @@ function IconFrame({
         ...sharedStyle,
         display: "grid",
         placeItems: "center",
-        color: "#facc15",
+        color: "var(--amber)",
         fontWeight: 900,
         fontSize: size >= 56 ? "1.35rem" : "1rem"
       }}
@@ -267,9 +267,9 @@ function MiniInfoBadge() {
         borderRadius: 8,
         display: "grid",
         placeItems: "center",
-        border: "1px solid rgba(255, 255, 255, 0.16)",
-        background: "rgba(8, 13, 25, 0.88)",
-        color: "#bae6fd"
+        border: "1px solid color-mix(in srgb, var(--on-accent) 16%, transparent)",
+        background: "color-mix(in srgb, var(--paper) 88%, transparent)",
+        color: "var(--ink)"
       }}
     >
       <InfoIcon />
@@ -288,7 +288,7 @@ function MetricChip({
   value: string | number;
   tone?: "blue" | "gold" | "green";
 }) {
-  const toneColor = tone === "gold" ? "#facc15" : tone === "green" ? "#86efac" : "#7dd3fc";
+  const toneColor = tone === "gold" ? "var(--amber)" : tone === "green" ? "var(--sage-soft)" : "var(--accent)";
 
   return (
     <div
@@ -301,7 +301,7 @@ function MetricChip({
         padding: "8px 10px",
         borderRadius: 8,
         border: `1px solid ${toneColor}44`,
-        background: "rgba(15, 23, 42, 0.68)",
+        background: "color-mix(in srgb, var(--surface) 68%, transparent)",
         color: "var(--text-main)",
         minWidth: 0
       }}
@@ -336,12 +336,12 @@ function RoundIconButton({
 }) {
   const background =
     tone === "green"
-      ? "linear-gradient(180deg, #22c55e 0%, #15803d 100%)"
+      ? "linear-gradient(180deg, var(--sage) 0%, var(--sage) 100%)"
       : tone === "orange"
-        ? "linear-gradient(180deg, #f59e0b 0%, #c2410c 100%)"
+        ? "linear-gradient(180deg, var(--amber) 0%, var(--danger) 100%)"
         : tone === "slate"
-          ? "rgba(30, 41, 59, 0.9)"
-          : "linear-gradient(180deg, #38bdf8 0%, #0e7490 100%)";
+          ? "color-mix(in srgb, var(--surface-raised) 90%, transparent)"
+          : "linear-gradient(180deg, var(--accent) 0%, var(--accent) 100%)";
 
   return (
     <button
@@ -355,7 +355,7 @@ function RoundIconButton({
         width: 52,
         height: 52,
         borderRadius: 8,
-        border: "1px solid rgba(255, 255, 255, 0.16)",
+        border: "1px solid color-mix(in srgb, var(--on-accent) 16%, transparent)",
         background,
         color: "white",
         display: "grid",
@@ -363,7 +363,7 @@ function RoundIconButton({
         opacity: disabled ? 0.46 : 1,
         cursor: disabled ? "not-allowed" : "pointer",
         touchAction: "manipulation",
-        boxShadow: disabled ? "none" : "0 10px 22px rgba(2, 6, 23, 0.26)"
+        boxShadow: disabled ? "none" : "0 10px 22px color-mix(in srgb, var(--paper) 26%, transparent)"
       }}
     >
       {children}
@@ -379,9 +379,9 @@ function RoundIconButton({
             borderRadius: 8,
             display: "grid",
             placeItems: "center",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            background: "rgba(8, 13, 25, 0.96)",
-            color: "#facc15",
+            border: "1px solid color-mix(in srgb, var(--on-accent) 20%, transparent)",
+            background: "color-mix(in srgb, var(--paper) 96%, transparent)",
+            color: "var(--amber)",
             fontSize: "0.72rem",
             fontWeight: 900
           }}
@@ -420,8 +420,8 @@ function LoadoutTile({
         placeItems: "center",
         padding: 7,
         borderRadius: 8,
-        border: selected ? "1px solid rgba(250, 204, 21, 0.72)" : "1px solid rgba(148, 163, 184, 0.14)",
-        background: selected ? "rgba(250, 204, 21, 0.12)" : "rgba(15, 23, 42, 0.58)",
+        border: selected ? "1px solid color-mix(in srgb, var(--amber) 72%, transparent)" : "1px solid color-mix(in srgb, var(--muted) 14%, transparent)",
+        background: selected ? "color-mix(in srgb, var(--amber) 12%, transparent)" : "color-mix(in srgb, var(--surface) 58%, transparent)",
         color: "var(--text-main)",
         cursor: "pointer",
         touchAction: "manipulation"
@@ -441,9 +441,9 @@ function LoadoutTile({
             borderRadius: 8,
             display: "grid",
             placeItems: "center",
-            border: "1px solid rgba(255, 255, 255, 0.16)",
-            background: "rgba(22, 101, 52, 0.9)",
-            color: "#bbf7d0"
+            border: "1px solid color-mix(in srgb, var(--on-accent) 16%, transparent)",
+            background: "color-mix(in srgb, var(--sage-strong) 90%, transparent)",
+            color: "var(--ink)"
           }}
         >
           <MergeIcon />
@@ -466,10 +466,10 @@ function OfferTile({
 }) {
   const canBuy = !model.disabled && offer.affordable && !offer.purchased;
   const borderColor = offer.purchased
-    ? "rgba(34, 197, 94, 0.46)"
+    ? "color-mix(in srgb, var(--sage) 46%, transparent)"
     : offer.affordable
-      ? "rgba(56, 189, 248, 0.36)"
-      : "rgba(148, 163, 184, 0.16)";
+      ? "color-mix(in srgb, var(--accent) 36%, transparent)"
+      : "color-mix(in srgb, var(--muted) 16%, transparent)";
 
   return (
     <article
@@ -480,10 +480,10 @@ function OfferTile({
         borderRadius: 8,
         border: `1px solid ${borderColor}`,
         background: offer.purchased
-          ? "linear-gradient(180deg, rgba(22, 101, 52, 0.28), rgba(15, 23, 42, 0.78))"
+          ? "linear-gradient(180deg, color-mix(in srgb, var(--sage-strong) 28%, transparent), color-mix(in srgb, var(--surface) 78%, transparent))"
           : offer.affordable
-            ? "linear-gradient(180deg, rgba(8, 145, 178, 0.22), rgba(15, 23, 42, 0.82))"
-            : "rgba(15, 23, 42, 0.68)",
+            ? "linear-gradient(180deg, color-mix(in srgb, var(--accent-strong) 22%, transparent), color-mix(in srgb, var(--surface) 82%, transparent))"
+            : "color-mix(in srgb, var(--surface) 68%, transparent)",
         overflow: "hidden",
         minWidth: 0
       }}
@@ -516,8 +516,8 @@ function OfferTile({
               minWidth: 34,
               padding: "3px 6px",
               borderRadius: 8,
-              background: offer.affordable ? "rgba(250, 204, 21, 0.96)" : "rgba(71, 85, 105, 0.96)",
-              color: offer.affordable ? "#1f1300" : "var(--text-main)",
+              background: offer.affordable ? "color-mix(in srgb, var(--amber) 96%, transparent)" : "color-mix(in srgb, var(--line-strong) 96%, transparent)",
+              color: offer.affordable ? "var(--amber)" : "var(--text-main)",
               fontSize: "0.72rem",
               fontWeight: 900
             }}
@@ -544,13 +544,13 @@ function OfferTile({
         }
         style={{
           border: 0,
-          borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+          borderTop: "1px solid color-mix(in srgb, var(--on-accent) 8%, transparent)",
           background: offer.purchased
-            ? "rgba(34, 197, 94, 0.18)"
+            ? "color-mix(in srgb, var(--sage) 18%, transparent)"
             : canBuy
-              ? "rgba(34, 197, 94, 0.34)"
-              : "rgba(30, 41, 59, 0.72)",
-          color: canBuy || offer.purchased ? "#bbf7d0" : "rgba(226, 232, 240, 0.52)",
+              ? "color-mix(in srgb, var(--sage) 34%, transparent)"
+              : "color-mix(in srgb, var(--surface-raised) 72%, transparent)",
+          color: canBuy || offer.purchased ? "var(--sage-soft)" : "color-mix(in srgb, var(--ink-soft) 52%, transparent)",
           display: "grid",
           placeItems: "center",
           cursor: canBuy ? "pointer" : "not-allowed",
@@ -585,8 +585,8 @@ function StatGrid({ stats }: { stats?: LayoutStat[] }) {
             minWidth: 0,
             padding: "9px 10px",
             borderRadius: 8,
-            border: stat.highlighted ? "1px solid rgba(250, 204, 21, 0.32)" : "1px solid rgba(148, 163, 184, 0.14)",
-            background: stat.highlighted ? "rgba(250, 204, 21, 0.1)" : "rgba(15, 23, 42, 0.56)"
+            border: stat.highlighted ? "1px solid color-mix(in srgb, var(--amber) 32%, transparent)" : "1px solid color-mix(in srgb, var(--muted) 14%, transparent)",
+            background: stat.highlighted ? "color-mix(in srgb, var(--amber) 10%, transparent)" : "color-mix(in srgb, var(--surface) 56%, transparent)"
           }}
         >
           <span
@@ -722,7 +722,7 @@ function DetailSheet({
         display: "grid",
         alignItems: "end",
         padding: 12,
-        background: "rgba(2, 6, 23, 0.68)"
+        background: "color-mix(in srgb, var(--paper) 68%, transparent)"
       }}
     >
       <section
@@ -739,9 +739,9 @@ function DetailSheet({
           gap: 14,
           padding: 14,
           borderRadius: 8,
-          border: "1px solid rgba(148, 163, 184, 0.24)",
-          background: "linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(8, 13, 25, 0.98))",
-          boxShadow: "0 24px 52px rgba(0, 0, 0, 0.48)"
+          border: "1px solid color-mix(in srgb, var(--muted) 24%, transparent)",
+          background: "linear-gradient(180deg, color-mix(in srgb, var(--surface) 98%, transparent), color-mix(in srgb, var(--paper) 98%, transparent))",
+          boxShadow: "0 24px 52px color-mix(in srgb, var(--paper) 48%, transparent)"
         }}
       >
         <header
@@ -775,8 +775,8 @@ function DetailSheet({
             style={{
               padding: "9px 10px",
               borderRadius: 8,
-              border: "1px solid rgba(56, 189, 248, 0.22)",
-              background: "rgba(8, 145, 178, 0.12)",
+              border: "1px solid color-mix(in srgb, var(--accent) 22%, transparent)",
+              background: "color-mix(in srgb, var(--accent-strong) 12%, transparent)",
               color: "var(--text-main)",
               fontWeight: 800,
               fontSize: "0.86rem"
@@ -794,8 +794,8 @@ function DetailSheet({
                 style={{
                   padding: "4px 7px",
                   borderRadius: 8,
-                  border: "1px solid rgba(148, 163, 184, 0.16)",
-                  background: "rgba(30, 41, 59, 0.62)",
+                  border: "1px solid color-mix(in srgb, var(--muted) 16%, transparent)",
+                  background: "color-mix(in srgb, var(--surface-raised) 62%, transparent)",
                   color: "var(--text-muted)",
                   fontSize: "0.72rem",
                   fontWeight: 800
@@ -823,12 +823,12 @@ function DetailSheet({
             style={{
               minHeight: 54,
               borderRadius: 8,
-              border: "1px solid rgba(255, 255, 255, 0.14)",
+              border: "1px solid color-mix(in srgb, var(--on-accent) 14%, transparent)",
               background: detail.offer.purchased
-                ? "rgba(34, 197, 94, 0.18)"
+                ? "color-mix(in srgb, var(--sage) 18%, transparent)"
                 : canBuy
-                  ? "linear-gradient(180deg, #22c55e 0%, #15803d 100%)"
-                  : "rgba(30, 41, 59, 0.84)",
+                  ? "linear-gradient(180deg, var(--sage) 0%, var(--sage) 100%)"
+                  : "color-mix(in srgb, var(--surface-raised) 84%, transparent)",
               color: "white",
               fontWeight: 900,
               cursor: canBuy ? "pointer" : "not-allowed",
@@ -859,9 +859,9 @@ function DetailSheet({
                 style={{
                   minHeight: 54,
                   borderRadius: 8,
-                  border: "1px solid rgba(255, 255, 255, 0.14)",
-                  background: canMerge ? "rgba(34, 197, 94, 0.36)" : "rgba(30, 41, 59, 0.78)",
-                  color: canMerge ? "#bbf7d0" : "rgba(226, 232, 240, 0.56)",
+                  border: "1px solid color-mix(in srgb, var(--on-accent) 14%, transparent)",
+                  background: canMerge ? "color-mix(in srgb, var(--sage) 36%, transparent)" : "color-mix(in srgb, var(--surface-raised) 78%, transparent)",
+                  color: canMerge ? "var(--sage-soft)" : "color-mix(in srgb, var(--ink-soft) 56%, transparent)",
                   display: "grid",
                   placeItems: "center",
                   cursor: canMerge ? "pointer" : "not-allowed"
@@ -884,9 +884,9 @@ function DetailSheet({
                 style={{
                   minHeight: 54,
                   borderRadius: 8,
-                  border: "1px solid rgba(255, 255, 255, 0.14)",
-                  background: canSell ? "rgba(249, 115, 22, 0.34)" : "rgba(30, 41, 59, 0.78)",
-                  color: canSell ? "#fed7aa" : "rgba(226, 232, 240, 0.56)",
+                  border: "1px solid color-mix(in srgb, var(--on-accent) 14%, transparent)",
+                  background: canSell ? "color-mix(in srgb, var(--amber) 34%, transparent)" : "color-mix(in srgb, var(--surface-raised) 78%, transparent)",
+                  color: canSell ? "var(--amber-soft)" : "color-mix(in srgb, var(--ink-soft) 56%, transparent)",
                   display: "grid",
                   gridTemplateColumns: "22px auto",
                   justifyContent: "center",
@@ -926,8 +926,8 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
           gap: 10,
           padding: 12,
           borderRadius: 8,
-          border: "1px solid rgba(148, 163, 184, 0.18)",
-          background: "linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(8, 13, 25, 0.86))"
+          border: "1px solid color-mix(in srgb, var(--muted) 18%, transparent)",
+          background: "linear-gradient(180deg, color-mix(in srgb, var(--surface) 90%, transparent), color-mix(in srgb, var(--paper) 86%, transparent))"
         }}
       >
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 10, alignItems: "center" }}>
@@ -970,10 +970,10 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
                 alignItems: "center",
                 gap: 10,
                 borderRadius: 8,
-                border: "1px solid rgba(255, 255, 255, 0.14)",
+                border: "1px solid color-mix(in srgb, var(--on-accent) 14%, transparent)",
                 background: model.reroll.affordable
-                  ? "linear-gradient(180deg, #f59e0b 0%, #c2410c 100%)"
-                  : "rgba(30, 41, 59, 0.84)",
+                  ? "linear-gradient(180deg, var(--amber) 0%, var(--danger) 100%)"
+                  : "color-mix(in srgb, var(--surface-raised) 84%, transparent)",
                 color: "white",
                 fontWeight: 900,
                 opacity: model.disabled || !model.reroll.affordable ? 0.55 : 1,
@@ -1000,10 +1000,10 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
                 alignItems: "center",
                 gap: 10,
                 borderRadius: 8,
-                border: "1px solid rgba(255, 255, 255, 0.14)",
+                border: "1px solid color-mix(in srgb, var(--on-accent) 14%, transparent)",
                 background: ready.currentPlayerReady
-                  ? "linear-gradient(180deg, #22c55e 0%, #15803d 100%)"
-                  : "linear-gradient(180deg, #38bdf8 0%, #0e7490 100%)",
+                  ? "linear-gradient(180deg, var(--sage) 0%, var(--sage) 100%)"
+                  : "linear-gradient(180deg, var(--accent) 0%, var(--accent) 100%)",
                 color: "white",
                 fontWeight: 900,
                 opacity: model.disabled ? 0.55 : 1,

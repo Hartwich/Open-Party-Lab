@@ -33,7 +33,7 @@ function PadButton({ label, onClick }: { label: string; onClick: () => void }) {
         minHeight: 72,
         borderRadius: 18,
         border: "1px solid var(--panel-border)",
-        background: "rgba(15, 23, 42, 0.7)",
+        background: "color-mix(in srgb, var(--surface) 70%, transparent)",
         color: "var(--text-main)",
         fontSize: "2rem"
       }}

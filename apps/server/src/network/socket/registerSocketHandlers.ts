@@ -25,6 +25,13 @@ type IoServer = import("socket.io").Server<
   SocketData
 >;
 
+type RoomSocket = import("socket.io").Socket<
+  ClientToServerEvents,
+  ServerToClientEvents,
+  InterServerEvents,
+  SocketData
+>;
+
 export interface RegisterSocketHandlersDeps {
   io: IoServer;
   roomManager: RoomManager;
@@ -102,7 +109,25 @@ function socketText(en: boolean) {
     hostAbortOnly: en ? "Only the host can end running rounds." : "Nur der Host kann laufende Runden beenden.",
     ownInputOnly: en
       ? "You can only send inputs for your own player."
-      : "Du darfst nur Eingaben fuer deinen eigenen Spieler senden."
+      : "Du darfst nur Eingaben fuer deinen eigenen Spieler senden.",
+    hostThemeOnly: en
+      ? "Only the host can change the theme."
+      : "Nur der Host kann das Design aendern.",
+    hostControlPlayersOnly: en
+      ? "Only players in this room can request host control."
+      : "Nur Spieler in diesem Raum koennen die Steuerung anfragen.",
+    hostControlAlreadyHeld: en
+      ? "Another player already has host control."
+      : "Ein anderer Spieler hat die Steuerung bereits.",
+    hostControlScreenOnly: en
+      ? "Only the shared screen can answer takeover requests."
+      : "Nur der Bildschirm kann Uebernahme-Anfragen beantworten.",
+    hostControlNoRequest: en
+      ? "There is no pending takeover request."
+      : "Es liegt keine Uebernahme-Anfrage vor.",
+    hostControlReleaseForbidden: en
+      ? "Only the shared screen or the current holder can hand control back."
+      : "Nur der Bildschirm oder der aktuelle Halter kann die Steuerung zurueckgeben."
   };
 }
 
@@ -132,6 +157,32 @@ export function registerSocketHandlers({
   stateBroadcaster,
   roomCleanupService
 }: RegisterSocketHandlersDeps): void {
+  /**
+   * Single authorisation gate for every room-driving action.
+   *
+   * Historically each handler compared `socket.data.role` against `"host"`.
+   * With remote host control there are two legitimate drivers: the shared
+   * screen, and the one player it has handed the controls to. Routing every
+   * check through here keeps the two in sync — a new host action cannot forget
+   * to honour a delegation.
+   */
+  function canControlRoom(
+    room: NonNullable<ReturnType<RoomManager["getRoom"]>>,
+    socket: RoomSocket
+  ): boolean {
+    if (socket.data.roomCode !== room.code) {
+      return false;
+    }
+
+    if (socket.data.role === "host") {
+      return true;
+    }
+
+    return (
+      socket.data.role === "controller" && roomManager.hasHostControl(room, socket.data.playerId)
+    );
+  }
+
   function getSelectedGame(room: NonNullable<ReturnType<RoomManager["getRoom"]>>) {
     return room.selectedGameId ? gameRegistry.getAvailableGame(room.selectedGameId, room.language) : undefined;
   }
@@ -236,14 +287,13 @@ export function registerSocketHandlers({
       return false;
     }
 
-    if (room.currentRound?.phase === "finished" && selectedGame.id === "arena-survivor") {
-      const roundState = room.currentRound.state as {
-        result?: { outcome?: string };
-      };
-
-      if (roundState.result?.outcome !== "survived") {
-        return false;
-      }
+    // Only an explicit "no" from a game with a continuing run blocks the next
+    // round. Games without that rule fall through to the normal readiness check.
+    if (
+      room.currentRound?.phase === "finished" &&
+      gameRuntime.shouldContinueRun(room) === false
+    ) {
+      return false;
     }
 
     if (!canStartRound(room, selectedGame)) {
@@ -336,7 +386,7 @@ export function registerSocketHandlers({
       }
       const text = socketText(room.language === "en");
 
-      if (socket.data.role !== "host" || socket.data.roomCode !== room.code) {
+      if (!canControlRoom(room, socket)) {
         ack(ackError(text.hostLanguageOnly));
         return;
       }
@@ -356,6 +406,26 @@ export function registerSocketHandlers({
       if (room.currentRound) {
         stateBroadcaster.broadcastGameState(room);
       }
+    });
+
+    socket.on("room:set-theme", (payload, ack) => {
+      const room = roomManager.getRoom(payload.roomCode);
+
+      if (!room) {
+        ack(ackError("Raum nicht gefunden."));
+        return;
+      }
+      const text = socketText(room.language === "en");
+
+      if (!canControlRoom(room, socket)) {
+        ack(ackError(text.hostThemeOnly));
+        return;
+      }
+
+      roomManager.setTheme(room, payload.theme);
+
+      ack({ ok: true, data: { room: stateBroadcaster.createRoomSnapshot(room) } });
+      stateBroadcaster.broadcastRoomState(room);
     });
 
     socket.on("room:join", (payload, ack) => {
@@ -484,6 +554,8 @@ export function registerSocketHandlers({
         return;
       }
 
+      roomManager.forgetHostControlForPlayer(room, result.player.id);
+
       ack({
         ok: true,
         data: {
@@ -518,7 +590,7 @@ export function registerSocketHandlers({
       }
       const text = socketText(room.language === "en");
 
-      if (socket.data.role !== "host") {
+      if (!canControlRoom(room, socket)) {
         ack(ackError(text.hostKickOnly));
         return;
       }
@@ -529,6 +601,9 @@ export function registerSocketHandlers({
         ack(ackError(result.error));
         return;
       }
+
+      // A kicked player must not keep driving the room.
+      roomManager.forgetHostControlForPlayer(room, result.player.id);
 
       ack({
         ok: true,
@@ -688,6 +763,85 @@ export function registerSocketHandlers({
       maybeAutoStartReadyRound(room.code);
     });
 
+    socket.on("host-control:request", (payload, ack) => {
+      const room = roomManager.getRoom(payload.roomCode);
+
+      if (!room) {
+        ack(ackError("Raum nicht gefunden."));
+        return;
+      }
+      const text = socketText(room.language === "en");
+
+      if (
+        socket.data.role !== "controller" ||
+        socket.data.roomCode !== room.code ||
+        socket.data.playerId !== payload.playerId ||
+        !room.players.has(payload.playerId)
+      ) {
+        ack(ackError(text.hostControlPlayersOnly));
+        return;
+      }
+
+      if (room.hostControl.holderPlayerId && room.hostControl.holderPlayerId !== payload.playerId) {
+        ack(ackError(text.hostControlAlreadyHeld));
+        return;
+      }
+
+      roomManager.requestHostControl(room, payload.playerId);
+
+      ack({ ok: true, data: { room: stateBroadcaster.createRoomSnapshot(room) } });
+      stateBroadcaster.broadcastRoomState(room);
+    });
+
+    socket.on("host-control:resolve", (payload, ack) => {
+      const room = roomManager.getRoom(payload.roomCode);
+
+      if (!room) {
+        ack(ackError("Raum nicht gefunden."));
+        return;
+      }
+      const text = socketText(room.language === "en");
+
+      // Only the shared screen decides, never a delegated controller — that
+      // would let a holder grant control to someone else.
+      if (socket.data.role !== "host" || socket.data.roomCode !== room.code) {
+        ack(ackError(text.hostControlScreenOnly));
+        return;
+      }
+
+      if (!roomManager.resolveHostControl(room, payload.playerId, payload.grant)) {
+        ack(ackError(text.hostControlNoRequest));
+        return;
+      }
+
+      ack({ ok: true, data: { room: stateBroadcaster.createRoomSnapshot(room) } });
+      stateBroadcaster.broadcastRoomState(room);
+    });
+
+    socket.on("host-control:release", (payload, ack) => {
+      const room = roomManager.getRoom(payload.roomCode);
+
+      if (!room) {
+        ack(ackError("Raum nicht gefunden."));
+        return;
+      }
+      const text = socketText(room.language === "en");
+
+      const isScreen = socket.data.role === "host" && socket.data.roomCode === room.code;
+      const isHolder =
+        socket.data.role === "controller" && roomManager.hasHostControl(room, socket.data.playerId);
+
+      if (!isScreen && !isHolder) {
+        ack(ackError(text.hostControlReleaseForbidden));
+        return;
+      }
+
+      roomManager.releaseHostControl(room);
+
+      ack({ ok: true, data: { room: stateBroadcaster.createRoomSnapshot(room) } });
+      stateBroadcaster.broadcastRoomState(room);
+    });
+
     socket.on("game:select", (payload) => {
       const room = roomManager.getRoom(payload.roomCode);
 
@@ -697,7 +851,7 @@ export function registerSocketHandlers({
       }
       const text = socketText(room.language === "en");
 
-      if (socket.data.role !== "host") {
+      if (!canControlRoom(room, socket)) {
         stateBroadcaster.emitError(socket, "room/forbidden", text.hostSelectOnly);
         return;
       }
@@ -730,7 +884,7 @@ export function registerSocketHandlers({
       }
       const text = socketText(room.language === "en");
 
-      if (socket.data.role !== "host") {
+      if (!canControlRoom(room, socket)) {
         stateBroadcaster.emitError(socket, "room/forbidden", text.hostActionOnly);
         return;
       }
@@ -784,7 +938,7 @@ export function registerSocketHandlers({
       }
       const text = socketText(room.language === "en");
 
-      if (socket.data.role !== "host") {
+      if (!canControlRoom(room, socket)) {
         stateBroadcaster.emitError(socket, "room/forbidden", text.hostStartOnly);
         return;
       }
@@ -822,7 +976,7 @@ export function registerSocketHandlers({
       }
       const text = socketText(room.language === "en");
 
-      if (socket.data.role !== "host") {
+      if (!canControlRoom(room, socket)) {
         ack(ackError(text.hostAbortOnly));
         return;
       }

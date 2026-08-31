@@ -1,15 +1,13 @@
 import { getRoomPhase, hasActiveRound } from "@open-party-lab/protocol";
-import type { HostSocketClient } from "./hostSocketClient.js";
+import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
+import { getSelectedGameChrome } from "../games/selectedGame.js";
 import { getHostText } from "../i18n/hostText.js";
 import { applyStyles, createChromeCard, hostChrome } from "../ui/chrome/hostChrome.js";
+import { hostTheme } from "../ui/theme/theme.js";
 
-function shouldShowHudOverlay(
-  state: Parameters<HostSocketClient["subscribe"]>[0] extends (state: infer TState) => void ? TState : never
-): boolean {
-  if (
-    state.room?.selectedGameId === "arena-survivor" ||
-    state.room?.selectedGameId === "zeichnen-und-erraten"
-  ) {
+function shouldShowHudOverlay(state: HostAppState): boolean {
+  // Games that fill the screen themselves opt out via their manifest.
+  if (!getSelectedGameChrome(state).hud) {
     return false;
   }
 
@@ -32,8 +30,7 @@ export function mountHudOverlay(client: HostSocketClient): () => void {
   const card = createChromeCard("dark");
   card.style.gap = "6px";
   card.style.padding = "12px 14px";
-  card.style.background = "rgba(15, 23, 42, 0.72)";
-  card.style.boxShadow = "0 16px 36px rgba(2, 6, 23, 0.24)";
+  card.style.boxShadow = hostChrome.shadow.card;
   card.style.pointerEvents = "auto";
   overlay.appendChild(card);
 
@@ -43,12 +40,12 @@ export function mountHudOverlay(client: HostSocketClient): () => void {
 
   const line2 = document.createElement("div");
   line2.style.fontSize = "13px";
-  line2.style.color = "#cbd5e1";
+  line2.style.color = hostTheme.textSoft;
   card.appendChild(line2);
 
   const line3 = document.createElement("div");
   line3.style.fontSize = "12px";
-  line3.style.color = "#94a3b8";
+  line3.style.color = hostTheme.muted;
   card.appendChild(line3);
 
   document.body.appendChild(overlay);

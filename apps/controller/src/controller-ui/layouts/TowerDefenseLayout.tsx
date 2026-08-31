@@ -39,8 +39,8 @@ function MetricCard({ label, value }: { label: string; value: string | number })
       style={{
         padding: 8,
         borderRadius: 14,
-        border: "1px solid rgba(56, 189, 248, 0.16)",
-        background: "rgba(8, 47, 73, 0.28)"
+        border: "1px solid color-mix(in srgb, var(--accent) 16%, transparent)",
+        background: "color-mix(in srgb, var(--accent-soft) 28%, transparent)"
       }}
     >
       <div style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>{label}</div>
@@ -99,10 +99,10 @@ function BuildBlueprint({
                 ? `2px solid ${accentColor ?? "var(--accent)"}`
                 : slot.tower
                   ? `1px solid ${slot.tower.color}66`
-                  : "1px solid rgba(56, 189, 248, 0.55)",
+                  : "1px solid color-mix(in srgb, var(--accent) 55%, transparent)",
               background: slot.tower
-                ? "linear-gradient(180deg, rgba(14, 165, 233, 0.18), rgba(15, 23, 42, 0.92))"
-                : "linear-gradient(180deg, rgba(8, 47, 73, 0.62), rgba(15, 23, 42, 0.88))",
+                ? "linear-gradient(180deg, color-mix(in srgb, var(--accent) 18%, transparent), color-mix(in srgb, var(--surface) 92%, transparent))"
+                : "linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 62%, transparent), color-mix(in srgb, var(--surface) 88%, transparent))",
               boxShadow: isSelected ? `0 0 0 2px ${accentColor ?? "var(--accent)"}22` : "none",
               color: "var(--text-main)",
               padding: slot.tower ? 0 : 3,
@@ -118,8 +118,8 @@ function BuildBlueprint({
                   width: slot.tower ? "100%" : "62%",
                   aspectRatio: "1 / 1",
                   borderRadius: slot.tower ? 4 : 4,
-                  background: slot.tower ? "transparent" : "rgba(226, 232, 240, 0.08)",
-                  border: slot.tower ? "none" : "1px dashed rgba(148, 163, 184, 0.48)",
+                  background: slot.tower ? "transparent" : "color-mix(in srgb, var(--ink-soft) 8%, transparent)",
+                  border: slot.tower ? "none" : "1px dashed color-mix(in srgb, var(--muted) 48%, transparent)",
                   display: "grid",
                   placeItems: "center",
                   overflow: "hidden"
@@ -153,10 +153,10 @@ function BuildBlueprint({
             position: "relative",
             aspectRatio: "1 / 1",
             borderRadius: 4,
-            border: "1px solid rgba(148, 163, 184, 0.08)",
+            border: "1px solid color-mix(in srgb, var(--muted) 8%, transparent)",
             background: isPath
-              ? "linear-gradient(180deg, rgba(8, 47, 73, 0.98), rgba(12, 74, 110, 0.92))"
-              : "rgba(15, 23, 42, 0.74)",
+              ? "linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 98%, transparent), color-mix(in srgb, var(--accent-strong) 92%, transparent))"
+              : "color-mix(in srgb, var(--surface) 74%, transparent)",
             overflow: "hidden"
           }}
         >
@@ -166,7 +166,7 @@ function BuildBlueprint({
                 position: "absolute",
                 inset: "22% 10%",
                 borderRadius: 3,
-                background: "rgba(125, 211, 252, 0.18)"
+                background: "color-mix(in srgb, var(--accent) 18%, transparent)"
               }}
             />
           ) : null}
@@ -183,7 +183,7 @@ function BuildBlueprint({
         padding: 7,
         borderRadius: 14,
         border: "1px solid var(--panel-border)",
-        background: "rgba(15, 23, 42, 0.58)"
+        background: "color-mix(in srgb, var(--surface) 58%, transparent)"
       }}
     >
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10, color: "var(--text-muted)", fontSize: "0.78rem" }}>
@@ -199,7 +199,7 @@ function BuildBlueprint({
           gap: 4,
           padding: 5,
           borderRadius: 10,
-          background: "linear-gradient(180deg, rgba(2, 6, 23, 0.92), rgba(15, 23, 42, 0.86))",
+          background: "linear-gradient(180deg, color-mix(in srgb, var(--paper) 92%, transparent), color-mix(in srgb, var(--surface) 86%, transparent))",
           aspectRatio: `${Math.max(1, map.cols)} / ${Math.max(1, map.rows)}`
         }}
       >
@@ -256,8 +256,8 @@ function TowerCard({
         borderRadius: 14,
         border: selected ? `2px solid ${tower.color}` : "1px solid var(--panel-border)",
         background: selected
-          ? "linear-gradient(180deg, rgba(34, 211, 238, 0.16), rgba(15, 23, 42, 0.84))"
-          : "rgba(15, 23, 42, 0.62)",
+          ? "linear-gradient(180deg, color-mix(in srgb, var(--accent) 16%, transparent), color-mix(in srgb, var(--surface) 84%, transparent))"
+          : "color-mix(in srgb, var(--surface) 62%, transparent)",
         color: "var(--text-main)",
         padding: 6,
         textAlign: "left",
@@ -272,8 +272,8 @@ function TowerCard({
           minHeight: 42,
           borderRadius: 10,
           overflow: "hidden",
-          border: "1px solid rgba(148, 163, 184, 0.16)",
-          background: `radial-gradient(circle at 30% 20%, ${tower.color}2E, rgba(15, 23, 42, 0.96))`,
+          border: "1px solid color-mix(in srgb, var(--muted) 16%, transparent)",
+          background: `radial-gradient(circle at 30% 20%, ${tower.color}2E, color-mix(in srgb, var(--surface) 96%, transparent))`,
           display: "grid",
           placeItems: "center"
         }}
@@ -286,7 +286,7 @@ function TowerCard({
             zIndex: 1,
             padding: "2px 6px",
             borderRadius: 999,
-            background: "rgba(2, 6, 23, 0.82)",
+            background: "color-mix(in srgb, var(--paper) 82%, transparent)",
             border: `1px solid ${tower.color}55`,
             color: tower.color,
             fontWeight: 900,
@@ -345,8 +345,8 @@ function EnemyCard({
         borderRadius: 14,
         border: selected ? `2px solid ${enemy.color}` : "1px solid var(--panel-border)",
         background: selected
-          ? "linear-gradient(180deg, rgba(249, 115, 22, 0.24), rgba(15, 23, 42, 0.92))"
-          : "rgba(15, 23, 42, 0.7)",
+          ? "linear-gradient(180deg, color-mix(in srgb, var(--amber) 24%, transparent), color-mix(in srgb, var(--surface) 92%, transparent))"
+          : "color-mix(in srgb, var(--surface) 70%, transparent)",
         color: "var(--text-main)",
         padding: 5,
         textAlign: "left",
@@ -361,8 +361,8 @@ function EnemyCard({
           minHeight: 34,
           borderRadius: 10,
           overflow: "hidden",
-          border: "1px solid rgba(148, 163, 184, 0.16)",
-          background: `radial-gradient(circle at 30% 20%, ${enemy.color}33, rgba(15, 23, 42, 0.96))`,
+          border: "1px solid color-mix(in srgb, var(--muted) 16%, transparent)",
+          background: `radial-gradient(circle at 30% 20%, ${enemy.color}33, color-mix(in srgb, var(--surface) 96%, transparent))`,
           display: "grid",
           placeItems: "center"
         }}
@@ -375,7 +375,7 @@ function EnemyCard({
             zIndex: 1,
             padding: "2px 6px",
             borderRadius: 999,
-            background: "rgba(2, 6, 23, 0.82)",
+            background: "color-mix(in srgb, var(--paper) 82%, transparent)",
             border: `1px solid ${enemy.color}55`,
             color: enemy.color,
             fontWeight: 900,
@@ -432,8 +432,8 @@ function DetailStat({
       style={{
         padding: subtle ? "8px 10px" : "10px 12px",
         borderRadius: 14,
-        background: "rgba(8, 47, 73, 0.24)",
-        border: "1px solid rgba(56, 189, 248, 0.12)"
+        background: "color-mix(in srgb, var(--accent-soft) 24%, transparent)",
+        border: "1px solid color-mix(in srgb, var(--accent) 12%, transparent)"
       }}
     >
       <div style={{ color: "var(--text-muted)", fontSize: subtle ? "0.72rem" : "0.78rem" }}>{label}</div>
@@ -570,7 +570,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
           padding: 12,
           borderRadius: 18,
           border: "1px solid var(--panel-border)",
-          background: "linear-gradient(180deg, rgba(8, 47, 73, 0.9), rgba(15, 23, 42, 0.86))"
+          background: "linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 90%, transparent), color-mix(in srgb, var(--surface) 86%, transparent))"
         }}
       >
         <div
@@ -598,7 +598,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
           padding: 10,
           borderRadius: 18,
           border: "1px solid var(--panel-border)",
-          background: "rgba(15, 23, 42, 0.54)"
+          background: "color-mix(in srgb, var(--surface) 54%, transparent)"
         }}
       >
         <div
@@ -662,9 +662,9 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
                 borderRadius: 16,
                 border: "1px solid var(--panel-border)",
                 background: canBuild
-                  ? "linear-gradient(180deg, rgba(56, 189, 248, 0.92), rgba(14, 165, 233, 0.96))"
-                  : "rgba(30, 41, 59, 0.72)",
-                color: canBuild ? "#082f49" : "var(--text-muted)",
+                  ? "linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, transparent), color-mix(in srgb, var(--accent) 96%, transparent))"
+                  : "color-mix(in srgb, var(--surface-raised) 72%, transparent)",
+                color: canBuild ? "var(--accent-soft)" : "var(--text-muted)",
                 fontWeight: 900,
                 fontSize: "0.9rem",
                 opacity: model.disabled ? 0.55 : 1
@@ -687,9 +687,9 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
                 borderRadius: 16,
                 border: "1px solid var(--panel-border)",
                 background: canUpgrade
-                  ? "linear-gradient(180deg, rgba(34, 197, 94, 0.92), rgba(16, 185, 129, 0.96))"
-                  : "rgba(30, 41, 59, 0.72)",
-                color: canUpgrade ? "#052e16" : "var(--text-muted)",
+                  ? "linear-gradient(180deg, color-mix(in srgb, var(--sage) 92%, transparent), color-mix(in srgb, var(--sage) 96%, transparent))"
+                  : "color-mix(in srgb, var(--surface-raised) 72%, transparent)",
+                color: canUpgrade ? "var(--sage-strong)" : "var(--text-muted)",
                 fontWeight: 900,
                 fontSize: "0.9rem",
                 opacity: model.disabled ? 0.55 : 1
@@ -712,9 +712,9 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
                 borderRadius: 16,
                 border: "1px solid var(--panel-border)",
                 background: canSell
-                  ? "linear-gradient(180deg, rgba(248, 113, 113, 0.92), rgba(239, 68, 68, 0.96))"
-                  : "rgba(30, 41, 59, 0.72)",
-                color: canSell ? "#450a0a" : "var(--text-muted)",
+                  ? "linear-gradient(180deg, color-mix(in srgb, var(--danger) 92%, transparent), color-mix(in srgb, var(--danger) 96%, transparent))"
+                  : "color-mix(in srgb, var(--surface-raised) 72%, transparent)",
+                color: canSell ? "var(--danger)" : "var(--text-muted)",
                 fontWeight: 900,
                 fontSize: "0.9rem",
                 opacity: model.disabled ? 0.55 : 1
@@ -734,8 +734,8 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
                 borderRadius: 16,
                 border: "1px solid var(--panel-border)",
                 background: showTowerInfo
-                  ? "linear-gradient(180deg, rgba(125, 211, 252, 0.26), rgba(15, 23, 42, 0.92))"
-                  : "rgba(30, 41, 59, 0.72)",
+                  ? "linear-gradient(180deg, color-mix(in srgb, var(--accent) 26%, transparent), color-mix(in srgb, var(--surface) 92%, transparent))"
+                  : "color-mix(in srgb, var(--surface-raised) 72%, transparent)",
                 color: showTowerInfo ? "var(--text-main)" : "var(--text-muted)",
                 fontWeight: 900,
                 fontSize: "0.9rem",
@@ -752,7 +752,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
               padding: 10,
               borderRadius: 14,
               border: "1px solid var(--panel-border)",
-              background: "rgba(15, 23, 42, 0.58)"
+              background: "color-mix(in srgb, var(--surface) 58%, transparent)"
             }}
           >
             <strong>{selectedSlot?.tower ? selectedSlot.tower.displayName : en ? "Free build slot" : "Freier Bauplatz"}</strong>
@@ -822,7 +822,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
               padding: 12,
               borderRadius: 18,
               border: "1px solid var(--panel-border)",
-              background: "rgba(15, 23, 42, 0.6)"
+              background: "color-mix(in srgb, var(--surface) 60%, transparent)"
             }}
           >
             <div
@@ -918,9 +918,9 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             borderRadius: 18,
             border: "1px solid var(--panel-border)",
             background: canSend
-              ? "linear-gradient(180deg, rgba(251, 146, 60, 0.92), rgba(234, 88, 12, 0.98))"
-              : "rgba(30, 41, 59, 0.72)",
-            color: canSend ? "#431407" : "var(--text-muted)",
+              ? "linear-gradient(180deg, color-mix(in srgb, var(--amber) 92%, transparent), color-mix(in srgb, var(--amber) 98%, transparent))"
+              : "color-mix(in srgb, var(--surface-raised) 72%, transparent)",
+            color: canSend ? "var(--danger)" : "var(--text-muted)",
             fontWeight: 900,
             letterSpacing: "0.04em",
             opacity: model.disabled ? 0.55 : 1
@@ -938,7 +938,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
               padding: 12,
               borderRadius: 18,
               border: "1px solid var(--panel-border)",
-              background: "rgba(15, 23, 42, 0.6)"
+              background: "color-mix(in srgb, var(--surface) 60%, transparent)"
             }}
           >
             <strong>{selectedEnemy.displayName}</strong>

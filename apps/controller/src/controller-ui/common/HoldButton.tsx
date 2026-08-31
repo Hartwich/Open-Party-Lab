@@ -47,7 +47,7 @@ export function HoldButton({ label, disabled = false, accentColor, onHoldChange 
         border: "1px solid var(--panel-border)",
         background: active
           ? accentColor ?? "linear-gradient(160deg, var(--accent) 0%, var(--accent-strong) 100%)"
-          : "rgba(15, 23, 42, 0.72)",
+          : "color-mix(in srgb, var(--surface) 72%, transparent)",
         color: "var(--text-main)",
         fontSize: "clamp(1.5rem, 5vw, 2.25rem)",
         fontWeight: 800,

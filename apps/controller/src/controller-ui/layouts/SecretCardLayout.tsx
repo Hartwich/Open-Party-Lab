@@ -11,16 +11,16 @@ interface SecretCardLayoutProps {
 }
 
 const ROLE_TONES: Record<SecretCardRoleTone, { bg: string; border: string; text: string }> = {
-  primary: { bg: "rgba(34, 197, 94, 0.16)", border: "rgba(34, 197, 94, 0.55)", text: "#86efac" },
-  watch: { bg: "rgba(248, 113, 113, 0.16)", border: "rgba(248, 113, 113, 0.55)", text: "#fca5a5" },
-  guess: { bg: "rgba(96, 165, 250, 0.16)", border: "rgba(96, 165, 250, 0.55)", text: "#93c5fd" },
-  bench: { bg: "rgba(148, 163, 184, 0.14)", border: "rgba(148, 163, 184, 0.4)", text: "#cbd5e1" }
+  primary: { bg: "color-mix(in srgb, var(--sage) 16%, transparent)", border: "color-mix(in srgb, var(--sage) 55%, transparent)", text: "var(--sage-soft)" },
+  watch: { bg: "color-mix(in srgb, var(--danger) 16%, transparent)", border: "color-mix(in srgb, var(--danger) 55%, transparent)", text: "var(--danger-soft)" },
+  guess: { bg: "color-mix(in srgb, var(--accent) 16%, transparent)", border: "color-mix(in srgb, var(--accent) 55%, transparent)", text: "var(--accent-soft)" },
+  bench: { bg: "color-mix(in srgb, var(--muted) 14%, transparent)", border: "color-mix(in srgb, var(--muted) 40%, transparent)", text: "var(--ink-soft)" }
 };
 
 const ACTION_TONES = {
-  positive: { bg: "linear-gradient(180deg, #22c55e, #15803d)", border: "#4ade80", text: "#f0fdf4" },
-  neutral: { bg: "linear-gradient(180deg, #475569, #1e293b)", border: "#94a3b8", text: "#e2e8f0" },
-  danger: { bg: "linear-gradient(180deg, #ef4444, #b91c1c)", border: "#fca5a5", text: "#fef2f2" }
+  positive: { bg: "linear-gradient(180deg, var(--sage), var(--sage))", border: "var(--sage)", text: "var(--sage-soft)" },
+  neutral: { bg: "linear-gradient(180deg, var(--line-strong), var(--surface-raised))", border: "var(--muted)", text: "var(--ink-soft)" },
+  danger: { bg: "linear-gradient(180deg, var(--danger), var(--danger))", border: "var(--danger-soft)", text: "var(--danger-soft)" }
 } as const;
 
 /**
@@ -67,12 +67,12 @@ function TimerRing({ remainingMs, durationMs }: { remainingMs: number | null; du
   const radius = 34;
   const circumference = 2 * Math.PI * radius;
   const urgent = remaining <= 10_000;
-  const stroke = urgent ? "#f87171" : ratio > 0.4 ? "#4ade80" : "#fbbf24";
+  const stroke = urgent ? "var(--danger)" : ratio > 0.4 ? "var(--sage)" : "var(--amber)";
 
   return (
     <div style={{ position: "relative", width: 80, height: 80, flexShrink: 0 }}>
       <svg width={80} height={80} viewBox="0 0 80 80" style={{ transform: "rotate(-90deg)" }}>
-        <circle cx={40} cy={40} r={radius} fill="none" stroke="rgba(148,163,184,0.22)" strokeWidth={7} />
+        <circle cx={40} cy={40} r={radius} fill="none" stroke="color-mix(in srgb, var(--muted) 22%, transparent)" strokeWidth={7} />
         <circle
           cx={40}
           cy={40}
@@ -194,7 +194,7 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
             placeItems: "center",
             padding: "10px 0",
             borderRadius: "var(--radius-lg)",
-            background: "rgba(15, 23, 42, 0.55)",
+            background: "color-mix(in srgb, var(--surface) 55%, transparent)",
             border: "1px dashed var(--panel-border)"
           }}
         >
@@ -208,11 +208,11 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
         <section
           style={{
             borderRadius: "var(--radius-lg)",
-            border: "1px solid rgba(148, 163, 184, 0.35)",
-            background: "linear-gradient(165deg, #f8fafc 0%, #e2e8f0 100%)",
-            color: "#0f172a",
+            border: "1px solid color-mix(in srgb, var(--muted) 35%, transparent)",
+            background: "linear-gradient(165deg, var(--ink) 0%, var(--ink-soft) 100%)",
+            color: "var(--ink-soft)",
             padding: "16px 16px 14px",
-            boxShadow: "0 12px 30px rgba(2, 6, 23, 0.45)"
+            boxShadow: "0 12px 30px color-mix(in srgb, var(--paper) 45%, transparent)"
           }}
         >
           {model.card.tag ? (
@@ -222,7 +222,7 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
                 fontWeight: 700,
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
-                color: "#64748b"
+                color: "var(--muted)"
               }}
             >
               {model.card.tag}
@@ -239,7 +239,7 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
           >
             {model.card.term}
           </div>
-          <div style={{ height: 1, background: "rgba(15, 23, 42, 0.14)", margin: "0 0 10px" }} />
+          <div style={{ height: 1, background: "color-mix(in srgb, var(--surface) 14%, transparent)", margin: "0 0 10px" }} />
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {model.card.forbidden.map((word) => (
               <span
@@ -249,9 +249,9 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
                   fontWeight: 600,
                   padding: "5px 10px",
                   borderRadius: 999,
-                  background: "rgba(220, 38, 38, 0.12)",
-                  border: "1px solid rgba(220, 38, 38, 0.35)",
-                  color: "#b91c1c",
+                  background: "color-mix(in srgb, var(--danger) 12%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--danger) 35%, transparent)",
+                  color: "var(--danger)",
                   textDecoration: "line-through",
                   textDecorationThickness: "1.5px"
                 }}
@@ -267,7 +267,7 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
             borderRadius: "var(--radius-lg)",
             border: "1px dashed var(--panel-border)",
             background:
-              "repeating-linear-gradient(135deg, rgba(30,41,59,0.75) 0 10px, rgba(15,23,42,0.75) 10px 20px)",
+              "repeating-linear-gradient(135deg, color-mix(in srgb, var(--surface-raised) 75%, transparent) 0 10px, color-mix(in srgb, var(--surface) 75%, transparent) 10px 20px)",
             padding: "22px 16px",
             display: "grid",
             placeItems: "center",
@@ -313,9 +313,9 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
                 disabled={model.disabled || target.disabled}
                 style={{
                   minHeight: 54,
-                  border: "1px solid rgba(74, 222, 128, 0.45)",
+                  border: "1px solid color-mix(in srgb, var(--sage) 45%, transparent)",
                   borderRadius: "var(--radius-md)",
-                  background: "rgba(22, 101, 52, 0.28)",
+                  background: "color-mix(in srgb, var(--sage-strong) 28%, transparent)",
                   color: "var(--text-main)",
                   fontWeight: 600,
                   fontSize: "0.98rem",
@@ -346,9 +346,9 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
                 justifyContent: "space-between",
                 alignItems: "center",
                 gap: 10,
-                background: row.highlighted ? "rgba(59, 130, 246, 0.16)" : "rgba(15, 23, 42, 0.52)",
-                border: `1px solid ${row.highlighted ? "rgba(96,165,250,0.45)" : "transparent"}`,
-                borderLeft: `3px solid ${row.accentColor ?? "rgba(148,163,184,0.35)"}`,
+                background: row.highlighted ? "color-mix(in srgb, var(--accent) 16%, transparent)" : "color-mix(in srgb, var(--surface) 52%, transparent)",
+                border: `1px solid ${row.highlighted ? "color-mix(in srgb, var(--accent) 45%, transparent)" : "transparent"}`,
+                borderLeft: `3px solid ${row.accentColor ?? "color-mix(in srgb, var(--muted) 35%, transparent)"}`,
                 borderRadius: "var(--radius-md)",
                 padding: "9px 12px"
               }}
@@ -368,7 +368,7 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
             <div
               key={stat.label}
               style={{
-                background: "rgba(15, 23, 42, 0.52)",
+                background: "color-mix(in srgb, var(--surface) 52%, transparent)",
                 borderRadius: "var(--radius-md)",
                 padding: "8px 10px",
                 display: "grid",
@@ -396,9 +396,9 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
                 fontSize: "0.85rem",
                 color:
                   entry.tone === "positive"
-                    ? "#86efac"
+                    ? "var(--sage-soft)"
                     : entry.tone === "danger"
-                      ? "#fca5a5"
+                      ? "var(--danger-soft)"
                       : "var(--text-muted)"
               }}
             >

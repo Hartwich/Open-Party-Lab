@@ -1,4 +1,5 @@
 import { defaultLanguage, normalizeLanguage, type SupportedLanguage } from "@open-party-lab/game-core";
+import { defaultThemeName, normalizeThemeName, type ThemeName } from "@open-party-lab/ui-kit";
 import { createRoomCode } from "./roomCode.js";
 import type { RoomRecord } from "./roomStore.js";
 import { RoomStore } from "./roomStore.js";
@@ -26,8 +27,10 @@ export class RoomManager {
       lastActivityAt: createdAt,
       joinUrl: this.createJoinUrl(code),
       language: normalizeLanguage(language),
+      theme: defaultThemeName,
       hostName,
       hostSocketId: null,
+      hostControl: { holderPlayerId: null, pendingRequest: null },
       selectedGameId: null,
       gameSettingsByGameId: {},
       roundCounter: 0,
@@ -78,6 +81,79 @@ export class RoomManager {
 
   setLanguage(room: RoomRecord, language: SupportedLanguage): RoomRecord {
     room.language = normalizeLanguage(language, room.language);
+    return room;
+  }
+
+  /**
+   * Records a takeover request. A newer request replaces an older pending one,
+   * so a forgotten prompt on the shared screen cannot block the room.
+   */
+  requestHostControl(room: RoomRecord, playerId: string): void {
+    room.hostControl.pendingRequest = { playerId, requestedAt: this.getNow() };
+    this.touch(room);
+  }
+
+  /**
+   * Answers the pending request. Returns false when the request no longer
+   * matches — e.g. the player left, or a newer request arrived meanwhile.
+   */
+  resolveHostControl(room: RoomRecord, playerId: string, grant: boolean): boolean {
+    if (room.hostControl.pendingRequest?.playerId !== playerId) {
+      return false;
+    }
+
+    room.hostControl.pendingRequest = null;
+
+    if (grant) {
+      room.hostControl.holderPlayerId = room.players.has(playerId) ? playerId : null;
+    }
+
+    this.touch(room);
+    return true;
+  }
+
+  /** Hands control back to the shared screen. */
+  releaseHostControl(room: RoomRecord): void {
+    room.hostControl.holderPlayerId = null;
+    room.hostControl.pendingRequest = null;
+    this.touch(room);
+  }
+
+  /**
+   * Drops any control or pending request belonging to a player who left.
+   * Returns true when something changed and the room must be rebroadcast.
+   */
+  forgetHostControlForPlayer(room: RoomRecord, playerId: string): boolean {
+    let changed = false;
+
+    if (room.hostControl.holderPlayerId === playerId) {
+      room.hostControl.holderPlayerId = null;
+      changed = true;
+    }
+
+    if (room.hostControl.pendingRequest?.playerId === playerId) {
+      room.hostControl.pendingRequest = null;
+      changed = true;
+    }
+
+    return changed;
+  }
+
+  /**
+   * The holder must still be in the room. Cleanup paths that drop a player
+   * record without going through `forgetHostControlForPlayer` would otherwise
+   * leave a stale id that still authorises actions.
+   */
+  hasHostControl(room: RoomRecord, playerId: string | undefined): boolean {
+    if (!playerId || room.hostControl.holderPlayerId !== playerId) {
+      return false;
+    }
+
+    return room.players.has(playerId);
+  }
+
+  setTheme(room: RoomRecord, theme: unknown): RoomRecord {
+    room.theme = normalizeThemeName(theme);
     return room;
   }
 

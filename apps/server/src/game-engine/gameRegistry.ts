@@ -65,7 +65,12 @@ export class GameRegistry {
       estimatedRoundDurationMs: manifest.estimatedRoundDurationMs,
       roundCompletionMode: manifest.roundCompletionMode,
       lobbySetup: manifest.lobbySetup,
-      playerSetup: manifest.playerSetup
+      playerSetup: manifest.playerSetup,
+      ownsScreens: manifest.ownsScreens,
+      hostChrome: manifest.hostChrome,
+      controllerChrome: manifest.controllerChrome,
+      visual: manifest.visual,
+      audio: manifest.audio
     };
   }
 }

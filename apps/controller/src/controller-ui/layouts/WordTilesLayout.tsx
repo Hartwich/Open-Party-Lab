@@ -45,16 +45,16 @@ function bonusLabel(bonus: WordTilesBoardCellState["bonus"]): string {
 function bonusColors(bonus: WordTilesBoardCellState["bonus"]): { background: string; color: string; border: string } {
   switch (bonus) {
     case "double_letter":
-      return { background: "rgba(59, 130, 246, 0.28)", color: "#bfdbfe", border: "rgba(96, 165, 250, 0.45)" };
+      return { background: "color-mix(in srgb, var(--accent) 28%, transparent)", color: "var(--ink)", border: "color-mix(in srgb, var(--accent) 45%, transparent)" };
     case "triple_letter":
-      return { background: "rgba(14, 165, 233, 0.44)", color: "#e0f2fe", border: "rgba(125, 211, 252, 0.58)" };
+      return { background: "color-mix(in srgb, var(--accent) 44%, transparent)", color: "var(--ink)", border: "color-mix(in srgb, var(--accent) 58%, transparent)" };
     case "double_word":
     case "center":
-      return { background: "rgba(244, 114, 182, 0.24)", color: "#fbcfe8", border: "rgba(244, 114, 182, 0.42)" };
+      return { background: "color-mix(in srgb, var(--accent) 24%, transparent)", color: "var(--ink)", border: "color-mix(in srgb, var(--accent) 42%, transparent)" };
     case "triple_word":
-      return { background: "rgba(239, 68, 68, 0.38)", color: "#fee2e2", border: "rgba(248, 113, 113, 0.58)" };
+      return { background: "color-mix(in srgb, var(--danger) 38%, transparent)", color: "var(--ink)", border: "color-mix(in srgb, var(--danger) 58%, transparent)" };
     default:
-      return { background: "rgba(15, 23, 42, 0.78)", color: "rgba(226, 232, 240, 0.5)", border: "rgba(148, 163, 184, 0.13)" };
+      return { background: "color-mix(in srgb, var(--surface) 78%, transparent)", color: "color-mix(in srgb, var(--ink-soft) 50%, transparent)", border: "color-mix(in srgb, var(--muted) 13%, transparent)" };
   }
 }
 
@@ -264,7 +264,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
           padding: 12,
           borderRadius: 16,
           border: "1px solid var(--panel-border)",
-          background: "linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(8, 47, 73, 0.72))"
+          background: "linear-gradient(180deg, color-mix(in srgb, var(--surface) 90%, transparent), color-mix(in srgb, var(--accent-soft) 72%, transparent))"
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline" }}>
@@ -272,7 +272,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
           <span style={{ color: "var(--text-muted)", fontWeight: 800 }}>{model.ownScore} P</span>
         </div>
         <span style={{ color: "var(--text-muted)", lineHeight: 1.35 }}>{model.subtitle}</span>
-        <span style={{ color: model.lastError ? "#fca5a5" : "var(--text-muted)", lineHeight: 1.35 }}>
+        <span style={{ color: model.lastError ? "var(--danger-soft)" : "var(--text-muted)", lineHeight: 1.35 }}>
           {model.lastError ?? model.helperText}
         </span>
       </header>
@@ -310,8 +310,8 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
           gap: 6,
           padding: 7,
           borderRadius: 14,
-          border: "1px solid rgba(148, 163, 184, 0.14)",
-          background: "rgba(2, 6, 23, 0.52)"
+          border: "1px solid color-mix(in srgb, var(--muted) 14%, transparent)",
+          background: "color-mix(in srgb, var(--paper) 52%, transparent)"
         }}
       >
         <div
@@ -356,19 +356,19 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
                   borderRadius: 4,
                   border: renderedTile
                     ? cell.recent || renderedTile.draft
-                      ? "2px solid #facc15"
-                      : "1px solid rgba(120, 53, 15, 0.62)"
+                      ? "2px solid var(--amber)"
+                      : "1px solid color-mix(in srgb, var(--amber) 62%, transparent)"
                     : eligible
-                      ? "2px solid rgba(34, 197, 94, 0.72)"
+                      ? "2px solid color-mix(in srgb, var(--sage) 72%, transparent)"
                       : `1px solid ${colors.border}`,
                   background: renderedTile
                     ? renderedTile.draft
-                      ? "linear-gradient(180deg, #fde68a, #f59e0b)"
-                      : "linear-gradient(180deg, #f5deb3, #d6a65c)"
+                      ? "linear-gradient(180deg, var(--amber-soft), var(--amber))"
+                      : "linear-gradient(180deg, var(--amber-soft), var(--amber))"
                     : eligible
-                      ? "rgba(34, 197, 94, 0.22)"
+                      ? "color-mix(in srgb, var(--sage) 22%, transparent)"
                       : colors.background,
-                  color: renderedTile ? "#3b2208" : colors.color,
+                  color: renderedTile ? "var(--amber)" : colors.color,
                   padding: 0,
                   display: "grid",
                   placeItems: "center",
@@ -426,16 +426,16 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
                   minHeight: 52,
                   borderRadius: 8,
                   border: exchangeSelected
-                    ? "2px solid #fb923c"
+                    ? "2px solid var(--amber)"
                     : selected
-                      ? "2px solid #22c55e"
-                      : "1px solid rgba(120, 53, 15, 0.7)",
+                      ? "2px solid var(--sage)"
+                      : "1px solid color-mix(in srgb, var(--amber) 70%, transparent)",
                   background: exchangeSelected
-                    ? "linear-gradient(180deg, #fed7aa, #fb923c)"
+                    ? "linear-gradient(180deg, var(--amber-soft), var(--amber))"
                     : selected
-                      ? "linear-gradient(180deg, #bbf7d0, #22c55e)"
-                      : "linear-gradient(180deg, #f5deb3, #d6a65c)",
-                  color: "#3b2208",
+                      ? "linear-gradient(180deg, var(--sage-soft), var(--sage))"
+                      : "linear-gradient(180deg, var(--amber-soft), var(--amber))",
+                  color: "var(--amber)",
                   fontWeight: 950,
                   fontSize: "1.25rem",
                   opacity: model.disabled ? 0.58 : 1
@@ -466,13 +466,13 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
             gap: 5,
             padding: 9,
             borderRadius: 14,
-            border: "1px solid rgba(34, 197, 94, 0.28)",
-            background: "rgba(20, 83, 45, 0.2)"
+            border: "1px solid color-mix(in srgb, var(--sage) 28%, transparent)",
+            background: "color-mix(in srgb, var(--sage-strong) 20%, transparent)"
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
             <strong>{en ? "This turn" : "Dieser Zug"}</strong>
-            <span style={{ color: "#86efac", fontWeight: 900 }}>
+            <span style={{ color: "var(--ink-soft)", fontWeight: 900 }}>
               {activeTurn.score} P
               {activeTurn.bingoEligible ? " +50" : ""}
             </span>
@@ -491,13 +491,13 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
             gap: 8,
             padding: 10,
             borderRadius: 14,
-            border: pendingMove.challengedByName ? "1px solid rgba(248, 113, 113, 0.45)" : "1px solid rgba(250, 204, 21, 0.34)",
-            background: pendingMove.challengedByName ? "rgba(127, 29, 29, 0.28)" : "rgba(120, 53, 15, 0.24)"
+            border: pendingMove.challengedByName ? "1px solid color-mix(in srgb, var(--danger) 45%, transparent)" : "1px solid color-mix(in srgb, var(--amber) 34%, transparent)",
+            background: pendingMove.challengedByName ? "color-mix(in srgb, var(--danger) 28%, transparent)" : "color-mix(in srgb, var(--amber) 24%, transparent)"
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
             <strong>{en ? "Open move" : "Offener Zug"}</strong>
-            <span style={{ color: pendingMove.challengedByName ? "#fca5a5" : "#fde68a", fontWeight: 850 }}>
+            <span style={{ color: pendingMove.challengedByName ? "var(--danger-soft)" : "var(--amber-soft)", fontWeight: 850 }}>
               {pendingMoveStatus}
             </span>
           </div>
@@ -644,8 +644,8 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
               gap: 8,
               padding: "7px 9px",
               borderRadius: 10,
-              border: player.playerId === model.activePlayerId ? "1px solid rgba(34, 197, 94, 0.5)" : "1px solid rgba(148, 163, 184, 0.12)",
-              background: player.playerId === model.currentPlayerId ? "rgba(14, 165, 233, 0.14)" : "rgba(15, 23, 42, 0.42)"
+              border: player.playerId === model.activePlayerId ? "1px solid color-mix(in srgb, var(--sage) 50%, transparent)" : "1px solid color-mix(in srgb, var(--muted) 12%, transparent)",
+              background: player.playerId === model.currentPlayerId ? "color-mix(in srgb, var(--accent) 14%, transparent)" : "color-mix(in srgb, var(--surface) 42%, transparent)"
             }}
           >
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -666,7 +666,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
             display: "grid",
             placeItems: "center",
             padding: 16,
-            background: "rgba(2, 6, 23, 0.72)"
+            background: "color-mix(in srgb, var(--paper) 72%, transparent)"
           }}
         >
           <div
@@ -711,8 +711,8 @@ const metricStyle = {
   gap: 2,
   padding: 8,
   borderRadius: 12,
-  border: "1px solid rgba(148, 163, 184, 0.14)",
-  background: "rgba(15, 23, 42, 0.48)"
+  border: "1px solid color-mix(in srgb, var(--muted) 14%, transparent)",
+  background: "color-mix(in srgb, var(--surface) 48%, transparent)"
 } as const;
 
 const metricLabelStyle = {
@@ -723,36 +723,36 @@ const metricLabelStyle = {
 
 const primaryButtonStyle = {
   minHeight: 50,
-  border: "1px solid rgba(34, 197, 94, 0.42)",
+  border: "1px solid color-mix(in srgb, var(--sage) 42%, transparent)",
   borderRadius: 12,
-  background: "linear-gradient(180deg, #86efac, #22c55e)",
-  color: "#052e16",
+  background: "linear-gradient(180deg, var(--sage-soft), var(--sage))",
+  color: "var(--sage-strong)",
   fontWeight: 950
 } as const;
 
 const secondaryButtonStyle = {
   minHeight: 50,
-  border: "1px solid rgba(148, 163, 184, 0.18)",
+  border: "1px solid color-mix(in srgb, var(--muted) 18%, transparent)",
   borderRadius: 12,
-  background: "rgba(30, 41, 59, 0.78)",
+  background: "color-mix(in srgb, var(--surface-raised) 78%, transparent)",
   color: "var(--text-main)",
   fontWeight: 850
 } as const;
 
 const warningButtonStyle = {
   minHeight: 50,
-  border: "1px solid rgba(251, 146, 60, 0.45)",
+  border: "1px solid color-mix(in srgb, var(--amber) 45%, transparent)",
   borderRadius: 12,
-  background: "linear-gradient(180deg, #fdba74, #f97316)",
-  color: "#431407",
+  background: "linear-gradient(180deg, var(--amber), var(--amber))",
+  color: "var(--danger)",
   fontWeight: 950
 } as const;
 
 const dangerButtonStyle = {
   minHeight: 50,
-  border: "1px solid rgba(248, 113, 113, 0.5)",
+  border: "1px solid color-mix(in srgb, var(--danger) 50%, transparent)",
   borderRadius: 12,
-  background: "linear-gradient(180deg, #fca5a5, #ef4444)",
-  color: "#450a0a",
+  background: "linear-gradient(180deg, var(--danger-soft), var(--danger))",
+  color: "var(--danger)",
   fontWeight: 950
 } as const;

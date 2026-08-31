@@ -46,7 +46,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
           : `${en ? "Word" : "Wort"}: ${model.wordMask}`}
       </div>
       {model.winnerName ? (
-        <div style={{ color: "#4ade80", fontWeight: 700 }}>
+        <div style={{ color: "var(--sage)", fontWeight: 700 }}>
           {en ? "Winner" : "Gewinner"}: {model.winnerName}
         </div>
       ) : null}
@@ -70,9 +70,9 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
                       width: 34,
                       height: 34,
                       borderRadius: 999,
-                      border: selected ? "3px solid #f8fafc" : "2px solid rgba(148,163,184,0.5)",
+                      border: selected ? "3px solid var(--ink)" : "2px solid color-mix(in srgb, var(--muted) 50%, transparent)",
                       background: color,
-                      boxShadow: selected ? "0 0 0 3px rgba(15, 23, 42, 0.8)" : "none",
+                      boxShadow: selected ? "0 0 0 3px color-mix(in srgb, var(--surface) 80%, transparent)" : "none",
                       cursor: model.disabled ? "not-allowed" : "pointer",
                       opacity: model.disabled ? 0.6 : 1
                     }}
@@ -87,8 +87,8 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
               position: "relative",
               width: "100%",
               height: "clamp(320px, 62vh, 560px)",
-              background: "#0f172a",
-              border: "2px solid #334155",
+              background: "var(--surface)",
+              border: "2px solid var(--line-strong)",
               borderRadius: 14,
               touchAction: "none",
               overflow: "hidden"
@@ -161,8 +161,8 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
             style={{
               border: 0,
               borderRadius: 12,
-              background: "#334155",
-              color: "#f8fafc",
+              background: "var(--line-strong)",
+              color: "var(--ink)",
               fontSize: 16,
               fontWeight: 700,
               padding: "12px 16px"
@@ -193,9 +193,9 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
             style={{
               padding: "14px 16px",
               borderRadius: 12,
-              border: "1px solid #334155",
-              background: "#0f172a",
-              color: "#f8fafc",
+              border: "1px solid var(--line-strong)",
+              background: "var(--surface)",
+              color: "var(--ink)",
               fontSize: 18
             }}
           />
@@ -205,8 +205,8 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
             style={{
               border: 0,
               borderRadius: 12,
-              background: "linear-gradient(135deg, #22d3ee 0%, #0ea5e9 100%)",
-              color: "#082f49",
+              background: "linear-gradient(135deg, var(--accent) 0%, var(--accent) 100%)",
+              color: "var(--on-accent)",
               fontSize: 17,
               fontWeight: 800,
               padding: "12px 16px"
@@ -222,7 +222,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
           <small style={{ color: "var(--text-muted)" }}>{en ? "No guesses yet." : "Noch keine Tipps."}</small>
         ) : (
           recentGuesses.map((entry, index) => (
-            <small key={`${entry.playerName}-${index}`} style={{ color: entry.correct ? "#4ade80" : "var(--text-muted)" }}>
+            <small key={`${entry.playerName}-${index}`} style={{ color: entry.correct ? "var(--sage)" : "var(--text-muted)" }}>
               {entry.playerName}: {entry.guess}
             </small>
           ))

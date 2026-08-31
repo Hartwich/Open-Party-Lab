@@ -14,7 +14,7 @@ export function BigButton({
         border: 0,
         borderRadius: "32px",
         background: "linear-gradient(160deg, var(--accent) 0%, var(--accent-strong) 100%)",
-        color: "#082f49",
+        color: "var(--on-accent)",
         fontSize: "clamp(2rem, 9vw, 4rem)",
         fontWeight: 900,
         boxShadow: "var(--button-shadow)",

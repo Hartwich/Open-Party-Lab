@@ -38,7 +38,7 @@ export function SingleButtonLayout({ model }: SingleButtonLayoutProps) {
                 justifyContent: "space-between",
                 padding: "12px 14px",
                 borderRadius: "var(--radius-md)",
-                background: "rgba(15, 23, 42, 0.52)"
+                background: "color-mix(in srgb, var(--surface) 52%, transparent)"
               }}
             >
               <span style={{ color: "var(--text-muted)" }}>{stat.label}</span>

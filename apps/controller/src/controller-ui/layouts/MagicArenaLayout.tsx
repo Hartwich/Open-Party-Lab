@@ -395,25 +395,25 @@ function getHexObjectVariantStyle(type: MagicArenaBoardObjectState["type"]) {
   switch (type) {
     case "magic_mine":
       return {
-        background: "#0f172a",
-        borderColor: "rgba(248,113,113,0.86)",
-        boxShadow: "0 0 8px rgba(248,113,113,0.42)"
+        background: "var(--surface)",
+        borderColor: "color-mix(in srgb, var(--danger) 86%, transparent)",
+        boxShadow: "0 0 8px color-mix(in srgb, var(--danger) 42%, transparent)"
       } as const;
     case "pitfall":
       return {
-        background: "rgba(15,23,42,0.76)",
-        borderColor: "rgba(148,163,184,0.72)"
+        background: "color-mix(in srgb, var(--surface) 76%, transparent)",
+        borderColor: "color-mix(in srgb, var(--muted) 72%, transparent)"
       } as const;
     case "time_rift_marker":
       return {
-        background: "rgba(88,28,135,0.72)",
-        borderColor: "rgba(216,180,254,0.82)",
-        boxShadow: "0 0 9px rgba(192,132,252,0.42)"
+        background: "color-mix(in srgb, var(--accent) 72%, transparent)",
+        borderColor: "color-mix(in srgb, var(--accent-soft) 82%, transparent)",
+        boxShadow: "0 0 9px color-mix(in srgb, var(--accent-soft) 42%, transparent)"
       } as const;
     default:
       return {
-        background: "#111827",
-        borderColor: "rgba(248,250,252,0.52)"
+        background: "var(--surface)",
+        borderColor: "color-mix(in srgb, var(--ink) 52%, transparent)"
       } as const;
   }
 }
@@ -1164,8 +1164,8 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
     <div style={{ display: "grid", gap: 10 }}>
       <header style={panelStyle}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
-          <strong style={{ fontSize: "1.18rem", color: "#f8fafc" }}>{model.title}</strong>
-          <span style={{ color: "#bae6fd", fontWeight: 900 }}>R{state.roundIndex} {phaseLabel}</span>
+          <strong style={{ fontSize: "1.18rem", color: "var(--ink)" }}>{model.title}</strong>
+          <span style={{ color: "var(--ink-soft)", fontWeight: 900 }}>R{state.roundIndex} {phaseLabel}</span>
         </div>
         <span style={{ color: "var(--text-muted)", lineHeight: 1.35 }}>{model.subtitle ?? model.helperText}</span>
       </header>
@@ -1210,8 +1210,8 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
                 onClick={() => setSlotIndex(index)}
                 style={{
                   ...slotButtonStyle,
-                  border: slotIndex === index ? "2px solid #38bdf8" : plan ? "1px solid rgba(34,197,94,0.5)" : slotButtonStyle.border,
-                  background: slotIndex === index ? "rgba(14,165,233,0.24)" : plan ? "rgba(34,197,94,0.16)" : slotButtonStyle.background
+                  border: slotIndex === index ? "2px solid var(--accent)" : plan ? "1px solid color-mix(in srgb, var(--sage) 50%, transparent)" : slotButtonStyle.border,
+                  background: slotIndex === index ? "color-mix(in srgb, var(--accent) 24%, transparent)" : plan ? "color-mix(in srgb, var(--sage) 16%, transparent)" : slotButtonStyle.background
                 }}
               >
                 {plan ? (
@@ -1309,44 +1309,44 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
                 !plannedFigureIds.has(entry.figure.figureId)
             );
             const rimColor = pathStep || selected
-              ? "#facc15"
+              ? "var(--amber)"
               : selectedOwnFigure
-                ? "#38bdf8"
+                ? "var(--accent)"
                 : roundEventMarked
-                  ? "#c084fc"
+                  ? "var(--accent-soft)"
                   : validTarget
-                    ? "#22c55e"
+                    ? "var(--sage)"
                     : plannedMarker?.target || plannedMarker?.self
-                      ? "#60a5fa"
+                      ? "var(--accent)"
                       : plannedMarker?.path || plannedMarker?.area
-                        ? "rgba(96,165,250,0.78)"
+                        ? "color-mix(in srgb, var(--accent) 78%, transparent)"
                         : hasOwnSelectableFigure
-                          ? "rgba(56,189,248,0.78)"
-                          : "rgba(148,163,184,0.2)";
+                          ? "color-mix(in srgb, var(--accent) 78%, transparent)"
+                          : "color-mix(in srgb, var(--muted) 20%, transparent)";
             const rimWidth = pathStep || selected || selectedOwnFigure || validTarget || plannedMarker ? 3 : 1;
             const fillColor = !field.exists
-              ? "rgba(14,165,233,0.22)"
+              ? "color-mix(in srgb, var(--accent) 22%, transparent)"
               : pathStep
-                ? "rgba(250,204,21,0.34)"
+                ? "color-mix(in srgb, var(--amber) 34%, transparent)"
                 : selected
-                  ? "rgba(250,204,21,0.24)"
+                  ? "color-mix(in srgb, var(--amber) 24%, transparent)"
                 : effectPreview
-                  ? "rgba(34,197,94,0.22)"
+                  ? "color-mix(in srgb, var(--sage) 22%, transparent)"
                   : roundEventMarked
-                    ? "rgba(168,85,247,0.26)"
+                    ? "color-mix(in srgb, var(--accent) 26%, transparent)"
                     : selectedOwnFigure
-                      ? "rgba(56,189,248,0.28)"
+                      ? "color-mix(in srgb, var(--accent) 28%, transparent)"
                       : plannedMarker?.target || plannedMarker?.self
-                        ? "rgba(96,165,250,0.3)"
+                        ? "color-mix(in srgb, var(--accent) 30%, transparent)"
                         : plannedMarker?.path
-                          ? "rgba(59,130,246,0.23)"
+                          ? "color-mix(in srgb, var(--accent) 23%, transparent)"
                           : plannedMarker?.area
-                            ? "rgba(14,165,233,0.18)"
+                            ? "color-mix(in srgb, var(--accent) 18%, transparent)"
                             : field.type === "strong"
-                              ? "rgba(71,85,105,0.84)"
+                              ? "color-mix(in srgb, var(--line-strong) 84%, transparent)"
                               : field.type === "weak"
-                                ? "rgba(100,116,139,0.52)"
-                                : "rgba(30,41,59,0.76)";
+                                ? "color-mix(in srgb, var(--muted) 52%, transparent)"
+                                : "color-mix(in srgb, var(--surface-raised) 76%, transparent)";
 
             return (
               <button
@@ -1360,12 +1360,12 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
                   left: `${cell.left}%`,
                   top: `${cell.top}%`,
                   background: rimColor,
-                  color: field.exists ? "#e2e8f0" : "#7dd3fc",
+                  color: field.exists ? "var(--ink-soft)" : "var(--accent)",
                   opacity: model.disabled ? 0.74 : 1,
                   boxShadow: validTarget
-                    ? "0 0 12px rgba(34,197,94,0.24)"
+                    ? "0 0 12px color-mix(in srgb, var(--sage) 24%, transparent)"
                     : plannedMarker
-                      ? "0 0 10px rgba(96,165,250,0.22)"
+                      ? "0 0 10px color-mix(in srgb, var(--accent) 22%, transparent)"
                       : "none"
                 }}
               >
@@ -1393,7 +1393,7 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
                         background: entry.color,
                         opacity: entry.figure.status === "in_water" ? 0.62 : entry.figure.stealthUntilRound ? 0.54 : 1,
                         transform: `translate(${(index - (Math.min(figures.length, 3) - 1) / 2) * 8}px, 3px)`,
-                        boxShadow: entry.own ? "0 0 0 2px rgba(248,250,252,0.65)" : "0 0 0 1px rgba(15,23,42,0.85)"
+                        boxShadow: entry.own ? "0 0 0 2px color-mix(in srgb, var(--ink) 65%, transparent)" : "0 0 0 1px color-mix(in srgb, var(--surface) 85%, transparent)"
                       }}
                     />
                   ))}
@@ -1472,8 +1472,8 @@ const panelStyle = {
   gap: 8,
   padding: 10,
   borderRadius: 12,
-  border: "1px solid rgba(148, 163, 184, 0.14)",
-  background: "rgba(2, 6, 23, 0.48)"
+  border: "1px solid color-mix(in srgb, var(--muted) 14%, transparent)",
+  background: "color-mix(in srgb, var(--paper) 48%, transparent)"
 } as const;
 
 const roundEventNoticeStyle = {
@@ -1481,9 +1481,9 @@ const roundEventNoticeStyle = {
   gap: 4,
   padding: "10px 12px",
   borderRadius: 10,
-  border: "1px solid rgba(196,181,253,0.38)",
-  background: "rgba(49,46,129,0.44)",
-  color: "#f8fafc",
+  border: "1px solid color-mix(in srgb, var(--accent-soft) 38%, transparent)",
+  background: "color-mix(in srgb, var(--accent) 44%, transparent)",
+  color: "var(--ink)",
   lineHeight: 1.25
 } as const;
 
@@ -1493,18 +1493,18 @@ function turnBannerStyle(ownTurn: boolean) {
     gap: 4,
     padding: "10px 12px",
     borderRadius: 12,
-    border: ownTurn ? "2px solid rgba(34,197,94,0.6)" : "1px solid rgba(148, 163, 184, 0.18)",
-    background: ownTurn ? "rgba(34,197,94,0.14)" : "rgba(2, 6, 23, 0.48)",
-    color: "#f8fafc",
+    border: ownTurn ? "2px solid color-mix(in srgb, var(--sage) 60%, transparent)" : "1px solid color-mix(in srgb, var(--muted) 18%, transparent)",
+    background: ownTurn ? "color-mix(in srgb, var(--sage) 14%, transparent)" : "color-mix(in srgb, var(--paper) 48%, transparent)",
+    color: "var(--ink)",
     fontSize: "0.95rem"
   } as const;
 }
 
 const slotButtonStyle = {
   minHeight: 56,
-  border: "1px solid rgba(148, 163, 184, 0.18)",
+  border: "1px solid color-mix(in srgb, var(--muted) 18%, transparent)",
   borderRadius: 10,
-  background: "rgba(15, 23, 42, 0.62)",
+  background: "color-mix(in srgb, var(--surface) 62%, transparent)",
   color: "var(--text-main)",
   display: "grid",
   gap: 3,
@@ -1522,7 +1522,7 @@ const slotFigureNameStyle = {
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
-  color: "#e0f2fe",
+  color: "var(--ink-soft)",
   fontSize: "0.72rem",
   lineHeight: 1.1,
   fontWeight: 900
@@ -1546,8 +1546,8 @@ const hexBoardStyle = {
   minHeight: 292,
   overflow: "hidden",
   borderRadius: 10,
-  border: "1px solid rgba(148, 163, 184, 0.12)",
-  background: "linear-gradient(180deg, rgba(8,47,73,0.42), rgba(15,23,42,0.72))"
+  border: "1px solid color-mix(in srgb, var(--muted) 12%, transparent)",
+  background: "linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 42%, transparent), color-mix(in srgb, var(--surface) 72%, transparent))"
 } as const;
 
 const hexCellStyle = {
@@ -1578,7 +1578,7 @@ const hexHpStyle = {
   textAlign: "center",
   fontSize: "0.52rem",
   lineHeight: 1,
-  color: "rgba(248,250,252,0.82)",
+  color: "color-mix(in srgb, var(--ink) 82%, transparent)",
   pointerEvents: "none",
   zIndex: 4
 } as const;
@@ -1597,7 +1597,7 @@ const hexFigureDotStyle = {
   width: 10,
   height: 10,
   borderRadius: 999,
-  border: "1px solid rgba(2,6,23,0.72)"
+  border: "1px solid color-mix(in srgb, var(--paper) 72%, transparent)"
 } as const;
 
 const hexBadgeStyle = {
@@ -1609,8 +1609,8 @@ const hexBadgeStyle = {
   borderRadius: 999,
   display: "grid",
   placeItems: "center",
-  background: "#facc15",
-  color: "#422006",
+  background: "var(--amber)",
+  color: "var(--amber)",
   fontSize: "0.52rem",
   lineHeight: 1,
   fontWeight: 950,
@@ -1624,8 +1624,8 @@ const hexBombStyle = {
   width: 11,
   height: 11,
   borderRadius: 999,
-  background: "#111827",
-  border: "1px solid rgba(248,250,252,0.48)",
+  background: "var(--surface)",
+  border: "1px solid color-mix(in srgb, var(--ink) 48%, transparent)",
   pointerEvents: "none"
 } as const;
 
@@ -1636,8 +1636,8 @@ const hexObjectStyle = {
   width: 12,
   height: 12,
   borderRadius: 999,
-  background: "rgba(15,23,42,0.84)",
-  border: "1px solid rgba(125,211,252,0.58)",
+  background: "color-mix(in srgb, var(--surface) 84%, transparent)",
+  border: "1px solid color-mix(in srgb, var(--accent) 58%, transparent)",
   pointerEvents: "none"
 } as const;
 
@@ -1656,9 +1656,9 @@ const hexCrystalMarkerStyle = {
   height: 12,
   transform: "rotate(45deg)",
   borderRadius: 2,
-  background: "linear-gradient(135deg, #ecfeff 0%, #67e8f9 42%, #0e7490 100%)",
-  border: "1px solid rgba(240,253,250,0.88)",
-  boxShadow: "0 0 9px rgba(103,232,249,0.72)"
+  background: "linear-gradient(135deg, var(--accent-soft) 0%, var(--accent) 42%, var(--accent) 100%)",
+  border: "1px solid color-mix(in srgb, var(--accent-soft) 88%, transparent)",
+  boxShadow: "0 0 9px color-mix(in srgb, var(--accent) 72%, transparent)"
 } as const;
 
 const hexCrackMarkerStyle = {
@@ -1675,9 +1675,9 @@ const hexCrackMainStyle = {
   width: "44%",
   height: 2,
   borderRadius: 999,
-  background: "#020617",
+  background: "var(--paper)",
   transform: "rotate(23deg)",
-  boxShadow: "0 0 4px rgba(248,113,113,0.38)"
+  boxShadow: "0 0 4px color-mix(in srgb, var(--danger) 38%, transparent)"
 } as const;
 
 const hexCrackBranchLeftStyle = {
@@ -1687,7 +1687,7 @@ const hexCrackBranchLeftStyle = {
   width: "21%",
   height: 2,
   borderRadius: 999,
-  background: "#020617",
+  background: "var(--paper)",
   transform: "rotate(-43deg)",
   transformOrigin: "left center"
 } as const;
@@ -1699,7 +1699,7 @@ const hexCrackBranchRightStyle = {
   width: "24%",
   height: 2,
   borderRadius: 999,
-  background: "#020617",
+  background: "var(--paper)",
   transform: "rotate(-34deg)",
   transformOrigin: "left center"
 } as const;
@@ -1707,9 +1707,9 @@ const hexCrackBranchRightStyle = {
 function modeButtonStyle(selected: boolean) {
   return {
     minHeight: 42,
-    border: selected ? "2px solid #facc15" : "1px solid rgba(148, 163, 184, 0.18)",
+    border: selected ? "2px solid var(--amber)" : "1px solid color-mix(in srgb, var(--muted) 18%, transparent)",
     borderRadius: 10,
-    background: selected ? "rgba(250, 204, 21, 0.2)" : "rgba(15, 23, 42, 0.68)",
+    background: selected ? "color-mix(in srgb, var(--amber) 20%, transparent)" : "color-mix(in srgb, var(--surface) 68%, transparent)",
     color: "var(--text-main)",
     fontWeight: 900,
     display: "grid",
@@ -1721,18 +1721,18 @@ function modeButtonStyle(selected: boolean) {
 
 const primaryButtonStyle = {
   minHeight: 50,
-  border: "1px solid rgba(34, 197, 94, 0.42)",
+  border: "1px solid color-mix(in srgb, var(--sage) 42%, transparent)",
   borderRadius: 12,
-  background: "linear-gradient(180deg, #86efac, #22c55e)",
-  color: "#052e16",
+  background: "linear-gradient(180deg, var(--sage-soft), var(--sage))",
+  color: "var(--sage-strong)",
   fontWeight: 950
 } as const;
 
 const secondaryButtonStyle = {
   minHeight: 50,
-  border: "1px solid rgba(148, 163, 184, 0.18)",
+  border: "1px solid color-mix(in srgb, var(--muted) 18%, transparent)",
   borderRadius: 12,
-  background: "rgba(30, 41, 59, 0.78)",
+  background: "color-mix(in srgb, var(--surface-raised) 78%, transparent)",
   color: "var(--text-main)",
   fontWeight: 850
 } as const;

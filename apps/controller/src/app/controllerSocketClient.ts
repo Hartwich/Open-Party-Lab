@@ -8,6 +8,7 @@ import type {
   ServerToClientEvents,
   SupportedLanguage
 } from "@open-party-lab/protocol";
+import { applyThemeVariables, normalizeThemeName } from "@open-party-lab/ui-kit";
 import { io, type Socket } from "socket.io-client";
 import {
   readStoredControllerLanguage,
@@ -48,6 +49,15 @@ const initialState: ControllerAppState = {
   hasStoredSession: false,
   storedSession: null
 };
+
+/** Writes the room's theme onto the document root. */
+function applyControllerTheme(theme: unknown): void {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  applyThemeVariables(document.documentElement, normalizeThemeName(theme));
+}
 
 function shouldUseVolatileInput(input: unknown): boolean {
   if (!input || typeof input !== "object") {
@@ -120,6 +130,8 @@ export class ControllerSocketClient {
         : this.state.player;
 
       writeStoredControllerLanguage(room.language);
+      // The theme is a room setting the phone simply adopts.
+      applyControllerTheme(room.theme);
       const currentGame =
         room.currentRound &&
         this.state.game?.gameId === room.currentRound.gameId &&
@@ -171,6 +183,7 @@ export class ControllerSocketClient {
       this.sessionTerminationPending = false;
       const storedSession = this.persistSession(room.code, player.id, player.name, reconnectToken);
       writeStoredControllerLanguage(room.language);
+      applyControllerTheme(room.theme);
       this.updateState({
         room,
         player,
@@ -420,6 +433,104 @@ export class ControllerSocketClient {
         });
       }
     );
+  }
+
+  // --- remote host control -------------------------------------------------
+
+  /**
+   * Asks the shared screen for the host controls. The screen answers with
+   * `host-control:resolve`; the outcome arrives via the next `room:state`.
+   */
+  requestHostControl(): void {
+    if (!this.state.room || !this.state.player) {
+      return;
+    }
+
+    this.socket.emit(
+      "host-control:request",
+      { roomCode: this.state.room.code, playerId: this.state.player.id },
+      (result) => {
+        if (!result.ok) {
+          this.updateState({ error: result.error });
+          return;
+        }
+
+        this.updateState({ room: result.data.room, error: null });
+      }
+    );
+  }
+
+  /** Hands the controls back to the shared screen. */
+  releaseHostControl(): void {
+    if (!this.state.room) {
+      return;
+    }
+
+    this.socket.emit("host-control:release", { roomCode: this.state.room.code }, (result) => {
+      if (!result.ok) {
+        this.updateState({ error: result.error });
+        return;
+      }
+
+      this.updateState({ room: result.data.room, error: null });
+    });
+  }
+
+  /** Host action: pick a game. Requires host control; the server enforces it. */
+  selectGame(gameId: string | null): void {
+    if (!this.state.room) {
+      return;
+    }
+
+    this.socket.emit("game:select", { roomCode: this.state.room.code, gameId });
+  }
+
+  /** Host action: start the current round. */
+  startRound(): void {
+    if (!this.state.room) {
+      return;
+    }
+
+    this.socket.emit("round:start", { roomCode: this.state.room.code });
+  }
+
+  /** Host action: abort the running round and return to the catalog. */
+  returnToGameSelection(): void {
+    const room = this.state.room;
+
+    if (!room) {
+      return;
+    }
+
+    if (room.currentRound && room.currentRound.phase !== "finished") {
+      this.socket.emit("round:abort", { roomCode: room.code }, (result) => {
+        if (!result.ok) {
+          this.updateState({ error: result.error });
+          return;
+        }
+
+        this.socket.emit("game:select", { roomCode: room.code, gameId: null });
+      });
+      return;
+    }
+
+    this.socket.emit("game:select", { roomCode: room.code, gameId: null });
+  }
+
+  /** Host action: remove a player from the room. */
+  kickPlayer(playerId: string): void {
+    if (!this.state.room) {
+      return;
+    }
+
+    this.socket.emit("player:kick", { roomCode: this.state.room.code, playerId }, (result) => {
+      if (!result.ok) {
+        this.updateState({ error: result.error });
+        return;
+      }
+
+      this.updateState({ room: result.data.room, error: null });
+    });
   }
 
   sendInput(input: unknown): void {

@@ -33,7 +33,7 @@ export function ReconnectPage({
             style={{
               borderRadius: "var(--radius-md)",
               padding: "14px 16px",
-              background: "rgba(15, 23, 42, 0.52)"
+              background: "var(--surface)"
             }}
           >
             <strong>{storedSession.playerName}</strong>
@@ -63,7 +63,7 @@ const primaryButtonStyle = {
   border: 0,
   borderRadius: "var(--radius-md)",
   background: "var(--accent)",
-  color: "#082f49",
+  color: "var(--on-accent)",
   padding: "16px 20px",
   fontWeight: 800
 } as const;

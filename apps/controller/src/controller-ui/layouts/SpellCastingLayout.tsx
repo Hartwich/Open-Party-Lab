@@ -13,9 +13,9 @@ interface SpellCastingLayoutProps {
 }
 
 const colorHexByGesture = {
-  red: "#ef4444",
-  blue: "#3b82f6",
-  green: "#22c55e"
+  red: "var(--danger)",
+  blue: "var(--accent)",
+  green: "var(--sage)"
 } as const satisfies Record<SpellCastingGestureColor, string>;
 
 function clamp01(value: number) {
@@ -116,7 +116,7 @@ export function SpellCastingLayout({ model }: SpellCastingLayoutProps) {
   const spellIds = useMemo(() => spellIdSignature(model.spells), [model.spells]);
   const selectedSpell =
     model.spells.find((spell) => spell.id === selectedSpellId) ?? model.spells[0] ?? null;
-  const strokeColor = selectedSpell ? colorHexByGesture[selectedSpell.color] : "#94a3b8";
+  const strokeColor = selectedSpell ? colorHexByGesture[selectedSpell.color] : "var(--muted)";
   const localLockRemainingMs = localLock ? Math.max(0, localLock.untilMs - nowMs) : 0;
   const lockRemainingMs = Math.max(model.nextSpellReadyMs, localLockRemainingMs);
   const lockTotalMs =
@@ -215,10 +215,10 @@ export function SpellCastingLayout({ model }: SpellCastingLayoutProps) {
                 style={{
                   position: "relative",
                   minHeight: 45,
-                  border: selected ? `2px solid ${color}` : "1px solid rgba(148, 163, 184, 0.22)",
+                  border: selected ? `2px solid ${color}` : "1px solid color-mix(in srgb, var(--muted) 22%, transparent)",
                   borderRadius: 10,
-                  background: selected ? "rgba(15, 23, 42, 0.94)" : "rgba(15, 23, 42, 0.55)",
-                  color: "#f8fafc",
+                  background: selected ? "color-mix(in srgb, var(--surface) 94%, transparent)" : "color-mix(in srgb, var(--surface) 55%, transparent)",
+                  color: "var(--ink)",
                   display: "grid",
                   placeItems: "center",
                   padding: 0,
@@ -233,7 +233,7 @@ export function SpellCastingLayout({ model }: SpellCastingLayoutProps) {
                     style={{
                       position: "absolute",
                       inset: 0,
-                      background: `conic-gradient(from -90deg, rgba(59, 130, 246, 0.82) ${cooldownProgress * 360}deg, rgba(15, 23, 42, 0.08) 0deg)`,
+                      background: `conic-gradient(from -90deg, color-mix(in srgb, var(--accent) 82%, transparent) ${cooldownProgress * 360}deg, color-mix(in srgb, var(--surface) 8%, transparent) 0deg)`,
                       opacity: 0.72
                     }}
                   />
@@ -242,7 +242,7 @@ export function SpellCastingLayout({ model }: SpellCastingLayoutProps) {
                   style={{
                     position: "relative",
                     zIndex: 1,
-                    filter: "drop-shadow(0 1px 5px rgba(2, 6, 23, 0.85))",
+                    filter: "drop-shadow(0 1px 5px color-mix(in srgb, var(--paper) 85%, transparent))",
                     ...spellIconStyle(spell.iconPath, color, 24)
                   }}
                 />
@@ -254,11 +254,11 @@ export function SpellCastingLayout({ model }: SpellCastingLayoutProps) {
                       right: 0,
                       bottom: 3,
                       zIndex: 2,
-                      color: "#eff6ff",
+                      color: "var(--ink-soft)",
                       fontSize: 9,
                       fontWeight: 950,
                       lineHeight: 1,
-                      textShadow: "0 1px 3px rgba(2, 6, 23, 0.92)"
+                      textShadow: "0 1px 3px color-mix(in srgb, var(--paper) 92%, transparent)"
                     }}
                   >
                     {formatSeconds(spell.cooldownRemainingMs)}
@@ -280,7 +280,7 @@ export function SpellCastingLayout({ model }: SpellCastingLayoutProps) {
           minHeight: 0,
           border: `2px solid ${strokeColor}`,
           borderRadius: 14,
-          background: "radial-gradient(circle at 50% 42%, rgba(30, 41, 59, 0.95), #020617 72%)",
+          background: "radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--surface-raised) 95%, transparent), var(--paper) 72%)",
           overflow: "hidden",
           touchAction: "none",
           opacity: model.disabled ? 0.72 : 1
@@ -329,7 +329,7 @@ export function SpellCastingLayout({ model }: SpellCastingLayoutProps) {
               display: "grid",
               placeItems: "center",
               background:
-                "linear-gradient(180deg, rgba(15, 23, 42, 0.58), rgba(2, 6, 23, 0.46)), radial-gradient(circle at 50% 42%, rgba(59, 130, 246, 0.24), transparent 60%)",
+                "linear-gradient(180deg, color-mix(in srgb, var(--surface) 58%, transparent), color-mix(in srgb, var(--paper) 46%, transparent)), radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 60%)",
               backdropFilter: "blur(1px)",
               pointerEvents: "auto"
             }}
@@ -341,9 +341,9 @@ export function SpellCastingLayout({ model }: SpellCastingLayoutProps) {
                 aspectRatio: "1",
                 borderRadius: 16,
                 padding: 6,
-                background: `conic-gradient(from -90deg, rgba(59, 130, 246, 0.84) ${lockProgress * 360}deg, rgba(15, 23, 42, 0.44) 0deg)`,
-                boxShadow: "0 0 36px rgba(59, 130, 246, 0.42), inset 0 0 18px rgba(2, 6, 23, 0.55)",
-                border: "1px solid rgba(147, 197, 253, 0.4)"
+                background: `conic-gradient(from -90deg, color-mix(in srgb, var(--accent) 84%, transparent) ${lockProgress * 360}deg, color-mix(in srgb, var(--surface) 44%, transparent) 0deg)`,
+                boxShadow: "0 0 36px color-mix(in srgb, var(--accent) 42%, transparent), inset 0 0 18px color-mix(in srgb, var(--paper) 55%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--accent-soft) 40%, transparent)"
               }}
             >
               <div
@@ -354,11 +354,11 @@ export function SpellCastingLayout({ model }: SpellCastingLayoutProps) {
                   display: "grid",
                   placeItems: "center",
                   background:
-                    "radial-gradient(circle at 50% 35%, rgba(30, 64, 175, 0.72), rgba(15, 23, 42, 0.9) 68%)",
-                  color: "#eff6ff",
+                    "radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--accent) 72%, transparent), color-mix(in srgb, var(--surface) 90%, transparent) 68%)",
+                  color: "var(--ink-soft)",
                   fontSize: "clamp(42px, 14vw, 68px)",
                   fontWeight: 950,
-                  textShadow: "0 2px 8px rgba(2, 6, 23, 0.8)"
+                  textShadow: "0 2px 8px color-mix(in srgb, var(--paper) 80%, transparent)"
                 }}
               >
                 {formatSeconds(lockRemainingMs).replace("s", "")}

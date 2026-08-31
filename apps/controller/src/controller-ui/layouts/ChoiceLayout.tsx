@@ -28,9 +28,9 @@ export function ChoiceLayout({ model }: ChoiceLayoutProps) {
             disabled={model.disabled || choice.disabled}
             style={{
               textAlign: "left",
-              border: "1px solid rgba(148, 163, 184, 0.36)",
+              border: "1px solid color-mix(in srgb, var(--muted) 36%, transparent)",
               borderRadius: "var(--radius-md)",
-              background: "rgba(15, 23, 42, 0.68)",
+              background: "color-mix(in srgb, var(--surface) 68%, transparent)",
               color: "inherit",
               padding: "12px 14px",
               opacity: model.disabled || choice.disabled ? 0.55 : 1
@@ -52,7 +52,7 @@ export function ChoiceLayout({ model }: ChoiceLayoutProps) {
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                background: "rgba(15, 23, 42, 0.52)",
+                background: "color-mix(in srgb, var(--surface) 52%, transparent)",
                 borderRadius: "var(--radius-md)",
                 padding: "10px 12px"
               }}

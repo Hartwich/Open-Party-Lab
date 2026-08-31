@@ -1,5 +1,6 @@
 import type {
   AvailableGameDto,
+  HostControlSnapshot,
   RoomLifecycle,
   RoomSnapshot
 } from "@open-party-lab/protocol";
@@ -19,18 +20,6 @@ export function deriveRoomLifecycle(room: RoomRecord): RoomLifecycle {
   }
 
   return "lobby";
-}
-
-function isArenaSurvivorContinuingRun(room: RoomRecord): boolean {
-  if (room.selectedGameId !== "arena-survivor" || !room.currentRound) {
-    return false;
-  }
-
-  const roundState = room.currentRound.state as {
-    result?: { outcome?: string };
-  };
-
-  return room.currentRound.phase === "finished" && roundState.result?.outcome === "survived";
 }
 
 function getPlayerSetupSelectionKey(setup: PlayerSetupDefinition): string {
@@ -122,10 +111,6 @@ function isLobbySetupConfirmed(room: RoomRecord, selectedGame: AvailableGameDto)
   const confirmation = selectedGame.lobbySetup?.confirmation;
 
   if (!confirmation) {
-    return true;
-  }
-
-  if (selectedGame.id === "arena-survivor" && isArenaSurvivorContinuingRun(room)) {
     return true;
   }
 
@@ -228,6 +213,28 @@ export function explainCannotStartRound(
   return null;
 }
 
+function toHostControlSnapshot(room: RoomRecord): HostControlSnapshot {
+  const holder = room.hostControl.holderPlayerId
+    ? room.players.get(room.hostControl.holderPlayerId)
+    : undefined;
+  const requester = room.hostControl.pendingRequest
+    ? room.players.get(room.hostControl.pendingRequest.playerId)
+    : undefined;
+
+  return {
+    holderPlayerId: holder ? holder.id : null,
+    holderName: holder ? holder.name : null,
+    pendingRequest:
+      room.hostControl.pendingRequest && requester
+        ? {
+            playerId: requester.id,
+            playerName: requester.name,
+            requestedAt: room.hostControl.pendingRequest.requestedAt
+          }
+        : null
+  };
+}
+
 export function toRoomSnapshot(
   room: RoomRecord,
   availableGames: AvailableGameDto[]
@@ -240,7 +247,9 @@ export function toRoomSnapshot(
     createdAt: room.createdAt,
     joinUrl: room.joinUrl,
     language: room.language,
+    theme: room.theme,
     hostConnected: room.hostSocketId !== null,
+    hostControl: toHostControlSnapshot(room),
     lifecycle: deriveRoomLifecycle(room),
     selectedGameId: room.selectedGameId,
     selectedGameSettings: toPublicSelectedGameSettings(room),

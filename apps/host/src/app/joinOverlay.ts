@@ -1,6 +1,7 @@
 import { getRoomPhase } from "@open-party-lab/protocol";
 import QRCode from "qrcode";
-import type { HostSocketClient } from "./hostSocketClient.js";
+import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
+import { getSelectedGameChrome } from "../games/selectedGame.js";
 import { getHostText } from "../i18n/hostText.js";
 import { hostTheme } from "../ui/theme/theme.js";
 import {
@@ -12,21 +13,27 @@ import {
   trapChromePointerEvents
 } from "../ui/chrome/hostChrome.js";
 
-function shouldShowJoinOverlay(
-  state: Parameters<HostSocketClient["subscribe"]>[0] extends (state: infer TState) => void ? TState : never
-): boolean {
+function shouldShowJoinOverlay(state: HostAppState): boolean {
   const room = state.room;
-  const lifecycle = getRoomPhase(room);
 
   if (!room) {
     return true;
   }
 
-  if (room.selectedGameId === "arena-survivor" && lifecycle === "finished") {
+  const chrome = getSelectedGameChrome(state);
+
+  if (!chrome.joinOverlay) {
     return false;
   }
 
-  return lifecycle === "lobby" || lifecycle === "game_selected" || lifecycle === "finished";
+  const lifecycle = getRoomPhase(room);
+
+  if (lifecycle === "finished") {
+    // Games with a continuing run keep the screen to themselves after a round.
+    return chrome.joinOverlayWhenFinished;
+  }
+
+  return lifecycle === "lobby" || lifecycle === "game_selected";
 }
 
 export function mountJoinOverlay(client: HostSocketClient): () => void {
@@ -67,15 +74,14 @@ export function mountJoinOverlay(client: HostSocketClient): () => void {
     width: "44px",
     height: "44px",
     padding: "0",
-    border: hostChrome.border.bright,
+    border: hostChrome.border.subtle,
     borderRadius: hostChrome.radius.pill,
-    background: "linear-gradient(145deg, rgba(15, 23, 42, 0.94), rgba(8, 47, 73, 0.86))",
+    background: hostTheme.panel,
     boxShadow: hostChrome.shadow.dock,
-    color: hostTheme.text,
-    fontFamily: "\"Space Grotesk\", sans-serif",
+    color: hostTheme.accentStrong,
+    fontFamily: hostTheme.titleFont,
     fontSize: "16px",
     cursor: "pointer",
-    backdropFilter: "blur(12px)",
     placeItems: "center",
     touchAction: "manipulation"
   });
@@ -97,9 +103,7 @@ export function mountJoinOverlay(client: HostSocketClient): () => void {
   header.appendChild(title);
 
   const minimizeButton = createChromeTextButton("Verstecken");
-  minimizeButton.style.background = "#e2e8f0";
-  minimizeButton.style.border = hostChrome.border.paper;
-  minimizeButton.style.color = "#0f172a";
+  minimizeButton.style.background = hostTheme.panelMuted;
   header.appendChild(minimizeButton);
 
   const status = document.createElement("p");
@@ -120,7 +124,8 @@ export function mountJoinOverlay(client: HostSocketClient): () => void {
   canvas.style.width = "100%";
   canvas.style.height = "auto";
   canvas.style.borderRadius = hostChrome.radius.section;
-  canvas.style.background = "#ffffff";
+  canvas.style.background = hostTheme.onAccent;
+  canvas.style.border = hostChrome.border.subtle;
   canvas.style.padding = "10px";
   card.appendChild(canvas);
 
@@ -129,13 +134,13 @@ export function mountJoinOverlay(client: HostSocketClient): () => void {
   link.rel = "noreferrer";
   link.style.fontSize = "12px";
   link.style.lineHeight = "1.4";
-  link.style.color = "#0f766e";
+  link.style.color = hostTheme.accentStrong;
   link.style.wordBreak = "break-all";
   card.appendChild(link);
 
   const hint = document.createElement("small");
   hint.textContent = "Am Handy immer den angezeigten Controller-Link oder QR-Code verwenden.";
-  hint.style.color = "#475569";
+  hint.style.color = hostTheme.muted;
   hint.style.lineHeight = "1.4";
   card.appendChild(hint);
 
@@ -189,7 +194,7 @@ export function mountJoinOverlay(client: HostSocketClient): () => void {
       return;
     }
 
-    roomCode.style.display = room.selectedGameId === "zeichnen-und-erraten" ? "none" : "block";
+    roomCode.style.display = getSelectedGameChrome(state).roomCode ? "block" : "none";
 
     if (!showOverlay) {
       return;
@@ -207,8 +212,8 @@ export function mountJoinOverlay(client: HostSocketClient): () => void {
       margin: 1,
       width: 176,
       color: {
-        dark: "#0f172a",
-        light: "#ffffff"
+        dark: hostTheme.text,
+        light: hostTheme.onAccent
       }
     });
   });

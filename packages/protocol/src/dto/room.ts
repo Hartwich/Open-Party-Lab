@@ -1,4 +1,6 @@
 import type { AvailableGameDto, PublicGamePhase } from "./gameState.js";
+import type { HostControlSnapshot } from "./hostControl.js";
+import type { ThemeName } from "@open-party-lab/ui-kit";
 import type { SupportedLanguage } from "@open-party-lab/game-core";
 import type { PlayerSnapshot } from "./player.js";
 
@@ -29,7 +31,11 @@ export interface RoomSnapshot {
   createdAt: number;
   joinUrl: string;
   language: SupportedLanguage;
+  /** Skin every screen in this room uses. Set from the host settings. */
+  theme: ThemeName;
   hostConnected: boolean;
+  /** Who is currently allowed to drive the room. */
+  hostControl: HostControlSnapshot;
   lifecycle: RoomLifecycle;
   selectedGameId: string | null;
   selectedGameSettings?: Record<string, string | number | boolean>;

@@ -5,7 +5,7 @@ Open Party Lab is a TypeScript npm-workspace monorepo for local browser party ga
 ## Applications
 
 - `apps/server` is the authoritative Socket.IO server. It owns rooms, players, round timing, gameplay rules, scoring, and lifecycle transitions.
-- `apps/host` is the shared-screen Phaser application. It renders the lobby, game select flow, QR join overlay, scoreboards, and game host scenes.
+- `apps/host` is the shared-screen Phaser application. It renders the lobby, the game select flow and the QR join overlay, and hands the screen to the selected game for the whole round. It owns no scoreboard or round-intro screen.
 - `apps/controller` is the React phone UI. It renders the player controller for the selected game and sends typed input to the server.
 
 ## Shared Packages
@@ -22,6 +22,7 @@ Open Party Lab is a TypeScript npm-workspace monorepo for local browser party ga
 3. Host scenes render state; they do not own game rules.
 4. Protocol types are the contract between all apps.
 5. New games should live in optional game repos and expose only the documented package entrypoints.
+6. The platform must not name a game. Anything game-specific is declared in that game's manifest — chrome, colours, music, broadcast tuning — or implemented behind an optional hook.
 
 ## Runtime Flow
 

@@ -11,5 +11,6 @@
     "sourceMap": true,
     "lib": ["ES2022"]
   },
+  "references": [{ "path": "../ui-kit" }],
   "include": ["src"]
 }

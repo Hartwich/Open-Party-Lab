@@ -1,7 +1,5 @@
 import type {
-  LightTrailsHostPatch,
   AvailableGameDto,
-  LightTrailsState,
   GamePatchPayload,
   GameStateEnvelope,
   RoomSnapshot,
@@ -11,7 +9,10 @@ import type {
   SupportedLanguage
 } from "@open-party-lab/protocol";
 import { io, type Socket } from "socket.io-client";
+import { hasActiveRound } from "@open-party-lab/protocol";
 import { readStoredHostLanguage, writeStoredHostLanguage } from "../i18n/hostText.js";
+import { hostGameRegistry } from "../games/registry.js";
+import { applyHostTheme } from "../ui/theme/theme.js";
 
 export type HostLobbyScreen = "catalog" | null;
 export type HostSceneOverride = "catalog" | null;
@@ -58,6 +59,8 @@ export class HostSocketClient {
   private roomRequested = false;
   private listenersBound = false;
   private notifyScheduled = false;
+  /** Set when a room update switched the theme, so scenes force a redraw. */
+  private themeChanged = false;
 
   constructor(
     private readonly serverUrl: string,
@@ -94,6 +97,9 @@ export class HostSocketClient {
 
     this.socket.on("room:state", ({ room }) => {
       writeStoredHostLanguage(room.language);
+      // The theme is a room setting; adopting it here keeps every scene and
+      // overlay in step without each of them subscribing separately.
+      this.themeChanged = applyHostTheme(room.theme) || this.themeChanged;
       this.updateState({
         room,
         preferredLanguage: room.language,
@@ -102,7 +108,10 @@ export class HostSocketClient {
           room,
           this.state.preferredLobbyScreen
         ),
-        sceneOverride: room ? this.state.sceneOverride : null
+        // The catalog override is a local view preference. A round that is
+        // running always wins — otherwise the screen stays on the catalog when
+        // a phone with host control starts the round.
+        sceneOverride: room && !hasActiveRound(room) ? this.state.sceneOverride : null
       });
     });
 
@@ -145,6 +154,36 @@ export class HostSocketClient {
 
   getState(): HostAppState {
     return this.state;
+  }
+
+  /**
+   * Whether the last update changed the theme. Reading it clears the flag, so
+   * the first scene to ask is the one that forces the redraw.
+   */
+  consumeThemeChange(): boolean {
+    const changed = this.themeChanged;
+    this.themeChanged = false;
+    return changed;
+  }
+
+  /** Host action: switch the room's theme. */
+  setTheme(theme: string): void {
+    const roomCode = this.state.room?.code;
+
+    if (!roomCode) {
+      return;
+    }
+
+    this.socket.emit("room:set-theme", { roomCode, theme: theme as never }, (result) => {
+      if (!result.ok) {
+        this.updateState({ error: result.error });
+        return;
+      }
+
+      applyHostTheme(result.data.room.theme);
+      this.themeChanged = true;
+      this.updateState({ room: result.data.room, error: null });
+    });
   }
 
   selectGame(gameId: string): void {
@@ -194,6 +233,47 @@ export class HostSocketClient {
         preferredLanguage: result.data.room.language,
         error: null
       });
+    });
+  }
+
+  /**
+   * Answers a pending takeover request from a phone.
+   *
+   * Only the shared screen may do this; the server enforces it, this is just
+   * the wire call.
+   */
+  resolveHostControl(playerId: string, grant: boolean): void {
+    const roomCode = this.state.room?.code;
+
+    if (!roomCode) {
+      return;
+    }
+
+    this.socket.emit("host-control:resolve", { roomCode, playerId, grant }, (result) => {
+      if (!result.ok) {
+        this.updateState({ error: result.error });
+        return;
+      }
+
+      this.updateState({ room: result.data.room, error: null });
+    });
+  }
+
+  /** Takes the controls back from whoever is holding them. */
+  reclaimHostControl(): void {
+    const roomCode = this.state.room?.code;
+
+    if (!roomCode) {
+      return;
+    }
+
+    this.socket.emit("host-control:release", { roomCode }, (result) => {
+      if (!result.ok) {
+        this.updateState({ error: result.error });
+        return;
+      }
+
+      this.updateState({ room: result.data.room, error: null });
     });
   }
 
@@ -371,6 +451,14 @@ export class HostSocketClient {
   }
 }
 
+/**
+ * Merges an incremental patch into the state the host already holds.
+ *
+ * The merge itself belongs to the game — the host only checks that the patch
+ * still matches the round it is rendering, then delegates. Returning null makes
+ * the host discard the patch and wait for the next full state, which is the
+ * safe behaviour whenever anything is out of step.
+ */
 function applyGamePatch(
   currentGame: GameStateEnvelope | null,
   payload: GamePatchPayload
@@ -387,62 +475,22 @@ function applyGamePatch(
     return null;
   }
 
-  if (payload.gameId !== "light-trails") {
+  const merge = hostGameRegistry[payload.gameId]?.applyHostPatch;
+
+  if (!merge) {
     return null;
   }
 
-  const currentState = currentGame.state as LightTrailsState;
-  const patch = payload.patch as LightTrailsHostPatch;
+  const mergedState = merge(currentGame.state, payload.patch);
 
-  for (const [playerId, playerPatch] of Object.entries(patch.players)) {
-    const existingPlayer = currentState.players[playerId];
-
-    if (!existingPlayer) {
-      currentState.players[playerId] = {
-        playerId: playerPatch.playerId,
-        name: playerPatch.name,
-        color: playerPatch.color,
-        x: playerPatch.x,
-        y: playerPatch.y,
-        angleRad: playerPatch.angleRad,
-        alive: playerPatch.alive,
-        turnInput: playerPatch.turnInput,
-        trailCellIds: [],
-        trailSegments: [...playerPatch.trailSegments],
-        eliminatedAt: playerPatch.eliminatedAt,
-        collisionReason: playerPatch.collisionReason
-      };
-      continue;
-    }
-
-    existingPlayer.x = playerPatch.x;
-    existingPlayer.y = playerPatch.y;
-    existingPlayer.angleRad = playerPatch.angleRad;
-    existingPlayer.alive = playerPatch.alive;
-    existingPlayer.turnInput = playerPatch.turnInput;
-    existingPlayer.eliminatedAt = playerPatch.eliminatedAt;
-    existingPlayer.collisionReason = playerPatch.collisionReason;
-
-    if (playerPatch.trailSegments.length > 0) {
-      existingPlayer.trailSegments.push(...playerPatch.trailSegments);
-    }
+  if (mergedState === null || mergedState === undefined) {
+    return null;
   }
-
-  currentState.arenaWidth = patch.arenaWidth;
-  currentState.arenaHeight = patch.arenaHeight;
-  currentState.cellSize = patch.cellSize;
-  currentState.trailThickness = patch.trailThickness;
-  currentState.tick = patch.tick;
-  currentState.alivePlayerIds = patch.alivePlayerIds;
-  currentState.winnerPlayerId = patch.winnerPlayerId;
-  currentState.winnerName = patch.winnerName;
-  currentState.isDraw = patch.isDraw;
-  currentState.finishAt = patch.finishAt;
 
   return {
     ...currentGame,
     updatedAt: payload.updatedAt,
     message: payload.message,
-    state: currentState
+    state: mergedState
   };
 }

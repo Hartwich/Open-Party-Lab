@@ -24,6 +24,18 @@ export function writeStoredControllerLanguage(language: SupportedLanguage): void
 }
 
 export interface ControllerText {
+  hostControlTitle: string;
+  hostControlTake: string;
+  hostControlPending: string;
+  hostControlHeldByOther: (name: string) => string;
+  hostControlActive: string;
+  hostControlRelease: string;
+  hostControlChooseGame: string;
+  hostControlStartRound: string;
+  hostControlBackToMenu: string;
+  hostControlRoster: string;
+  hostControlKick: (name: string) => string;
+  hostControlRoundRunning: string;
   joinTitle: string;
   joinSubtitle: string;
   roomCode: string;
@@ -85,6 +97,18 @@ export interface ControllerText {
 
 const controllerText = {
   de: {
+    hostControlTitle: "Host-Steuerung",
+    hostControlTake: "Steuerung uebernehmen",
+    hostControlPending: "Anfrage laeuft - bitte am Bildschirm bestaetigen.",
+    hostControlHeldByOther: (name: string) => `${name} steuert gerade den Host.`,
+    hostControlActive: "Du steuerst den Host.",
+    hostControlRelease: "Steuerung zurueckgeben",
+    hostControlChooseGame: "Spiel waehlen",
+    hostControlStartRound: "Runde starten",
+    hostControlBackToMenu: "Zurueck zum Menue",
+    hostControlRoster: "Spieler im Raum",
+    hostControlKick: (name: string) => `${name} entfernen`,
+    hostControlRoundRunning: "Waehrend einer laufenden Runde gesperrt.",
     joinTitle: "Beitreten",
     joinSubtitle: "Verbinde dein Handy mit dem Raum auf dem grossen Bildschirm.",
     roomCode: "Raumcode",
@@ -166,6 +190,18 @@ const controllerText = {
     }
   },
   en: {
+    hostControlTitle: "Host controls",
+    hostControlTake: "Take host control",
+    hostControlPending: "Request sent - confirm it on the shared screen.",
+    hostControlHeldByOther: (name: string) => `${name} is driving the host.`,
+    hostControlActive: "You are driving the host.",
+    hostControlRelease: "Hand control back",
+    hostControlChooseGame: "Choose a game",
+    hostControlStartRound: "Start round",
+    hostControlBackToMenu: "Back to menu",
+    hostControlRoster: "Players in the room",
+    hostControlKick: (name: string) => `Remove ${name}`,
+    hostControlRoundRunning: "Locked while a round is running.",
     joinTitle: "Join",
     joinSubtitle: "Connect your phone to the room on the big screen.",
     roomCode: "Room code",
