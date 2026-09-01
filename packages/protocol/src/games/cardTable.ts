@@ -33,6 +33,12 @@ export interface CardTableHandCardState extends CardTableCardState {
 
 export type CardTableStackKind = "draw" | "discard" | "zone";
 
+/**
+ * `pile`: Haufen, `cards[0]` liegt oben, höchstens drei sichtbar.
+ * `spread`: Auslage, alle Karten in Modellreihenfolge nebeneinander.
+ */
+export type CardTableStackLayout = "pile" | "spread";
+
 export interface CardTableStackState {
   id: string;
   label: string;
@@ -40,6 +46,7 @@ export interface CardTableStackState {
   count: number;
   cards: CardTableCardState[];
   faceDown: boolean;
+  layout?: CardTableStackLayout;
 }
 
 export interface CardTableSeatState {
