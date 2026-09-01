@@ -7,6 +7,7 @@ import {
   type RoomSnapshot
 } from "@open-party-lab/protocol";
 import { getControllerText } from "../../i18n/controllerText.js";
+import { LobbySetupControls } from "./LobbySetupControls.js";
 
 export interface HostControlPanelProps {
   room: RoomSnapshot;
@@ -14,6 +15,7 @@ export interface HostControlPanelProps {
   onRequestControl: () => void;
   onReleaseControl: () => void;
   onSelectGame: (gameId: string) => void;
+  onHostAction: (gameId: string, action: unknown) => void;
   onStartRound: () => void;
   onBackToMenu: () => void;
   onKickPlayer: (playerId: string) => void;
@@ -75,6 +77,7 @@ export function HostControlPanel({
   onRequestControl,
   onReleaseControl,
   onSelectGame,
+  onHostAction,
   onStartRound,
   onBackToMenu,
   onKickPlayer
@@ -105,6 +108,7 @@ export function HostControlPanel({
 
   const roundRunning = hasActiveRound(room);
   const canManageRoster = canManagePlayerRoster(room);
+  const selectedGame = room.availableGames.find((game) => game.id === room.selectedGameId);
 
   return (
     <section style={panelStyle}>
@@ -144,8 +148,16 @@ export function HostControlPanel({
             })}
           </div>
 
-          {room.selectedGameId ? (
+          {selectedGame ? (
             <>
+              {/* The game's own settings — map, ruleset, starting values — so
+                  holding control does not mean walking back to the screen. */}
+              <LobbySetupControls
+                game={selectedGame}
+                settings={room.selectedGameSettings ?? {}}
+                disabled={roundRunning}
+                onHostAction={onHostAction}
+              />
               <button type="button" style={actionStyle} onClick={onStartRound}>
                 {text.hostControlStartRound}
               </button>

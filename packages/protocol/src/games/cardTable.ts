@@ -12,6 +12,9 @@ export type CardTableColor = "red" | "black" | "green" | "blue" | "yellow" | "ne
 
 export type CardTableBackStyle = "classic" | "diamond" | "wave" | "grid";
 
+/** Kartenbild, das Host und Handy gemeinsam verwenden. */
+export type CardTableCardStyle = "classic" | "modern" | "clear";
+
 export interface CardTableCardState {
   cardId: string;
   suitId: string | null;
@@ -47,6 +50,8 @@ export interface CardTableSeatState {
   handCount: number;
   score: number;
   isActive: boolean;
+  /** Virtueller Mitspieler statt eines Handys. */
+  isBot?: boolean;
   statusLabel?: string;
 }
 

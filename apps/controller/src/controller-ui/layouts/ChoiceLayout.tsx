@@ -6,11 +6,35 @@ interface ChoiceLayoutProps {
 }
 
 export function ChoiceLayout({ model }: ChoiceLayoutProps) {
+  const accent = model.accentColor ?? "var(--accent)";
+
   return (
     <div style={{ display: "grid", gap: 16 }}>
-      <header style={{ display: "grid", gap: 6 }}>
-        <strong style={{ fontSize: "1.25rem" }}>{model.title}</strong>
+      <header
+        style={{
+          display: "grid",
+          gap: 7,
+          borderLeft: `6px solid ${accent}`,
+          paddingLeft: 12
+        }}
+      >
+        <strong style={{ fontSize: "1.25rem", color: accent }}>{model.title}</strong>
         {model.subtitle ? <span style={{ color: "var(--text-muted)" }}>{model.subtitle}</span> : null}
+        {model.identityLabel ? (
+          <span style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 800 }}>
+            <span
+              aria-hidden="true"
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: "50%",
+                background: accent,
+                boxShadow: `0 0 0 3px color-mix(in srgb, ${accent} 24%, transparent)`
+              }}
+            />
+            {model.identityLabel}
+          </span>
+        ) : null}
       </header>
 
       {model.helperText ? (
@@ -27,6 +51,10 @@ export function ChoiceLayout({ model }: ChoiceLayoutProps) {
             onClick={choice.onSelect}
             disabled={model.disabled || choice.disabled}
             style={{
+              display: "grid",
+              gridTemplateColumns: choice.iconPath ? "54px minmax(0, 1fr)" : "1fr",
+              alignItems: "center",
+              gap: 12,
               textAlign: "left",
               border: "1px solid color-mix(in srgb, var(--muted) 36%, transparent)",
               borderRadius: "var(--radius-md)",
@@ -36,10 +64,20 @@ export function ChoiceLayout({ model }: ChoiceLayoutProps) {
               opacity: model.disabled || choice.disabled ? 0.55 : 1
             }}
           >
-            <strong style={{ display: "block", marginBottom: 4 }}>{choice.label}</strong>
-            {choice.description ? (
-              <span style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>{choice.description}</span>
+            {choice.iconPath ? (
+              <img
+                src={choice.iconPath}
+                alt=""
+                aria-hidden="true"
+                style={{ width: 48, height: 48, objectFit: "contain", display: "block" }}
+              />
             ) : null}
+            <span style={{ minWidth: 0 }}>
+              <strong style={{ display: "block", marginBottom: 4 }}>{choice.label}</strong>
+              {choice.description ? (
+                <span style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>{choice.description}</span>
+              ) : null}
+            </span>
           </button>
         ))}
       </div>

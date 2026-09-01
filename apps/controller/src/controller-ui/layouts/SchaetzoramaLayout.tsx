@@ -1,885 +1,126 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import type {
-  SchaetzoramaAnswerSet,
-  SchaetzoramaAssignQuestion,
-  SchaetzoramaAssignmentZone,
-  SchaetzoramaCategoryId,
-  SchaetzoramaNumberQuestion,
-  SchaetzoramaPublicQuestion,
-  SchaetzoramaRankQuestion
-} from "@open-party-lab/protocol";
+import { useEffect, useMemo, useState } from "react";
+import type { SchaetzoramaAnswerSet, SchaetzoramaAssignQuestion, SchaetzoramaAssignmentZone, SchaetzoramaCategoryId, SchaetzoramaNumberQuestion, SchaetzoramaPublicQuestion, SchaetzoramaRankQuestion } from "@open-party-lab/protocol";
 import type { SchaetzoramaLayoutModel } from "./models.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
+import "./SchaetzoramaLayout.css";
 
-interface SchaetzoramaLayoutProps {
-  model: SchaetzoramaLayoutModel;
-}
+interface Props { model: SchaetzoramaLayoutModel }
+type JokerDraft = { categoryId: SchaetzoramaCategoryId; targetPlayerId: string };
+const categories: SchaetzoramaCategoryId[] = ["number", "percent", "rank", "assign"];
 
-type JokerDraft = {
-  kind: "copy" | "none";
-  categoryId: SchaetzoramaCategoryId;
-  targetPlayerId: string;
-};
-
-const categoryOrder: SchaetzoramaCategoryId[] = ["number", "percent", "rank", "assign"];
-
-export function SchaetzoramaLayout({ model }: SchaetzoramaLayoutProps) {
-  const en = model.language === "en";
-  const initialAnswers = useMemo(() => buildInitialAnswers(model), [model]);
-  const initialJoker = useMemo(() => buildInitialJoker(model), [model]);
-  const [answers, setAnswers] = useState<SchaetzoramaAnswerSet>(initialAnswers);
-  const [jokerDraft, setJokerDraft] = useState<JokerDraft>(initialJoker);
+export function SchaetzoramaLayout({ model }: Props) {
+  const initial = useMemo(() => initialAnswers(model), [model]);
+  const [answers, setAnswers] = useState<SchaetzoramaAnswerSet>(initial);
+  const [active, setActive] = useState<SchaetzoramaCategoryId>("number");
+  const [reviewed, setReviewed] = useState<Set<SchaetzoramaCategoryId>>(new Set());
+  const [joker, setJoker] = useState<JokerDraft>(() => initialJoker(model));
 
   useEffect(() => {
-    setAnswers(initialAnswers);
-    setJokerDraft(initialJoker);
-  }, [initialAnswers, initialJoker, model.resetKey]);
+    setAnswers(initial);
+    setActive("number");
+    setReviewed(new Set(Object.keys(model.ownAnswers) as SchaetzoramaCategoryId[]));
+    setJoker(initialJoker(model));
+  }, [initial, model.resetKey]);
 
   if (!model.roundContent) {
-    return <p style={{ margin: 0, color: "var(--text-muted)" }}>{en ? "The quiz panel is warming up." : "Das Quiz-Pult wird aufgewarmt."}</p>;
+    return <p className="szc-empty">{model.language === "en" ? "The quiz panel is warming up." : "Das Quiz-Pult wird vorbereitet."}</p>;
   }
 
-  const answered = Object.keys(model.ownAnswers).length > 0;
-  const canSubmit = model.canSubmitAnswers;
+  const en = model.language === "en";
+  const locked = Object.keys(model.ownAnswers).length > 0;
+  const index = categories.indexOf(active);
+  const canLock = categories.slice(0, -1).every((category) => reviewed.has(category));
+  const finishStep = () => {
+    const done = new Set(reviewed).add(active);
+    setReviewed(done);
+    const target = categories.find((category, position) => position > index && !done.has(category));
+    if (target) setActive(target);
+  };
 
-  return (
-    <div style={{ display: "grid", gap: 14 }}>
-      <header style={headerStyle}>
-        <div>
-          <strong style={{ display: "block", fontSize: "1.2rem" }}>{model.title}</strong>
-          <span style={subtleTextStyle}>{model.roundContent.roundLabel} | {model.subtitle}</span>
-        </div>
-        <span style={timerPillStyle}>{formatTimer(model)}</span>
-      </header>
-
-      <LeaderboardStrip model={model} />
-
-      {model.helperText ? <p style={helperStyle}>{model.helperText}</p> : null}
-
-      {model.ready ? <ReadyPanel ready={model.ready} /> : null}
-
-      {model.stage === "revealed" ? (
-        <ResultView model={model} />
-      ) : model.stage === "joker" ? (
-        <CopyReviewView model={model} draft={jokerDraft} onDraftChange={setJokerDraft} />
-      ) : (
-        <>
-          <div style={questionGridStyle}>
-            {categoryOrder.map((categoryId) => (
-              <QuestionEditor
-                key={categoryId}
-                question={model.roundContent!.questions[categoryId]}
-                answer={answers[categoryId]}
-                language={model.language}
-                disabled={answered || !model.canSubmitAnswers}
-                onChange={(answer) => setAnswers((current) => ({ ...current, [categoryId]: answer }))}
-              />
-            ))}
-          </div>
-
-          <button
-            type="button"
-            disabled={!canSubmit}
-            onClick={() => model.onSubmitAnswers(answers)}
-            style={{
-              ...primaryButtonStyle,
-              opacity: canSubmit ? 1 : 0.55
-            }}
-          >
-            {answered ? en ? "Panel locked" : "Pult verriegelt" : en ? "Lock in panel" : "Pult einloggen"}
-          </button>
-        </>
-      )}
-
-      <ProgressStrip model={model} />
-    </div>
-  );
-}
-
-function QuestionEditor({
-  question,
-  answer,
-  language,
-  disabled,
-  onChange
-}: {
-  question: SchaetzoramaPublicQuestion;
-  answer: SchaetzoramaAnswerSet[SchaetzoramaCategoryId];
-  language: SchaetzoramaLayoutModel["language"];
-  disabled: boolean;
-  onChange: (answer: NonNullable<SchaetzoramaAnswerSet[SchaetzoramaCategoryId]>) => void;
-}) {
-  const body = renderQuestionBody(question, answer, language, disabled, onChange);
-
-  return (
-    <section style={panelStyle(question.categoryId)}>
-      <PanelHeading question={question} />
-      <p style={questionTextStyle}>{question.prompt}</p>
-      {body}
-    </section>
-  );
-}
-
-function renderQuestionBody(
-  question: SchaetzoramaPublicQuestion,
-  answer: SchaetzoramaAnswerSet[SchaetzoramaCategoryId],
-  language: SchaetzoramaLayoutModel["language"],
-  disabled: boolean,
-  onChange: (answer: NonNullable<SchaetzoramaAnswerSet[SchaetzoramaCategoryId]>) => void
-) {
-  const en = language === "en";
-
-  if (question.kind === "number" || question.kind === "percent") {
-    const numericQuestion = question as SchaetzoramaNumberQuestion;
-    const value = answer?.kind === "number" ? answer.value : Math.round((numericQuestion.min + numericQuestion.max) / 2);
-
-    return (
-      <div style={{ display: "grid", gap: 10 }}>
-        <input
-          type="range"
-          min={numericQuestion.min}
-          max={numericQuestion.max}
-          value={value}
-          disabled={disabled}
-          onChange={(event) => onChange({ kind: "number", value: Number(event.currentTarget.value) })}
-        />
-        <label style={numberInputWrapStyle}>
-          <span>{question.kind === "percent" ? en ? "Percent" : "Prozent" : en ? "Number" : "Zahl"}</span>
-          <input
-            type="number"
-            min={numericQuestion.min}
-            max={numericQuestion.max}
-            value={value}
-            disabled={disabled}
-            onChange={(event) => onChange({ kind: "number", value: Number(event.currentTarget.value) })}
-            style={numberInputStyle}
-          />
-        </label>
+  return <div className="szc-shell">
+    <header className="szc-header">
+      <div><span className="szc-kicker">{model.roundContent.roundLabel}</span><strong>{stageTitle(model)}</strong></div>
+      <span className="szc-limit">{en ? "No timer" : "Ohne Zeitlimit"}</span>
+    </header>
+    {model.ready ? <ReadyPanel ready={model.ready} /> : null}
+    {model.stage === "revealed" ? <ResultView model={model} /> : model.stage === "joker" ? <CopyView model={model} draft={joker} onDraftChange={setJoker} /> : locked ? <LockedView model={model} /> : <>
+      <nav className="szc-tabs" aria-label={en ? "Questions" : "Fragen"}>
+        {categories.map((category, position) => <button key={category} type="button" className={`szc-tab szc-${category}${active === category ? " is-active" : ""}${reviewed.has(category) ? " is-done" : ""}`} onClick={() => setActive(category)} aria-label={`${position + 1}. ${model.categoryLabels[category]}`}><span>{glyph(category)}</span><small>{position + 1}</small></button>)}
+      </nav>
+      <Question question={model.roundContent.questions[active]} answer={answers[active]} language={model.language} disabled={!model.canSubmitAnswers} onChange={(answer) => setAnswers((current) => ({ ...current, [active]: answer }))} />
+      <div className="szc-actions">
+        {index > 0 ? <button type="button" className="szc-button szc-button-secondary" onClick={() => setActive(categories[index - 1])}>← {en ? "Back" : "Zurück"}</button> : <span />}
+        {index < 3 ? <button type="button" className="szc-button szc-button-primary" onClick={finishStep}>{en ? "Done" : "Fertig"} →</button> : <button type="button" className="szc-button szc-button-submit" disabled={!model.canSubmitAnswers || !canLock} onClick={() => model.onSubmitAnswers(answers)}>{en ? "Lock answers" : "Antworten einloggen"}</button>}
       </div>
-    );
+      {!canLock && index === 3 ? <p className="szc-note">{en ? "Complete questions 1 to 3 before locking in." : "Schließe die Fragen 1 bis 3 ab, bevor du einloggst."}</p> : null}
+    </>}
+    <Progress model={model} />
+  </div>;
+}
+
+function Question({ question, answer, language, disabled, onChange }: { question: SchaetzoramaPublicQuestion; answer: SchaetzoramaAnswerSet[SchaetzoramaCategoryId]; language: SchaetzoramaLayoutModel["language"]; disabled: boolean; onChange: (answer: NonNullable<SchaetzoramaAnswerSet[SchaetzoramaCategoryId]>) => void }) {
+  return <section className={`szc-question szc-${question.categoryId}`}>
+    <div className="szc-question-head"><span className="szc-question-icon">{glyph(question.categoryId)}</span><div><span>{question.shortLabel}</span><strong>{question.title}</strong></div></div>
+    <h2>{question.prompt}</h2>
+    {questionControl(question, answer, language, disabled, onChange)}
+  </section>;
+}
+
+function questionControl(question: SchaetzoramaPublicQuestion, answer: SchaetzoramaAnswerSet[SchaetzoramaCategoryId], language: SchaetzoramaLayoutModel["language"], disabled: boolean, onChange: (answer: NonNullable<SchaetzoramaAnswerSet[SchaetzoramaCategoryId]>) => void) {
+  const en = language === "en";
+  if (question.kind === "number" || question.kind === "percent") {
+    const value = answer?.kind === "number" ? answer.value : Math.round((question.min + question.max) / 2);
+    const progress = ((value - question.min) / Math.max(1, question.max - question.min)) * 100;
+    const unit = question.unitLabel ?? (question.kind === "percent" ? "%" : "");
+    return <div className="szc-number-control">
+      {question.kind === "percent" ? <div className="szc-percent-ring" style={{ "--value": `${progress}%` } as React.CSSProperties}><strong>{value}<small>%</small></strong></div> : <div className="szc-number-readout"><strong>{value}</strong><span>{unit}</span></div>}
+      <input className="szc-range" type="range" min={question.min} max={question.max} value={value} disabled={disabled} onChange={(event) => onChange({ kind: "number", value: Number(event.currentTarget.value) })}/>
+      <div className="szc-range-labels"><span>{question.min}</span><span>{question.max}{unit ? ` ${unit}` : ""}</span></div>
+      <div className="szc-stepper"><button type="button" disabled={disabled || value <= question.min} aria-label={en ? "Decrease" : "Verringern"} onClick={() => onChange({ kind: "number", value: Math.max(question.min, value - 1) })}>−</button><input type="number" min={question.min} max={question.max} value={value} disabled={disabled} aria-label={en ? "Estimate" : "Schätzwert"} onChange={(event) => onChange({ kind: "number", value: clamp(Number(event.currentTarget.value), question.min, question.max) })}/><button type="button" disabled={disabled || value >= question.max} aria-label={en ? "Increase" : "Erhöhen"} onClick={() => onChange({ kind: "number", value: Math.min(question.max, value + 1) })}>+</button></div>
+    </div>;
   }
 
   if (question.kind === "rank") {
-    const rankQuestion = question as SchaetzoramaRankQuestion;
-    const order = answer?.kind === "rank" ? answer.order : rankQuestion.items.map((item) => item.id);
-
-    return (
-      <div style={{ display: "grid", gap: 8 }}>
-        {order.map((itemId, index) => {
-          const item = rankQuestion.items.find((entry) => entry.id === itemId) ?? rankQuestion.items[index];
-          return (
-            <div key={itemId} style={rankRowStyle}>
-              <strong>{index + 1}</strong>
-              <span>{item.label}</span>
-              <div style={{ display: "flex", gap: 6 }}>
-                <button
-                  type="button"
-                  disabled={disabled}
-                  style={miniButtonStyle}
-                  onClick={() => onChange({ kind: "rank", order: move(order, index, -1) })}
-                >
-                  {en ? "Up" : "Hoch"}
-                </button>
-                <button
-                  type="button"
-                  disabled={disabled}
-                  style={miniButtonStyle}
-                  onClick={() => onChange({ kind: "rank", order: move(order, index, 1) })}
-                >
-                  {en ? "Down" : "Runter"}
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
+    const order = answer?.kind === "rank" ? answer.order : question.items.map((item) => item.id);
+    return <div className="szc-rank-control"><p className="szc-direction">{question.directionLabel}</p>{order.map((id, position) => {
+      const item = question.items.find((entry) => entry.id === id) ?? question.items[position];
+      return <div className="szc-rank-row" key={id}><b>{position + 1}</b><span>{item.label}</span><div><button type="button" disabled={disabled || position === 0} aria-label={en ? "Move up" : "Nach oben"} onClick={() => onChange({ kind: "rank", order: move(order, position, -1) })}>↑</button><button type="button" disabled={disabled || position === order.length - 1} aria-label={en ? "Move down" : "Nach unten"} onClick={() => onChange({ kind: "rank", order: move(order, position, 1) })}>↓</button></div></div>;
+    })}</div>;
   }
 
-  const assignQuestion = question as SchaetzoramaAssignQuestion;
-  const assignments =
-    answer?.kind === "assign"
-      ? answer.assignments
-      : Object.fromEntries(assignQuestion.terms.map((term) => [term.id, "left" as SchaetzoramaAssignmentZone]));
-
-  return (
-    <>
-      <div style={assignLegendStyle}>
-        <span>{assignQuestion.leftLabel}</span>
-        <span>{en ? "Both" : "Beides"}</span>
-        <span>{assignQuestion.rightLabel}</span>
-      </div>
-      <div style={{ display: "grid", gap: 8 }}>
-        {assignQuestion.terms.map((term) => (
-          <div key={term.id} style={assignRowStyle}>
-            <strong>{term.label}</strong>
-            <div style={segmentedStyle}>
-              {(["left", "both", "right"] as SchaetzoramaAssignmentZone[]).map((zone) => (
-                <button
-                  key={zone}
-                  type="button"
-                  disabled={disabled}
-                  onClick={() =>
-                    onChange({
-                      kind: "assign",
-                      assignments: {
-                        ...assignments,
-                        [term.id]: zone
-                      }
-                    })
-                  }
-                  style={{
-                    ...segmentButtonStyle,
-                    background: assignments[term.id] === zone ? "color-mix(in srgb, var(--on-accent) 92%, transparent)" : "color-mix(in srgb, var(--on-accent) 12%, transparent)",
-                    color: assignments[term.id] === zone ? "var(--surface)" : "var(--ink)"
-                  }}
-                >
-                  {zoneLabel(zone, language)}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </>
-  );
+  if (question.kind === "assign") {
+    const assignments = answer?.kind === "assign" ? answer.assignments : Object.fromEntries(question.terms.map((term) => [term.id, "left" as const]));
+    return <div className="szc-assign-control"><div className="szc-venn"><i>{question.leftLabel}</i><b>{en ? "Both" : "Beide"}</b><i>{question.rightLabel}</i></div>{question.terms.map((term) => <div className="szc-assign-row" key={term.id}><strong>{term.label}</strong><div>{(["left", "both", "right"] as SchaetzoramaAssignmentZone[]).map((zone) => <button type="button" key={zone} disabled={disabled} className={assignments[term.id] === zone ? "is-selected" : ""} aria-label={`${term.label}: ${zoneLabel(zone, question, language)}`} onClick={() => onChange({ kind: "assign", assignments: { ...assignments, [term.id]: zone } })}>{zone === "left" ? "L" : zone === "right" ? "R" : "∩"}</button>)}</div></div>)}</div>;
+  }
+  return null;
 }
 
-function CopyReviewView({
-  model,
-  draft,
-  onDraftChange
-}: {
-  model: SchaetzoramaLayoutModel;
-  draft: JokerDraft;
-  onDraftChange: (draft: JokerDraft) => void;
-}) {
+function LockedView({ model }: { model: SchaetzoramaLayoutModel }) {
+  const en = model.language === "en";
+  const waiting = model.progress.filter((player) => !player.answered).length;
+  return <section className="szc-status"><span>✓</span><h2>{en ? "Answers locked" : "Antworten eingeloggt"}</h2><p>{waiting ? (en ? `Waiting for ${waiting} more.` : `Noch ${waiting} fehlen.`) : (en ? "Everyone is ready." : "Alle sind bereit.")}</p></section>;
+}
+
+function CopyView({ model, draft, onDraftChange }: { model: SchaetzoramaLayoutModel; draft: JokerDraft; onDraftChange: (draft: JokerDraft) => void }) {
   const en = model.language === "en";
   const preview = model.ownJokerPreview;
   const categoryId = preview?.categoryId ?? draft.categoryId;
-  const targetPlayerId = preview?.targetPlayerId ?? (draft.targetPlayerId || (model.copyTargets[0]?.playerId ?? ""));
-  const target = model.copyTargets.find((entry) => entry.playerId === targetPlayerId) ?? model.copyTargets[0];
-  const ownAnswer = model.ownAnswers[categoryId];
-  const targetAnswer = preview ? target?.answers?.[categoryId] : undefined;
-  const copyUsesLeft = model.ownInventory.copy;
-  const canChoosePreview = model.canSubmitJoker && !preview && copyUsesLeft > 0 && Boolean(target?.playerId);
-  const canCopy = model.canSubmitJoker && Boolean(preview) && Boolean(target?.playerId);
-
-  if (!model.canSubmitJoker) {
-    return (
-      <section style={copyPanelStyle}>
-        <strong>{en ? "Copy" : "Abschreiben"}</strong>
-        <p style={helperStyle}>{en ? "Choice locked. Waiting for the other panels." : "Entscheidung eingeloggt. Warte auf die anderen Pulte."}</p>
-      </section>
-    );
-  }
-
-  if (!preview && (copyUsesLeft <= 0 || model.copyTargets.length === 0)) {
-    return (
-      <section style={copyPanelStyle}>
-        <strong>{en ? "Copy" : "Abschreiben"}</strong>
-        <p style={helperStyle}>
-          {copyUsesLeft <= 0
-            ? en ? "No copy uses left. Keep your own answers for this round." : "Du hast kein Abschreiben mehr uebrig. Diese Runde bleiben deine Antworten."
-            : en ? "No other panel is available to copy from." : "Es gibt kein anderes Pult zum Abschreiben."}
-        </p>
-        <button type="button" onClick={() => model.onChooseJoker(null)} style={secondaryActionStyle}>
-          {en ? "Keep mine" : "Eigene behalten"}
-        </button>
-      </section>
-    );
-  }
-
-  return (
-    <section style={copyPanelStyle}>
-      <strong>{en ? `Copy (${copyUsesLeft} left)` : `Abschreiben (${copyUsesLeft} uebrig)`}</strong>
-      {!preview ? (
-        <>
-          <p style={helperStyle}>{en ? "Choose exactly one player and one task. The answer is revealed after you lock this choice." : "Waehle genau eine Person und eine Aufgabe. Erst danach wird diese Antwort sichtbar."}</p>
-          <div style={copySelectGridStyle}>
-            <label style={selectLabelStyle}>
-              {en ? "Task" : "Aufgabe"}
-              <select
-                value={categoryId}
-                onChange={(event) => onDraftChange({ ...draft, kind: "copy", categoryId: event.currentTarget.value as SchaetzoramaCategoryId, targetPlayerId })}
-                style={selectStyle}
-              >
-                {categoryOrder.map((entry) => (
-                  <option key={entry} value={entry}>
-                    {model.categoryLabels[entry]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label style={selectLabelStyle}>
-              {en ? "From whom?" : "Bei wem?"}
-              <select
-                value={targetPlayerId}
-                onChange={(event) => onDraftChange({ ...draft, kind: "copy", categoryId, targetPlayerId: event.currentTarget.value })}
-                style={selectStyle}
-              >
-                {model.copyTargets.map((entry) => (
-                  <option key={entry.playerId} value={entry.playerId}>
-                    {entry.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <div style={copyButtonGridStyle}>
-            <button type="button" onClick={() => model.onChooseJoker(null)} style={secondaryActionStyle}>
-              {en ? "Skip copy" : "Nicht abschreiben"}
-            </button>
-            <button
-              type="button"
-              disabled={!canChoosePreview}
-              onClick={() =>
-                target &&
-                model.onPreviewJoker({
-                  kind: "copy",
-                  categoryId,
-                  targetPlayerId: target.playerId
-                })
-              }
-              style={{
-                ...primaryButtonStyle,
-                opacity: canChoosePreview ? 1 : 0.5
-              }}
-            >
-              {en ? "Reveal this answer" : "Diese Antwort ansehen"}
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <p style={helperStyle}>
-            {en
-              ? `${target?.name ?? "Other"} on ${model.categoryLabels[categoryId]} is revealed. Decide now.`
-              : `${target?.name ?? "Andere"} bei ${model.categoryLabels[categoryId]} ist sichtbar. Entscheide jetzt.`}
-          </p>
-          <div style={answerCompareGridStyle}>
-            <AnswerPreview title={en ? "Your answer" : "Deine Antwort"} text={formatControllerAnswer(model, categoryId, ownAnswer)} />
-            <AnswerPreview title={`${target?.name ?? (en ? "Other" : "Andere")} ${en ? "answer" : "Antwort"}`} text={formatControllerAnswer(model, categoryId, targetAnswer)} />
-          </div>
-          <div style={copyButtonGridStyle}>
-            <button type="button" onClick={() => model.onChooseJoker(null)} style={secondaryActionStyle}>
-              {en ? "Keep mine" : "Eigene behalten"}
-            </button>
-            <button
-              type="button"
-              disabled={!canCopy}
-              onClick={() =>
-                preview &&
-                model.onChooseJoker({
-                  kind: "copy",
-                  categoryId: preview.categoryId,
-                  targetPlayerId: preview.targetPlayerId
-                })
-              }
-              style={{
-                ...primaryButtonStyle,
-                opacity: canCopy ? 1 : 0.5
-              }}
-            >
-              {en ? "Copy answer" : "Abschreiben"}
-            </button>
-          </div>
-        </>
-      )}
-    </section>
-  );
+  const targetId = preview?.targetPlayerId ?? draft.targetPlayerId;
+  const target = model.copyTargets.find((player) => player.playerId === targetId) ?? model.copyTargets[0];
+  if (!model.canSubmitJoker) return <section className="szc-status"><span>✓</span><h2>{en ? "Decision locked" : "Entscheidung eingeloggt"}</h2></section>;
+  if (model.ownInventory.copy <= 0 || !target) return <section className="szc-copy"><h2>{en ? "Keep your answers" : "Eigene Antworten behalten"}</h2><p>{en ? "No copy is available this round." : "In dieser Runde ist kein Abschreiben verfügbar."}</p><button className="szc-button szc-button-primary" onClick={() => model.onChooseJoker(null)}>{en ? "Continue" : "Weiter"}</button></section>;
+  return <section className="szc-copy"><div className="szc-copy-token"><span>◫</span><strong>{model.ownInventory.copy}</strong></div><h2>{en ? "Copy one answer?" : "Eine Antwort abschreiben?"}</h2>{!preview ? <><label>{en ? "Question" : "Frage"}<select value={categoryId} onChange={(event) => onDraftChange({ ...draft, categoryId: event.currentTarget.value as SchaetzoramaCategoryId })}>{categories.map((category) => <option key={category} value={category}>{model.categoryLabels[category]}</option>)}</select></label><label>{en ? "Player" : "Person"}<select value={targetId} onChange={(event) => onDraftChange({ ...draft, targetPlayerId: event.currentTarget.value })}>{model.copyTargets.map((player) => <option key={player.playerId} value={player.playerId}>{player.name}</option>)}</select></label><div className="szc-copy-actions"><button className="szc-button szc-button-secondary" onClick={() => model.onChooseJoker(null)}>{en ? "Keep mine" : "Eigene behalten"}</button><button className="szc-button szc-button-primary" onClick={() => model.onPreviewJoker({ kind: "copy", categoryId, targetPlayerId: target.playerId })}>{en ? "Reveal" : "Ansehen"}</button></div></> : <><div className="szc-compare"><Preview title={en ? "You" : "Du"} text={formatAnswer(model, categoryId, model.ownAnswers[categoryId])}/><Preview title={target.name} text={formatAnswer(model, categoryId, target.answers?.[categoryId])}/></div><div className="szc-copy-actions"><button className="szc-button szc-button-secondary" onClick={() => model.onChooseJoker(null)}>{en ? "Keep mine" : "Eigene behalten"}</button><button className="szc-button szc-button-submit" onClick={() => model.onChooseJoker({ kind: "copy", categoryId, targetPlayerId: target.playerId })}>{en ? "Copy" : "Abschreiben"}</button></div></>}</section>;
 }
 
-function AnswerPreview({ title, text }: { title: string; text: string }) {
-  return (
-    <div style={answerPreviewStyle}>
-      <span style={{ color: "color-mix(in srgb, var(--on-accent) 70%, transparent)", fontSize: "0.82rem" }}>{title}</span>
-      <strong>{text}</strong>
-    </div>
-  );
-}
-
-function ResultView({ model }: { model: SchaetzoramaLayoutModel }) {
-  const en = model.language === "en";
-  const sorted = [...model.results].sort((left, right) => right.total - left.total);
-
-  return (
-    <section style={resultsPanelStyle}>
-      <strong>{en ? "Round score" : "Rundenwertung"}</strong>
-      <div style={{ display: "grid", gap: 8 }}>
-        {sorted.map((result, index) => (
-          <div key={result.playerId} style={resultRowStyle}>
-            <span>{index + 1}. {result.name}</span>
-            <strong>{result.total} {en ? "pts" : "P"}</strong>
-          </div>
-        ))}
-      </div>
-      <div style={solutionGridStyle}>
-        {categoryOrder.map((categoryId) => (
-          <div key={categoryId} style={solutionPillStyle}>
-            <span>{model.categoryLabels[categoryId]}</span>
-            <strong>{formatSolution(model, categoryId)}</strong>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function LeaderboardStrip({ model }: { model: SchaetzoramaLayoutModel }) {
-  const en = model.language === "en";
-  if (model.standings.length === 0) {
-    return null;
-  }
-
-  return (
-    <div style={leaderboardStyle}>
-      {model.standings.slice(0, 4).map((standing, index) => (
-        <span key={standing.playerId} style={{ ...leaderboardPillStyle, borderColor: standing.color }}>
-          {index + 1}. {standing.name} {standing.projectedScore} {en ? "pts" : "P"}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function ProgressStrip({ model }: { model: SchaetzoramaLayoutModel }) {
-  return (
-    <div style={progressStyle}>
-      {model.progress.map((player) => {
-        const done = model.stage === "joker" ? player.jokerReady : player.answered;
-
-        return (
-          <span
-            key={player.playerId}
-            style={{
-              ...progressDotStyle,
-              borderColor: player.color,
-              opacity: done ? 1 : 0.42
-            }}
-          >
-            {player.name}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
-
-function PanelHeading({ question }: { question: SchaetzoramaPublicQuestion }) {
-  return (
-    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-      <strong>{question.shortLabel}</strong>
-      <span style={{ fontSize: "0.8rem", opacity: 0.76 }}>{question.title}</span>
-    </div>
-  );
-}
-
-function buildInitialAnswers(model: SchaetzoramaLayoutModel): SchaetzoramaAnswerSet {
-  if (!model.roundContent) {
-    return {};
-  }
-
-  return {
-    number:
-      model.ownAnswers.number ??
-      ({
-        kind: "number",
-        value: 25
-      } as const),
-    percent:
-      model.ownAnswers.percent ??
-      ({
-        kind: "number",
-        value: 50
-      } as const),
-    rank:
-      model.ownAnswers.rank ??
-      ({
-        kind: "rank",
-        order: (model.roundContent.questions.rank as SchaetzoramaRankQuestion).items.map((item) => item.id)
-      } as const),
-    assign:
-      model.ownAnswers.assign ??
-      ({
-        kind: "assign",
-        assignments: Object.fromEntries((model.roundContent.questions.assign as SchaetzoramaAssignQuestion).terms.map((term) => [term.id, "left"]))
-      } as const)
-  };
-}
-
-function buildInitialJoker(model: SchaetzoramaLayoutModel): JokerDraft {
-  const ownJoker = model.ownJokerPreview ?? model.ownJoker;
-
-  if (!ownJoker) {
-    return {
-      kind: "none",
-      categoryId: "number",
-      targetPlayerId: model.copyTargets[0]?.playerId ?? ""
-    };
-  }
-
-  return {
-    kind: "copy",
-    categoryId: ownJoker.categoryId,
-    targetPlayerId: ownJoker.targetPlayerId ?? model.copyTargets[0]?.playerId ?? ""
-  };
-}
-
-function move(order: string[], index: number, offset: number): string[] {
-  const target = index + offset;
-
-  if (target < 0 || target >= order.length) {
-    return order;
-  }
-
-  const next = [...order];
-  const [item] = next.splice(index, 1);
-  next.splice(target, 0, item);
-  return next;
-}
-
-function zoneLabel(zone: SchaetzoramaAssignmentZone, language: SchaetzoramaLayoutModel["language"]): string {
-  if (language === "en") {
-    return zone === "left" ? "Left" : zone === "right" ? "Right" : "Both";
-  }
-
-  return zone === "left" ? "Links" : zone === "right" ? "Rechts" : "Beides";
-}
-
-function formatTimer(model: SchaetzoramaLayoutModel): string {
-  const end = model.stage === "joker" ? model.jokerEndsAt : model.answerEndsAt;
-
-  if (!end || model.stage === "revealed") {
-    return model.stage === "revealed"
-      ? (model.language === "en" ? "Reveal" : "Auswertung")
-      : (model.language === "en" ? "No limit" : "Ohne Limit");
-  }
-
-  const seconds = Math.max(0, Math.ceil((end - Date.now()) / 1000));
-  return `${seconds}s`;
-}
-
-function formatSolution(model: SchaetzoramaLayoutModel, categoryId: SchaetzoramaCategoryId): string {
-  const solution = model.solutions[categoryId];
-  const question = model.roundContent?.questions[categoryId];
-
-  if (!solution || !question) {
-    return "?";
-  }
-
-  if (solution.kind === "number") {
-    return `${solution.value}${question.kind === "percent" ? "%" : ""}`;
-  }
-
-  if (solution.kind === "rank" && question.kind === "rank") {
-    return solution.order
-      .map((itemId) => question.items.find((item) => item.id === itemId)?.label ?? itemId)
-      .join(" > ");
-  }
-
-  if (solution.kind === "assign" && question.kind === "assign") {
-    return question.terms
-      .map((term) => `${term.label}: ${solution.assignments[term.id] === "left" ? question.leftLabel : solution.assignments[term.id] === "right" ? question.rightLabel : model.language === "en" ? "Both" : "Beides"}`)
-      .join(" | ");
-  }
-
-  return "?";
-}
-
-function formatControllerAnswer(
-  model: SchaetzoramaLayoutModel,
-  categoryId: SchaetzoramaCategoryId,
-  answer: SchaetzoramaAnswerSet[SchaetzoramaCategoryId]
-): string {
-  const question = model.roundContent?.questions[categoryId];
-
-  if (!answer || !question) {
-    return "-";
-  }
-
-  if (answer.kind === "number") {
-    return `${answer.value}${question.kind === "percent" ? "%" : ""}`;
-  }
-
-  if (answer.kind === "rank" && question.kind === "rank") {
-    return answer.order
-      .map((itemId) => question.items.find((item) => item.id === itemId)?.label ?? itemId)
-      .join(" > ");
-  }
-
-  if (answer.kind === "assign" && question.kind === "assign") {
-    return question.terms
-      .map((term) => {
-        const zone = answer.assignments[term.id];
-        const label = zone === "left" ? question.leftLabel : zone === "right" ? question.rightLabel : model.language === "en" ? "Both" : "Beides";
-        return `${term.label}: ${label}`;
-      })
-      .join(" | ");
-  }
-
-  return "-";
-}
-
-const headerStyle = {
-  display: "flex",
-  justifyContent: "space-between",
-  gap: 12,
-  alignItems: "center",
-  padding: 14,
-  borderRadius: 14,
-  background: "linear-gradient(135deg, color-mix(in srgb, var(--danger) 86%, transparent), color-mix(in srgb, var(--accent) 86%, transparent) 52%, color-mix(in srgb, var(--amber) 86%, transparent))",
-  color: "var(--on-accent)"
-} as const;
-
-const subtleTextStyle = {
-  color: "color-mix(in srgb, var(--on-accent) 72%, transparent)",
-  fontSize: "0.92rem"
-} as const;
-
-const timerPillStyle = {
-  minWidth: 64,
-  textAlign: "center",
-  padding: "8px 10px",
-  borderRadius: 999,
-  background: "color-mix(in srgb, var(--paper) 32%, transparent)",
-  fontWeight: 800
-} as const;
-
-const helperStyle = {
-  margin: 0,
-  color: "var(--text-muted)",
-  lineHeight: 1.4
-} as const;
-
-const questionGridStyle = {
-  display: "grid",
-  gap: 12
-} as const;
-
-const colorByCategory: Record<SchaetzoramaCategoryId, string> = {
-  number: "color-mix(in srgb, var(--sage) 72%, transparent)",
-  percent: "color-mix(in srgb, var(--accent) 72%, transparent)",
-  rank: "color-mix(in srgb, var(--danger) 72%, transparent)",
-  assign: "color-mix(in srgb, var(--amber) 72%, transparent)"
-};
-
-function panelStyle(categoryId: SchaetzoramaCategoryId) {
-  return {
-    display: "grid",
-    gap: 10,
-    padding: 14,
-    borderRadius: 14,
-    border: "1px solid color-mix(in srgb, var(--on-accent) 16%, transparent)",
-    background: `linear-gradient(135deg, ${colorByCategory[categoryId]}, color-mix(in srgb, var(--surface) 84%, transparent))`
-  } as const;
-}
-
-const questionTextStyle = {
-  margin: 0,
-  lineHeight: 1.35,
-  color: "color-mix(in srgb, var(--on-accent) 92%, transparent)"
-} as const;
-
-const numberInputWrapStyle = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: 12,
-  padding: "8px 10px",
-  borderRadius: 12,
-  background: "color-mix(in srgb, var(--paper) 24%, transparent)"
-} as const;
-
-const numberInputStyle = {
-  width: 92,
-  border: "none",
-  borderRadius: 10,
-  padding: "10px 12px",
-  fontWeight: 800,
-  fontSize: "1.05rem"
-} as const;
-
-const rankRowStyle = {
-  display: "grid",
-  gridTemplateColumns: "28px 1fr auto",
-  alignItems: "center",
-  gap: 10,
-  padding: 10,
-  borderRadius: 12,
-  background: "color-mix(in srgb, var(--paper) 24%, transparent)"
-} as const;
-
-const miniButtonStyle = {
-  minWidth: 54,
-  minHeight: 38,
-  borderRadius: 10,
-  border: "1px solid color-mix(in srgb, var(--on-accent) 24%, transparent)",
-  background: "color-mix(in srgb, var(--on-accent) 13%, transparent)",
-  color: "var(--on-accent)",
-  fontWeight: 800
-} as const;
-
-const assignLegendStyle = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr 1fr",
-  gap: 6,
-  color: "color-mix(in srgb, var(--on-accent) 74%, transparent)",
-  fontSize: "0.78rem",
-  textAlign: "center"
-} as const;
-
-const assignRowStyle = {
-  display: "grid",
-  gap: 8,
-  padding: 10,
-  borderRadius: 12,
-  background: "color-mix(in srgb, var(--paper) 24%, transparent)"
-} as const;
-
-const segmentedStyle = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr 1fr",
-  gap: 6
-} as const;
-
-const segmentButtonStyle = {
-  minHeight: 38,
-  borderRadius: 10,
-  border: "1px solid color-mix(in srgb, var(--on-accent) 20%, transparent)",
-  fontWeight: 800
-} as const;
-
-const primaryButtonStyle = {
-  minHeight: 54,
-  borderRadius: 14,
-  border: "none",
-  background: "linear-gradient(135deg, var(--amber), var(--danger) 48%, var(--accent))",
-  color: "var(--on-accent)",
-  fontWeight: 900,
-  fontSize: "1rem"
-} as const;
-
-const selectLabelStyle = {
-  display: "grid",
-  gap: 6,
-  color: "color-mix(in srgb, var(--on-accent) 82%, transparent)"
-} as const;
-
-const selectStyle = {
-  minHeight: 44,
-  borderRadius: 12,
-  border: "none",
-  padding: "0 12px",
-  fontWeight: 800
-} as const;
-
-const copyPanelStyle = {
-  display: "grid",
-  gap: 12,
-  padding: 14,
-  borderRadius: 14,
-  border: "1px solid color-mix(in srgb, var(--on-accent) 18%, transparent)",
-  background: "linear-gradient(135deg, color-mix(in srgb, var(--accent) 58%, transparent), color-mix(in srgb, var(--accent) 56%, transparent), color-mix(in srgb, var(--amber) 46%, transparent))"
-} as const;
-
-const copySelectGridStyle = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: 10
-} as const;
-
-const answerCompareGridStyle = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: 10
-} as const;
-
-const answerPreviewStyle = {
-  display: "grid",
-  gap: 6,
-  minHeight: 88,
-  padding: 12,
-  borderRadius: 12,
-  border: "1px solid color-mix(in srgb, var(--on-accent) 16%, transparent)",
-  background: "color-mix(in srgb, var(--paper) 30%, transparent)",
-  color: "var(--on-accent)"
-} as const;
-
-const copyButtonGridStyle = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: 10
-} as const;
-
-const secondaryActionStyle = {
-  minHeight: 54,
-  borderRadius: 14,
-  border: "1px solid color-mix(in srgb, var(--on-accent) 26%, transparent)",
-  background: "color-mix(in srgb, var(--on-accent) 12%, transparent)",
-  color: "var(--on-accent)",
-  fontWeight: 900,
-  fontSize: "1rem"
-} as const;
-
-const resultsPanelStyle = {
-  display: "grid",
-  gap: 12,
-  padding: 14,
-  borderRadius: 14,
-  border: "1px solid color-mix(in srgb, var(--on-accent) 18%, transparent)",
-  background: "linear-gradient(135deg, color-mix(in srgb, var(--sage) 44%, transparent), color-mix(in srgb, var(--accent) 42%, transparent), color-mix(in srgb, var(--accent) 38%, transparent))"
-} as const;
-
-const resultRowStyle = {
-  display: "flex",
-  justifyContent: "space-between",
-  gap: 12,
-  padding: "10px 12px",
-  borderRadius: 12,
-  background: "color-mix(in srgb, var(--paper) 30%, transparent)"
-} as const;
-
-const solutionGridStyle = {
-  display: "grid",
-  gap: 8
-} as const;
-
-const solutionPillStyle = {
-  display: "grid",
-  gap: 4,
-  padding: "10px 12px",
-  borderRadius: 12,
-  background: "color-mix(in srgb, var(--on-accent) 11%, transparent)"
-} as const;
-
-const leaderboardStyle = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: 8
-} as const;
-
-const leaderboardPillStyle = {
-  border: "2px solid",
-  borderRadius: 999,
-  padding: "7px 10px",
-  background: "color-mix(in srgb, var(--surface) 54%, transparent)",
-  color: "var(--text-main)",
-  fontSize: "0.84rem",
-  fontWeight: 800
-} as const;
-
-const progressStyle = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: 8
-} as const;
-
-const progressDotStyle = {
-  border: "2px solid",
-  borderRadius: 999,
-  padding: "6px 9px",
-  background: "color-mix(in srgb, var(--surface) 58%, transparent)",
-  color: "var(--text-main)",
-  fontSize: "0.82rem"
-} as const;
+function Preview({ title, text }: { title: string; text: string }) { return <div className="szc-answer-preview"><span>{title}</span><strong>{text}</strong></div>; }
+function ResultView({ model }: { model: SchaetzoramaLayoutModel }) { const en = model.language === "en"; const own = model.results.find((result) => result.playerId === model.currentPlayerId); return <section className="szc-results"><div className="szc-result-total"><span>{en ? "This round" : "Diese Runde"}</span><strong>+{own?.total ?? 0}</strong><small>{en ? "points" : "Punkte"}</small></div><div className="szc-solutions">{categories.map((category) => <div className={`szc-${category}`} key={category}><span>{glyph(category)} {model.categoryLabels[category]}</span><strong>{formatAnswer(model, category, model.solutions[category])}</strong></div>)}</div></section>; }
+function Progress({ model }: { model: SchaetzoramaLayoutModel }) { return model.progress.length ? <div className="szc-progress">{model.progress.map((player) => { const done = model.stage === "joker" ? player.jokerReady : player.answered; return <i key={player.playerId} title={player.name} className={done ? "is-done" : ""} style={{ "--player": player.color } as React.CSSProperties}/>; })}</div> : null; }
+
+function initialAnswers(model: SchaetzoramaLayoutModel): SchaetzoramaAnswerSet { if (!model.roundContent) return {}; const number = model.roundContent.questions.number as SchaetzoramaNumberQuestion; const percent = model.roundContent.questions.percent as SchaetzoramaNumberQuestion; const rank = model.roundContent.questions.rank as SchaetzoramaRankQuestion; const assign = model.roundContent.questions.assign as SchaetzoramaAssignQuestion; return { number: model.ownAnswers.number ?? { kind: "number", value: Math.round((number.min + number.max) / 2) }, percent: model.ownAnswers.percent ?? { kind: "number", value: Math.round((percent.min + percent.max) / 2) }, rank: model.ownAnswers.rank ?? { kind: "rank", order: rank.items.map((item) => item.id) }, assign: model.ownAnswers.assign ?? { kind: "assign", assignments: Object.fromEntries(assign.terms.map((term) => [term.id, "left"])) } }; }
+function initialJoker(model: SchaetzoramaLayoutModel): JokerDraft { const joker = model.ownJokerPreview ?? model.ownJoker; return { categoryId: joker?.categoryId ?? "number", targetPlayerId: joker?.targetPlayerId ?? model.copyTargets[0]?.playerId ?? "" }; }
+function move(order: string[], index: number, offset: number) { const target = index + offset; if (target < 0 || target >= order.length) return order; const next = [...order]; const [item] = next.splice(index, 1); next.splice(target, 0, item); return next; }
+function clamp(value: number, min: number, max: number) { return Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : min; }
+function glyph(category: SchaetzoramaCategoryId) { return category === "number" ? "#" : category === "percent" ? "%" : category === "rank" ? "↕" : "◉"; }
+function stageTitle(model: SchaetzoramaLayoutModel) { const en = model.language === "en"; return model.stage === "revealed" ? (en ? "Results" : "Auflösung") : model.stage === "joker" ? (en ? "Copy round" : "Abschreiben") : (en ? "Your estimates" : "Deine Schätzungen"); }
+function zoneLabel(zone: SchaetzoramaAssignmentZone, question: Pick<SchaetzoramaAssignQuestion, "leftLabel" | "rightLabel">, language: SchaetzoramaLayoutModel["language"]) { return zone === "left" ? question.leftLabel : zone === "right" ? question.rightLabel : language === "en" ? "Both" : "Beide"; }
+function formatAnswer(model: SchaetzoramaLayoutModel, category: SchaetzoramaCategoryId, answer: SchaetzoramaAnswerSet[SchaetzoramaCategoryId]): string { const question = model.roundContent?.questions[category]; if (!answer || !question) return "–"; if (answer.kind === "number") return `${answer.value}${question.kind === "percent" ? "%" : question.kind === "number" && question.unitLabel ? ` ${question.unitLabel}` : ""}`; if (answer.kind === "rank" && question.kind === "rank") return answer.order.map((id) => question.items.find((item) => item.id === id)?.label ?? id).join(" › "); if (answer.kind === "assign" && question.kind === "assign") return question.terms.map((term) => `${term.label}: ${zoneLabel(answer.assignments[term.id], question, model.language)}`).join(" · "); return "–"; }

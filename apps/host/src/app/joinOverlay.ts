@@ -1,9 +1,10 @@
 import { getRoomPhase } from "@open-party-lab/protocol";
+import { themes } from "@open-party-lab/ui-kit";
 import QRCode from "qrcode";
 import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
+import { shouldShowShell } from "../shell/hostShell.js";
 import { getSelectedGameChrome } from "../games/selectedGame.js";
 import { getHostText } from "../i18n/hostText.js";
-import { hostTheme } from "../ui/theme/theme.js";
 import {
   applyStyles,
   createChromeCard,
@@ -18,6 +19,14 @@ function shouldShowJoinOverlay(state: HostAppState): boolean {
 
   if (!room) {
     return true;
+  }
+
+  // The shell's room card already carries the code, the QR and the link, so a
+  // floating copy of the same information would only be clutter. The overlay's
+  // remaining job is the moment a game holds the screen and latecomers still
+  // need a way in.
+  if (shouldShowShell(state)) {
+    return false;
   }
 
   const chrome = getSelectedGameChrome(state);
@@ -76,10 +85,10 @@ export function mountJoinOverlay(client: HostSocketClient): () => void {
     padding: "0",
     border: hostChrome.border.subtle,
     borderRadius: hostChrome.radius.pill,
-    background: hostTheme.panel,
+    background: "var(--surface)",
     boxShadow: hostChrome.shadow.dock,
-    color: hostTheme.accentStrong,
-    fontFamily: hostTheme.titleFont,
+    color: "var(--accent-strong)",
+    fontFamily: "var(--font-display)",
     fontSize: "16px",
     cursor: "pointer",
     placeItems: "center",
@@ -103,7 +112,7 @@ export function mountJoinOverlay(client: HostSocketClient): () => void {
   header.appendChild(title);
 
   const minimizeButton = createChromeTextButton("Verstecken");
-  minimizeButton.style.background = hostTheme.panelMuted;
+  minimizeButton.style.background = "var(--surface-muted)";
   header.appendChild(minimizeButton);
 
   const status = document.createElement("p");
@@ -124,7 +133,7 @@ export function mountJoinOverlay(client: HostSocketClient): () => void {
   canvas.style.width = "100%";
   canvas.style.height = "auto";
   canvas.style.borderRadius = hostChrome.radius.section;
-  canvas.style.background = hostTheme.onAccent;
+  canvas.style.background = themes.light.color.surfaceRaised;
   canvas.style.border = hostChrome.border.subtle;
   canvas.style.padding = "10px";
   card.appendChild(canvas);
@@ -134,13 +143,13 @@ export function mountJoinOverlay(client: HostSocketClient): () => void {
   link.rel = "noreferrer";
   link.style.fontSize = "12px";
   link.style.lineHeight = "1.4";
-  link.style.color = hostTheme.accentStrong;
+  link.style.color = "var(--accent-strong)";
   link.style.wordBreak = "break-all";
   card.appendChild(link);
 
   const hint = document.createElement("small");
   hint.textContent = "Am Handy immer den angezeigten Controller-Link oder QR-Code verwenden.";
-  hint.style.color = hostTheme.muted;
+  hint.style.color = "var(--muted)";
   hint.style.lineHeight = "1.4";
   card.appendChild(hint);
 
@@ -212,8 +221,8 @@ export function mountJoinOverlay(client: HostSocketClient): () => void {
       margin: 1,
       width: 176,
       color: {
-        dark: hostTheme.text,
-        light: hostTheme.onAccent
+        dark: themes.light.color.text,
+        light: themes.light.color.surfaceRaised
       }
     });
   });

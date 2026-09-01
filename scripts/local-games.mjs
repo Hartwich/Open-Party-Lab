@@ -245,7 +245,7 @@ async function writeGeneratedFiles(linkedGames) {
     serverEntries.push(`  { manifest: ${ident}ServerGame.manifest, serverGame: ${ident}ServerGame }`);
 
     hostImports.push(`import { hostGame as ${ident}HostGame } from "${game.package}/host";`);
-    hostEntries.push(`  ${ident}HostGame as ExternalHostGameRegistration`);
+    hostEntries.push(`  ${ident}HostGame as HostGame`);
 
     controllerImports.push(`import { controllerGame as ${ident}ControllerGame } from "${game.package}/controller";`);
     controllerEntries.push(`  ${ident}ControllerGame as ControllerGameRegistration`);
@@ -259,30 +259,19 @@ ${serverEntries.join(",\n")}
 `;
 
   const hostContent = `import type Phaser from "phaser";
+import type { HostGame } from "@open-party-lab/game-core";
 ${hostImports.join("\n")}${hostImports.length ? "\n" : ""}
-export interface ExternalHostGameRegistration {
-  id: string;
-  displayName: string;
-  sceneKey: string;
-  scene: Phaser.Types.Scenes.SceneType;
-}
-
-export const externalHostGames: ExternalHostGameRegistration[] = [
+export const externalHostGames: HostGame[] = [
 ${hostEntries.join(",\n")}
 ];
 
-export const externalHostGameRegistry: Record<string, { id: string; displayName: string; sceneKey: string }> = Object.fromEntries(
-  externalHostGames.map((game) => [
-    game.id,
-    {
-      id: game.id,
-      displayName: game.displayName,
-      sceneKey: game.sceneKey
-    }
-  ])
+export const externalHostGameRegistry: Record<string, HostGame> = Object.fromEntries(
+  externalHostGames.map((game) => [game.id, game])
 );
 
-export const externalHostScenes: Phaser.Types.Scenes.SceneType[] = externalHostGames.map((game) => game.scene);
+export const externalHostScenes: Phaser.Types.Scenes.SceneType[] = externalHostGames.flatMap((game) =>
+  game.scene ? [game.scene as Phaser.Types.Scenes.SceneType] : []
+);
 `;
 
   const controllerContent = `${controllerImports.join("\n")}${controllerImports.length ? "\n" : ""}import type { ControllerGameRegistration } from "../registry.js";

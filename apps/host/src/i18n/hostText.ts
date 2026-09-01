@@ -108,10 +108,31 @@ export interface HostText {
   hostControlDelegatedTitle: string;
   hostControlDelegatedBody: (name: string) => string;
   hostControlReclaim: string;
+  shellKicker: string;
+  shellTitle: string;
+  shellSetupKicker: string;
+  shellMoreGames: (count: number) => string;
+  shellStartRound: string;
+  shellRoundRunning: string;
+  shellBackToCatalog: string;
+  shellRosterEmpty: string;
+  shellNeedsPlayers: (missing: number) => string;
+  shellReadyCount: (ready: number, total: number) => string;
 }
 
 const hostText = {
   de: {
+    shellKicker: "Spiel waehlen",
+    shellTitle: "Was spielen wir?",
+    shellSetupKicker: "Einstellungen",
+    shellMoreGames: (count: number) => `${count} weitere`,
+    shellStartRound: "Runde starten",
+    shellRoundRunning: "Runde laeuft",
+    shellBackToCatalog: "Zur Auswahl",
+    shellRosterEmpty: "Noch niemand da. Code scannen zum Beitreten.",
+    shellNeedsPlayers: (missing: number) =>
+      missing === 1 ? "Es fehlt noch 1 Spieler." : `Es fehlen noch ${missing} Spieler.`,
+    shellReadyCount: (ready: number, total: number) => `${ready} von ${total} bereit`,
     hostControlRequestTitle: "Steuerung uebernehmen?",
     hostControlRequestBody: (name: string) => `${name} moechte den Host steuern.`,
     hostControlRequestHint: "Spielauswahl, Rundenstart und Spielerverwaltung wandern aufs Handy.",
@@ -207,6 +228,17 @@ const hostText = {
     lifecycle: (phase: RoomLifecycle | string) => phase
   },
   en: {
+    shellKicker: "Choose a game",
+    shellTitle: "What are we playing?",
+    shellSetupKicker: "Settings",
+    shellMoreGames: (count: number) => `${count} more`,
+    shellStartRound: "Start round",
+    shellRoundRunning: "Round running",
+    shellBackToCatalog: "Back to games",
+    shellRosterEmpty: "Nobody here yet. Scan the code to join.",
+    shellNeedsPlayers: (missing: number) =>
+      missing === 1 ? "1 more player needed." : `${missing} more players needed.`,
+    shellReadyCount: (ready: number, total: number) => `${ready} of ${total} ready`,
     hostControlRequestTitle: "Hand over control?",
     hostControlRequestBody: (name: string) => `${name} wants to drive the host.`,
     hostControlRequestHint: "Game selection, round start and the roster move to the phone.",

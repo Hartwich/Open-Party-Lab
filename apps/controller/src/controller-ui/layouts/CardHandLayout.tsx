@@ -1,32 +1,27 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { useHaptics } from "../../hooks/useHaptics.js";
 import { useOrientationHint } from "../../hooks/useOrientationHint.js";
-import { CardBack, PlayingCard } from "./cardArt.js";
+import { PlayingCard } from "./cardArt.js";
 import type { CardHandLayoutModel } from "./models.js";
-import type {
-  CardTableActionState,
-  CardTableBackStyle,
-  CardTableHandCardState,
-  CardTableStackState
-} from "@open-party-lab/protocol";
+import type { CardTableActionState, CardTableHandCardState } from "@open-party-lab/protocol";
 
 /**
  * Handkarten im Querformat.
  *
- * Das Layout ist bewusst spielunabhängig: Es zeigt die Tischstapel, die das
- * Spiel meldet - einen Ablagestapel, einen Stich, offene Tischkarten oder
- * mehrere Farbreihen -, die eigene Hand und die Aktionen, die der Server für
- * das aktuelle Regelwerk schickt. Die Hand fächert sich so weit auf, wie der
- * Platz reicht: von drei bis über zwanzig Karten bleibt jede antippbar.
+ * Das Layout ist bewusst spielunabhängig und zeigt nur, was in die Hand
+ * gehört: die eigenen Karten und die Aktionen, die der Server für das aktuelle
+ * Regelwerk schickt. Der gemeinsame Tisch - Ablage, Stich, Nachziehstapel -
+ * liegt auf dem großen Bildschirm, damit das Handy dem Blatt gehört. Die Hand
+ * fächert sich so weit auf, wie der Platz reicht: von drei bis über zwanzig
+ * Karten bleibt jede antippbar.
  */
 
 interface CardHandLayoutProps {
   model: CardHandLayoutModel;
 }
 
-const maxCardHeight = 190;
+const maxCardHeight = 240;
 const minCardHeight = 88;
-const stackCardWidth = 40;
 
 function useBoxSize(): [RefObject<HTMLDivElement | null>, { width: number; height: number }] {
   const ref = useRef<HTMLDivElement>(null);
@@ -66,54 +61,6 @@ function actionColors(kind: CardTableActionState["kind"]): { background: string;
     default:
       return { background: "var(--surface)", color: "var(--ink)", border: "var(--line-strong)" };
   }
-}
-
-/** Ein Tischstapel: verdeckter Stapel mit Zahl, oder bis zu drei offene Karten. */
-function TableStack({
-  stack,
-  backStyle
-}: {
-  stack: CardTableStackState;
-  backStyle: CardTableBackStyle;
-}) {
-  const cards = stack.cards.slice(0, 3);
-
-  return (
-    <div style={{ display: "grid", gap: 3, justifyItems: "center", flex: "0 0 auto" }}>
-      <div style={{ display: "flex", gap: 3 }}>
-        {stack.faceDown || cards.length === 0 ? (
-          stack.count > 0 && stack.faceDown ? (
-            <CardBack style={backStyle} width={stackCardWidth} count={stack.count} />
-          ) : (
-            <div
-              style={{
-                width: stackCardWidth,
-                height: stackCardWidth * 1.4,
-                borderRadius: 5,
-                border: "1px dashed var(--line-strong)",
-                background: "color-mix(in srgb, var(--surface) 70%, transparent)"
-              }}
-            />
-          )
-        ) : (
-          cards.map((card) => <PlayingCard key={card.cardId} card={card} width={stackCardWidth} />)
-        )}
-      </div>
-      <small
-        style={{
-          color: "var(--muted)",
-          fontSize: "0.68rem",
-          maxWidth: stackCardWidth * 3,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap"
-        }}
-      >
-        {stack.label}
-        {stack.count > cards.length || stack.faceDown ? ` (${stack.count})` : ""}
-      </small>
-    </div>
-  );
 }
 
 export function CardHandLayout({ model }: CardHandLayoutProps) {
@@ -228,43 +175,50 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
         </span>
       </header>
 
-      <section style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr)", gap: 10, alignItems: "start" }}>
-        <div style={{ display: "flex", gap: 8, alignItems: "flex-start", overflowX: "auto", maxWidth: "58vw" }}>
-          {model.stacks.map((stack) => (
-            <TableStack key={stack.id} stack={stack} backStyle={model.backStyle} />
-          ))}
-        </div>
-
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignContent: "flex-start" }}>
-          {model.seats.map((seat) => (
-            <div
-              key={seat.playerId}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "4px 9px",
-                borderRadius: 999,
-                border: seat.isActive ? "2px solid var(--accent)" : "1px solid var(--line)",
-                background:
-                  seat.playerId === model.currentPlayerId
-                    ? "var(--surface-raised)"
-                    : "color-mix(in srgb, var(--surface) 72%, transparent)",
-                opacity: seat.connected ? 1 : 0.55,
-                fontSize: "0.82rem"
-              }}
-            >
-              <span style={{ color: seat.color, fontSize: "0.8rem" }}>●</span>
-              <span style={{ maxWidth: 92, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {seat.name}
+      <section style={{ display: "flex", gap: 6, flexWrap: "wrap", alignContent: "flex-start" }}>
+        {model.seats.map((seat) => (
+          <div
+            key={seat.playerId}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "4px 9px",
+              borderRadius: 999,
+              border: seat.isActive ? "2px solid var(--accent)" : "1px solid var(--line)",
+              background:
+                seat.playerId === model.currentPlayerId
+                  ? "var(--surface-raised)"
+                  : "color-mix(in srgb, var(--surface) 72%, transparent)",
+              opacity: seat.connected ? 1 : 0.55,
+              fontSize: "0.82rem"
+            }}
+          >
+            <span style={{ color: seat.color, fontSize: "0.8rem" }}>●</span>
+            <span style={{ maxWidth: 92, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {seat.name}
+            </span>
+            {seat.isBot ? (
+              <span
+                style={{
+                  fontSize: "0.6rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  padding: "1px 5px",
+                  borderRadius: 5,
+                  border: "1px solid var(--line)",
+                  color: "var(--muted)"
+                }}
+              >
+                {model.language === "en" ? "AI" : "KI"}
               </span>
-              <strong>{seat.handCount}</strong>
-              {seat.statusLabel ? (
-                <span style={{ color: "var(--accent-strong)", fontWeight: 700 }}>{seat.statusLabel}</span>
-              ) : null}
-            </div>
-          ))}
-        </div>
+            ) : null}
+            <strong>{seat.handCount}</strong>
+            {seat.statusLabel ? (
+              <span style={{ color: "var(--accent-strong)", fontWeight: 700 }}>{seat.statusLabel}</span>
+            ) : null}
+          </div>
+        ))}
       </section>
 
       <section
@@ -328,6 +282,7 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
                     width={cardWidth}
                     selected={selected}
                     dimmed={!card.playable && !model.disabled}
+                    style={model.cardStyle}
                   />
                 </button>
               );

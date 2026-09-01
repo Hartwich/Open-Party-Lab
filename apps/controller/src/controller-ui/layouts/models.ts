@@ -60,6 +60,7 @@ export interface TapMashLayoutModel {
 export interface ChoiceItemModel {
   id: string;
   label: string;
+  iconPath?: string;
   description?: string;
   disabled?: boolean;
   onSelect: () => void;
@@ -70,6 +71,8 @@ export interface ChoiceLayoutModel {
   title: string;
   subtitle?: string;
   helperText?: string;
+  accentColor?: string;
+  identityLabel?: string;
   disabled: boolean;
   ready?: ReadyLayoutModel;
   choices: ChoiceItemModel[];
@@ -597,6 +600,7 @@ export interface DrawingGuessLayoutModel {
 
 export interface SchaetzoramaLayoutModel {
   kind: "schaetzorama";
+  currentPlayerId: string;
   title: string;
   subtitle?: string;
   helperText?: string;
@@ -703,6 +707,7 @@ export interface CardHandLayoutModel {
   resetKey: string;
   deckLabel: string;
   backStyle: import("@open-party-lab/protocol").CardTableBackStyle;
+  cardStyle: import("@open-party-lab/protocol").CardTableCardStyle;
   hand: import("@open-party-lab/protocol").CardTableHandCardState[];
   stacks: import("@open-party-lab/protocol").CardTableStackState[];
   seats: import("@open-party-lab/protocol").CardTableSeatState[];

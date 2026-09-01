@@ -14,7 +14,7 @@ export function ReadyPanel({ ready }: ReadyPanelProps) {
         display: "grid",
         gap: 12,
         padding: 16,
-        borderRadius: 18,
+        borderRadius: 8,
         border: "1px solid color-mix(in srgb, var(--accent) 22%, transparent)",
         background: "linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 42%, transparent) 0%, color-mix(in srgb, var(--surface) 72%, transparent) 100%)"
       }}
@@ -31,12 +31,12 @@ export function ReadyPanel({ ready }: ReadyPanelProps) {
         style={{
           width: "100%",
           minHeight: 54,
-          borderRadius: 12,
+          borderRadius: 7,
           border: "none",
           padding: "12px 14px",
           fontWeight: 700,
           fontSize: "1rem",
-          color: "var(--ink-soft)",
+          color: "var(--on-accent)",
           background: ready.currentPlayerReady
             ? "linear-gradient(180deg, color-mix(in srgb, var(--sage) 96%, transparent) 0%, var(--sage-strong) 100%)"
             : "linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%)",

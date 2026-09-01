@@ -82,12 +82,43 @@ export function resolveControllerChrome(
  * `accent` is the only required value; the platform derives card surfaces and
  * tints from it so every catalog entry keeps the same lightness.
  */
+/**
+ * Catalog glyphs the platform can draw.
+ *
+ * A game picks a name from this list instead of the platform keeping a table of
+ * game ids — that table is exactly what the decoupling work removed. The set is
+ * deliberately small and pictorial: the catalog should read as a shelf of
+ * boxes, not as a list of words.
+ */
+export type GameGlyphName =
+  | "swords"
+  | "brush"
+  | "cards"
+  | "chat"
+  | "cannon"
+  | "car"
+  | "bird"
+  | "mask"
+  | "bolt"
+  | "sparkles"
+  | "wand"
+  | "tower"
+  | "drama"
+  | "question"
+  | "ghost"
+  | "hand"
+  | "grid"
+  | "puck"
+  | "star";
+
 export interface GameVisualDefinition {
   /** `#rrggbb`. Muted, earthy hues read best on the warm paper background. */
   accent: string;
   /** Short category word above the title, e.g. "Arena", "Words". */
   eyebrow?: string;
-  /** Optional SVG served from the game's public assets. */
+  /** Catalog glyph. Falls back to the abstract mark when omitted. */
+  icon?: GameGlyphName;
+  /** Optional SVG served from the game's public assets. Wins over `icon`. */
   iconPath?: string;
 }
 

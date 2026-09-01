@@ -485,6 +485,21 @@ export class ControllerSocketClient {
     this.socket.emit("game:select", { roomCode: this.state.room.code, gameId });
   }
 
+  /**
+   * Host action: change the selected game's lobby settings.
+   *
+   * This is the same event the shared screen sends for a map or ruleset choice,
+   * so a phone holding host control configures a game exactly as the screen
+   * would. The server authorises it through the same check.
+   */
+  sendGameHostAction(gameId: string, action: unknown): void {
+    if (!this.state.room) {
+      return;
+    }
+
+    this.socket.emit("game:host-action", { roomCode: this.state.room.code, gameId, action });
+  }
+
   /** Host action: start the current round. */
   startRound(): void {
     if (!this.state.room) {

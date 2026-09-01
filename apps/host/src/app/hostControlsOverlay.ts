@@ -11,6 +11,7 @@ import { getHostText } from "../i18n/hostText.js";
 import { themeNames, type ThemeName } from "@open-party-lab/ui-kit";
 import { hostTheme, partyTheme } from "../ui/theme/theme.js";
 import { getSelectedGameChrome } from "../games/selectedGame.js";
+import { OPEN_HOST_CONTROLS_EVENT, SHELL_ACTIVE_ATTRIBUTE } from "../shell/hostShell.js";
 import {
   applyStyles,
   createChromeCard,
@@ -217,7 +218,7 @@ export function mountHostControlsOverlay(
 
   const subtitle = document.createElement("div");
   subtitle.style.fontSize = "12px";
-  subtitle.style.color = hostTheme.muted;
+  subtitle.style.color = "var(--muted)";
   subtitle.textContent = "FPS, Spieler und Schnellzugriff";
   titleBlock.appendChild(subtitle);
 
@@ -245,7 +246,7 @@ export function mountHostControlsOverlay(
   connectionBadge.style.justifyItems = "end";
   connectionBadge.style.padding = "10px 12px";
   connectionBadge.style.fontSize = "12px";
-  connectionBadge.style.color = hostTheme.muted;
+  connectionBadge.style.color = "var(--muted)";
   connectionBadge.style.textAlign = "right";
   connectionBadge.style.whiteSpace = "pre-line";
   meta.appendChild(connectionBadge);
@@ -260,7 +261,7 @@ export function mountHostControlsOverlay(
   fpsLabel.style.fontSize = "12px";
   fpsLabel.style.letterSpacing = "0.12em";
   fpsLabel.style.textTransform = "uppercase";
-  fpsLabel.style.color = hostTheme.muted;
+  fpsLabel.style.color = "var(--muted)";
   fpsSection.appendChild(fpsLabel);
 
   const fpsButtons = document.createElement("div");
@@ -310,7 +311,7 @@ export function mountHostControlsOverlay(
   themeLabel.style.fontSize = "12px";
   themeLabel.style.letterSpacing = "0.12em";
   themeLabel.style.textTransform = "uppercase";
-  themeLabel.style.color = hostTheme.muted;
+  themeLabel.style.color = "var(--muted)";
   themeSection.appendChild(themeLabel);
 
   const themeButtons = document.createElement("div");
@@ -349,7 +350,7 @@ export function mountHostControlsOverlay(
   languageLabel.style.fontSize = "12px";
   languageLabel.style.letterSpacing = "0.12em";
   languageLabel.style.textTransform = "uppercase";
-  languageLabel.style.color = hostTheme.muted;
+  languageLabel.style.color = "var(--muted)";
   languageSection.appendChild(languageLabel);
 
   const languageButtons = document.createElement("div");
@@ -394,7 +395,7 @@ export function mountHostControlsOverlay(
   controlLabel.style.fontSize = "12px";
   controlLabel.style.letterSpacing = "0.12em";
   controlLabel.style.textTransform = "uppercase";
-  controlLabel.style.color = hostTheme.muted;
+  controlLabel.style.color = "var(--muted)";
   controlSection.appendChild(controlLabel);
 
   const controlStatus = document.createElement("div");
@@ -423,12 +424,12 @@ export function mountHostControlsOverlay(
   playersLabel.style.fontSize = "12px";
   playersLabel.style.letterSpacing = "0.12em";
   playersLabel.style.textTransform = "uppercase";
-  playersLabel.style.color = hostTheme.muted;
+  playersLabel.style.color = "var(--muted)";
   playersHeader.appendChild(playersLabel);
 
   const playersCount = document.createElement("div");
   playersCount.style.fontSize = "12px";
-  playersCount.style.color = hostTheme.muted;
+  playersCount.style.color = "var(--muted)";
   playersHeader.appendChild(playersCount);
 
   const playersList = document.createElement("div");
@@ -438,13 +439,18 @@ export function mountHostControlsOverlay(
 
   const moderationHint = document.createElement("div");
   moderationHint.style.fontSize = "12px";
-  moderationHint.style.color = hostTheme.muted;
+  moderationHint.style.color = "var(--muted)";
   moderationHint.style.lineHeight = "1.4";
   playersSection.appendChild(moderationHint);
 
   function syncOpenState(label: string): void {
     card.style.display = isOpen ? "grid" : "none";
     setChromeIconButtonState(toggleButton, { active: isOpen, label });
+    // The shell's dock already offers a settings button; a second floating gear
+    // beside it would be two controls for one panel.
+    const shellActive =
+      document.documentElement.getAttribute(SHELL_ACTIVE_ATTRIBUTE) === "on";
+    toggleButton.style.display = shellActive ? "none" : "grid";
   }
 
   function resolveLanguage(): SupportedLanguage {
@@ -622,6 +628,15 @@ export function mountHostControlsOverlay(
     syncView();
   });
 
+  /** The shell's dock opens this panel without importing it. */
+  const handleOpenRequest = (): void => {
+    isOpen = !isOpen;
+    writeStoredBoolean(openPreferenceKey, isOpen);
+    syncView();
+  };
+
+  window.addEventListener(OPEN_HOST_CONTROLS_EVENT, handleOpenRequest);
+
   closeButton.addEventListener("click", () => {
     isOpen = false;
     writeStoredBoolean(openPreferenceKey, isOpen);
@@ -645,6 +660,7 @@ export function mountHostControlsOverlay(
   return () => {
     destroyed = true;
     unsubscribe();
+    window.removeEventListener(OPEN_HOST_CONTROLS_EVENT, handleOpenRequest);
     overlay.remove();
   };
 }

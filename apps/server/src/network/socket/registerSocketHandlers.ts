@@ -17,6 +17,7 @@ import { ReconnectService } from "../../players/reconnectService.js";
 import { canStartRound, explainCannotStartRound } from "../../rooms/roomLifecycle.js";
 import { RoomManager } from "../../rooms/roomManager.js";
 import { RoomCleanupService } from "../../rooms/roomCleanupService.js";
+import { createGuardedOn } from "./guardClientEvents.js";
 
 type IoServer = import("socket.io").Server<
   ClientToServerEvents,
@@ -304,6 +305,11 @@ export function registerSocketHandlers({
   }
 
   io.on("connection", (socket) => {
+    // Every client event goes through this instead of socket.on: it normalises
+    // the arguments a well-behaved client would have sent and keeps a fault in
+    // one handler from ending the process for every room on the server.
+    const on = createGuardedOn(socket);
+
     socket.use((_event, next) => {
       const roomCode = socket.data.roomCode;
       const room = roomCode ? roomManager.getRoom(roomCode) : undefined;
@@ -317,7 +323,7 @@ export function registerSocketHandlers({
       recoveryEnabled: true
     });
 
-    socket.on("room:create", (payload, ack) => {
+    on("room:create", (payload, ack) => {
       const hostName = payload.hostName?.trim() || "Host";
       const requestedRoomCode = payload.roomCode?.trim().toUpperCase();
 
@@ -377,7 +383,7 @@ export function registerSocketHandlers({
       }
     });
 
-    socket.on("room:set-language", (payload, ack) => {
+    on("room:set-language", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -408,7 +414,7 @@ export function registerSocketHandlers({
       }
     });
 
-    socket.on("room:set-theme", (payload, ack) => {
+    on("room:set-theme", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -428,7 +434,7 @@ export function registerSocketHandlers({
       stateBroadcaster.broadcastRoomState(room);
     });
 
-    socket.on("room:join", (payload, ack) => {
+    on("room:join", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -471,7 +477,7 @@ export function registerSocketHandlers({
       }
     });
 
-    socket.on("session:resume", (payload, ack) => {
+    on("session:resume", (payload, ack) => {
       const session = reconnectService.getSession(payload.reconnectToken);
 
       if (!session) {
@@ -533,7 +539,7 @@ export function registerSocketHandlers({
       }
     });
 
-    socket.on("room:leave", (payload, ack) => {
+    on("room:leave", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -581,7 +587,7 @@ export function registerSocketHandlers({
       }
     });
 
-    socket.on("player:kick", (payload, ack) => {
+    on("player:kick", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -637,7 +643,7 @@ export function registerSocketHandlers({
       }
     });
 
-    socket.on("player:ready", (payload) => {
+    on("player:ready", (payload) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -657,7 +663,7 @@ export function registerSocketHandlers({
       maybeAutoStartReadyRound(room.code);
     });
 
-    socket.on("player:select-character", (payload) => {
+    on("player:select-character", (payload) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -705,7 +711,7 @@ export function registerSocketHandlers({
       maybeAutoStartReadyRound(room.code);
     });
 
-    socket.on("player:set-setup", (payload, ack) => {
+    on("player:set-setup", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -763,7 +769,7 @@ export function registerSocketHandlers({
       maybeAutoStartReadyRound(room.code);
     });
 
-    socket.on("host-control:request", (payload, ack) => {
+    on("host-control:request", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -793,7 +799,7 @@ export function registerSocketHandlers({
       stateBroadcaster.broadcastRoomState(room);
     });
 
-    socket.on("host-control:resolve", (payload, ack) => {
+    on("host-control:resolve", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -818,7 +824,7 @@ export function registerSocketHandlers({
       stateBroadcaster.broadcastRoomState(room);
     });
 
-    socket.on("host-control:release", (payload, ack) => {
+    on("host-control:release", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -842,7 +848,7 @@ export function registerSocketHandlers({
       stateBroadcaster.broadcastRoomState(room);
     });
 
-    socket.on("game:select", (payload) => {
+    on("game:select", (payload) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -875,7 +881,7 @@ export function registerSocketHandlers({
       stateBroadcaster.broadcastScoreboard(room);
     });
 
-    socket.on("game:host-action", (payload) => {
+    on("game:host-action", (payload) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -929,7 +935,7 @@ export function registerSocketHandlers({
       }
     });
 
-    socket.on("round:start", (payload) => {
+    on("round:start", (payload) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
@@ -994,9 +1000,9 @@ export function registerSocketHandlers({
       });
     };
 
-    socket.on("round:abort" as keyof ClientToServerEvents, handleRoundAbort);
+    on("round:abort" as keyof ClientToServerEvents, handleRoundAbort);
 
-    socket.on("game:input", (payload) => {
+    on("game:input", (payload) => {
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {

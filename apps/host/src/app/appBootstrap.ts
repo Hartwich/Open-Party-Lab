@@ -17,8 +17,7 @@ import {
   readHostFpsPreference
 } from "./hostControlsOverlay.js";
 import { BootScene } from "../scenes/BootScene.js";
-import { LobbyScene } from "../scenes/LobbyScene.js";
-import { GameSelectScene } from "../scenes/GameSelectScene.js";
+import { mountHostShell } from "../shell/hostShell.js";
 import { externalHostScenes } from "../games/.generated/externalGames.js";
 
 interface HostAutomationBridge {
@@ -83,14 +82,13 @@ export function bootstrapHostApp(requestedRoomCode: string | null = null): Phase
     fps: fpsConfig,
     scale: {
       mode: Phaser.Scale.RESIZE,
-      autoCenter: Phaser.Scale.CENTER_BOTH
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+      // Fractional canvas dimensions make the browser resample the whole frame.
+      // Rounding them away removes a layer of softness that no per-object
+      // setting can undo.
+      autoRound: true
     },
-    scene: [
-      BootScene,
-      LobbyScene,
-      GameSelectScene,
-      ...externalHostScenes
-    ]
+    scene: [BootScene, ...externalHostScenes]
   });
 
   applyHostFps(game, preferredFps);
@@ -108,6 +106,7 @@ export function bootstrapHostApp(requestedRoomCode: string | null = null): Phase
     }
   });
   createHostRouter(game, hostClient);
+  mountHostShell(hostClient);
   mountJoinOverlay(hostClient);
   mountHudOverlay(hostClient);
   mountDebugOverlay(game, hostClient);

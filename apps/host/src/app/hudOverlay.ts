@@ -3,7 +3,6 @@ import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
 import { getSelectedGameChrome } from "../games/selectedGame.js";
 import { getHostText } from "../i18n/hostText.js";
 import { applyStyles, createChromeCard, hostChrome } from "../ui/chrome/hostChrome.js";
-import { hostTheme } from "../ui/theme/theme.js";
 
 function shouldShowHudOverlay(state: HostAppState): boolean {
   // Games that fill the screen themselves opt out via their manifest.
@@ -40,12 +39,12 @@ export function mountHudOverlay(client: HostSocketClient): () => void {
 
   const line2 = document.createElement("div");
   line2.style.fontSize = "13px";
-  line2.style.color = hostTheme.textSoft;
+  line2.style.color = "var(--ink-soft)";
   card.appendChild(line2);
 
   const line3 = document.createElement("div");
   line3.style.fontSize = "12px";
-  line3.style.color = hostTheme.muted;
+  line3.style.color = "var(--muted)";
   card.appendChild(line3);
 
   document.body.appendChild(overlay);

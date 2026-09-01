@@ -100,6 +100,7 @@ export function ControllerApp() {
           onRequestHostControl={() => controllerClient.requestHostControl()}
           onReleaseHostControl={() => controllerClient.releaseHostControl()}
           onSelectGame={(gameId) => controllerClient.selectGame(gameId)}
+          onHostAction={(gameId, action) => controllerClient.sendGameHostAction(gameId, action)}
           onStartRound={() => controllerClient.startRound()}
           onBackToMenu={() => controllerClient.returnToGameSelection()}
           onKickPlayer={(playerId) => controllerClient.kickPlayer(playerId)}

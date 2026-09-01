@@ -19,6 +19,8 @@
     "smoke:round": "node scripts/smoke-round.mjs",
     "smoke:games": "node scripts/smoke-all-games.mjs",
     "smoke:control": "node scripts/smoke-host-control.mjs",
+    "smoke:robustness": "node scripts/smoke-robustness.mjs",
+    "smoke:remote-setup": "node scripts/smoke-remote-setup.mjs",
     "postinstall": "node scripts/local-games.mjs ensure-generated",
     "build:packages": "tsc -b packages/utils packages/ui-kit packages/game-core packages/protocol",
     "watch:packages": "tsc -b packages/utils packages/ui-kit packages/game-core packages/protocol -w",

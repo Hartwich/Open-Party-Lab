@@ -1,6 +1,5 @@
 import type { HostSocketClient } from "./hostSocketClient.js";
 import { getHostText } from "../i18n/hostText.js";
-import { hostTheme } from "../ui/theme/theme.js";
 import {
   applyStyles,
   createChromeCard,
@@ -37,7 +36,7 @@ export function mountHostControlOverlay(client: HostSocketClient): () => void {
   overlay.appendChild(card);
 
   const title = document.createElement("strong");
-  title.style.fontFamily = hostTheme.titleFont;
+  title.style.fontFamily = "var(--font-display)";
   title.style.fontSize = "20px";
   card.appendChild(title);
 
@@ -48,7 +47,7 @@ export function mountHostControlOverlay(client: HostSocketClient): () => void {
   card.appendChild(body);
 
   const hint = document.createElement("small");
-  hint.style.color = hostTheme.muted;
+  hint.style.color = "var(--muted)";
   hint.style.lineHeight = "1.4";
   card.appendChild(hint);
 

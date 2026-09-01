@@ -1,5 +1,10 @@
-import { partyTheme, setActiveTheme, type ThemeName } from "@open-party-lab/ui-kit";
-import { refreshSceneColors } from "./sceneColors.js";
+import {
+  applyThemeVariables,
+  normalizeThemeName,
+  partyTheme,
+  setActiveTheme,
+  type ThemeName
+} from "@open-party-lab/ui-kit";
 
 /**
  * Host-facing view of the active theme.
@@ -62,13 +67,18 @@ function syncHostTheme(): void {
  * redraw only when it is needed.
  */
 export function applyHostTheme(name: ThemeName | string | undefined): boolean {
-  if (!setActiveTheme(name)) {
-    return false;
+  const normalized = normalizeThemeName(name);
+  const changed = setActiveTheme(normalized);
+
+  if (typeof document !== "undefined") {
+    applyThemeVariables(document.documentElement, normalized);
   }
 
-  syncHostTheme();
-  refreshSceneColors();
-  return true;
+  if (changed) {
+    syncHostTheme();
+  }
+
+  return changed;
 }
 
 export { partyTheme };

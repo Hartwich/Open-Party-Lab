@@ -1,92 +1,75 @@
 import Phaser from "phaser";
-import { getRoomPhase } from "@open-party-lab/protocol";
-import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
+import type { HostSocketClient } from "./hostSocketClient.js";
+import { resolveHostSurface } from "./hostSurface.js";
 import { HostPerfTracker } from "./perfTelemetry.js";
-import { hostGameRegistry } from "../games/registry.js";
 
 /**
- * Scenes the platform itself owns. Everything else belongs to a game.
+ * Scenes the platform itself owns.
+ *
+ * Exactly one is left. Lobby and catalog used to be Phaser scenes that
+ * hand-computed their own pixel layout, scrollbar and hit areas; they are DOM
+ * now, which is both crisper and a great deal less code. The canvas is for
+ * games.
  */
 export const hostSceneKeys = {
-  boot: "BootScene",
-  lobby: "LobbyScene",
-  gameSelect: "GameSelectScene"
+  boot: "BootScene"
 } as const;
 
-/** Phases during which the selected game renders the screen. */
-const gameOwnedPhases = new Set([
-  "round_intro",
-  "countdown",
-  "playing",
-  "locked",
-  "result",
-  "scoreboard",
-  "finished"
-]);
-
-/**
- * The game's own host scene, or null when the game is not installed.
- *
- * A missing scene is not something to paper over: the room falls back to the
- * catalog rather than showing a stand-in that pretends the game is running.
- */
-function getGameSceneKey(gameId: string | null | undefined): string | null {
-  return gameId ? hostGameRegistry[gameId]?.sceneKey ?? null : null;
-}
-
-/**
- * Chooses which scene should be running.
- *
- * The platform owns three scenes — boot, lobby, game select — and hands the
- * screen to the selected game for the entire round, intro and result included.
- * The router used to carry one hand-written exception per game that had
- * outgrown the generic scoreboard; there is nothing left to except.
- */
-function resolveSceneKey(state: HostAppState): string {
-  if (!state.room) {
-    return hostSceneKeys.boot;
-  }
-
-  if (state.sceneOverride === "catalog") {
-    return hostSceneKeys.gameSelect;
-  }
-
-  const phase = getRoomPhase(state.room);
-  const gameSceneKey = getGameSceneKey(state.room.selectedGameId);
-
-  if (phase && gameSceneKey && gameOwnedPhases.has(phase)) {
-    return gameSceneKey;
-  }
-
-  if (state.room.selectedGameId) {
-    return hostSceneKeys.gameSelect;
-  }
-
-  return hostSceneKeys.lobby;
-}
-
 export function createHostRouter(game: Phaser.Game, client: HostSocketClient): () => void {
-  let currentSceneKey: string = hostSceneKeys.boot;
   const perfTracker = new HostPerfTracker(game, "host-router", "host-router");
+  let currentSceneKey: string | null = null;
+  let currentDomGameId: string | null = null;
+  let unmountDomGame: (() => void) | null = null;
+  const domRoot = document.createElement("div");
+  domRoot.dataset.hostGameSurface = "";
+  Object.assign(domRoot.style, {
+    position: "fixed",
+    inset: "0",
+    display: "none",
+    overflow: "hidden"
+  });
+  document.getElementById("app")?.appendChild(domRoot);
 
   const unsubscribe = client.subscribe((state) => {
     const routeStart = performance.now();
-    const nextSceneKey = resolveSceneKey(state);
-    const activeScenes = game.scene.getScenes(true);
-    const strayScenes = activeScenes.filter((scene) => scene.scene.key !== nextSceneKey);
-    const sceneChanged = nextSceneKey !== currentSceneKey || !game.scene.isActive(nextSceneKey);
+    const surface = resolveHostSurface(state);
+    // The shell paints the platform screen itself, so Phaser has nothing to run
+    // there; boot keeps its scene because it is what shows before a room exists.
+    const nextSceneKey =
+      surface.kind === "game" && !surface.game.mountDom
+        ? surface.game.sceneKey ?? null
+        : surface.kind === "boot"
+          ? hostSceneKeys.boot
+          : null;
+    const nextDomGame = surface.kind === "game" && surface.game.mountDom ? surface.game : null;
+    const sceneChanged = nextSceneKey !== currentSceneKey;
 
-    for (const scene of strayScenes) {
-      game.scene.stop(scene.scene.key);
-    }
+    if (nextDomGame?.id !== currentDomGameId) {
+      unmountDomGame?.();
+      unmountDomGame = null;
+      domRoot.replaceChildren();
+      currentDomGameId = nextDomGame?.id ?? null;
 
-    if (!(nextSceneKey === currentSceneKey && game.scene.isActive(nextSceneKey))) {
-      currentSceneKey = nextSceneKey;
-
-      if (!game.scene.isActive(nextSceneKey)) {
-        game.scene.start(nextSceneKey);
+      if (nextDomGame?.mountDom) {
+        unmountDomGame = nextDomGame.mountDom(domRoot, client);
       }
     }
+
+    domRoot.style.display = nextDomGame ? "block" : "none";
+
+    for (const scene of game.scene.getScenes(true)) {
+      if (scene.scene.key !== nextSceneKey) {
+        game.scene.stop(scene.scene.key);
+      }
+    }
+
+    if (nextSceneKey && !game.scene.isActive(nextSceneKey)) {
+      game.scene.start(nextSceneKey);
+    }
+
+    currentSceneKey = nextSceneKey;
+    // A canvas nobody is drawing into should not sit on top of the shell.
+    game.canvas.style.visibility = nextSceneKey ? "visible" : "hidden";
 
     perfTracker.sample({
       timingsMs: {
@@ -100,7 +83,7 @@ export function createHostRouter(game: Phaser.Game, client: HostSocketClient): (
         roomCode: state.room?.code ?? null,
         gameId: state.room?.selectedGameId ?? null,
         phase: state.game?.phase ?? state.room?.lifecycle ?? null,
-        sceneKey: nextSceneKey
+        sceneKey: nextDomGame ? `dom:${nextDomGame.id}` : nextSceneKey ?? "shell"
       },
       flags: {
         sceneChanged
@@ -111,5 +94,7 @@ export function createHostRouter(game: Phaser.Game, client: HostSocketClient): (
   return () => {
     perfTracker.clear();
     unsubscribe();
+    unmountDomGame?.();
+    domRoot.remove();
   };
 }

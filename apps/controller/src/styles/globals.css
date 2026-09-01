@@ -43,8 +43,10 @@ button {
 }
 
 button:focus-visible,
-input:focus-visible {
-  outline: 3px solid var(--accent-soft);
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--accent-strong);
   outline-offset: 2px;
 }
 

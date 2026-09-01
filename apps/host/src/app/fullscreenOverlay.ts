@@ -7,6 +7,7 @@ import {
   setChromeIconButtonState,
   trapChromePointerEvents
 } from "../ui/chrome/hostChrome.js";
+import { SHELL_ACTIVE_ATTRIBUTE, TOGGLE_FULLSCREEN_EVENT } from "../shell/hostShell.js";
 
 type FullscreenDocument = Document & {
   webkitFullscreenElement?: Element | null;
@@ -108,6 +109,16 @@ export function mountFullscreenOverlay(client: HostSocketClient): () => void {
     });
   }
 
+  /**
+   * These buttons float over a running game. On the shell they would sit on top
+   * of the room card and duplicate the dock, which already carries the catalog
+   * and full-screen controls, so the whole group steps aside.
+   */
+  function updateOverlayVisibility(): void {
+    const shellActive = document.documentElement.getAttribute(SHELL_ACTIVE_ATTRIBUTE) === "on";
+    overlay.style.display = shellActive ? "none" : "flex";
+  }
+
   async function toggleFullscreen(): Promise<void> {
     try {
       if (isFullscreenActive(targetDocument)) {
@@ -173,17 +184,27 @@ export function mountFullscreenOverlay(client: HostSocketClient): () => void {
   targetDocument.addEventListener("fullscreenchange", updateButtonLabel);
   targetDocument.addEventListener("webkitfullscreenchange", updateButtonLabel as EventListener);
   window.addEventListener("keydown", handleKeydown);
+  /** The shell's dock asks for full screen without importing this module. */
+  const handleToggleRequest = (): void => {
+    void toggleFullscreen();
+  };
+
+  window.addEventListener(TOGGLE_FULLSCREEN_EVENT, handleToggleRequest);
+
   const unsubscribe = client.subscribe(() => {
     updateButtonLabel();
     updateGameSelectButton();
+    updateOverlayVisibility();
   });
   updateButtonLabel();
   updateGameSelectButton();
+  updateOverlayVisibility();
 
   return () => {
     targetDocument.removeEventListener("fullscreenchange", updateButtonLabel);
     targetDocument.removeEventListener("webkitfullscreenchange", updateButtonLabel as EventListener);
     window.removeEventListener("keydown", handleKeydown);
+    window.removeEventListener(TOGGLE_FULLSCREEN_EVENT, handleToggleRequest);
     unsubscribe();
     overlay.remove();
   };
