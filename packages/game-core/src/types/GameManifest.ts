@@ -15,12 +15,28 @@ export interface GameLobbySetupOption {
   description?: string;
 }
 
+/**
+ * Sichtbarkeit eines Feldes, abhängig von einem anderen Feld.
+ *
+ * Manche Optionen ergeben nur für einen Teil eines Spiels Sinn - eine
+ * Deckauswahl bei einem Regelwerk mit festem Blatt zum Beispiel. Statt sie
+ * auszugrauen oder gar wirkungslos anzubieten, blendet die Lobby sie aus.
+ */
+export interface GameLobbySetupVisibility {
+  /** `settingKey` (ersatzweise `id`) des Feldes, von dem die Sichtbarkeit abhängt. */
+  field: string;
+  /** Sichtbar, solange der Wert jenes Feldes einer dieser Optionen entspricht. */
+  anyOf: readonly string[];
+}
+
 interface GameLobbySetupFieldBase {
   id: string;
   label: string;
   description?: string;
   settingKey?: string;
   actionKey?: string;
+  /** Ohne Angabe immer sichtbar. */
+  visibleWhen?: GameLobbySetupVisibility;
 }
 
 export interface GameLobbySetupSelectField extends GameLobbySetupFieldBase {
@@ -129,6 +145,35 @@ export interface GameManifest {
   audio?: GameAudioDefinition;
   /** State broadcast tuning. */
   broadcast?: GameBroadcastPolicy;
+}
+
+function lobbyFieldKey(field: GameLobbySetupField): string {
+  return field.settingKey ?? field.id;
+}
+
+/**
+ * Ist dieses Lobby-Feld gerade sichtbar?
+ *
+ * Host und Handy müssen dieselbe Antwort geben, deshalb liegt die Regel hier
+ * und nicht in einer der beiden Oberflächen. Der Wert des Bezugsfeldes kommt
+ * aus den Raumeinstellungen; solange dort nichts steht, gilt sein Standardwert.
+ */
+export function isLobbyFieldVisible(
+  field: GameLobbySetupField,
+  fields: readonly GameLobbySetupField[],
+  settings: Readonly<Record<string, unknown>>
+): boolean {
+  const rule = field.visibleWhen;
+
+  if (!rule) {
+    return true;
+  }
+
+  const source = fields.find((entry) => lobbyFieldKey(entry) === rule.field);
+  const stored = settings[rule.field];
+  const value = stored === undefined || stored === null ? source?.defaultValue : stored;
+
+  return rule.anyOf.includes(String(value));
 }
 
 /** True when the game renders the given lifecycle screen itself. */

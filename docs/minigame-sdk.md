@@ -122,6 +122,13 @@ is the reference implementation and carries the deck presets, the table engine
 and its pluggable rulesets — ten card games run on the same layout, so a new card
 game there needs no platform change at all.
 
+Lobby setup fields take an optional `visibleWhen: { field, anyOf }`. The field
+names another field by its `settingKey` (or `id`), and the option is shown only
+while that field holds one of the listed values — a deck picker disappears for a
+ruleset that brings its own deck rather than sitting there doing nothing. Host
+and phone both call `isLobbyFieldVisible(field, fields, settings)` so the two
+surfaces can never disagree; a field without the property is always visible.
+
 Seat chips carry an optional `isBot` flag. The platform has no notion of AI
 players and never will: it only knows the people who joined a room. A game that
 wants virtual opponents mints its own seats, drives them from `tick()`, and

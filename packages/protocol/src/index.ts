@@ -14,6 +14,7 @@ export * from "./games/wordTiles.js";
 export * from "./games/cardTable.js";
 export {
   defaultLanguage,
+  isLobbyFieldVisible,
   languageLabels,
   normalizeLanguage,
   supportedLanguages,

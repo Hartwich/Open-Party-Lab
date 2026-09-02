@@ -1,4 +1,4 @@
-import type { AvailableGameDto } from "@open-party-lab/protocol";
+import { isLobbyFieldVisible, type AvailableGameDto } from "@open-party-lab/protocol";
 
 type LobbyField = NonNullable<AvailableGameDto["lobbySetup"]>["fields"][number];
 type SettingsMap = Record<string, string | number | boolean>;
@@ -193,12 +193,17 @@ export function LobbySetupControls({
 
   const confirmation = setup.confirmation;
   const confirmed = confirmation ? settings[confirmation.settingKey] === true : false;
+  // Dieselbe Regel wie auf dem grossen Bildschirm: Was gerade nichts bewirkt,
+  // wird ausgeblendet statt ausgegraut.
+  const visibleFields = setup.fields.filter((field) =>
+    isLobbyFieldVisible(field, setup.fields, settings)
+  );
 
   return (
     <div style={{ display: "grid", gap: 14 }}>
       {setup.description ? <p style={hintStyle}>{setup.description}</p> : null}
 
-      {setup.fields.map((field) => {
+      {visibleFields.map((field) => {
         const value = settings[field.settingKey ?? field.id] ?? field.defaultValue;
 
         return field.kind === "select" ? (

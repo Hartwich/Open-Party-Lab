@@ -1,4 +1,4 @@
-import type { AvailableGameDto, SupportedLanguage } from "@open-party-lab/protocol";
+import { isLobbyFieldVisible, type AvailableGameDto, type SupportedLanguage } from "@open-party-lab/protocol";
 import { getHostText } from "../i18n/hostText.js";
 import { renderGameGlyph, renderUiIcon } from "./gameGlyphs.js";
 import { escapeHtml } from "./escapeHtml.js";
@@ -117,6 +117,9 @@ function renderSetup(game: AvailableGameDto, settings: SettingsMap, locked: bool
   }
 
   const fields = setup.fields
+    // Optionen, die für das gewählte Regelwerk nichts bewirken, werden nicht
+    // ausgegraut, sondern gar nicht erst gezeigt.
+    .filter((field) => isLobbyFieldVisible(field, setup.fields, settings))
     .map((field) => {
       const value = settings[field.settingKey ?? field.id] ?? field.defaultValue;
 
