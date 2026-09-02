@@ -22,6 +22,7 @@ Platform:
 - host DEV automation bridge for browser checks exposed only by the Vite dev host
 - portable Windows release assembly with a one-click launcher, bundled Node.js runtime, same-origin host/controller assets, and all known games
 - hosted room isolation with a 20-room capacity, inactive-room eviction, ten-minute empty-room cleanup, and a one-hour maximum room lifetime
+- Render hosted builds download the public game repositories as GitHub source archives, so assembling all games does not depend on interactive Git credentials inside the build container
 
 Optional local game repos:
 
@@ -60,7 +61,7 @@ Lobby/setup:
 - Magic Arena, Magic Duell, Arena Survivor, MinionsTD, Zeichnen & Erraten, Schaetzorama, Chaos-Kommando, Flatterfluff, Word Tiles, and Drift Racer are the recommended alpha/beta set, but still need normal playtesting and refinement;
 - Schaetzorama's interface is bilingual, but most legacy question texts still fall back to German in English rooms;
 - persistent storage is not wired for production use;
-- no hosted deployment configuration is included;
+- the public Render deployment is suitable for testing, but free-instance cold starts and ephemeral in-memory rooms remain production limitations;
 - no formal end-to-end test suite exists yet;
 - controller bundles can be split further;
 - several games need deeper playtesting and balancing;
