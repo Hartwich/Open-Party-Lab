@@ -48,21 +48,21 @@ function createProfile(
 
 const musicTemplates: Record<string, MusicTemplate> = {
   calmFocus: {
-    bars: 32, legato: true,
+    bars: 64, legato: true,
     leadPattern: [0,null,null,null,null,null,7,null,null,null,null,null,4,null,null,null, 2,null,null,null,null,null,null,null,7,null,null,null,null,null,null,null, 4,null,null,null,null,null,9,null,null,null,null,null,7,null,null,null, 2,null,null,null,null,null,null,null,0,null,null,null,null,null,null,null],
     bassPattern: [0,null,null,null,null,null,null,null,7,null,null,null,null,null,null,null],
     padPattern: [0,null,null,null],
-    barProgression: [0,0,5,5,9,9,5,7, 0,0,5,5,9,7,5,0, 9,9,5,5,0,0,7,7, 5,5,0,9,5,7,0,0],
+    barProgression: [0,0,5,5,9,9,5,7, 0,0,5,5,9,7,5,0, 9,9,5,5,0,0,7,7, 5,5,0,9,5,7,0,0, 0,5,9,7,5,0,5,7, 9,5,0,0,5,9,7,7, 5,0,9,9,7,5,0,5, 9,7,5,0,5,7,0,0],
     kickPattern: [], snarePattern: [], hatPattern: [],
     leadWave: "sine", bassWave: "sine", padWave: "sine", padChordIntervals: [0,7,12,16],
     leadGain: .038, bassGain: .06, padGain: .10, drumGain: 0, lowpassHz: 1400
   },
   calmReveal: {
-    bars: 32, legato: true,
+    bars: 64, legato: true,
     leadPattern: [4,null,null,null,7,null,null,null,12,null,null,null,null,null,7,null, 9,null,null,null,null,null,7,null,4,null,null,null,null,null,null,null, 7,null,null,null,12,null,null,null,14,null,null,null,12,null,null,null, 7,null,null,null,null,null,4,null,0,null,null,null,null,null,null,null],
     bassPattern: [0,null,null,null,null,null,null,null,7,null,null,null,null,null,null,null],
     padPattern: [0,null,null,null],
-    barProgression: [0,0,5,5,9,9,7,7, 5,5,0,0,9,5,7,0, 0,9,5,7,0,9,5,7, 5,5,0,0,9,7,0,0],
+    barProgression: [0,0,5,5,9,9,7,7, 5,5,0,0,9,5,7,0, 0,9,5,7,0,9,5,7, 5,5,0,0,9,7,0,0, 5,9,0,7,5,5,9,7, 0,5,9,5,0,0,7,7, 9,9,5,0,7,5,9,7, 5,0,5,9,7,5,0,0],
     kickPattern: [.2,0,0,0,0,0,0,0,.12,0,0,0,0,0,0,0], snarePattern: [], hatPattern: [],
     leadWave: "triangle", bassWave: "sine", padWave: "sine", padChordIntervals: [0,7,12,16],
     leadGain: .035, bassGain: .055, padGain: .085, drumGain: .06, lowpassHz: 1750

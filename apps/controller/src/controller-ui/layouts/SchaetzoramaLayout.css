@@ -14,7 +14,7 @@
 @media(prefers-reduced-motion:no-preference){.szc-question{animation:szc-in .22s ease-out}@keyframes szc-in{from{opacity:0;transform:translateY(5px)}}}
 
 .szc-rank-list{display:grid;gap:8px;isolation:isolate}
-.szc-rank-list .szc-rank-row{grid-template-columns:28px minmax(0,1fr) 64px;position:relative;transition:transform 180ms ease;will-change:transform}
+.szc-rank-list .szc-rank-row{grid-template-columns:28px minmax(0,1fr);position:relative;transition:transform 180ms ease;will-change:transform}
 .szc-rank-row.is-dragging{z-index:2;transition:none;border-color:var(--category);box-shadow:0 8px 22px #0003;background:var(--surface)}
 .szc-rank-grip{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0;min-height:48px;padding:4px 0;border:0;background:transparent;color:var(--text-main);font:inherit;font-weight:800;text-align:left;touch-action:none;user-select:none;cursor:grab}
 .szc-rank-grip>span:first-child{overflow-wrap:anywhere}.szc-grip-mark{flex:none;color:var(--text-muted);font-size:24px}
@@ -31,4 +31,12 @@
 .szc-assign-tile.is-dragging{transition:none;box-shadow:0 7px 18px #0003}
 .szc-rank-grip:focus-visible,.szc-assign-tile:focus-visible,.szc-zone-targets button:focus-visible{outline:3px solid var(--category);outline-offset:2px;z-index:3}
 .szc-sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.szc-copy-category{height:66px;gap:2px;padding:6px 2px}.szc-copy-category b{font-size:.7rem;overflow-wrap:anywhere}
+.szc-copy-prompt{font-size:.95rem;line-height:1.4;color:var(--text-main)!important}
+.szc-people{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.szc-person{display:flex;align-items:center;gap:9px;min-height:60px;padding:10px;border:2px solid var(--surface-border);border-radius:7px;background:var(--paper);color:var(--text-main);text-align:left}
+.szc-person>span{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:50%;background:var(--sz-percent);color:#fff;font-weight:800}.szc-person>strong{overflow-wrap:anywhere;min-width:0}
+.szc-person.is-selected{border-color:var(--sz-percent);background:color-mix(in srgb,var(--sz-percent) 12%,var(--surface))}
+.szc-button-keep{border:2px solid var(--sz-percent);background:color-mix(in srgb,var(--sz-percent) 15%,var(--surface));color:var(--text-main);box-shadow:0 3px 0 color-mix(in srgb,var(--sz-percent) 50%,var(--surface-border))}
+.szc-button-keep:active{transform:translateY(2px);box-shadow:none}.szc-copy-token small{font-size:.78rem}
 @media(prefers-reduced-motion:reduce){.szc-rank-row,.szc-assign-tile{transition:none!important}}

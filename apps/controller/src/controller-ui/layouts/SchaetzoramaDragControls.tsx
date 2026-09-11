@@ -64,7 +64,6 @@ export function RankingControl({ question, order, en, disabled, onChange }: {
             onKeyDown={(event) => { if (event.key === "ArrowUp" || event.key === "ArrowDown") { event.preventDefault(); reorder(index, index + (event.key === "ArrowUp" ? -1 : 1)); } }}>
             <span>{item.label}</span><span aria-hidden="true" className="szc-grip-mark">⠿</span>
           </button>
-          <div className="szc-rank-arrows"><button type="button" disabled={disabled || index === 0} aria-label={`${item.label}: ${en ? "move up" : "nach oben"}`} onClick={() => reorder(index, index - 1)}>↑</button><button type="button" disabled={disabled || index === order.length - 1} aria-label={`${item.label}: ${en ? "move down" : "nach unten"}`} onClick={() => reorder(index, index + 1)}>↓</button></div>
         </div>;
       })}
     </div>
@@ -123,6 +122,6 @@ function AssignmentRail({ id, label, labels, zone, disabled, onChange }: {
       onKeyDown={(event) => {
         const target = event.key === "ArrowLeft" ? Math.max(0, index - 1) : event.key === "ArrowRight" ? Math.min(2, index + 1) : event.key === "Home" ? 0 : event.key === "End" ? 2 : null;
         if (target !== null) { event.preventDefault(); onChange(zones[target]); }
-      }}><strong>{label}</strong><span aria-hidden="true">↔</span></button>
+      }}><strong>{label}</strong></button>
   </div>;
 }

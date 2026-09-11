@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import type { SchaetzoramaAnswerSet, SchaetzoramaAssignQuestion, SchaetzoramaAssignmentZone, SchaetzoramaCategoryId, SchaetzoramaNumberQuestion, SchaetzoramaPublicQuestion, SchaetzoramaRankQuestion } from "@open-party-lab/protocol";
 import type { SchaetzoramaLayoutModel } from "./models.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
@@ -10,18 +10,14 @@ type JokerDraft = { categoryId: SchaetzoramaCategoryId; targetPlayerId: string }
 const categories: SchaetzoramaCategoryId[] = ["number", "percent", "rank", "assign"];
 
 export function SchaetzoramaLayout({ model }: Props) {
-  const initial = useMemo(() => initialAnswers(model), [model]);
-  const [answers, setAnswers] = useState<SchaetzoramaAnswerSet>(initial);
+  return <RoundLayout key={model.resetKey} model={model} />;
+}
+
+function RoundLayout({ model }: Props) {
+  const [answers, setAnswers] = useState<SchaetzoramaAnswerSet>(() => initialAnswers(model));
   const [active, setActive] = useState<SchaetzoramaCategoryId>("number");
   const [reviewed, setReviewed] = useState<Set<SchaetzoramaCategoryId>>(new Set());
   const [joker, setJoker] = useState<JokerDraft>(() => initialJoker(model));
-
-  useEffect(() => {
-    setAnswers(initial);
-    setActive("number");
-    setReviewed(new Set(Object.keys(model.ownAnswers) as SchaetzoramaCategoryId[]));
-    setJoker(initialJoker(model));
-  }, [initial, model.resetKey]);
 
   if (!model.roundContent) {
     return <p className="szc-empty">{model.language === "en" ? "The quiz panel is warming up." : "Das Quiz-Pult wird vorbereitet."}</p>;
@@ -106,12 +102,21 @@ function CopyView({ model, draft, onDraftChange }: { model: SchaetzoramaLayoutMo
   const targetId = preview?.targetPlayerId ?? draft.targetPlayerId;
   const target = model.copyTargets.find((player) => player.playerId === targetId) ?? model.copyTargets[0];
   if (!model.canSubmitJoker) return <section className="szc-status"><span>✓</span><h2>{en ? "Decision locked" : "Entscheidung eingeloggt"}</h2></section>;
-  if (model.ownInventory.copy <= 0 || !target) return <section className="szc-copy"><h2>{en ? "Keep your answers" : "Eigene Antworten behalten"}</h2><p>{en ? "No copy is available this round." : "In dieser Runde ist kein Abschreiben verfügbar."}</p><button className="szc-button szc-button-primary" onClick={() => model.onChooseJoker(null)}>{en ? "Continue" : "Weiter"}</button></section>;
-  return <section className="szc-copy"><div className="szc-copy-token"><span>◫</span><strong>{model.ownInventory.copy}</strong></div><h2>{en ? "Copy one answer?" : "Eine Antwort abschreiben?"}</h2>{!preview ? <><label>{en ? "Question" : "Frage"}<select value={categoryId} onChange={(event) => onDraftChange({ ...draft, categoryId: event.currentTarget.value as SchaetzoramaCategoryId })}>{categories.map((category) => <option key={category} value={category}>{model.categoryLabels[category]}</option>)}</select></label><label>{en ? "Player" : "Person"}<select value={targetId} onChange={(event) => onDraftChange({ ...draft, targetPlayerId: event.currentTarget.value })}>{model.copyTargets.map((player) => <option key={player.playerId} value={player.playerId}>{player.name}</option>)}</select></label><div className="szc-copy-actions"><button className="szc-button szc-button-secondary" onClick={() => model.onChooseJoker(null)}>{en ? "Keep mine" : "Eigene behalten"}</button><button className="szc-button szc-button-primary" onClick={() => model.onPreviewJoker({ kind: "copy", categoryId, targetPlayerId: target.playerId })}>{en ? "Reveal" : "Ansehen"}</button></div></> : <><div className="szc-compare"><Preview title={en ? "You" : "Du"} text={formatAnswer(model, categoryId, model.ownAnswers[categoryId])}/><Preview title={target.name} text={formatAnswer(model, categoryId, target.answers?.[categoryId])}/></div><div className="szc-copy-actions"><button className="szc-button szc-button-secondary" onClick={() => model.onChooseJoker(null)}>{en ? "Keep mine" : "Eigene behalten"}</button><button className="szc-button szc-button-submit" onClick={() => model.onChooseJoker({ kind: "copy", categoryId, targetPlayerId: target.playerId })}>{en ? "Copy" : "Abschreiben"}</button></div></>}</section>;
+  if ((!preview && model.ownInventory.copy <= 0) || !target) return <section className="szc-copy"><h2>{en ? "Keep your answers" : "Eigene Antworten behalten"}</h2><p>{en ? "No copy is available this round." : "In dieser Runde ist kein Abschreiben verfügbar."}</p><button className="szc-button szc-button-primary" onClick={() => model.onChooseJoker(null)}>{en ? "Continue" : "Weiter"}</button></section>;
+  return <section className="szc-copy">
+    <div className="szc-copy-token"><span aria-hidden="true">◫</span><strong>{model.ownInventory.copy}</strong><small>{en ? "remaining" : "übrig"}</small></div>
+    <h2>{preview ? (en ? "Keep or copy?" : "Behalten oder abschreiben?") : (en ? "Whose answer?" : "Bei wem abgucken?")}</h2>
+    {!preview ? <>
+      <div className="szc-tabs" role="group" aria-label={en ? "Question" : "Frage"}>{categories.map((category) => <button key={category} type="button" className={`szc-tab szc-copy-category szc-${category}${categoryId === category ? " is-active" : ""}`} aria-pressed={categoryId === category} onClick={() => onDraftChange({ ...draft, categoryId: category })}><span aria-hidden="true">{glyph(category)}</span><b>{model.categoryLabels[category]}</b></button>)}</div>
+      <p className="szc-copy-prompt">{model.roundContent?.questions[categoryId].prompt}</p>
+      <div className="szc-people" role="group" aria-label={en ? "Player" : "Person"}>{model.copyTargets.map((player) => <button key={player.playerId} type="button" className={`szc-person${target.playerId === player.playerId ? " is-selected" : ""}`} aria-pressed={target.playerId === player.playerId} onClick={() => onDraftChange({ ...draft, targetPlayerId: player.playerId })}><span aria-hidden="true">{player.name.slice(0, 1).toUpperCase()}</span><strong>{player.name}</strong></button>)}</div>
+    </> : <><p className="szc-copy-prompt">{model.categoryLabels[categoryId]} · {model.roundContent?.questions[categoryId].prompt}</p><div className="szc-compare"><Preview title={en ? "You" : "Du"} text={formatAnswer(model, categoryId, model.ownAnswers[categoryId])}/><Preview title={target.name} text={formatAnswer(model, categoryId, target.answers?.[categoryId])}/></div></>}
+    <div className="szc-copy-actions"><button type="button" className="szc-button szc-button-keep" onClick={() => model.onChooseJoker(null)}>{en ? "Keep mine" : "Eigene behalten"}</button>{preview ? <button type="button" className="szc-button szc-button-submit" onClick={() => model.onChooseJoker({ kind: "copy", categoryId, targetPlayerId: target.playerId })}>{en ? "Copy" : "Abschreiben"}</button> : <button type="button" className="szc-button szc-button-primary" onClick={() => model.onPreviewJoker({ kind: "copy", categoryId, targetPlayerId: target.playerId })}>{en ? "Reveal · 1 token" : "Ansehen · 1 Joker"}</button>}</div>
+  </section>;
 }
 
 function Preview({ title, text }: { title: string; text: string }) { return <div className="szc-answer-preview"><span>{title}</span><strong>{text}</strong></div>; }
-function ResultView({ model }: { model: SchaetzoramaLayoutModel }) { const en = model.language === "en"; const own = model.results.find((result) => result.playerId === model.currentPlayerId); return <section className="szc-results"><div className="szc-result-total"><span>{en ? "This round" : "Diese Runde"}</span><strong>+{own?.total ?? 0}</strong><small>{en ? "points" : "Punkte"}</small></div><div className="szc-solutions">{categories.map((category) => <div className={`szc-${category}`} key={category}><span>{glyph(category)} {model.categoryLabels[category]}</span><strong>{formatAnswer(model, category, model.solutions[category])}</strong></div>)}</div></section>; }
+function ResultView({ model }: { model: SchaetzoramaLayoutModel }) { const en = model.language === "en"; return <section className="szc-status"><h2>{en ? "Eyes on the big screen" : "Blick auf den großen Bildschirm"}</h2><p>{en ? "The answers and standings are being revealed." : "Jetzt werden die Antworten und der Zwischenstand aufgelöst."}</p></section>; }
 function Progress({ model }: { model: SchaetzoramaLayoutModel }) { return model.progress.length ? <div className="szc-progress">{model.progress.map((player) => { const done = model.stage === "joker" ? player.jokerReady : player.answered; return <i key={player.playerId} title={player.name} className={done ? "is-done" : ""} style={{ "--player": player.color } as React.CSSProperties}/>; })}</div> : null; }
 
 function initialAnswers(model: SchaetzoramaLayoutModel): SchaetzoramaAnswerSet { if (!model.roundContent) return {}; const number = model.roundContent.questions.number as SchaetzoramaNumberQuestion; const percent = model.roundContent.questions.percent as SchaetzoramaNumberQuestion; const rank = model.roundContent.questions.rank as SchaetzoramaRankQuestion; const assign = model.roundContent.questions.assign as SchaetzoramaAssignQuestion; return { number: model.ownAnswers.number ?? { kind: "number", value: Math.round((number.min + number.max) / 2) }, percent: model.ownAnswers.percent ?? { kind: "number", value: Math.round((percent.min + percent.max) / 2) }, rank: model.ownAnswers.rank ?? { kind: "rank", order: rank.items.map((item) => item.id) }, assign: model.ownAnswers.assign ?? { kind: "assign", assignments: Object.fromEntries(assign.terms.map((term) => [term.id, "both"])) } }; }

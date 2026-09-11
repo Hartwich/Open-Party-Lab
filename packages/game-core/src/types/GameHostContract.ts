@@ -60,13 +60,16 @@ export interface GameControllerChromeOptions {
   bare?: boolean;
   /** Keep the frame but drop the phase subtitle. */
   hideSubtitle?: boolean;
+  /** Keep scores exclusive to the shared host screen. */
+  hideScore?: boolean;
 }
 
 export const defaultControllerChrome: Required<GameControllerChromeOptions> = {
   minimal: false,
   wide: false,
   bare: false,
-  hideSubtitle: false
+  hideSubtitle: false,
+  hideScore: false
 };
 
 /** Resolves a game's phone chrome against the platform defaults. */

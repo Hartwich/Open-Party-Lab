@@ -178,9 +178,9 @@ export function ControllerPage({ state, onLeaveRoom, onInput, onSetReady }: Cont
               {!hideSubtitle ? (
                 <small style={{ color: "var(--text-muted)" }}>{text.room} {state.room.code}</small>
               ) : null}
-              <small style={{ color: "var(--text-muted)" }}>
+              {!chrome.hideScore ? <small style={{ color: "var(--text-muted)" }}>
                 {text.score}: {state.scoreboard?.entries.find((entry) => entry.playerId === state.player?.id)?.total ?? state.player.score}
-              </small>
+              </small> : null}
             </div>
           ) : null}
         </div>
