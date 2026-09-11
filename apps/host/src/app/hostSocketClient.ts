@@ -68,7 +68,13 @@ export class HostSocketClient {
   ) {
     this.socket = io(serverUrl, {
       autoConnect: false,
-      timeout: 5_000
+      timeout: 5_000,
+      // WebSocket straight away instead of starting on HTTP long-polling and
+      // upgrading later: polling adds a request round trip per message and
+      // drops volatile packets while a request is in flight. Polling stays as
+      // the fallback for networks that block WebSockets.
+      transports: ["websocket", "polling"],
+      tryAllTransports: true
     });
   }
 
@@ -273,6 +279,18 @@ export class HostSocketClient {
         return;
       }
 
+      this.updateState({ room: result.data.room, error: null });
+    });
+  }
+
+  extendRoomLifetime(): void {
+    const roomCode = this.state.room?.code;
+    if (!roomCode) return;
+    this.socket.emit("room:extend-lifetime", { roomCode }, (result) => {
+      if (!result.ok) {
+        this.updateState({ error: result.error });
+        return;
+      }
       this.updateState({ room: result.data.room, error: null });
     });
   }

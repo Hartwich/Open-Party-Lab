@@ -18,7 +18,7 @@ The hosted build opens on a room start page. Creating a room sends the browser t
 
 Rooms stay alive while a host or controller is connected. After the last participant disconnects, an in-memory room is deleted after ten minutes of inactivity. `ROOM_INACTIVITY_TIMEOUT_MS` and `ROOM_CLEANUP_INTERVAL_MS` can override the defaults when needed.
 
-The hosted server accepts at most 20 rooms. When room 21 is requested, the oldest room without a connected player is closed first; if all 20 rooms have active players, creation is rejected until capacity becomes available. Every room also has a hard one-hour lifetime, after which connected host and controller clients receive a closure message. `ROOM_MAX_COUNT` and `ROOM_MAX_LIFETIME_MS` can override these defaults.
+The hosted server accepts at most 20 rooms. When room 21 is requested, the oldest room without a connected player is closed first; if all 20 rooms have active players, creation is rejected until capacity becomes available. Every room also has a one-hour lifetime. Five minutes before expiry, the hosted host screen offers a localized **Extend by 1 hour** action; the server applies the extension authoritatively. If nobody extends the room, connected host and controller clients receive a closure message. `ROOM_MAX_COUNT` and `ROOM_MAX_LIFETIME_MS` can override these defaults.
 
 ## Free-tier behavior
 

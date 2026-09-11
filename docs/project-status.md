@@ -21,14 +21,14 @@ Platform:
 - virtual controller helper for AI browser checks through `npm run ai:controllers`
 - host DEV automation bridge for browser checks exposed only by the Vite dev host
 - portable Windows release assembly with a one-click launcher, bundled Node.js runtime, same-origin host/controller assets, and all known games
-- hosted room isolation with a 20-room capacity, inactive-room eviction, ten-minute empty-room cleanup, and a one-hour maximum room lifetime
+- hosted room isolation with a 20-room capacity, inactive-room eviction, ten-minute empty-room cleanup, and a one-hour room lifetime that the host can extend by one hour during the final five minutes
 - Render hosted builds download the public game repositories as GitHub source archives, so assembling all games does not depend on interactive Git credentials inside the build container
 
 Optional local game repos:
 
 - Magic Arena can be loaded from `local-games/magic-arena` when cloned locally. It is currently recommended alpha and playable.
 - Magic Duell can be loaded from `local-games/magic-duell` when cloned locally. It is currently recommended alpha and playable.
-- Arena Survivor can be loaded from `local-games/arena-survivor` when cloned locally. It is currently beta and recommended.
+- Arena Survivor can be loaded from `local-games/arena-survivor` when cloned locally. It is currently beta and recommended. Its in-wave phone stick sits at the lower screen edge; phones receive only their own player at 10 Hz, stick inputs are applied by the next server tick instead of triggering their own broadcast, and the host extrapolates movement between server states.
 - MinionsTD can be loaded from `local-games/minions-td` when cloned locally. It is currently beta and recommended.
 - Zeichnen & Erraten can be loaded from `local-games/zeichnen-und-erraten` when cloned locally. It is currently beta and recommended; its focused play view omits redundant phase, color-prompt, and room-code chrome while retaining the host QR join flow.
 - Schaetzorama can be loaded from `local-games/schaetzorama` when cloned locally. It is currently beta and recommended; its host is a crisp DOM surface with animated category reveals and scoring, while the phone presents one visual task at a time. The answer-setting phase has no timer, all 40 questions in a 10-round session are unique, the tenth round ends on a final overall ranking, and a documented audit leaves 124 of 160 sourced prompts active after excluding 36 arithmetic, definition-only, ambiguous, mismatched, or semantically duplicated questions.

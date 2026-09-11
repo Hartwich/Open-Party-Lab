@@ -10,6 +10,7 @@ import { createHostRouter } from "./router.js";
 import { HostSocketClient, type HostAppState } from "./hostSocketClient.js";
 import { mountJoinOverlay } from "./joinOverlay.js";
 import { mountHostControlOverlay } from "./hostControlOverlay.js";
+import { mountRoomExpiryOverlay } from "./roomExpiryOverlay.js";
 import {
   applyHostFps,
   createHostFpsConfig,
@@ -112,6 +113,9 @@ export function bootstrapHostApp(requestedRoomCode: string | null = null): Phase
   mountDebugOverlay(game, hostClient);
   mountHostControlsOverlay(game, hostClient);
   mountHostControlOverlay(hostClient);
+  if (import.meta.env.VITE_OPEN_PARTY_LAB_HOSTED === "1") {
+    mountRoomExpiryOverlay(hostClient);
+  }
   mountFullscreenOverlay(hostClient);
   mountScreenWakeLock();
   mountBackgroundMusic(hostClient);

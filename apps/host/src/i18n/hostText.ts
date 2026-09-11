@@ -118,6 +118,10 @@ export interface HostText {
   shellRosterEmpty: string;
   shellNeedsPlayers: (missing: number) => string;
   shellReadyCount: (ready: number, total: number) => string;
+  roomExpiryTitle: string;
+  roomExpiryBody: (minutes: number) => string;
+  roomExpiryExtend: string;
+  roomExpiryExtending: string;
 }
 
 const hostText = {
@@ -133,6 +137,10 @@ const hostText = {
     shellNeedsPlayers: (missing: number) =>
       missing === 1 ? "Es fehlt noch 1 Spieler." : `Es fehlen noch ${missing} Spieler.`,
     shellReadyCount: (ready: number, total: number) => `${ready} von ${total} bereit`,
+    roomExpiryTitle: "Raum laeuft bald ab",
+    roomExpiryBody: (minutes: number) => `Dieser Raum wird in etwa ${minutes} Minuten geschlossen.`,
+    roomExpiryExtend: "Um 1 Stunde verlaengern",
+    roomExpiryExtending: "Verlaengere...",
     hostControlRequestTitle: "Steuerung uebernehmen?",
     hostControlRequestBody: (name: string) => `${name} moechte den Host steuern.`,
     hostControlRequestHint: "Spielauswahl, Rundenstart und Spielerverwaltung wandern aufs Handy.",
@@ -239,6 +247,10 @@ const hostText = {
     shellNeedsPlayers: (missing: number) =>
       missing === 1 ? "1 more player needed." : `${missing} more players needed.`,
     shellReadyCount: (ready: number, total: number) => `${ready} of ${total} ready`,
+    roomExpiryTitle: "Room expiring soon",
+    roomExpiryBody: (minutes: number) => `This room will close in about ${minutes} minutes.`,
+    roomExpiryExtend: "Extend by 1 hour",
+    roomExpiryExtending: "Extending...",
     hostControlRequestTitle: "Hand over control?",
     hostControlRequestBody: (name: string) => `${name} wants to drive the host.`,
     hostControlRequestHint: "Game selection, round start and the roster move to the phone.",

@@ -47,6 +47,8 @@ export interface CardTableStackState {
   cards: CardTableCardState[];
   faceDown: boolean;
   layout?: CardTableStackLayout;
+  /** Nur auf Anforderung sichtbar - etwa der zuletzt gewonnene Stich. */
+  onDemand?: boolean;
 }
 
 export interface CardTableSeatState {

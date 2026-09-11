@@ -32,7 +32,8 @@ export function createApp(environment: AppEnv = loadEnv()) {
     roomStore,
     (roomCode) => buildJoinUrl(environment.publicControllerOrigin, roomCode),
     now,
-    environment.fixedPrimaryRoomCode
+    environment.fixedPrimaryRoomCode,
+    environment.roomMaxLifetimeMs
   );
   const reconnectService = new ReconnectService(sessionStore, now);
   const playerPresenceTracker = new PlayerPresenceTracker(
@@ -90,7 +91,8 @@ export function createApp(environment: AppEnv = loadEnv()) {
     gameRegistry,
     gameRuntime,
     stateBroadcaster,
-    roomCleanupService
+    roomCleanupService,
+    hostedMode: environment.hostedMode
   });
 
   return {

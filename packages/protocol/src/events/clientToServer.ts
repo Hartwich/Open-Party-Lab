@@ -159,6 +159,14 @@ export interface RoomThemeSuccess {
   room: RoomSnapshot;
 }
 
+export interface RoomLifetimeExtensionRequest {
+  roomCode: string;
+}
+
+export interface RoomLifetimeExtensionSuccess {
+  room: RoomSnapshot;
+}
+
 export interface ClientToServerEvents {
   "room:create": (
     payload: CreateRoomRequest,
@@ -187,6 +195,10 @@ export interface ClientToServerEvents {
   "room:set-theme": (
     payload: RoomThemeRequest,
     ack: (result: AckResult<RoomThemeSuccess>) => void
+  ) => void;
+  "room:extend-lifetime": (
+    payload: RoomLifetimeExtensionRequest,
+    ack: (result: AckResult<RoomLifetimeExtensionSuccess>) => void
   ) => void;
   "player:ready": (payload: PlayerReadyRequest) => void;
   "player:select-character": (payload: PlayerSelectCharacterRequest) => void;

@@ -9,7 +9,8 @@ export class RoomManager {
     private readonly roomStore: RoomStore,
     private readonly createJoinUrl: (roomCode: string) => string,
     private readonly getNow: () => number,
-    private readonly fixedPrimaryRoomCode: string | null = null
+    private readonly fixedPrimaryRoomCode: string | null = null,
+    private readonly maxLifetimeMs = 3_600_000
   ) {}
 
   createRoom(hostName: string, language: SupportedLanguage = defaultLanguage): RoomRecord {
@@ -24,6 +25,7 @@ export class RoomManager {
     return this.roomStore.create({
       code,
       createdAt,
+      expiresAt: createdAt + this.maxLifetimeMs,
       lastActivityAt: createdAt,
       joinUrl: this.createJoinUrl(code),
       language: normalizeLanguage(language),

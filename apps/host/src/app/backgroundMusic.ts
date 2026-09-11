@@ -8,6 +8,7 @@ const MUSIC_UNLOCK_EVENTS = ["pointerdown", "keydown", "touchstart"] as const;
 
 interface MusicTemplate {
   bars?: number;
+  legato?: boolean;
   leadPattern: Array<number | null>;
   bassPattern: Array<number | null>;
   padPattern: Array<number | null>;
@@ -30,6 +31,7 @@ interface MusicProfile extends MusicTemplate {
   bpm: number;
   rootMidi: number;
   masterGain: number;
+  crossfadeSeconds?: number;
 }
 
 function createProfile(
@@ -45,6 +47,26 @@ function createProfile(
 }
 
 const musicTemplates: Record<string, MusicTemplate> = {
+  calmFocus: {
+    bars: 32, legato: true,
+    leadPattern: [0,null,null,null,null,null,7,null,null,null,null,null,4,null,null,null, 2,null,null,null,null,null,null,null,7,null,null,null,null,null,null,null, 4,null,null,null,null,null,9,null,null,null,null,null,7,null,null,null, 2,null,null,null,null,null,null,null,0,null,null,null,null,null,null,null],
+    bassPattern: [0,null,null,null,null,null,null,null,7,null,null,null,null,null,null,null],
+    padPattern: [0,null,null,null],
+    barProgression: [0,0,5,5,9,9,5,7, 0,0,5,5,9,7,5,0, 9,9,5,5,0,0,7,7, 5,5,0,9,5,7,0,0],
+    kickPattern: [], snarePattern: [], hatPattern: [],
+    leadWave: "sine", bassWave: "sine", padWave: "sine", padChordIntervals: [0,7,12,16],
+    leadGain: .038, bassGain: .06, padGain: .10, drumGain: 0, lowpassHz: 1400
+  },
+  calmReveal: {
+    bars: 32, legato: true,
+    leadPattern: [4,null,null,null,7,null,null,null,12,null,null,null,null,null,7,null, 9,null,null,null,null,null,7,null,4,null,null,null,null,null,null,null, 7,null,null,null,12,null,null,null,14,null,null,null,12,null,null,null, 7,null,null,null,null,null,4,null,0,null,null,null,null,null,null,null],
+    bassPattern: [0,null,null,null,null,null,null,null,7,null,null,null,null,null,null,null],
+    padPattern: [0,null,null,null],
+    barProgression: [0,0,5,5,9,9,7,7, 5,5,0,0,9,5,7,0, 0,9,5,7,0,9,5,7, 5,5,0,0,9,7,0,0],
+    kickPattern: [.2,0,0,0,0,0,0,0,.12,0,0,0,0,0,0,0], snarePattern: [], hatPattern: [],
+    leadWave: "triangle", bassWave: "sine", padWave: "sine", padChordIntervals: [0,7,12,16],
+    leadGain: .035, bassGain: .055, padGain: .085, drumGain: .06, lowpassHz: 1750
+  },
   lobby: {
     leadPattern: [0, null, 7, null, 3, null, 10, null, 7, null, 12, null, 10, null, 7, null],
     bassPattern: [0, null, null, null, -5, null, null, null, -2, null, null, null, -5, null, null, null],
@@ -300,13 +322,15 @@ function resolveTemplate(name: string): MusicTemplate {
  */
 function resolveManifestProfile(state: HostAppState): { id: string; profile: MusicProfile } | null {
   const game = getSelectedGame(state);
-  const track = resolveGameAudioTrack(game?.audio, state.room?.selectedGameSettings);
+  const publicState = state.game?.state;
+  const stage = publicState && typeof publicState === "object" && "stage" in publicState && typeof publicState.stage === "string" ? publicState.stage : undefined;
+  const track = resolveGameAudioTrack(game?.audio, state.room?.selectedGameSettings, stage);
 
   if (!game || !track) {
     return null;
   }
 
-  const id = `${game.id}:${track.profile}:${track.bpm ?? ""}:${track.rootMidi ?? ""}`;
+  const id = `${game.id}:${track.profile}:${track.bpm ?? ""}:${track.rootMidi ?? ""}:${track.masterGain ?? ""}:${track.crossfadeSeconds ?? ""}`;
   const cached = manifestProfiles.get(id);
 
   if (cached) {
@@ -318,6 +342,7 @@ function resolveManifestProfile(state: HostAppState): { id: string; profile: Mus
     rootMidi: track.rootMidi ?? 50,
     masterGain: track.masterGain ?? 0.14
   });
+  profile.crossfadeSeconds = track.crossfadeSeconds;
   manifestProfiles.set(id, profile);
   return { id, profile };
 }
@@ -467,9 +492,10 @@ async function renderTrackLoop(profile: MusicProfile): Promise<AudioBuffer> {
   const beatDuration = 60 / profile.bpm;
   const durationSeconds = stepDuration * totalSteps;
   const sampleRate = 44_100;
+  const tailSeconds = profile.legato ? 3 : 0;
   const context = new OfflineAudioContext(
     2,
-    Math.max(1, Math.ceil(durationSeconds * sampleRate)),
+    Math.max(1, Math.ceil((durationSeconds + tailSeconds) * sampleRate)),
     sampleRate
   );
   const masterGain = context.createGain();
@@ -506,14 +532,14 @@ async function renderTrackLoop(profile: MusicProfile): Promise<AudioBuffer> {
       for (const chordOffset of profile.padChordIntervals) {
         scheduleTone(context, masterGain, {
           time: startTime,
-          duration: beatDuration * (isVariationSection ? 2.15 : 1.9),
+          duration: beatDuration * (profile.legato ? 4.4 : isVariationSection ? 2.15 : 1.9),
           frequency: midiToFrequency(profile.rootMidi + barOffset + noteOffset + chordOffset),
           wave: profile.padWave,
           gain: (profile.padGain / Math.max(1, profile.padChordIntervals.length)) * (isVariationSection ? 1.08 : 1),
           lowpassHz: Math.max(700, profile.lowpassHz - 900),
           pan: (chordOffset - 6) / 16,
-          attack: 0.08,
-          release: isVariationSection ? 0.34 : 0.28
+          attack: profile.legato ? .5 : 0.08,
+          release: profile.legato ? .8 : isVariationSection ? 0.34 : 0.28
         });
       }
     }
@@ -527,7 +553,7 @@ async function renderTrackLoop(profile: MusicProfile): Promise<AudioBuffer> {
     const isVariationSection = barIndex >= bars / 2;
     const isTurnaroundBar = barIndex === bars - 1;
     const bassOffset = profile.bassPattern[stepInBar];
-    const leadOffset = profile.leadPattern[stepInBar];
+    const leadOffset = profile.leadPattern[stepIndex % profile.leadPattern.length];
     const kick = profile.kickPattern[stepInBar] ?? 0;
     const snare = profile.snarePattern[stepInBar] ?? 0;
     const hat = profile.hatPattern[stepInBar] ?? 0;
@@ -536,7 +562,7 @@ async function renderTrackLoop(profile: MusicProfile): Promise<AudioBuffer> {
       const bassAccent = stepInBar === 0 ? 1.12 : 1;
       scheduleTone(context, masterGain, {
         time,
-        duration: stepDuration * 2.6,
+        duration: stepDuration * (profile.legato ? 7 : 2.6),
         frequency: midiToFrequency(profile.rootMidi - 12 + barOffset + bassOffset),
         wave: profile.bassWave,
         gain: profile.bassGain * bassAccent,
@@ -548,18 +574,18 @@ async function renderTrackLoop(profile: MusicProfile): Promise<AudioBuffer> {
     }
 
     if (leadOffset !== null && leadOffset !== undefined) {
-      const leadLift = isVariationSection && stepInBar % 8 === 0 ? 12 : 0;
+      const leadLift = !profile.legato && isVariationSection && stepInBar % 8 === 0 ? 12 : 0;
       const leadGainMultiplier = isVariationSection && stepInBar >= 8 ? 1.08 : 1;
       scheduleTone(context, masterGain, {
         time,
-        duration: stepDuration * (isVariationSection && stepInBar >= 12 ? 2.3 : 1.8),
+        duration: stepDuration * (profile.legato ? 5 : isVariationSection && stepInBar >= 12 ? 2.3 : 1.8),
         frequency: midiToFrequency(profile.rootMidi + 12 + barOffset + leadOffset + leadLift),
         wave: profile.leadWave,
         gain: profile.leadGain * leadGainMultiplier,
         lowpassHz: Math.max(1_000, profile.lowpassHz + 900),
         pan: (stepInBar + barIndex) % 2 === 0 ? -0.12 : 0.12,
-        attack: 0.008,
-        release: 0.1
+        attack: profile.legato ? .035 : 0.008,
+        release: profile.legato ? .45 : 0.1
       });
     }
 
@@ -587,7 +613,7 @@ async function renderTrackLoop(profile: MusicProfile): Promise<AudioBuffer> {
       });
     }
 
-    if (isTurnaroundBar && stepInBar >= 12 && stepInBar % 2 === 1) {
+    if (!profile.legato && isTurnaroundBar && stepInBar >= 12 && stepInBar % 2 === 1) {
       scheduleNoiseHit(context, masterGain, noiseBuffer, {
         time,
         gain: profile.drumGain * 0.05,
@@ -598,7 +624,18 @@ async function renderTrackLoop(profile: MusicProfile): Promise<AudioBuffer> {
     }
   }
 
-  return context.startRendering();
+  const rendered = await context.startRendering();
+  if (!tailSeconds) return rendered;
+  // Fold sustained tails into the start, so the long loop has no cut-off chord.
+  const frames = Math.ceil(durationSeconds * sampleRate);
+  const loop = context.createBuffer(2, frames, sampleRate);
+  for (let channel = 0; channel < 2; channel++) {
+    const data = rendered.getChannelData(channel);
+    const target = loop.getChannelData(channel);
+    target.set(data.subarray(0, frames));
+    for (let index = frames; index < data.length; index++) target[index - frames] += data[index];
+  }
+  return loop;
 }
 
 class HostBackgroundMusicController {
@@ -719,7 +756,7 @@ class HostBackgroundMusicController {
     const nextTrackId = this.desiredTrackId;
     const buffer = await this.getTrackBuffer(nextTrackId);
 
-    if (this.disposed || !this.unlocked || nextTrackId !== this.desiredTrackId) {
+    if (this.disposed || !this.unlocked || document.hidden || nextTrackId !== this.desiredTrackId || this.currentTrackId === nextTrackId && this.currentSource) {
       return;
     }
 
@@ -728,11 +765,12 @@ class HostBackgroundMusicController {
     const startTime = audioContext.currentTime + 0.03;
     const previousSource = this.currentSource;
     const previousTrackGain = this.currentTrackGain;
+    const crossfade = Math.min(8, Math.max(.1, getMusicProfile(nextTrackId).crossfadeSeconds ?? .45));
 
     source.buffer = buffer;
     source.loop = true;
     trackGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
-    trackGain.gain.exponentialRampToValueAtTime(1, startTime + 0.45);
+    trackGain.gain.linearRampToValueAtTime(1, startTime + crossfade);
     source.connect(trackGain);
     trackGain.connect(this.masterGain!);
     source.onended = () => {
@@ -747,11 +785,11 @@ class HostBackgroundMusicController {
         Math.max(0.0001, previousTrackGain.gain.value || 0.0001),
         audioContext.currentTime
       );
-      previousTrackGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.4);
+      previousTrackGain.gain.linearRampToValueAtTime(0.0001, startTime + crossfade);
     }
 
     if (previousSource) {
-      previousSource.stop(audioContext.currentTime + 0.45);
+      previousSource.stop(startTime + crossfade + .05);
     }
 
     this.currentSource = source;

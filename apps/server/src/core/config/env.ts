@@ -11,6 +11,7 @@ export interface AppEnv {
   roomCleanupIntervalMs: number;
   roomMaxLifetimeMs: number;
   roomMaxCount: number;
+  hostedMode: boolean;
   jsonSnapshotPath: string;
   fixedPrimaryRoomCode: string | null;
   webRoot: string | null;
@@ -83,6 +84,7 @@ function readFixedPrimaryRoomCode(source: NodeJS.ProcessEnv): string | null {
 }
 
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): AppEnv {
+  const renderExternalUrl = source.RENDER_EXTERNAL_URL?.trim();
   return {
     port: readNumber(source.PORT, 3000),
     host: readHost(source),
@@ -94,6 +96,7 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): AppEnv {
     roomCleanupIntervalMs: readNumber(source.ROOM_CLEANUP_INTERVAL_MS, 60_000),
     roomMaxLifetimeMs: readNumber(source.ROOM_MAX_LIFETIME_MS, 3_600_000),
     roomMaxCount: Math.max(1, Math.floor(readNumber(source.ROOM_MAX_COUNT, 20))),
+    hostedMode: source.RENDER === "true" || Boolean(renderExternalUrl),
     jsonSnapshotPath: source.JSON_SNAPSHOT_PATH ?? "./data/room-snapshots.json",
     fixedPrimaryRoomCode: readFixedPrimaryRoomCode(source),
     webRoot: source.OPEN_PARTY_LAB_WEB_ROOT?.trim() || null

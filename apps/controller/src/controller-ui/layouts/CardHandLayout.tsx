@@ -10,10 +10,14 @@ import type { CardTableActionState, CardTableHandCardState } from "@open-party-l
  *
  * Das Layout ist bewusst spielunabhängig und zeigt nur, was in die Hand
  * gehört: die eigenen Karten und die Aktionen, die der Server für das aktuelle
- * Regelwerk schickt. Der gemeinsame Tisch - Ablage, Stich, Nachziehstapel -
- * liegt auf dem großen Bildschirm, damit das Handy dem Blatt gehört. Die Hand
- * fächert sich so weit auf, wie der Platz reicht: von drei bis über zwanzig
- * Karten bleibt jede antippbar.
+ * Regelwerk schickt. Alles Gemeinsame - Tisch, Mitspieler, Spielname,
+ * Punktestand - liegt auf dem großen Bildschirm. Es hier zu wiederholen kostet
+ * nur Platz, den die Karten besser gebrauchen können, und zwingt den Blick vom
+ * Tisch weg aufs Handy.
+ *
+ * Die Hand fächert sich so weit auf, wie der Platz reicht: von drei bis über
+ * zwanzig Karten bleibt jede antippbar. Die Knöpfe liegen darunter, in
+ * Daumenreichweite.
  */
 
 interface CardHandLayoutProps {
@@ -117,7 +121,7 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
     <div
       style={{
         display: "grid",
-        gridTemplateRows: "auto auto minmax(120px, 1fr)",
+        gridTemplateRows: "minmax(120px, 1fr) auto auto",
         gap: 8,
         height: "100%",
         minHeight: "min(84dvh, 760px)",
@@ -127,108 +131,7 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
         borderRadius: 16
       }}
     >
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          flexWrap: "wrap",
-          padding: "6px 10px",
-          borderRadius: 12,
-          border: "1px solid var(--line)",
-          background: "var(--surface)"
-        }}
-      >
-        <strong style={{ fontFamily: "var(--font-display)", fontSize: "1.05rem" }}>{model.title}</strong>
-        <span style={{ color: "var(--muted)", fontSize: "0.86rem" }}>{model.subtitle}</span>
-        {model.privateNote ? (
-          <span
-            style={{
-              padding: "3px 10px",
-              borderRadius: 999,
-              background: "var(--sage-soft)",
-              color: "var(--ink)",
-              fontWeight: 600,
-              fontSize: "0.84rem"
-            }}
-          >
-            {model.privateNote}
-          </span>
-        ) : null}
-        {model.conditionLabel ? (
-          <span
-            style={{
-              padding: "3px 10px",
-              borderRadius: 999,
-              background: "var(--accent-soft)",
-              color: "var(--ink)",
-              fontWeight: 600,
-              fontSize: "0.84rem"
-            }}
-          >
-            {model.conditionSymbol ? `${model.conditionSymbol} ` : ""}
-            {model.conditionLabel}
-          </span>
-        ) : null}
-        <span style={{ marginLeft: "auto", color: "var(--muted)", fontSize: "0.8rem" }}>
-          {model.direction === 1 ? "→" : "←"} #{model.turnNumber}
-        </span>
-      </header>
-
-      <section style={{ display: "flex", gap: 6, flexWrap: "wrap", alignContent: "flex-start" }}>
-        {model.seats.map((seat) => (
-          <div
-            key={seat.playerId}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "4px 9px",
-              borderRadius: 999,
-              border: seat.isActive ? "2px solid var(--accent)" : "1px solid var(--line)",
-              background:
-                seat.playerId === model.currentPlayerId
-                  ? "var(--surface-raised)"
-                  : "color-mix(in srgb, var(--surface) 72%, transparent)",
-              opacity: seat.connected ? 1 : 0.55,
-              fontSize: "0.82rem"
-            }}
-          >
-            <span style={{ color: seat.color, fontSize: "0.8rem" }}>●</span>
-            <span style={{ maxWidth: 92, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {seat.name}
-            </span>
-            {seat.isBot ? (
-              <span
-                style={{
-                  fontSize: "0.6rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.08em",
-                  padding: "1px 5px",
-                  borderRadius: 5,
-                  border: "1px solid var(--line)",
-                  color: "var(--muted)"
-                }}
-              >
-                {model.language === "en" ? "AI" : "KI"}
-              </span>
-            ) : null}
-            <strong>{seat.handCount}</strong>
-            {seat.statusLabel ? (
-              <span style={{ color: "var(--accent-strong)", fontWeight: 700 }}>{seat.statusLabel}</span>
-            ) : null}
-          </div>
-        ))}
-      </section>
-
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: `minmax(0, 1fr) ${wideActions ? 196 : 138}px`,
-          gap: 8,
-          minHeight: 0
-        }}
-      >
+      <section style={{ display: "grid", gap: 8, minHeight: 0 }}>
         <div
           ref={handRef}
           style={{
@@ -302,75 +205,96 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
             ) : null}
           </div>
         </div>
+      </section>
+      {/* Die Knöpfe liegen unter dem Blatt, dort wo der Daumen ohnehin ist. */}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "stretch", gap: 6 }}>
+        <button
+          type="button"
+          disabled={!selectedCard || !selectedCard.playable || model.disabled}
+          onClick={() => selectedCard && playCard(selectedCard)}
+          style={{
+            flex: "0 0 auto",
+            minWidth: 120,
+            minHeight: 54,
+            borderRadius: 12,
+            border: "1px solid var(--sage-strong)",
+            background: selectedCard?.playable && !model.disabled ? "var(--sage)" : "var(--surface-muted)",
+            color: selectedCard?.playable && !model.disabled ? "var(--on-accent)" : "var(--muted)",
+            fontWeight: 700,
+            touchAction: "manipulation"
+          }}
+        >
+          {en ? "Play" : "Legen"}
+        </button>
 
-        <div style={{ display: "grid", gap: 6, alignContent: "start", minHeight: 0, overflowY: "auto" }}>
-          <button
-            type="button"
-            disabled={!selectedCard || !selectedCard.playable || model.disabled}
-            onClick={() => selectedCard && playCard(selectedCard)}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, flex: "1 1 auto" }}>
+          {model.actions.map((action) => {
+            const colors = actionColors(action.kind);
+
+            return (
+              <button
+                key={action.id}
+                type="button"
+                disabled={!action.enabled}
+                onClick={() => {
+                  haptics.tap(14);
+                  setSelectedCardId(null);
+                  model.onAction(action.id);
+                }}
+                style={{
+                  flex: "1 1 120px",
+                  minHeight: 54,
+                  borderRadius: 12,
+                  border: `1px solid ${colors.border}`,
+                  background: action.enabled ? colors.background : "var(--surface-muted)",
+                  color: action.enabled ? colors.color : "var(--muted)",
+                  fontWeight: 700,
+                  fontSize: wideActions ? "0.9rem" : "1rem",
+                  touchAction: "manipulation"
+                }}
+              >
+                {action.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          flexWrap: "wrap",
+          minHeight: 20,
+          color: model.lastError ? "var(--danger)" : "var(--muted)",
+          fontSize: "0.78rem",
+          lineHeight: 1.3
+        }}
+      >
+        {model.privateNote ? (
+          <span style={{ color: "var(--ink)", fontWeight: 600 }}>{model.privateNote}</span>
+        ) : null}
+        {model.conditionLabel ? (
+          <span
             style={{
-              minHeight: 54,
-              borderRadius: 12,
-              border: "1px solid var(--sage-strong)",
-              background: selectedCard?.playable && !model.disabled ? "var(--sage)" : "var(--surface-muted)",
-              color: selectedCard?.playable && !model.disabled ? "var(--on-accent)" : "var(--muted)",
-              fontWeight: 700,
-              touchAction: "manipulation"
+              padding: "2px 9px",
+              borderRadius: 999,
+              background: "var(--accent-soft)",
+              color: "var(--ink)",
+              fontWeight: 600
             }}
           >
-            {en ? "Play" : "Legen"}
-          </button>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: wideActions ? "repeat(2, minmax(0, 1fr))" : "minmax(0, 1fr)",
-              gap: 6
-            }}
-          >
-            {model.actions.map((action) => {
-              const colors = actionColors(action.kind);
-
-              return (
-                <button
-                  key={action.id}
-                  type="button"
-                  disabled={!action.enabled}
-                  onClick={() => {
-                    haptics.tap(14);
-                    setSelectedCardId(null);
-                    model.onAction(action.id);
-                  }}
-                  style={{
-                    minHeight: wideActions ? 44 : 50,
-                    borderRadius: 12,
-                    border: `1px solid ${colors.border}`,
-                    background: action.enabled ? colors.background : "var(--surface-muted)",
-                    color: action.enabled ? colors.color : "var(--muted)",
-                    fontWeight: 700,
-                    fontSize: wideActions ? "0.86rem" : "1rem",
-                    touchAction: "manipulation"
-                  }}
-                >
-                  {action.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <small
-            style={{
-              color: model.lastError ? "var(--danger)" : "var(--muted)",
-              lineHeight: 1.3,
-              fontSize: "0.76rem"
-            }}
-          >
+            {model.conditionSymbol ? `${model.conditionSymbol} ` : ""}
+            {model.conditionLabel}
+          </span>
+        ) : null}
+        <span>
             {selectedCard && !selectedCard.playable && selectedCard.hint
               ? selectedCard.hint
               : model.helperText}
-          </small>
-        </div>
-      </section>
+        </span>
+      </div>
 
       {orientation === "portrait" ? (
         <div

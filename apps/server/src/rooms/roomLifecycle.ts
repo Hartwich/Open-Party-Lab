@@ -245,6 +245,7 @@ export function toRoomSnapshot(
   return {
     code: room.code,
     createdAt: room.createdAt,
+    expiresAt: room.expiresAt,
     joinUrl: room.joinUrl,
     language: room.language,
     theme: room.theme,

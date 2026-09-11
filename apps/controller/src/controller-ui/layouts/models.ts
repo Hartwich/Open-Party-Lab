@@ -195,6 +195,12 @@ export interface VirtualJoystickLayoutModel {
   stickHint?: string;
   minimal?: boolean;
   cleanChrome?: boolean;
+  /**
+   * Where a minimal stick sits on the phone. "center" (default) keeps the
+   * previous vertically centred pad; "bottom" anchors it to the lower screen
+   * edge so the thumb rests where the hand already holds the phone.
+   */
+  stickPlacement?: "center" | "bottom";
   disabled: boolean;
   accentColor?: string;
   resetKey: string;

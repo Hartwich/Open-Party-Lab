@@ -139,6 +139,16 @@ export interface GameBroadcastPolicy {
    * state. The game's protocol package must define the patch shape.
    */
   supportsHostPatches?: boolean;
+  /**
+   * Skip the immediate state broadcast after a player input while the round is
+   * playing, and let the next tick carry it instead.
+   *
+   * For games whose inputs only take effect inside `tick` (a stick that sets a
+   * direction), that broadcast carries nothing new, costs a full state build per
+   * input and knocks the host stream off its tick rhythm. Phase changes are
+   * never deferred, and games without a `tick` ignore the flag.
+   */
+  deferInputBroadcastToTick?: boolean;
 }
 
 /**
@@ -154,10 +164,14 @@ export interface GameAudioTrack {
   bpm?: number;
   rootMidi?: number;
   masterGain?: number;
+  /** Duration of the transition into this track. Defaults to 0.45 seconds. */
+  crossfadeSeconds?: number;
 }
 
 export interface GameAudioDefinition {
   track: GameAudioTrack;
+  /** Overrides keyed by the public game state's `stage` field. */
+  trackByStage?: Readonly<Record<string, GameAudioTrack>>;
   /**
    * Per-setting overrides, so a game can swap its track when a lobby setting
    * changes — theme pickers, difficulty, and so on.
@@ -171,11 +185,14 @@ export interface GameAudioDefinition {
 /** Resolves the track for the current lobby settings. */
 export function resolveGameAudioTrack(
   audio: GameAudioDefinition | undefined,
-  settings: Readonly<Record<string, string | number | boolean>> | undefined
+  settings: Readonly<Record<string, string | number | boolean>> | undefined,
+  stage?: string
 ): GameAudioTrack | undefined {
   if (!audio) {
     return undefined;
   }
+
+  if (stage && audio.trackByStage?.[stage]) return audio.trackByStage[stage];
 
   const override = audio.trackBySetting;
 

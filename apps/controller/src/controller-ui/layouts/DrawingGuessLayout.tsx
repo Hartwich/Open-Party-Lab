@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { ReadyPanel } from "../common/ReadyPanel.js";
+import { contrastInk } from "../common/contrastInk.js";
 import type { DrawingGuessLayoutModel } from "./models.js";
 
 interface DrawingGuessLayoutProps {
@@ -66,17 +67,44 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
                     onClick={() => model.onSelectColor?.(color)}
                     disabled={model.disabled}
                     aria-label={`${en ? "Color" : "Farbe"} ${color}`}
+                    aria-pressed={selected}
                     style={{
                       width: 34,
                       height: 34,
                       borderRadius: 999,
-                      border: selected ? "3px solid var(--ink)" : "2px solid color-mix(in srgb, var(--muted) 50%, transparent)",
+                      display: "grid",
+                      placeItems: "center",
+                      // The ring is a theme token, so it cannot mark the swatch
+                      // that matches it — a dark ring on the black pen in the
+                      // light theme, a light one on the white pen in the dark.
+                      // The tick inside carries the selection instead.
+                      border: selected
+                        ? "3px solid var(--ink)"
+                        : "2px solid color-mix(in srgb, var(--muted) 50%, transparent)",
                       background: color,
-                      boxShadow: selected ? "0 0 0 3px color-mix(in srgb, var(--surface) 80%, transparent)" : "none",
+                      boxShadow: selected
+                        ? "0 0 0 3px color-mix(in srgb, var(--surface) 80%, transparent)"
+                        : "none",
                       cursor: model.disabled ? "not-allowed" : "pointer",
                       opacity: model.disabled ? 0.6 : 1
                     }}
-                  />
+                  >
+                    {selected ? (
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke={contrastInk(color)}
+                        strokeWidth="3.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M5 12.5 10 17.5 19 7" />
+                      </svg>
+                    ) : null}
+                  </button>
                 );
               })}
             </div>
@@ -87,7 +115,9 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
               position: "relative",
               width: "100%",
               height: "clamp(320px, 62vh, 560px)",
-              background: "var(--surface)",
+              // The same token the shared screen paints its board with, so the
+              // drawer is looking at the paper everyone else sees.
+              background: "var(--surface-raised)",
               border: "2px solid var(--line-strong)",
               borderRadius: 14,
               touchAction: "none",

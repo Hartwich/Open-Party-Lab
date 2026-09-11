@@ -64,7 +64,18 @@ function shouldUseVolatileInput(input: unknown): boolean {
     return false;
   }
 
-  const inputType = (input as { type?: unknown }).type;
+  const { type: inputType, moveX, moveY } = input as {
+    type?: unknown;
+    moveX?: unknown;
+    moveY?: unknown;
+  };
+
+  // Releasing the stick must arrive: a dropped stop leaves the figure running
+  // until the player touches the stick again.
+  if (inputType === "move" && moveX === 0 && moveY === 0) {
+    return false;
+  }
+
   return inputType === "move" || inputType === "turn" || inputType === "aim";
 }
 
@@ -84,7 +95,13 @@ export class ControllerSocketClient {
   constructor(private readonly serverUrl: string) {
     this.socket = io(serverUrl, {
       autoConnect: false,
-      timeout: 5_000
+      timeout: 5_000,
+      // WebSocket straight away instead of starting on HTTP long-polling and
+      // upgrading later: polling adds a request round trip per message and
+      // drops volatile packets while a request is in flight. Polling stays as
+      // the fallback for networks that block WebSockets.
+      transports: ["websocket", "polling"],
+      tryAllTransports: true
     });
   }
 

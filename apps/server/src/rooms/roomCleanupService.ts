@@ -78,11 +78,11 @@ export class RoomCleanupService {
 
   removeInactiveRooms(): string[] {
     const cutoff = this.getNow() - this.inactivityTimeoutMs;
-    const lifetimeCutoff = this.getNow() - this.maxLifetimeMs;
+    const now = this.getNow();
     const removedRoomCodes: string[] = [];
 
     for (const room of this.roomStore.values()) {
-      if (room.createdAt <= lifetimeCutoff) {
+      if (room.expiresAt <= now) {
         this.closeRoom(room, "expired");
         removedRoomCodes.push(room.code);
         continue;
@@ -100,6 +100,11 @@ export class RoomCleanupService {
     }
 
     return removedRoomCodes;
+  }
+
+  extendRoomLifetime(room: RoomRecord): void {
+    room.expiresAt += this.maxLifetimeMs;
+    this.roomManager.touch(room);
   }
 
   private closeRoom(room: RoomRecord, reason: RoomClosedReason): void {

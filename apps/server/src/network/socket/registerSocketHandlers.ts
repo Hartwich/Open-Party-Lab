@@ -42,6 +42,7 @@ export interface RegisterSocketHandlersDeps {
   gameRuntime: GameRuntime;
   stateBroadcaster: StateBroadcaster;
   roomCleanupService: RoomCleanupService;
+  hostedMode: boolean;
 }
 
 function ackError<T>(message: string): AckResult<T> {
@@ -156,7 +157,8 @@ export function registerSocketHandlers({
   gameRegistry,
   gameRuntime,
   stateBroadcaster,
-  roomCleanupService
+  roomCleanupService,
+  hostedMode
 }: RegisterSocketHandlersDeps): void {
   /**
    * Single authorisation gate for every room-driving action.
@@ -432,6 +434,40 @@ export function registerSocketHandlers({
 
       ack({ ok: true, data: { room: stateBroadcaster.createRoomSnapshot(room) } });
       stateBroadcaster.broadcastRoomState(room);
+    });
+
+    on("room:extend-lifetime", (payload, ack) => {
+      const room = roomManager.getRoom(payload.roomCode);
+      const en = room?.language === "en";
+
+      if (!hostedMode) {
+        ack(ackError(en ? "Room lifetime extension is only available on the hosted server." : "Die Raumverlaengerung ist nur auf dem gehosteten Server verfuegbar."));
+        return;
+      }
+
+      if (!room) {
+        ack(ackError(socketText(false).roomNotFound));
+        return;
+      }
+
+      if (socket.data.role !== "host" || socket.data.roomCode !== room.code) {
+        ack(ackError(en ? "Only the host can extend the room." : "Nur der Host kann den Raum verlaengern."));
+        return;
+      }
+
+      if (room.expiresAt <= now()) {
+        ack(ackError(en ? "This room is already expired." : "Dieser Raum ist bereits abgelaufen."));
+        return;
+      }
+
+      if (room.expiresAt - now() > 5 * 60_000) {
+        ack(ackError(en ? "Room extension is available during the final five minutes only." : "Die Raumverlaengerung ist erst in den letzten fuenf Minuten moeglich."));
+        return;
+      }
+
+      roomCleanupService.extendRoomLifetime(room);
+      stateBroadcaster.broadcastRoomState(room);
+      ack({ ok: true, data: { room: stateBroadcaster.createRoomSnapshot(room) } });
     });
 
     on("room:join", (payload, ack) => {
@@ -1029,7 +1065,9 @@ export function registerSocketHandlers({
         return;
       }
 
-      if (update.stateChanged) {
+      // Games that apply inputs inside their tick get the change broadcast by
+      // that tick; a broadcast here would only repeat the previous frame.
+      if (update.stateChanged && !stateBroadcaster.canDeferInputBroadcast(room, update.phaseChanged)) {
         stateBroadcaster.broadcastGameState(room);
       }
 

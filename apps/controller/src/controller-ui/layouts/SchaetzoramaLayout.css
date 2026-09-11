@@ -12,3 +12,23 @@
 .szc-results{display:grid;gap:14px}.szc-result-total{display:grid;place-items:center;padding:22px;border:1px solid color-mix(in srgb,var(--sz-number) 25%,var(--surface-border));border-radius:8px;background:color-mix(in srgb,var(--sz-number) 8%,var(--surface))}.szc-result-total span,.szc-result-total small{color:var(--text-muted);font-weight:800}.szc-result-total strong{color:var(--sz-number);font-size:3.4rem;line-height:1}.szc-solutions{display:grid;gap:7px}.szc-solutions>div{display:grid;gap:4px;padding:11px;border-left:5px solid var(--category);background:var(--surface)}.szc-solutions span{color:var(--category);font-size:.76rem;font-weight:900}.szc-solutions strong{overflow-wrap:anywhere;font-size:.9rem}.szc-progress{display:flex;justify-content:center;gap:6px}.szc-progress i{width:9px;height:9px;border:2px solid var(--player);border-radius:50%;background:transparent;opacity:.45}.szc-progress i.is-done{background:var(--player);opacity:1}
 @media(max-width:370px){.szc-question{min-height:360px;padding:13px}.szc-question h2{font-size:1.1rem}.szc-rank-row{grid-template-columns:28px minmax(0,1fr) 74px}.szc-assign-row{grid-template-columns:minmax(0,1fr) 112px}}
 @media(prefers-reduced-motion:no-preference){.szc-question{animation:szc-in .22s ease-out}@keyframes szc-in{from{opacity:0;transform:translateY(5px)}}}
+
+.szc-rank-list{display:grid;gap:8px;isolation:isolate}
+.szc-rank-list .szc-rank-row{grid-template-columns:28px minmax(0,1fr) 64px;position:relative;transition:transform 180ms ease;will-change:transform}
+.szc-rank-row.is-dragging{z-index:2;transition:none;border-color:var(--category);box-shadow:0 8px 22px #0003;background:var(--surface)}
+.szc-rank-grip{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0;min-height:48px;padding:4px 0;border:0;background:transparent;color:var(--text-main);font:inherit;font-weight:800;text-align:left;touch-action:none;user-select:none;cursor:grab}
+.szc-rank-grip>span:first-child{overflow-wrap:anywhere}.szc-grip-mark{flex:none;color:var(--text-muted);font-size:24px}
+.szc-rank-row.is-dragging .szc-rank-grip{cursor:grabbing}.szc-rank-row .szc-rank-arrows{height:44px}
+.szc-zone-headings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;text-align:center}
+.szc-zone-headings>div{display:grid;align-content:start;gap:5px;padding:8px 3px;border-bottom:3px solid var(--category);font-size:.75rem;overflow-wrap:anywhere}
+.szc-zone-headings span{font-size:1.1rem;color:var(--category)}
+.szc-assign-rail{position:relative;min-height:76px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));isolation:isolate}
+.szc-zone-targets{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.szc-zone-targets button{min-width:0;border:1px dashed color-mix(in srgb,var(--category) 30%,var(--surface-border));border-radius:0;background:color-mix(in srgb,var(--category) 4%,var(--surface));color:var(--text-muted);font-size:1.1rem}
+.szc-zone-targets button:first-child{border-radius:7px 0 0 7px}.szc-zone-targets button:last-child{border-radius:0 7px 7px 0}
+.szc-assign-tile{grid-column:1;position:relative;z-index:1;width:100%;min-height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 5px;border:2px solid var(--category);border-radius:7px;background:var(--surface);color:var(--text-main);font:inherit;font-size:.82rem;overflow-wrap:anywhere;transform:translateX(calc(var(--position) * 100%));transition:transform 240ms cubic-bezier(.2,.8,.2,1);touch-action:pan-y;user-select:none;cursor:ew-resize;box-shadow:0 2px 5px #0001}
+.szc-assign-tile>strong{max-width:100%}.szc-assign-tile>span{color:var(--category);line-height:1}
+.szc-assign-tile.is-dragging{transition:none;box-shadow:0 7px 18px #0003}
+.szc-rank-grip:focus-visible,.szc-assign-tile:focus-visible,.szc-zone-targets button:focus-visible{outline:3px solid var(--category);outline-offset:2px;z-index:3}
+.szc-sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+@media(prefers-reduced-motion:reduce){.szc-rank-row,.szc-assign-tile{transition:none!important}}

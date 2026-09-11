@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { SchaetzoramaAnswerSet, SchaetzoramaAssignQuestion, SchaetzoramaAssignmentZone, SchaetzoramaCategoryId, SchaetzoramaNumberQuestion, SchaetzoramaPublicQuestion, SchaetzoramaRankQuestion } from "@open-party-lab/protocol";
 import type { SchaetzoramaLayoutModel } from "./models.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
+import { AssignmentControl, RankingControl } from "./SchaetzoramaDragControls.js";
 import "./SchaetzoramaLayout.css";
 
 interface Props { model: SchaetzoramaLayoutModel }
@@ -82,15 +83,12 @@ function questionControl(question: SchaetzoramaPublicQuestion, answer: Schaetzor
 
   if (question.kind === "rank") {
     const order = answer?.kind === "rank" ? answer.order : question.items.map((item) => item.id);
-    return <div className="szc-rank-control"><p className="szc-direction">{question.directionLabel}</p>{order.map((id, position) => {
-      const item = question.items.find((entry) => entry.id === id) ?? question.items[position];
-      return <div className="szc-rank-row" key={id}><b>{position + 1}</b><span>{item.label}</span><div><button type="button" disabled={disabled || position === 0} aria-label={en ? "Move up" : "Nach oben"} onClick={() => onChange({ kind: "rank", order: move(order, position, -1) })}>↑</button><button type="button" disabled={disabled || position === order.length - 1} aria-label={en ? "Move down" : "Nach unten"} onClick={() => onChange({ kind: "rank", order: move(order, position, 1) })}>↓</button></div></div>;
-    })}</div>;
+    return <RankingControl key={question.id} question={question} order={order} en={en} disabled={disabled} onChange={(order) => onChange({ kind: "rank", order })} />;
   }
 
   if (question.kind === "assign") {
-    const assignments = answer?.kind === "assign" ? answer.assignments : Object.fromEntries(question.terms.map((term) => [term.id, "left" as const]));
-    return <div className="szc-assign-control"><div className="szc-venn"><i>{question.leftLabel}</i><b>{en ? "Both" : "Beide"}</b><i>{question.rightLabel}</i></div>{question.terms.map((term) => <div className="szc-assign-row" key={term.id}><strong>{term.label}</strong><div>{(["left", "both", "right"] as SchaetzoramaAssignmentZone[]).map((zone) => <button type="button" key={zone} disabled={disabled} className={assignments[term.id] === zone ? "is-selected" : ""} aria-label={`${term.label}: ${zoneLabel(zone, question, language)}`} onClick={() => onChange({ kind: "assign", assignments: { ...assignments, [term.id]: zone } })}>{zone === "left" ? "L" : zone === "right" ? "R" : "∩"}</button>)}</div></div>)}</div>;
+    const assignments = answer?.kind === "assign" ? answer.assignments : Object.fromEntries(question.terms.map((term) => [term.id, "both" as const]));
+    return <AssignmentControl key={question.id} question={question} assignments={assignments} en={en} disabled={disabled} onChange={(assignments) => onChange({ kind: "assign", assignments })} />;
   }
   return null;
 }
@@ -116,9 +114,8 @@ function Preview({ title, text }: { title: string; text: string }) { return <div
 function ResultView({ model }: { model: SchaetzoramaLayoutModel }) { const en = model.language === "en"; const own = model.results.find((result) => result.playerId === model.currentPlayerId); return <section className="szc-results"><div className="szc-result-total"><span>{en ? "This round" : "Diese Runde"}</span><strong>+{own?.total ?? 0}</strong><small>{en ? "points" : "Punkte"}</small></div><div className="szc-solutions">{categories.map((category) => <div className={`szc-${category}`} key={category}><span>{glyph(category)} {model.categoryLabels[category]}</span><strong>{formatAnswer(model, category, model.solutions[category])}</strong></div>)}</div></section>; }
 function Progress({ model }: { model: SchaetzoramaLayoutModel }) { return model.progress.length ? <div className="szc-progress">{model.progress.map((player) => { const done = model.stage === "joker" ? player.jokerReady : player.answered; return <i key={player.playerId} title={player.name} className={done ? "is-done" : ""} style={{ "--player": player.color } as React.CSSProperties}/>; })}</div> : null; }
 
-function initialAnswers(model: SchaetzoramaLayoutModel): SchaetzoramaAnswerSet { if (!model.roundContent) return {}; const number = model.roundContent.questions.number as SchaetzoramaNumberQuestion; const percent = model.roundContent.questions.percent as SchaetzoramaNumberQuestion; const rank = model.roundContent.questions.rank as SchaetzoramaRankQuestion; const assign = model.roundContent.questions.assign as SchaetzoramaAssignQuestion; return { number: model.ownAnswers.number ?? { kind: "number", value: Math.round((number.min + number.max) / 2) }, percent: model.ownAnswers.percent ?? { kind: "number", value: Math.round((percent.min + percent.max) / 2) }, rank: model.ownAnswers.rank ?? { kind: "rank", order: rank.items.map((item) => item.id) }, assign: model.ownAnswers.assign ?? { kind: "assign", assignments: Object.fromEntries(assign.terms.map((term) => [term.id, "left"])) } }; }
+function initialAnswers(model: SchaetzoramaLayoutModel): SchaetzoramaAnswerSet { if (!model.roundContent) return {}; const number = model.roundContent.questions.number as SchaetzoramaNumberQuestion; const percent = model.roundContent.questions.percent as SchaetzoramaNumberQuestion; const rank = model.roundContent.questions.rank as SchaetzoramaRankQuestion; const assign = model.roundContent.questions.assign as SchaetzoramaAssignQuestion; return { number: model.ownAnswers.number ?? { kind: "number", value: Math.round((number.min + number.max) / 2) }, percent: model.ownAnswers.percent ?? { kind: "number", value: Math.round((percent.min + percent.max) / 2) }, rank: model.ownAnswers.rank ?? { kind: "rank", order: rank.items.map((item) => item.id) }, assign: model.ownAnswers.assign ?? { kind: "assign", assignments: Object.fromEntries(assign.terms.map((term) => [term.id, "both"])) } }; }
 function initialJoker(model: SchaetzoramaLayoutModel): JokerDraft { const joker = model.ownJokerPreview ?? model.ownJoker; return { categoryId: joker?.categoryId ?? "number", targetPlayerId: joker?.targetPlayerId ?? model.copyTargets[0]?.playerId ?? "" }; }
-function move(order: string[], index: number, offset: number) { const target = index + offset; if (target < 0 || target >= order.length) return order; const next = [...order]; const [item] = next.splice(index, 1); next.splice(target, 0, item); return next; }
 function clamp(value: number, min: number, max: number) { return Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : min; }
 function glyph(category: SchaetzoramaCategoryId) { return category === "number" ? "#" : category === "percent" ? "%" : category === "rank" ? "↕" : "◉"; }
 function stageTitle(model: SchaetzoramaLayoutModel) { const en = model.language === "en"; return model.stage === "revealed" ? (en ? "Results" : "Auflösung") : model.stage === "joker" ? (en ? "Copy round" : "Abschreiben") : (en ? "Your estimates" : "Deine Schätzungen"); }

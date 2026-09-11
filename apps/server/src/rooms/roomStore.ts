@@ -51,6 +51,7 @@ export interface HostControlRecord {
 export interface RoomRecord {
   code: string;
   createdAt: number;
+  expiresAt: number;
   lastActivityAt: number;
   joinUrl: string;
   language: SupportedLanguage;

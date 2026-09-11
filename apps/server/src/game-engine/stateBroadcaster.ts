@@ -88,14 +88,9 @@ export class StateBroadcaster {
 
   broadcastGameState(room: RoomRecord): void {
     const totalStart = performance.now();
-    const hostStateStart = performance.now();
-    const hostGameState = this.gameRuntime.getPublicGameState(room, "host");
-    const hostStateMs = performance.now() - hostStateStart;
-    const controllerStateStart = performance.now();
-    const sharedControllerGameState = this.gameRuntime.getPublicGameState(room, "controller");
-    const controllerStateMs = performance.now() - controllerStateStart;
+    const round = room.currentRound;
 
-    if (!hostGameState || !sharedControllerGameState) {
+    if (!round) {
       return;
     }
 
@@ -105,13 +100,51 @@ export class StateBroadcaster {
       return;
     }
 
+    // Decide who is due before building anything. Building the public states
+    // walks every entity of the round; doing it for an emit the throttle is
+    // about to drop was the bulk of the cost of input-triggered broadcasts.
+    const shouldEmitHostState = this.shouldEmitHostState(room.code, round.gameId, round.phase, totalStart);
+    const shouldEmitControllerState = this.shouldEmitControllerState(
+      room.code,
+      round.gameId,
+      round.phase,
+      totalStart
+    );
+    let hostStateMs = 0;
+    let controllerStateMs = 0;
+    let hostGameState: ReturnType<GameRuntime["getPublicGameState"]> | undefined;
+    let sharedControllerGameState: ReturnType<GameRuntime["getPublicGameState"]> | undefined;
+    const resolveHostGameState = () => {
+      if (hostGameState === undefined) {
+        const start = performance.now();
+        hostGameState = this.gameRuntime.getPublicGameState(room, "host");
+        hostStateMs += performance.now() - start;
+      }
+
+      return hostGameState;
+    };
+    const resolveControllerGameState = (playerId: string | undefined) => {
+      const start = performance.now();
+
+      if (playerId) {
+        const playerState = this.gameRuntime.getControllerGameStateForPlayer(room, playerId);
+        controllerStateMs += performance.now() - start;
+        return playerState;
+      }
+
+      if (sharedControllerGameState === undefined) {
+        sharedControllerGameState = this.gameRuntime.getPublicGameState(room, "controller");
+      }
+
+      controllerStateMs += performance.now() - start;
+      return sharedControllerGameState;
+    };
+
     let hostRecipients = 0;
     let controllerRecipients = 0;
     let controllerSuppressedRecipients = 0;
     let hostPatchRecipients = 0;
     let hostSuppressedRecipients = 0;
-    const shouldEmitHostState = this.shouldEmitHostState(room.code, hostGameState, totalStart);
-    const shouldEmitControllerState = this.shouldEmitControllerState(room.code, sharedControllerGameState, totalStart);
     const emitLoopStart = performance.now();
 
     for (const socketId of socketIds) {
@@ -129,7 +162,13 @@ export class StateBroadcaster {
           continue;
         }
 
-        const patchPayload = this.buildHostPatchPayload(room, hostGameState);
+        const currentHostGameState = resolveHostGameState();
+
+        if (!currentHostGameState) {
+          continue;
+        }
+
+        const patchPayload = this.buildHostPatchPayload(room, currentHostGameState);
 
         if (patchPayload) {
           hostPatchRecipients += 1;
@@ -140,10 +179,10 @@ export class StateBroadcaster {
         const hostEmitter = socket.compress(false);
         const hostPayload = {
           roomCode: room.code,
-          game: hostGameState
+          game: currentHostGameState
         };
         const shouldUseVolatileHostStream =
-          hostGameState.phase === "playing" || hostGameState.phase === "locked";
+          currentHostGameState.phase === "playing" || currentHostGameState.phase === "locked";
 
         if (shouldUseVolatileHostStream) {
           hostEmitter.volatile.emit("game:state", hostPayload);
@@ -151,7 +190,7 @@ export class StateBroadcaster {
           hostEmitter.emit("game:state", hostPayload);
         }
 
-        this.rememberHostState(room, hostGameState);
+        this.rememberHostState(room, currentHostGameState);
         continue;
       }
 
@@ -162,9 +201,7 @@ export class StateBroadcaster {
         continue;
       }
 
-      const controllerGameState = socket.data.playerId
-        ? this.gameRuntime.getControllerGameStateForPlayer(room, socket.data.playerId)
-        : sharedControllerGameState;
+      const controllerGameState = resolveControllerGameState(socket.data.playerId);
 
       if (!controllerGameState) {
         continue;
@@ -190,7 +227,7 @@ export class StateBroadcaster {
 
     serverPerfRegistry.sample(
       `broadcaster:game:${room.code}`,
-      `broadcaster:${room.currentRound?.gameId ?? room.selectedGameId ?? "unknown"}`,
+      `broadcaster:${round.gameId}`,
       {
         timingsMs: {
           total: performance.now() - totalStart,
@@ -204,14 +241,13 @@ export class StateBroadcaster {
           hostRecipients,
           controllerRecipients,
           hostPatchRecipients,
-          hostSuppressedRecipients
-          ,
+          hostSuppressedRecipients,
           controllerSuppressedRecipients
         },
         tags: {
           roomCode: room.code,
-          gameId: room.currentRound?.gameId ?? room.selectedGameId ?? null,
-          phase: room.currentRound?.phase ?? null
+          gameId: round.gameId,
+          phase: round.phase
         },
         flags: {
           hasPatchRecipients: hostPatchRecipients > 0,
@@ -220,6 +256,24 @@ export class StateBroadcaster {
         }
       }
     );
+  }
+
+  /**
+   * Whether a state change caused by a player input can wait for the next tick.
+   *
+   * Only for games that opted in, have a tick to carry the change, and only
+   * while playing: a phase change always goes out immediately.
+   */
+  canDeferInputBroadcast(room: RoomRecord, phaseChanged: boolean): boolean {
+    const round = room.currentRound;
+
+    if (!round || phaseChanged || round.phase !== "playing") {
+      return false;
+    }
+
+    const entry = this.gameRegistry.get(round.gameId);
+
+    return Boolean(entry?.serverGame.tick && entry.manifest.broadcast?.deferInputBroadcastToTick);
   }
 
   broadcastScoreboard(room: RoomRecord): void {
@@ -308,11 +362,11 @@ export class StateBroadcaster {
   private shouldEmit(
     cache: Map<string, number>,
     roomCode: string,
-    gameState: NonNullable<ReturnType<GameRuntime["getPublicGameState"]>>,
+    phase: string,
     nowMs: number,
     intervalMs: number
   ): boolean {
-    const isLivePhase = gameState.phase === "playing" || gameState.phase === "locked";
+    const isLivePhase = phase === "playing" || phase === "locked";
 
     if (!isLivePhase || intervalMs <= 0) {
       cache.delete(roomCode);
@@ -331,29 +385,31 @@ export class StateBroadcaster {
 
   private shouldEmitHostState(
     roomCode: string,
-    hostGameState: NonNullable<ReturnType<GameRuntime["getPublicGameState"]>>,
+    gameId: string,
+    phase: string,
     nowMs: number
   ): boolean {
     const interval =
-      this.getBroadcastPolicy(hostGameState.gameId)?.hostStateIntervalMs ??
+      this.getBroadcastPolicy(gameId)?.hostStateIntervalMs ??
       defaultHostStateIntervalMs;
 
-    return this.shouldEmit(this.lastHostEmitAtByRoom, roomCode, hostGameState, nowMs, interval);
+    return this.shouldEmit(this.lastHostEmitAtByRoom, roomCode, phase, nowMs, interval);
   }
 
   private shouldEmitControllerState(
     roomCode: string,
-    controllerGameState: NonNullable<ReturnType<GameRuntime["getPublicGameState"]>>,
+    gameId: string,
+    phase: string,
     nowMs: number
   ): boolean {
     const interval =
-      this.getBroadcastPolicy(controllerGameState.gameId)?.controllerStateIntervalMs ??
+      this.getBroadcastPolicy(gameId)?.controllerStateIntervalMs ??
       defaultControllerStateIntervalMs;
 
     return this.shouldEmit(
       this.lastControllerEmitAtByRoom,
       roomCode,
-      controllerGameState,
+      phase,
       nowMs,
       interval
     );

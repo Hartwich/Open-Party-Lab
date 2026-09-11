@@ -14,6 +14,20 @@ interface Vector2 {
 
 const DEADZONE = 0.12;
 
+/**
+ * While the thumb holds a direction, the current vector is repeated at this
+ * interval. Stick updates go out as volatile packets that may be dropped under
+ * load; without a repeat a lost packet would stay lost until the thumb moves.
+ */
+const HOLD_REPEAT_MS = 150;
+
+/**
+ * Height left for the controller once SafeAreaLayout has applied its padding.
+ * Keep in sync with the padding in `layout/SafeAreaLayout.tsx`.
+ */
+const SAFE_VIEWPORT_HEIGHT =
+  "calc(100dvh - max(10px, env(safe-area-inset-top)) - max(10px, env(safe-area-inset-bottom)))";
+
 function clampMagnitude(x: number, y: number): Vector2 {
   const magnitude = Math.hypot(x, y);
 
@@ -62,6 +76,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
   const activePointerIdRef = useRef<number | null>(null);
   const lastVectorRef = useRef<Vector2>({ moveX: 0, moveY: 0 });
   const onMoveChangeRef = useRef(model.onMoveChange);
+  const holdRepeatRef = useRef<number | null>(null);
   const [thumbOffset, setThumbOffset] = useState({ x: 0, y: 0, active: false });
   const minimal = Boolean(model.minimal);
   const cleanChrome = Boolean(model.cleanChrome);
@@ -70,8 +85,13 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
     model.actionButtonColumns ??
     (actionButtons.length >= 4 ? 2 : 1);
   const hasActionButtons = actionButtons.length > 0;
+  // Only the minimal (stick-only) variant can be anchored; the richer variants
+  // stack panels and stats around the stick and keep their flow layout.
+  const anchorBottom = minimal && model.stickPlacement === "bottom";
   const controlSize = minimal
-    ? "min(84vw, 360px)"
+    ? anchorBottom
+      ? "min(84vw, 360px, 70dvh)"
+      : "min(84vw, 360px)"
     : cleanChrome
       ? "clamp(170px, min(48vw, 62dvh), 360px)"
       : hasActionButtons ? "min(42vw, 220px)" : "min(78vw, 320px)";
@@ -88,6 +108,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
 
   useEffect(() => {
     activePointerIdRef.current = null;
+    stopHoldRepeat();
     setThumbOffset({ x: 0, y: 0, active: false });
 
     if (lastVectorRef.current.moveX !== 0 || lastVectorRef.current.moveY !== 0) {
@@ -98,6 +119,8 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
 
   useEffect(() => {
     return () => {
+      stopHoldRepeat();
+
       if (lastVectorRef.current.moveX !== 0 || lastVectorRef.current.moveY !== 0) {
         lastVectorRef.current = { moveX: 0, moveY: 0 };
         onMoveChangeRef.current(0, 0);
@@ -114,8 +137,32 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
     onMoveChangeRef.current(nextVector.moveX, nextVector.moveY);
   }
 
+  function startHoldRepeat(): void {
+    if (holdRepeatRef.current !== null) {
+      return;
+    }
+
+    holdRepeatRef.current = window.setInterval(() => {
+      const vector = lastVectorRef.current;
+
+      if (activePointerIdRef.current !== null && (vector.moveX !== 0 || vector.moveY !== 0)) {
+        onMoveChangeRef.current(vector.moveX, vector.moveY);
+      }
+    }, HOLD_REPEAT_MS);
+  }
+
+  function stopHoldRepeat(): void {
+    if (holdRepeatRef.current === null) {
+      return;
+    }
+
+    window.clearInterval(holdRepeatRef.current);
+    holdRepeatRef.current = null;
+  }
+
   function resetStick(): void {
     activePointerIdRef.current = null;
+    stopHoldRepeat();
     setThumbOffset({ x: 0, y: 0, active: false });
 
     if (lastVectorRef.current.moveX !== 0 || lastVectorRef.current.moveY !== 0) {
@@ -160,6 +207,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
     activePointerIdRef.current = event.pointerId;
     event.currentTarget.setPointerCapture(event.pointerId);
     updateStick(event.clientX, event.clientY);
+    startHoldRepeat();
   }
 
   function movePointer(event: React.PointerEvent<HTMLDivElement>): void {
@@ -184,9 +232,17 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
       style={{
         display: "grid",
         gap: minimal ? 0 : cleanChrome ? 12 : 18,
-        minHeight: minimal ? "min(76vh, 680px)" : undefined,
-        alignContent: cleanChrome ? "center" : undefined,
-        placeItems: minimal ? "center" : undefined
+        minHeight: anchorBottom
+          ? SAFE_VIEWPORT_HEIGHT
+          : minimal ? "min(76vh, 680px)" : undefined,
+        alignContent: anchorBottom ? "end" : cleanChrome ? "center" : undefined,
+        // Longhands instead of `placeItems`, so React never has to reconcile a
+        // shorthand against a longhand when the placement changes.
+        alignItems: minimal && !anchorBottom ? "center" : undefined,
+        justifyItems: minimal ? "center" : undefined,
+        // A little air above the lower edge keeps the pad clear of the
+        // system gesture bar while the thumb can still pull fully downwards.
+        paddingBottom: anchorBottom ? "max(12px, 3dvh)" : undefined
       }}
     >
       {!minimal && !cleanChrome ? <div

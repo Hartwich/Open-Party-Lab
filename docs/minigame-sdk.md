@@ -65,7 +65,7 @@ Everything here is optional; the defaults suit a simple game.
 | `controllerChrome` | Suppress phone chrome: `minimal`, `wide`, `bare`, `hideSubtitle`. |
 | `visual` | Catalog tile appearance: `accent` (`#rrggbb`), `eyebrow`, `icon`, optional `iconPath`. |
 | `audio` | Background music: an instrument `profile` plus `bpm`, `rootMidi`, `masterGain`. Use `trackBySetting` to swap tracks with a lobby setting. |
-| `broadcast` | `hostStateIntervalMs`, `controllerStateIntervalMs`, `supportsHostPatches`. |
+| `broadcast` | `hostStateIntervalMs`, `controllerStateIntervalMs`, `supportsHostPatches`, `deferInputBroadcastToTick` (ticking games whose inputs only take effect in `tick`: no extra broadcast per input while playing). |
 
 Instrument templates currently available: `lobby`, `battle`, `chase`, `arcade`,
 `gentle`, `mystery`, `strategy`, `sports`, `frostfire`, `sugarCountry`.
@@ -158,7 +158,9 @@ The platform must not import private files from a game repo.
 2. Add the game to `config/known-games.json`.
 3. Export manifest, protocol, server, host, and controller entrypoints.
 4. Render the intro and result phases in the host scene or DOM host surface.
-5. Declare `ownsScreens`, `visual` and `audio` in the manifest.
+5. Declare `ownsScreens`, `visual` and `audio` in the manifest. Use
+   `audio.trackByStage` when play and reveal need different music; the host
+   engine crossfades between the resolved tracks.
 6. Add or reuse a controller layout when the existing layouts are insufficient.
 7. Run `npm run games:sync-local` from the platform.
 8. Run `npm run typecheck`, then `npm run build` for release-facing changes.
@@ -172,8 +174,33 @@ The platform must not import private files from a game repo.
 - Use DOM/React for text-heavy phone controls.
 - Use Phaser scenes for continuously rendered playfields and DOM host surfaces
   for text-heavy, resolution-independent game screens.
-- Read colours from `@open-party-lab/ui-kit` rather than hardcoding hex values,
-  so a game matches the platform theme.
+
+### Chrome follows the theme, artwork does not
+
+This is the distinction to get right, and the one that has produced every theme
+bug so far. **Chrome** is anything that is a surface: panels, boards, lists,
+readouts, round screens. It reads the room's tokens, and its text and its
+background must come from the same place. **Artwork** is what the game paints —
+an arena, a character, a textured stage. It keeps its own fixed colours.
+
+The failure is always the half-conversion, and it hides in whichever theme
+happens to match:
+
+- Arena Survivor's HUD is painted on the dark arena. Its *text* had been moved
+  to platform tokens while the cards stayed fixed dark, so the light theme drew
+  dark labels on a near-black card — the wave report was rendering correctly and
+  showing nothing.
+- Zeichnen & Erraten is the mirror image: all chrome, no artwork, but its
+  *surfaces* were fixed dark slate while the text already read tokens.
+
+So: decide per surface, not per file, and convert both sides together. When a
+game's own artwork needs ink, give it a named local constant with a comment, not
+a token — `ArenaHud.ts`'s `hudInk` is the reference.
+
+Theme also reaches the server as `context.theme`, for the rare case where it has
+to influence state rather than rendering: Zeichnen & Erraten opens on a black pen
+in the light theme and a white one in the dark, because a default that is
+invisible on the board is not a default.
 
 ## AI checks
 

@@ -1,5 +1,6 @@
 import type { ScoreEntry } from "../scoring/ScoreEntry.js";
 import type { BaseRoundState } from "../state/BaseRoundState.js";
+import type { ThemeName } from "@open-party-lab/ui-kit";
 import type { SupportedLanguage } from "../i18n/language.js";
 import type { GameManifest } from "./GameManifest.js";
 import type { PlayerInput } from "./PlayerInput.js";
@@ -30,6 +31,16 @@ export interface ServerGameContext {
   now: number;
   deltaMs: number;
   language: SupportedLanguage;
+  /**
+   * The room's skin.
+   *
+   * Almost everything about a theme is a rendering concern the host handles on
+   * its own. This is here for the rare case where the theme has to influence
+   * *state*: the drawing game picks the pen colour a player starts with, and
+   * white ink on a white board is not a drawing. A game that does not care can
+   * ignore it.
+   */
+  theme: ThemeName;
   selectedGame: GameManifest;
   previousRound: PreviousRoundContext | null;
   roomSettings: Readonly<Record<string, unknown>>;

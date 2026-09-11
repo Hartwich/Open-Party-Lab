@@ -457,6 +457,7 @@ export class GameRuntime {
       now: this.getNow(),
       deltaMs,
       language: room.language,
+      theme: room.theme,
       selectedGame: localizeGameManifest(selectedGame, room.language),
       previousRound,
       roomSettings: room.gameSettingsByGameId[selectedGame.id] ?? {}

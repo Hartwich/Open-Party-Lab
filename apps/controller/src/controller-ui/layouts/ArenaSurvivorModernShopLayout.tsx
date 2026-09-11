@@ -4,6 +4,7 @@ import type {
   LayoutStat,
   ShopOfferModel
 } from "./models.js";
+import { translucent } from "../common/translucent.js";
 
 interface ArenaSurvivorModernShopLayoutProps {
   model: ArenaSurvivorModernShopLayoutModel;
@@ -85,6 +86,14 @@ function iconInitial(label: string): string {
   return label.trim().slice(0, 1).toUpperCase() || "?";
 }
 
+/**
+ * The tier ring around a weapon or item icon.
+ *
+ * Every tier needs a saturated hue of its own. `--accent-soft` sat here for
+ * tier 3, which is a pale tint in the light theme — a 2px frame in it is
+ * invisible on paper, so a tier-3 weapon looked unranked. Amber sits between
+ * the accent and danger and reads on both themes.
+ */
 function resolveLevelFrameColor(level?: number): string | null {
   switch (level) {
     case 1:
@@ -92,7 +101,7 @@ function resolveLevelFrameColor(level?: number): string | null {
     case 2:
       return "var(--accent)";
     case 3:
-      return "var(--accent-soft)";
+      return "var(--amber)";
     case 4:
       return "var(--danger)";
     default:
@@ -218,7 +227,9 @@ function IconFrame({
     border: levelColor ? `2px solid ${levelColor}` : "1px solid color-mix(in srgb, var(--muted) 18%, transparent)",
     background: "color-mix(in srgb, var(--paper) 78%, transparent)",
     flex: "0 0 auto",
-    boxShadow: levelColor ? `0 0 0 1px ${levelColor}44, 0 0 18px ${levelColor}2f` : undefined
+    boxShadow: levelColor
+      ? `0 0 0 1px ${translucent(levelColor, 27)}, 0 0 18px ${translucent(levelColor, 18)}`
+      : undefined
   };
 
   if (src) {
@@ -288,7 +299,9 @@ function MetricChip({
   value: string | number;
   tone?: "blue" | "gold" | "green";
 }) {
-  const toneColor = tone === "gold" ? "var(--amber)" : tone === "green" ? "var(--sage-soft)" : "var(--accent)";
+  // Saturated tokens only: the chip draws this as an icon and a border on a
+  // light surface, where a `-soft` tint disappears.
+  const toneColor = tone === "gold" ? "var(--amber)" : tone === "green" ? "var(--sage-strong)" : "var(--accent)";
 
   return (
     <div
@@ -300,7 +313,7 @@ function MetricChip({
         gap: 8,
         padding: "8px 10px",
         borderRadius: 8,
-        border: `1px solid ${toneColor}44`,
+        border: `1px solid ${translucent(toneColor, 27)}`,
         background: "color-mix(in srgb, var(--surface) 68%, transparent)",
         color: "var(--text-main)",
         minWidth: 0
@@ -409,8 +422,8 @@ function LoadoutTile({
   return (
     <button
       type="button"
-      aria-label={title}
-      title={title}
+      aria-label={`${title} · Lv. ${level}`}
+      title={`${title} · Lv. ${level}`}
       onClick={onClick}
       style={{
         position: "relative",
@@ -429,6 +442,31 @@ function LoadoutTile({
     >
       <MiniInfoBadge />
       <IconFrame src={iconPath} label={title} size={58} level={level} />
+      {/* The tier used to be carried by the frame colour alone, which is both
+          hard to read at 74px and useless to anyone who cannot separate the
+          hues. The number says it outright. */}
+      <span
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: 5,
+          top: 5,
+          minWidth: 20,
+          height: 20,
+          padding: "0 5px",
+          borderRadius: 7,
+          display: "grid",
+          placeItems: "center",
+          border: `1px solid ${resolveLevelFrameColor(level) ?? "var(--line)"}`,
+          background: "var(--surface)",
+          color: "var(--ink)",
+          fontSize: "0.72rem",
+          fontWeight: 900,
+          lineHeight: 1
+        }}
+      >
+        {level}
+      </span>
       {selected ? (
         <span
           aria-hidden="true"
@@ -442,8 +480,10 @@ function LoadoutTile({
             display: "grid",
             placeItems: "center",
             border: "1px solid color-mix(in srgb, var(--on-accent) 16%, transparent)",
-            background: "color-mix(in srgb, var(--sage-strong) 90%, transparent)",
-            color: "var(--ink)"
+            background: "var(--sage-strong)",
+            // Sage-strong is dark on paper and bright on the dark stage, so the
+            // mark on top has to be the theme's inverse, not the theme's ink.
+            color: "var(--on-accent)"
           }}
         >
           <MergeIcon />
@@ -550,7 +590,10 @@ function OfferTile({
             : canBuy
               ? "color-mix(in srgb, var(--sage) 34%, transparent)"
               : "color-mix(in srgb, var(--surface-raised) 72%, transparent)",
-          color: canBuy || offer.purchased ? "var(--sage-soft)" : "color-mix(in srgb, var(--ink-soft) 52%, transparent)",
+          // The cart sits on a sage wash, so it needs the deep end of the same
+          // hue. `--sage-soft` is the tint itself: near-white on paper, which
+          // left the button looking empty.
+          color: canBuy || offer.purchased ? "var(--sage-strong)" : "color-mix(in srgb, var(--ink-soft) 52%, transparent)",
           display: "grid",
           placeItems: "center",
           cursor: canBuy ? "pointer" : "not-allowed",
@@ -861,7 +904,7 @@ function DetailSheet({
                   borderRadius: 8,
                   border: "1px solid color-mix(in srgb, var(--on-accent) 14%, transparent)",
                   background: canMerge ? "color-mix(in srgb, var(--sage) 36%, transparent)" : "color-mix(in srgb, var(--surface-raised) 78%, transparent)",
-                  color: canMerge ? "var(--sage-soft)" : "color-mix(in srgb, var(--ink-soft) 56%, transparent)",
+                  color: canMerge ? "var(--sage-strong)" : "color-mix(in srgb, var(--ink-soft) 56%, transparent)",
                   display: "grid",
                   placeItems: "center",
                   cursor: canMerge ? "pointer" : "not-allowed"
@@ -886,7 +929,7 @@ function DetailSheet({
                   borderRadius: 8,
                   border: "1px solid color-mix(in srgb, var(--on-accent) 14%, transparent)",
                   background: canSell ? "color-mix(in srgb, var(--amber) 34%, transparent)" : "color-mix(in srgb, var(--surface-raised) 78%, transparent)",
-                  color: canSell ? "var(--amber-soft)" : "color-mix(in srgb, var(--ink-soft) 56%, transparent)",
+                  color: canSell ? "var(--ink)" : "color-mix(in srgb, var(--ink-soft) 56%, transparent)",
                   display: "grid",
                   gridTemplateColumns: "22px auto",
                   justifyContent: "center",
