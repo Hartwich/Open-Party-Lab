@@ -127,6 +127,36 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
     haptics.tap(10);
   }
 
+  if (model.gameOver) {
+    // Nach der Runde gehört der Platz der Auswertung auf dem grossen Bildschirm
+    // und dem Bereit-Knopf, den die Plattform darüber einblendet. Ein Blatt in
+    // voller Höhe würde ihn aus dem Bild schieben.
+    return (
+      <div
+        style={{
+          display: "grid",
+          gap: 6,
+          padding: 12,
+          borderRadius: 14,
+          border: "1px solid var(--line)",
+          background: "var(--surface)",
+          textAlign: "center"
+        }}
+      >
+        <strong style={{ fontFamily: "var(--font-display)", fontSize: "1.05rem" }}>
+          {en ? "Round over" : "Runde vorbei"}
+        </strong>
+        <span style={{ color: "var(--muted)", fontSize: "0.86rem" }}>
+          {model.winnerName
+            ? `${en ? "Winner" : "Sieger"}: ${model.winnerName}`
+            : en
+              ? "The result is on the shared screen."
+              : "Die Auswertung steht auf dem großen Bildschirm."}
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div
       style={{

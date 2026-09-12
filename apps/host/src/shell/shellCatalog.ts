@@ -78,6 +78,30 @@ function renderSelectField(field: LobbyField & { kind: "select" }, value: unknow
   `;
 }
 
+/**
+ * Ein Häkchen statt zweier Knöpfe.
+ *
+ * Der Klick schickt jeweils den anderen Wert - damit bleibt die bestehende
+ * `setup-select`-Behandlung unverändert, und der Schalter ist nur eine andere
+ * Darstellung derselben Auswahl.
+ */
+function renderToggleField(field: LobbyField & { kind: "toggle" }, value: unknown, locked: boolean): string {
+  const on = String(value) === field.onValue;
+  const nextValue = on ? field.offValue : field.onValue;
+
+  return `
+    <button type="button" class="opl-toggle" aria-pressed="${on ? "true" : "false"}"
+            ${locked ? "disabled" : ""}
+            data-action="setup-select"
+            data-action-key="${escapeHtml(field.actionKey ?? field.id)}"
+            data-value="${escapeHtml(nextValue)}"
+            ${field.description ? `title="${escapeHtml(field.description)}"` : ""}>
+      <span class="opl-toggle-box" aria-hidden="true">✓</span>
+      <span class="opl-toggle-text">${escapeHtml(field.label)}</span>
+    </button>
+  `;
+}
+
 function renderNumberField(field: LobbyField & { kind: "number" }, value: unknown, locked: boolean): string {
   const numeric = typeof value === "number" ? value : Number(value);
   const current = Number.isFinite(numeric) ? numeric : field.defaultValue;
@@ -107,17 +131,53 @@ function renderSetup(game: AvailableGameDto, settings: SettingsMap, locked: bool
     return "";
   }
 
-  const fields = setup.fields
+  const visible = setup.fields
     // Optionen, die für das gewählte Regelwerk nichts bewirken, werden nicht
     // ausgegraut, sondern gar nicht erst gezeigt.
-    .filter((field) => isLobbyFieldVisible(field, setup.fields, settings))
-    .map((field) => {
-      const value = settings[field.settingKey ?? field.id] ?? field.defaultValue;
+    .filter((field) => isLobbyFieldVisible(field, setup.fields, settings));
 
-      return field.kind === "select"
-        ? renderSelectField(field, value, locked)
-        : renderNumberField(field, value, locked);
-    })
+  const renderField = (field: LobbyField): string => {
+    const value = settings[field.settingKey ?? field.id] ?? field.defaultValue;
+
+    if (field.kind === "select") {
+      return renderSelectField(field, value, locked);
+    }
+
+    return field.kind === "toggle"
+      ? renderToggleField(field, value, locked)
+      : renderNumberField(field, value, locked);
+  };
+
+  // Felder mit derselben Gruppe erscheinen zusammen unter einer Überschrift,
+  // in der Reihenfolge, in der die Gruppe zuerst auftaucht.
+  type Block = { title: string | null; html: string[] };
+  const blocks: Block[] = [];
+
+  for (const field of visible) {
+    const title = field.group ?? null;
+    const last = blocks[blocks.length - 1];
+    const target =
+      title !== null ? blocks.find((block) => block.title === title) : last?.title === null ? last : undefined;
+
+    if (target) {
+      target.html.push(renderField(field));
+      continue;
+    }
+
+    blocks.push({ title, html: [renderField(field)] });
+  }
+
+  const fields = blocks
+    .map((block) =>
+      block.title === null
+        ? block.html.join("")
+        : `
+        <div class="opl-group">
+          <p class="opl-group-title">${escapeHtml(block.title)}</p>
+          <div class="opl-group-body">${block.html.join("")}</div>
+        </div>
+      `
+    )
     .join("");
 
   const confirmation = setup.confirmation;

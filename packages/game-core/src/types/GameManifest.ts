@@ -35,6 +35,14 @@ interface GameLobbySetupFieldBase {
   description?: string;
   settingKey?: string;
   actionKey?: string;
+  /**
+   * Überschrift, unter der verwandte Felder zusammen erscheinen.
+   *
+   * Zehn einzelne Hausregeln untereinander sind eine Wand; unter einer
+   * Überschrift und nebeneinander sind sie eine Liste, die man überfliegt.
+   * Felder ohne Gruppe stehen weiterhin für sich.
+   */
+  group?: string;
   /** Ohne Angabe immer sichtbar. */
   visibleWhen?: GameLobbySetupVisibility;
 }
@@ -53,7 +61,26 @@ export interface GameLobbySetupNumberField extends GameLobbySetupFieldBase {
   defaultValue: number;
 }
 
-export type GameLobbySetupField = GameLobbySetupSelectField | GameLobbySetupNumberField;
+/**
+ * Ein Schalter mit zwei Zuständen.
+ *
+ * Technisch eine Auswahl mit genau zwei Werten - aber als Häkchen gezeichnet
+ * und nur eine Zeile hoch. Für alles, was schlicht an oder aus ist, statt zwei
+ * nebeneinanderliegender Knöpfe, die dieselbe Frage umständlich stellen.
+ */
+export interface GameLobbySetupToggleField extends GameLobbySetupFieldBase {
+  kind: "toggle";
+  /** Wert im eingeschalteten Zustand. */
+  onValue: string;
+  /** Wert im ausgeschalteten Zustand. */
+  offValue: string;
+  defaultValue: string;
+}
+
+export type GameLobbySetupField =
+  | GameLobbySetupSelectField
+  | GameLobbySetupNumberField
+  | GameLobbySetupToggleField;
 
 export interface GameLobbySetupDefinition {
   title?: string;

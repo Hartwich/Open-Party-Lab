@@ -357,6 +357,79 @@ const css = `
 
 .opl-option:disabled { opacity: 0.45; cursor: default; }
 
+/* Verwandte Schalter stehen zusammen und nebeneinander. Zehn Hausregeln
+   untereinander wären eine Wand; in zwei, drei Spalten sind sie eine Liste. */
+.opl-group {
+  display: grid;
+  gap: 8px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--surface-muted) 55%, transparent);
+}
+
+.opl-group-title {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.opl-group-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 6px 12px;
+}
+
+.opl-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 13px;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.opl-toggle:hover:not(:disabled) {
+  border-color: var(--line);
+  background: var(--paper-deep);
+}
+
+.opl-toggle-box {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--surface);
+  font-size: 12px;
+  line-height: 1;
+  color: transparent;
+}
+
+.opl-toggle[aria-pressed="true"] .opl-toggle-box {
+  background: var(--tile-accent, var(--accent));
+  border-color: var(--tile-accent, var(--accent));
+  color: var(--on-accent);
+}
+
+.opl-toggle-text { min-width: 0; }
+.opl-toggle-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.opl-toggle:disabled { opacity: 0.45; cursor: default; }
+
 .opl-stepper {
   display: inline-flex;
   align-items: center;

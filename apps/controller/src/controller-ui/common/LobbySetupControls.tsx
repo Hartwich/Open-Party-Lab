@@ -58,6 +58,31 @@ const stepperButtonStyle = {
   lineHeight: 1
 } as const;
 
+/** Verwandte Felder unter einer Überschrift zusammenfassen. */
+function groupFields(fields: readonly LobbyField[]): Array<{ title: string | null; fields: LobbyField[] }> {
+  const blocks: Array<{ title: string | null; fields: LobbyField[] }> = [];
+
+  for (const field of fields) {
+    const title = field.group ?? null;
+    const last = blocks[blocks.length - 1];
+    const target =
+      title !== null
+        ? blocks.find((block) => block.title === title)
+        : last?.title === null
+          ? last
+          : undefined;
+
+    if (target) {
+      target.fields.push(field);
+      continue;
+    }
+
+    blocks.push({ title, fields: [field] });
+  }
+
+  return blocks;
+}
+
 function SelectField({
   game,
   field,
@@ -113,6 +138,72 @@ function SelectField({
       </div>
       {field.description ? <p style={hintStyle}>{field.description}</p> : null}
     </div>
+  );
+}
+
+/**
+ * Ein Häkchen statt zweier Knöpfe - dieselbe Auswahl, eine Zeile hoch.
+ */
+function ToggleField({
+  game,
+  field,
+  value,
+  disabled,
+  onHostAction
+}: {
+  game: AvailableGameDto;
+  field: LobbyField & { kind: "toggle" };
+  value: unknown;
+  disabled: boolean;
+  onHostAction: LobbySetupControlsProps["onHostAction"];
+}) {
+  const on = String(value) === field.onValue;
+
+  return (
+    <button
+      type="button"
+      aria-pressed={on}
+      disabled={disabled}
+      onClick={() =>
+        onHostAction(game.id, {
+          type: "configure-lobby",
+          [field.actionKey ?? field.id]: on ? field.offValue : field.onValue
+        })
+      }
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 9,
+        width: "100%",
+        padding: "8px 10px",
+        borderRadius: 10,
+        border: "1px solid var(--line)",
+        background: on ? "var(--accent-soft)" : "var(--surface-muted)",
+        color: "var(--ink)",
+        textAlign: "left",
+        opacity: disabled ? 0.5 : 1
+      }}
+    >
+      <span
+        aria-hidden
+        style={{
+          flex: "0 0 auto",
+          width: 18,
+          height: 18,
+          display: "grid",
+          placeItems: "center",
+          borderRadius: 5,
+          border: "1px solid var(--line-strong)",
+          background: on ? "var(--accent)" : "var(--surface)",
+          color: on ? "var(--on-accent)" : "transparent",
+          fontSize: 12,
+          lineHeight: 1
+        }}
+      >
+        ✓
+      </span>
+      <span style={{ minWidth: 0, fontWeight: on ? 700 : 400 }}>{field.label}</span>
+    </button>
   );
 }
 
@@ -203,27 +294,67 @@ export function LobbySetupControls({
     <div style={{ display: "grid", gap: 14 }}>
       {setup.description ? <p style={hintStyle}>{setup.description}</p> : null}
 
-      {visibleFields.map((field) => {
-        const value = settings[field.settingKey ?? field.id] ?? field.defaultValue;
+      {groupFields(visibleFields).map((block) => {
+        const rendered = block.fields.map((field) => {
+          const value = settings[field.settingKey ?? field.id] ?? field.defaultValue;
 
-        return field.kind === "select" ? (
-          <SelectField
-            key={field.id}
-            game={game}
-            field={field}
-            value={value}
-            disabled={disabled}
-            onHostAction={onHostAction}
-          />
-        ) : (
-          <NumberField
-            key={field.id}
-            game={game}
-            field={field}
-            value={value}
-            disabled={disabled}
-            onHostAction={onHostAction}
-          />
+          if (field.kind === "select") {
+            return (
+              <SelectField
+                key={field.id}
+                game={game}
+                field={field}
+                value={value}
+                disabled={disabled}
+                onHostAction={onHostAction}
+              />
+            );
+          }
+
+          if (field.kind === "toggle") {
+            return (
+              <ToggleField
+                key={field.id}
+                game={game}
+                field={field}
+                value={value}
+                disabled={disabled}
+                onHostAction={onHostAction}
+              />
+            );
+          }
+
+          return (
+            <NumberField
+              key={field.id}
+              game={game}
+              field={field}
+              value={value}
+              disabled={disabled}
+              onHostAction={onHostAction}
+            />
+          );
+        });
+
+        if (block.title === null) {
+          return rendered;
+        }
+
+        return (
+          <div
+            key={block.title}
+            style={{
+              display: "grid",
+              gap: 6,
+              padding: "10px 12px",
+              borderRadius: 12,
+              border: "1px solid var(--line)",
+              background: "color-mix(in srgb, var(--surface-muted) 55%, transparent)"
+            }}
+          >
+            <p style={labelStyle}>{block.title}</p>
+            {rendered}
+          </div>
         );
       })}
 
