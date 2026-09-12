@@ -6,6 +6,7 @@ import { GameRegistry } from "./gameRegistry.js";
 import { GameRuntime } from "./gameRuntime.js";
 import { StateBroadcaster } from "./stateBroadcaster.js";
 import { PlayerManager } from "../players/playerManager.js";
+import { RoomManager } from "../rooms/roomManager.js";
 import { canStartRound } from "../rooms/roomLifecycle.js";
 
 export class RoundTimerService {
@@ -13,6 +14,7 @@ export class RoundTimerService {
 
   constructor(
     private readonly roomStore: RoomStore,
+    private readonly roomManager: RoomManager,
     private readonly playerManager: PlayerManager,
     private readonly gameRegistry: GameRegistry,
     private readonly gameRuntime: GameRuntime,
@@ -37,6 +39,11 @@ export class RoundTimerService {
         let roomChanged = this.playerManager.expireDisconnectedPlayers(room);
         let restartedReadyRound = false;
 
+        // A handover nobody answered completes on its own. This runs on every
+        // room, paused or not: the deadline is wall-clock and has nothing to do
+        // with the game's simulation.
+        roomChanged = this.roomManager.expireHostControlRequest(room) || roomChanged;
+
         const update = this.gameRuntime.tickRoom(room, this.tickMs);
 
         if (
@@ -49,6 +56,9 @@ export class RoundTimerService {
             const allowReadyCarry = this.gameRuntime.shouldContinueRun(room) === true;
 
             if (allowReadyCarry && canStartRound(room, activeGame)) {
+              // A round that follows on its own must not inherit a pause from
+              // the one before it.
+              this.roomManager.clearPause(room);
               const startedState = this.gameRuntime.startRound(room);
 
               if (startedState) {

@@ -3,17 +3,51 @@ import {
   hasActiveRound,
   hasHostControl,
   hasPendingHostControlRequest,
+  isAskedToHandOverHostControl,
   type PlayerSnapshot,
   type RoomSnapshot
 } from "@open-party-lab/protocol";
+import { useEffect, useState } from "react";
 import { getControllerText } from "../../i18n/controllerText.js";
 import { LobbySetupControls } from "./LobbySetupControls.js";
+
+/**
+ * Seconds left on a pending handover, ticking once per second.
+ *
+ * The deadline is a timestamp in the room snapshot, and the server completes
+ * the handover on its own — this only keeps the number on screen honest while
+ * the phone waits, and stops ticking as soon as there is nothing pending.
+ */
+function useHostControlCountdown(room: RoomSnapshot): number {
+  const expiresAt = room.hostControl.pendingRequest?.expiresAt ?? null;
+  const [remaining, setRemaining] = useState(() =>
+    expiresAt === null ? 0 : Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000))
+  );
+
+  useEffect(() => {
+    if (expiresAt === null) {
+      setRemaining(0);
+      return;
+    }
+
+    const update = () => setRemaining(Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000)));
+
+    update();
+    const handle = setInterval(update, 1000);
+
+    return () => clearInterval(handle);
+  }, [expiresAt]);
+
+  return remaining;
+}
 
 export interface HostControlPanelProps {
   room: RoomSnapshot;
   player: PlayerSnapshot | null;
   onRequestControl: () => void;
   onReleaseControl: () => void;
+  /** Answers a handover aimed at this player. */
+  onResolveControl: (playerId: string, grant: boolean) => void;
   onSelectGame: (gameId: string) => void;
   onHostAction: (gameId: string, action: unknown) => void;
   onStartRound: () => void;
@@ -76,6 +110,7 @@ export function HostControlPanel({
   player,
   onRequestControl,
   onReleaseControl,
+  onResolveControl,
   onSelectGame,
   onHostAction,
   onStartRound,
@@ -88,19 +123,31 @@ export function HostControlPanel({
   const requestPending = hasPendingHostControlRequest(room.hostControl, playerId);
   const otherHolder =
     room.hostControl.holderPlayerId && !inControl ? room.hostControl.holderName : null;
+  const handoverRequest = isAskedToHandOverHostControl(room.hostControl, playerId)
+    ? room.hostControl.pendingRequest
+    : null;
+  const remainingSeconds = useHostControlCountdown(room);
 
   if (!inControl) {
     return (
       <section style={panelStyle}>
         <h2 style={headingStyle}>{text.hostControlTitle}</h2>
-        {otherHolder ? (
-          <p style={noteStyle}>{text.hostControlHeldByOther(otherHolder)}</p>
-        ) : requestPending ? (
-          <p style={noteStyle}>{text.hostControlPending}</p>
+        {requestPending ? (
+          <>
+            <p style={noteStyle}>{text.hostControlPending}</p>
+            <p style={noteStyle}>{text.hostControlPendingCountdown(remainingSeconds)}</p>
+          </>
         ) : (
-          <button type="button" style={secondaryActionStyle} onClick={onRequestControl}>
-            {text.hostControlTake}
-          </button>
+          <>
+            {otherHolder ? (
+              <p style={noteStyle}>{text.hostControlHeldByOther(otherHolder)}</p>
+            ) : null}
+            {/* Free controls need no permission, so the same button both asks
+                and takes — which of the two it was is visible a moment later. */}
+            <button type="button" style={secondaryActionStyle} onClick={onRequestControl}>
+              {text.hostControlTake}
+            </button>
+          </>
         )}
       </section>
     );
@@ -114,6 +161,45 @@ export function HostControlPanel({
     <section style={panelStyle}>
       <h2 style={headingStyle}>{text.hostControlTitle}</h2>
       <p style={noteStyle}>{text.hostControlActive}</p>
+
+      {/* The handover prompt belongs here, to the player who would lose the
+          controls. Ignoring it is an answer too: the deadline grants them. */}
+      {handoverRequest ? (
+        <div
+          style={{
+            display: "grid",
+            gap: 8,
+            padding: 12,
+            borderRadius: "var(--radius-md)",
+            border: "1px solid var(--accent)",
+            background: "var(--accent-soft)"
+          }}
+        >
+          <strong>{text.hostControlHandoverTitle}</strong>
+          <span style={noteStyle}>
+            {text.hostControlHandoverBody(handoverRequest.playerName)}
+          </span>
+          <span style={noteStyle}>
+            {text.hostControlHandoverCountdown(remainingSeconds)}
+          </span>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              type="button"
+              style={{ ...secondaryActionStyle, flex: 1 }}
+              onClick={() => onResolveControl(handoverRequest.playerId, false)}
+            >
+              {text.hostControlHandoverKeep}
+            </button>
+            <button
+              type="button"
+              style={{ ...actionStyle, flex: 1 }}
+              onClick={() => onResolveControl(handoverRequest.playerId, true)}
+            >
+              {text.hostControlHandoverGive}
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {roundRunning ? (
         <button type="button" style={secondaryActionStyle} onClick={onBackToMenu}>

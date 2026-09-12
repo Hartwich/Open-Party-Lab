@@ -27,9 +27,24 @@ export interface ControllerText {
   hostControlTitle: string;
   hostControlTake: string;
   hostControlPending: string;
+  hostControlPendingCountdown: (seconds: number) => string;
   hostControlHeldByOther: (name: string) => string;
+  hostControlHandoverTitle: string;
+  hostControlHandoverBody: (name: string) => string;
+  hostControlHandoverKeep: string;
+  hostControlHandoverGive: string;
+  hostControlHandoverCountdown: (seconds: number) => string;
+  hostMenuOpen: string;
+  hostMenuTitle: string;
+  hostMenuPausedNote: string;
+  hostMenuResume: string;
+  hostMenuToMainMenu: string;
   hostControlActive: string;
   hostControlRelease: string;
+  themeLabel: string;
+  themeLight: string;
+  themeDark: string;
+  languageLabel: string;
   hostControlChooseGame: string;
   hostControlStartRound: string;
   hostControlBackToMenu: string;
@@ -99,10 +114,27 @@ const controllerText = {
   de: {
     hostControlTitle: "Host-Steuerung",
     hostControlTake: "Steuerung uebernehmen",
-    hostControlPending: "Anfrage laeuft - bitte am Bildschirm bestaetigen.",
+    hostControlPending: "Anfrage laeuft.",
+    hostControlPendingCountdown: (seconds: number) =>
+      `Uebernahme in ${seconds} s, falls niemand widerspricht.`,
     hostControlHeldByOther: (name: string) => `${name} steuert gerade den Host.`,
+    hostControlHandoverTitle: "Steuerung abgeben?",
+    hostControlHandoverBody: (name: string) => `${name} moechte die Steuerung uebernehmen.`,
+    hostControlHandoverKeep: "Behalten",
+    hostControlHandoverGive: "Abgeben",
+    hostControlHandoverCountdown: (seconds: number) =>
+      `Ohne Antwort wechselt sie in ${seconds} s.`,
+    hostMenuOpen: "Host-Menue",
+    hostMenuTitle: "Host-Menue",
+    hostMenuPausedNote: "Die Runde ist angehalten, solange dieses Menue offen ist.",
+    hostMenuResume: "Weiterspielen",
+    hostMenuToMainMenu: "Zum Hauptmenue",
     hostControlActive: "Du steuerst den Host.",
     hostControlRelease: "Steuerung zurueckgeben",
+    themeLabel: "Farbschema",
+    themeLight: "Hell",
+    themeDark: "Dunkel",
+    languageLabel: "Sprache",
     hostControlChooseGame: "Spiel waehlen",
     hostControlStartRound: "Runde starten",
     hostControlBackToMenu: "Zurueck zum Menue",
@@ -192,10 +224,27 @@ const controllerText = {
   en: {
     hostControlTitle: "Host controls",
     hostControlTake: "Take host control",
-    hostControlPending: "Request sent - confirm it on the shared screen.",
+    hostControlPending: "Request sent.",
+    hostControlPendingCountdown: (seconds: number) =>
+      `Taking over in ${seconds}s unless someone objects.`,
     hostControlHeldByOther: (name: string) => `${name} is driving the host.`,
+    hostControlHandoverTitle: "Hand the controls over?",
+    hostControlHandoverBody: (name: string) => `${name} wants to take over.`,
+    hostControlHandoverKeep: "Keep",
+    hostControlHandoverGive: "Hand over",
+    hostControlHandoverCountdown: (seconds: number) =>
+      `Without an answer they get them in ${seconds}s.`,
+    hostMenuOpen: "Host menu",
+    hostMenuTitle: "Host menu",
+    hostMenuPausedNote: "The round is held while this menu is open.",
+    hostMenuResume: "Resume",
+    hostMenuToMainMenu: "Back to main menu",
     hostControlActive: "You are driving the host.",
     hostControlRelease: "Hand control back",
+    themeLabel: "Theme",
+    themeLight: "Light",
+    themeDark: "Dark",
+    languageLabel: "Language",
     hostControlChooseGame: "Choose a game",
     hostControlStartRound: "Start round",
     hostControlBackToMenu: "Back to menu",

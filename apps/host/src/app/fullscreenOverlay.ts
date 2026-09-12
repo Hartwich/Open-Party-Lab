@@ -63,13 +63,6 @@ export function mountFullscreenOverlay(client: HostSocketClient): () => void {
     justifyContent: "center"
   });
 
-  const menuIcon = `
-    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
-      <path d="M5 7h14" />
-      <path d="M5 12h14" />
-      <path d="M5 17h14" />
-    </svg>
-  `;
   const fullscreenIcon = `
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
       <path d="M8 4H4v4" />
@@ -83,9 +76,7 @@ export function mountFullscreenOverlay(client: HostSocketClient): () => void {
     </svg>
   `;
 
-  const gameSelectButton = createChromeIconButton("Spieluebersicht", menuIcon);
   const fullscreenButton = createChromeIconButton("Vollbild", fullscreenIcon);
-  overlay.appendChild(gameSelectButton);
   overlay.appendChild(fullscreenButton);
   document.body.appendChild(overlay);
 
@@ -96,16 +87,6 @@ export function mountFullscreenOverlay(client: HostSocketClient): () => void {
     setChromeIconButtonState(fullscreenButton, {
       active,
       label: active ? `${text.exitFullscreen} (F)` : `${text.fullscreen} (F)`
-    });
-  }
-
-  function updateGameSelectButton(): void {
-    const state = client.getState();
-    const text = getHostText(state.room?.language ?? state.preferredLanguage);
-    const canOpenCatalog = Boolean(state.room);
-    setChromeIconButtonState(gameSelectButton, {
-      disabled: !canOpenCatalog,
-      label: canOpenCatalog ? `${text.gameSelectionFallback} (G)` : text.waitingForRoom
     });
   }
 
@@ -158,7 +139,7 @@ export function mountFullscreenOverlay(client: HostSocketClient): () => void {
     }
 
     if (key === "g") {
-      if (gameSelectButton.disabled) {
+      if (!client.getState().room) {
         return;
       }
 
@@ -171,14 +152,6 @@ export function mountFullscreenOverlay(client: HostSocketClient): () => void {
   fullscreenButton.addEventListener("click", (event) => {
     (event.currentTarget as HTMLButtonElement).blur();
     void toggleFullscreen();
-  });
-  gameSelectButton.addEventListener("click", (event) => {
-    if (gameSelectButton.disabled) {
-      return;
-    }
-
-    (event.currentTarget as HTMLButtonElement).blur();
-    client.returnToGameSelection();
   });
 
   targetDocument.addEventListener("fullscreenchange", updateButtonLabel);
@@ -193,11 +166,9 @@ export function mountFullscreenOverlay(client: HostSocketClient): () => void {
 
   const unsubscribe = client.subscribe(() => {
     updateButtonLabel();
-    updateGameSelectButton();
     updateOverlayVisibility();
   });
   updateButtonLabel();
-  updateGameSelectButton();
   updateOverlayVisibility();
 
   return () => {

@@ -1,5 +1,7 @@
 import { startTransition, useEffect, useState } from "react";
+import { hasHostControl } from "@open-party-lab/protocol";
 import { ControllerPage } from "../pages/ControllerPage.js";
+import { HostGameMenu } from "../controller-ui/common/HostGameMenu.js";
 import { JoinPage } from "../pages/JoinPage.js";
 import { LobbyPage } from "../pages/LobbyPage.js";
 import { NotFoundPage } from "../pages/NotFoundPage.js";
@@ -99,6 +101,9 @@ export function ControllerApp() {
           onSetPlayerSetup={(selectionKey, value) => controllerClient.setPlayerSetup(selectionKey, value)}
           onRequestHostControl={() => controllerClient.requestHostControl()}
           onReleaseHostControl={() => controllerClient.releaseHostControl()}
+          onResolveHostControl={(playerId, grant) =>
+            controllerClient.resolveHostControl(playerId, grant)
+          }
           onSelectGame={(gameId) => controllerClient.selectGame(gameId)}
           onHostAction={(gameId, action) => controllerClient.sendGameHostAction(gameId, action)}
           onStartRound={() => controllerClient.startRound()}
@@ -108,12 +113,26 @@ export function ControllerApp() {
       ) : null}
 
       {page === "controller" ? (
-        <ControllerPage
-          state={state}
-          onLeaveRoom={() => controllerClient.leaveRoom()}
-          onInput={(input) => controllerClient.sendInput(input)}
-          onSetReady={(isReady) => controllerClient.setReady(isReady)}
-        />
+        <>
+          <ControllerPage
+            state={state}
+            onLeaveRoom={() => controllerClient.leaveRoom()}
+            onInput={(input) => controllerClient.sendInput(input)}
+            onSetReady={(isReady) => controllerClient.setReady(isReady)}
+          />
+          {/* Only the phone driving the room gets this, and only while a round
+              is running — it is the host's menu, not a player's. */}
+          {state.room && hasHostControl(state.room.hostControl, state.player?.id) ? (
+            <HostGameMenu
+              room={state.room}
+              onSetPaused={(paused) => controllerClient.setRoundPaused(paused)}
+              onSetTheme={(theme) => controllerClient.setTheme(theme)}
+              onSetLanguage={(language) => controllerClient.setRoomLanguage(language)}
+              onBackToMenu={() => controllerClient.returnToGameSelection()}
+              onReleaseControl={() => controllerClient.releaseHostControl()}
+            />
+          ) : null}
+        </>
       ) : null}
 
       {page === "missing" ? <NotFoundPage language={state.room?.language ?? state.preferredLanguage} /> : null}

@@ -8,7 +8,7 @@ import type {
   ServerToClientEvents,
   SupportedLanguage
 } from "@open-party-lab/protocol";
-import { applyThemeVariables, normalizeThemeName } from "@open-party-lab/ui-kit";
+import { applyThemeVariables, normalizeThemeName, type ThemeName } from "@open-party-lab/ui-kit";
 import { io, type Socket } from "socket.io-client";
 import {
   readStoredControllerLanguage,
@@ -455,8 +455,11 @@ export class ControllerSocketClient {
   // --- remote host control -------------------------------------------------
 
   /**
-   * Asks the shared screen for the host controls. The screen answers with
-   * `host-control:resolve`; the outcome arrives via the next `room:state`.
+   * Takes the host controls.
+   *
+   * Free controls are handed over at once. If another player holds them, this
+   * opens a handover they have thirty seconds to refuse; either way the outcome
+   * arrives via `room:state` rather than from this call.
    */
   requestHostControl(): void {
     if (!this.state.room || !this.state.player) {
@@ -466,6 +469,31 @@ export class ControllerSocketClient {
     this.socket.emit(
       "host-control:request",
       { roomCode: this.state.room.code, playerId: this.state.player.id },
+      (result) => {
+        if (!result.ok) {
+          this.updateState({ error: result.error });
+          return;
+        }
+
+        this.updateState({ room: result.data.room, error: null });
+      }
+    );
+  }
+
+  /**
+   * Answers a handover aimed at this phone.
+   *
+   * Only the player who currently holds the controls is being asked, so this is
+   * how they keep or give them up before the thirty seconds run out.
+   */
+  resolveHostControl(playerId: string, grant: boolean): void {
+    if (!this.state.room) {
+      return;
+    }
+
+    this.socket.emit(
+      "host-control:resolve",
+      { roomCode: this.state.room.code, playerId, grant },
       (result) => {
         if (!result.ok) {
           this.updateState({ error: result.error });
@@ -515,6 +543,61 @@ export class ControllerSocketClient {
     }
 
     this.socket.emit("game:host-action", { roomCode: this.state.room.code, gameId, action });
+  }
+
+  /**
+   * Host action: switch the room's skin.
+   *
+   * Room-wide, exactly as from the shared screen — the server already
+   * authorised the holder for this, the phone simply had no way to ask.
+   */
+  setTheme(theme: ThemeName): void {
+    if (!this.state.room) {
+      return;
+    }
+
+    this.socket.emit("room:set-theme", { roomCode: this.state.room.code, theme }, (result) => {
+      if (!result.ok) {
+        this.updateState({ error: result.error });
+        return;
+      }
+
+      this.updateState({ room: result.data.room, error: null });
+    });
+  }
+
+  /** Host action: switch the room's language. */
+  setRoomLanguage(language: SupportedLanguage): void {
+    if (!this.state.room) {
+      return;
+    }
+
+    this.socket.emit(
+      "room:set-language",
+      { roomCode: this.state.room.code, language },
+      (result) => {
+        if (!result.ok) {
+          this.updateState({ error: result.error });
+          return;
+        }
+
+        this.updateState({ room: result.data.room, error: null });
+      }
+    );
+  }
+
+  /**
+   * Host action: hold or release the running round.
+   *
+   * The phone pauses before opening the host menu, so reading the settings or
+   * stepping back to the catalog does not cost everyone the round in progress.
+   */
+  setRoundPaused(paused: boolean): void {
+    if (!this.state.room) {
+      return;
+    }
+
+    this.socket.emit("round:pause", { roomCode: this.state.room.code, paused });
   }
 
   /** Host action: start the current round. */

@@ -10,7 +10,7 @@ import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
 import { getHostText } from "../i18n/hostText.js";
 import { themeNames, type ThemeName } from "@open-party-lab/ui-kit";
 import { hostTheme, partyTheme } from "../ui/theme/theme.js";
-import { getSelectedGameChrome } from "../games/selectedGame.js";
+import { readHostMusicVolume, setHostMusicVolume } from "./backgroundMusic.js";
 import { OPEN_HOST_CONTROLS_EVENT, SHELL_ACTIVE_ATTRIBUTE } from "../shell/hostShell.js";
 import {
   applyStyles,
@@ -251,6 +251,15 @@ export function mountHostControlsOverlay(
   connectionBadge.style.whiteSpace = "pre-line";
   meta.appendChild(connectionBadge);
 
+  const menuButton = createChromeTextButton("", "neutral");
+  card.appendChild(menuButton);
+  menuButton.addEventListener("click", () => {
+    client.returnToGameSelection();
+    isOpen = false;
+    writeStoredBoolean(openPreferenceKey, false);
+    syncView();
+  });
+
   const fpsSection = document.createElement("section");
   fpsSection.style.display = "grid";
   fpsSection.style.gap = "8px";
@@ -301,6 +310,63 @@ export function mountHostControlsOverlay(
       syncView();
     });
   }
+
+  /*
+   * Music volume.
+   *
+   * A slider rather than a set of steps: this is the one setting people reach
+   * for mid-evening because the room got louder, and it wants a nudge, not a
+   * decision. The percentage next to the label is there so it can be set from
+   * across the room and read back at a glance.
+   */
+  const volumeSection = document.createElement("section");
+  volumeSection.style.display = "grid";
+  volumeSection.style.gap = "8px";
+  card.appendChild(volumeSection);
+
+  const volumeHeader = document.createElement("div");
+  volumeHeader.style.display = "flex";
+  volumeHeader.style.alignItems = "baseline";
+  volumeHeader.style.justifyContent = "space-between";
+  volumeHeader.style.gap = "12px";
+  volumeSection.appendChild(volumeHeader);
+
+  const volumeLabel = document.createElement("div");
+  volumeLabel.style.fontSize = "12px";
+  volumeLabel.style.letterSpacing = "0.12em";
+  volumeLabel.style.textTransform = "uppercase";
+  volumeLabel.style.color = "var(--muted)";
+  volumeHeader.appendChild(volumeLabel);
+
+  const volumeReadout = document.createElement("output");
+  volumeReadout.style.fontFamily = hostTheme.monoFont;
+  volumeReadout.style.fontSize = "16px";
+  volumeReadout.style.color = hostTheme.text;
+  volumeHeader.appendChild(volumeReadout);
+
+  const volumeSlider = document.createElement("input");
+  volumeSlider.type = "range";
+  volumeSlider.min = "0";
+  volumeSlider.max = "100";
+  volumeSlider.step = "5";
+  volumeSlider.value = String(Math.round(readHostMusicVolume() * 100));
+  volumeSlider.style.width = "100%";
+  volumeSlider.style.minHeight = "40px";
+  volumeSlider.style.accentColor = hostTheme.accent;
+  volumeSlider.style.cursor = "pointer";
+  volumeSection.appendChild(volumeSlider);
+
+  function renderVolume(): void {
+    const percent = Number(volumeSlider.value);
+    volumeReadout.textContent = percent === 0 ? "—" : `${percent}%`;
+  }
+
+  volumeSlider.addEventListener("input", () => {
+    setHostMusicVolume(Number(volumeSlider.value) / 100);
+    renderVolume();
+  });
+
+  renderVolume();
 
   const themeSection = document.createElement("section");
   themeSection.style.display = "grid";
@@ -485,8 +551,11 @@ export function mountHostControlsOverlay(
     const totalPlayers = room?.players.length ?? 0;
     const lifecycle = getRoomPhase(room) ?? "lobby";
 
-    roomBadge.textContent = room?.code ?? "----";
-    roomBadge.style.display = getSelectedGameChrome(currentState).roomCode ? "" : "none";
+    roomBadge.textContent = `${text.roomCode}\n${room?.code ?? "----"}`;
+    roomBadge.style.whiteSpace = "pre-line";
+    roomBadge.style.fontSize = "20px";
+    menuButton.textContent = `${text.backToMenu} (G)`;
+    menuButton.disabled = !room;
     roomBadge.style.opacity = room ? "1" : "0.65";
     connectionBadge.textContent = room
       ? `${gameName}\n${connectedPlayers}/${totalPlayers} ${text.players.toLowerCase()} | ${text.lifecycle(lifecycle)}`
@@ -591,6 +660,8 @@ export function mountHostControlsOverlay(
     fpsLabel.textContent = text.fpsLabel;
     languageLabel.textContent = text.languageLabel;
     themeLabel.textContent = text.themeLabel;
+    volumeLabel.textContent = text.musicVolumeLabel;
+    volumeSlider.setAttribute("aria-label", text.musicVolumeLabel);
 
     for (const [theme, button] of themeButtonMap) {
       const active = (currentState.room?.theme ?? "light") === theme;

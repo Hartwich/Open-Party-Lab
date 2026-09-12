@@ -15,24 +15,15 @@ export interface CatalogOptions {
   locked: boolean;
 }
 
-/**
- * How many tiles are shown before the grid collapses into a "more" tile.
+/*
+ * The shelf shows every game, always.
  *
- * The catalog scrolls, so this is not a hard limit — it exists so an open
- * setup card never pushes the rest of the shelf out of sight. Selecting the
- * "more" tile is not a mode: it simply raises the cap for this render.
+ * It used to cap at eleven tiles and hide the rest behind a "more" tile, on the
+ * assumption that an open setup card had to share the screen with the shelf.
+ * Selecting a game now replaces the shelf entirely, so there is nothing left to
+ * make room for — and a catalog that hides half its contents is a worse way to
+ * choose than a grid that scrolls.
  */
-const COLLAPSED_TILE_LIMIT = 11;
-
-let expanded = false;
-
-export function setCatalogExpanded(value: boolean): void {
-  expanded = value;
-}
-
-export function isCatalogExpanded(): boolean {
-  return expanded;
-}
 
 /** A tinted plate and a matching stroke, both derived from the game's hue. */
 function tileVariables(game: AvailableGameDto): string {
@@ -201,19 +192,5 @@ function renderOpenGameCard(
 }
 
 export function renderCatalog(options: CatalogOptions): string {
-  const { games, selectedGameId, language } = options;
-  const text = getHostText(language);
-  const rest = games.filter((game) => game.id !== selectedGameId);
-  const capped = expanded || rest.length <= COLLAPSED_TILE_LIMIT;
-  const shown = capped ? rest : rest.slice(0, COLLAPSED_TILE_LIMIT);
-  const hidden = rest.length - shown.length;
-
-  const moreTile =
-    hidden > 0
-      ? `<button type="button" class="opl-tile-more" data-action="expand-catalog">
-           ${renderUiIcon("dots", 22)}<span>${escapeHtml(text.shellMoreGames(hidden))}</span>
-         </button>`
-      : "";
-
-  return shown.map((game) => renderTile(game, language)).join("") + moreTile;
+  return options.games.map((game) => renderTile(game, options.language)).join("");
 }

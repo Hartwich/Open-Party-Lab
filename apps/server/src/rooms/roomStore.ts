@@ -45,7 +45,26 @@ export interface RoundRecord {
  */
 export interface HostControlRecord {
   holderPlayerId: string | null;
-  pendingRequest: { playerId: string; requestedAt: number } | null;
+  pendingRequest: { playerId: string; requestedAt: number; expiresAt: number } | null;
+}
+
+/**
+ * A paused round.
+ *
+ * Pausing cannot simply stop the tick: every deadline a game has stored —
+ * `phaseEndsAt`, a round's `finishAt` — is an absolute timestamp, so a round
+ * resumed after a minute would find all of them long expired and race through
+ * its phases. Instead the room keeps its own clock: `pausedTotalMs` is
+ * subtracted from wall time before anything reaches a game, so from the game's
+ * side the pause never happened.
+ */
+export interface RoomClock {
+  /** Wall-clock moment the round was paused, or null while it runs. */
+  pausedAt: number | null;
+  /** Milliseconds this room has spent paused, across all pauses. */
+  pausedTotalMs: number;
+  /** Player who paused, so the screen can say who. Null when the screen did. */
+  pausedByPlayerId: string | null;
 }
 
 export interface RoomRecord {
@@ -59,6 +78,7 @@ export interface RoomRecord {
   hostName: string;
   hostSocketId: string | null;
   hostControl: HostControlRecord;
+  clock: RoomClock;
   selectedGameId: string | null;
   gameSettingsByGameId: Record<string, Record<string, unknown>>;
   roundCounter: number;

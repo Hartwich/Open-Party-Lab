@@ -89,6 +89,16 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
   const fanWidth = cardWidth + step * Math.max(0, hand.length - 1);
   const selectedCard = hand.find((card) => card.cardId === selectedCardId) ?? null;
   const wideActions = model.actions.length > 5;
+  /**
+   * Der einzige Text, der aufs Handy gehört: warum gerade nichts geht.
+   *
+   * Spielname, Mitspieler, Punkte und Trumpfansage stehen auf dem grossen
+   * Bildschirm. Hier bleibt nur eine Meldung, und nur wenn es eine gibt -
+   * eine dauerhaft belegte Zeile würde den Karten Platz wegnehmen.
+   */
+  const notice =
+    model.lastError ??
+    (selectedCard && !selectedCard.playable ? selectedCard.hint : undefined);
 
   function playCard(card: CardTableHandCardState): void {
     if (!card.playable || model.disabled) {
@@ -121,11 +131,13 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
     <div
       style={{
         display: "grid",
-        gridTemplateRows: "minmax(120px, 1fr) auto auto",
-        gap: 8,
+        // Zwei Reihen: Das Blatt nimmt allen Platz, die Knöpfe sitzen darunter
+        // am unteren Rand - dort, wo der Daumen ohnehin liegt.
+        gridTemplateRows: "minmax(0, 1fr) auto",
+        gap: 6,
         height: "100%",
         minHeight: "min(84dvh, 760px)",
-        padding: 8,
+        padding: "6px 6px 4px",
         background:
           "radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--sage) 26%, var(--paper)) 0%, var(--paper) 70%)",
         borderRadius: 16
@@ -143,6 +155,31 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
             overflow: "hidden"
           }}
         >
+          {notice ? (
+            <span
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: 6,
+                transform: "translateX(-50%)",
+                maxWidth: "92%",
+                padding: "3px 12px",
+                borderRadius: 999,
+                background: model.lastError ? "var(--danger)" : "var(--surface-raised)",
+                color: model.lastError ? "var(--on-accent)" : "var(--muted)",
+                border: model.lastError ? "none" : "1px solid var(--line)",
+                fontSize: "0.78rem",
+                fontWeight: 600,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                zIndex: 5
+              }}
+            >
+              {notice}
+            </span>
+          ) : null}
+
           <div
             style={{
               position: "absolute",
@@ -258,42 +295,6 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
             );
           })}
         </div>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          flexWrap: "wrap",
-          minHeight: 20,
-          color: model.lastError ? "var(--danger)" : "var(--muted)",
-          fontSize: "0.78rem",
-          lineHeight: 1.3
-        }}
-      >
-        {model.privateNote ? (
-          <span style={{ color: "var(--ink)", fontWeight: 600 }}>{model.privateNote}</span>
-        ) : null}
-        {model.conditionLabel ? (
-          <span
-            style={{
-              padding: "2px 9px",
-              borderRadius: 999,
-              background: "var(--accent-soft)",
-              color: "var(--ink)",
-              fontWeight: 600
-            }}
-          >
-            {model.conditionSymbol ? `${model.conditionSymbol} ` : ""}
-            {model.conditionLabel}
-          </span>
-        ) : null}
-        <span>
-            {selectedCard && !selectedCard.playable && selectedCard.hint
-              ? selectedCard.hint
-              : model.helperText}
-        </span>
       </div>
 
       {orientation === "portrait" ? (

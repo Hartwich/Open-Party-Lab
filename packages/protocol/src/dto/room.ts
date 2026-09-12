@@ -4,6 +4,9 @@ import type { ThemeName } from "@open-party-lab/ui-kit";
 import type { SupportedLanguage } from "@open-party-lab/game-core";
 import type { PlayerSnapshot } from "./player.js";
 
+/** Shared warning/extension window for the hosted room lifetime. */
+export const ROOM_EXTENSION_WINDOW_MS = 5 * 60_000;
+
 export type RoomLifecycle =
   | "lobby"
   | "game_selected"
@@ -39,11 +42,26 @@ export interface RoomSnapshot {
   /** Who is currently allowed to drive the room. */
   hostControl: HostControlSnapshot;
   lifecycle: RoomLifecycle;
+  /**
+   * The round is held: the simulation and every phase timer stand still.
+   *
+   * Set while whoever drives the room has the host menu open. Null while the
+   * round runs; carries the player who paused when a phone did it, so the
+   * screen can say whose menu everyone is waiting on.
+   */
+  pausedBy?: { playerId: string | null; playerName: string | null } | null;
   selectedGameId: string | null;
   selectedGameSettings?: Record<string, string | number | boolean>;
   availableGames: AvailableGameDto[];
   players: PlayerSnapshot[];
   currentRound: RoundSummary | null;
+}
+
+/** True while the round is held, whoever did it. */
+export function isRoomPaused(
+  room: Pick<RoomSnapshot, "pausedBy"> | null | undefined
+): boolean {
+  return Boolean(room?.pausedBy);
 }
 
 export type RoomPhase = RoomLifecycle | PublicGamePhase;

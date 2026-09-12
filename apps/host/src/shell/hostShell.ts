@@ -16,12 +16,7 @@ import { resolveHostSurface } from "../app/hostSurface.js";
 import { requiresReadyAutoStart } from "../app/roundStartPolicy.js";
 import { getHostText } from "../i18n/hostText.js";
 import { installShellStyles } from "./shellStyles.js";
-import {
-  isCatalogExpanded,
-  renderCatalog,
-  renderOpenGame,
-  setCatalogExpanded
-} from "./shellCatalog.js";
+import { renderCatalog, renderOpenGame } from "./shellCatalog.js";
 import { renderRoomCard, renderRoster, type RailOptions } from "./shellRail.js";
 import { renderUiIcon } from "./gameGlyphs.js";
 import { escapeHtml } from "./escapeHtml.js";
@@ -288,7 +283,6 @@ export function mountHostShell(client: HostSocketClient): () => void {
       language,
       room.selectedGameId ?? "",
       locked ? "1" : "0",
-      isCatalogExpanded() ? "1" : "0",
       room.availableGames.map((game) => game.id).join(","),
       JSON.stringify(room.selectedGameSettings ?? {})
     ].join("|");
@@ -301,13 +295,19 @@ export function mountHostShell(client: HostSocketClient): () => void {
         language,
         locked
       );
-      nodes.catalog.innerHTML = renderCatalog({
-        games: room.availableGames,
-        selectedGameId: room.selectedGameId,
-        settings: room.selectedGameSettings ?? {},
-        language,
-        locked
-      });
+      // One thing at a time: choosing, or setting up what was chosen. The shelf
+      // behind an open setup card was only a way to lose your place, and the
+      // dock's catalog button is the way back.
+      nodes.catalog.hidden = Boolean(selected);
+      nodes.catalog.innerHTML = selected
+        ? ""
+        : renderCatalog({
+            games: room.availableGames,
+            selectedGameId: room.selectedGameId,
+            settings: room.selectedGameSettings ?? {},
+            language,
+            locked
+          });
     }
 
     const roomSignature = `${room.code}|${qrDataUrl ? "1" : "0"}|${language}`;
@@ -365,7 +365,6 @@ export function mountHostShell(client: HostSocketClient): () => void {
       // language, theme or catalog while a game held the screen.
       signatures = { ...emptySignatures };
       appliedTheme = null;
-      setCatalogExpanded(false);
     }
   }
 
@@ -388,11 +387,6 @@ export function mountHostShell(client: HostSocketClient): () => void {
         }
         break;
       }
-      case "expand-catalog":
-        setCatalogExpanded(true);
-        signatures.catalog = "";
-        render(state);
-        break;
       case "back":
         client.returnToGameSelection();
         break;

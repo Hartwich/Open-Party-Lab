@@ -59,6 +59,7 @@ export class HostSocketClient {
   private roomRequested = false;
   private listenersBound = false;
   private notifyScheduled = false;
+  private serverClockOffsetMs = 0;
   /** Set when a room update switched the theme, so scenes force a redraw. */
   private themeChanged = false;
 
@@ -85,6 +86,9 @@ export class HostSocketClient {
     }
 
     this.listenersBound = true;
+    this.socket.on("server:hello", ({ serverTime }) => {
+      this.serverClockOffsetMs = serverTime - Date.now();
+    });
     this.socket.on("connect", () => {
       this.updateState({ connected: true, error: null });
       this.requestHostRoom();
@@ -283,15 +287,29 @@ export class HostSocketClient {
     });
   }
 
-  extendRoomLifetime(): void {
+  getServerTime(): number {
+    return Date.now() + this.serverClockOffsetMs;
+  }
+
+  async extendRoomLifetime(): Promise<string | null> {
     const roomCode = this.state.room?.code;
-    if (!roomCode) return;
-    this.socket.emit("room:extend-lifetime", { roomCode }, (result) => {
-      if (!result.ok) {
-        this.updateState({ error: result.error });
-        return;
-      }
-      this.updateState({ room: result.data.room, error: null });
+    const en = this.state.room?.language === "en";
+    if (!roomCode || !this.socket.connected) {
+      return en ? "No connection. Please try again." : "Keine Verbindung. Bitte erneut versuchen.";
+    }
+    return new Promise((resolve) => {
+      this.socket.timeout(8_000).emit("room:extend-lifetime", { roomCode }, (error, result) => {
+        if (error) {
+          resolve(en ? "No response. Please try again." : "Keine Antwort. Bitte erneut versuchen.");
+          return;
+        }
+        if (!result.ok) {
+          resolve(result.error);
+          return;
+        }
+        this.updateState({ room: result.data.room, error: null });
+        resolve(null);
+      });
     });
   }
 

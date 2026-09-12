@@ -114,36 +114,33 @@ async function main() {
   check("Zwei Spieler treten bei", j1.ok && j2.ok);
   const player1 = j1.data.player;
 
-  // --- host control takeover (Etappe 3) ------------------------------------
+  // --- host control takeover ------------------------------------------------
+  // Nobody holds the controls, so asking for them is taking them: there is no
+  // one standing at the shared screen to approve anything.
   const req = await emitAck(p1, "host-control:request", {
     roomCode: room.code,
     playerId: player1.id
   });
-  check("Controller kann Steuerung anfragen", req.ok, req.ok ? "" : req.error);
+  check("Controller uebernimmt die Steuerung sofort", req.ok, req.ok ? "" : req.error);
   check(
-    "Anfrage erscheint im Raum-Snapshot",
-    req.ok && req.data.room.hostControl.pendingRequest?.playerId === player1.id
+    "Die Steuerung liegt beim Controller",
+    req.ok && req.data.room.hostControl.holderPlayerId === player1.id
+  );
+  check(
+    "Es bleibt keine Anfrage offen",
+    req.ok && req.data.room.hostControl.pendingRequest === null
   );
 
-  const denyByHolder = await emitAck(p2, "host-control:resolve", {
+  // A player who holds nothing cannot hand anything to anyone.
+  const resolveByOutsider = await emitAck(p2, "host-control:resolve", {
     roomCode: room.code,
     playerId: player1.id,
     grant: true
   });
   check(
-    "Nur der Bildschirm darf entscheiden",
-    denyByHolder.ok === false,
-    denyByHolder.ok ? "wurde faelschlich erlaubt" : denyByHolder.error
-  );
-
-  const granted = await emitAck(host, "host-control:resolve", {
-    roomCode: room.code,
-    playerId: player1.id,
-    grant: true
-  });
-  check(
-    "Bildschirm erlaubt die Uebernahme",
-    granted.ok && granted.data.room.hostControl.holderPlayerId === player1.id
+    "Ein Spieler ohne Steuerung darf nicht entscheiden",
+    resolveByOutsider.ok === false,
+    resolveByOutsider.ok ? "wurde faelschlich erlaubt" : resolveByOutsider.error
   );
 
   // A phone without control must not drive the room.

@@ -10,13 +10,18 @@ import {
 /**
  * Shared-screen side of remote host control.
  *
- * Shows the approval prompt while a phone is asking for the controls — and
- * nothing else. Who currently holds the controls is status, not an interruption,
- * so it lives in the host settings panel instead of sitting on the shared screen
- * for the rest of the evening.
+ * Two things reach this layer, and only while they are true: a handover that is
+ * waiting on an answer, and a round that somebody has paused.
  *
- * Deliberately a DOM overlay rather than a Phaser scene: the prompt has to stay
- * visible on top of any game, including the ones that own the whole canvas.
+ * The screen is no longer asked when a phone takes *its* controls — there is
+ * nobody standing at the screen to press a button, and a prompt nobody answers
+ * is a dead end, so a free set of controls is simply taken. What remains is a
+ * handover between two players: the holder decides, and the screen sees the
+ * same question because it is the room's fallback if that phone is unattended.
+ * Either way the deadline in the request settles it.
+ *
+ * Deliberately a DOM overlay rather than a Phaser scene: both messages have to
+ * stay visible on top of any game, including the ones that own the whole canvas.
  */
 export function mountHostControlOverlay(client: HostSocketClient): () => void {
   const overlay = document.createElement("div");
@@ -81,20 +86,36 @@ export function mountHostControlOverlay(client: HostSocketClient): () => void {
   const unsubscribe = client.subscribe((state) => {
     const text = getHostText(state.room?.language ?? state.preferredLanguage);
     const request = state.room?.hostControl.pendingRequest ?? null;
+    const pausedBy = state.room?.pausedBy ?? null;
 
     pendingPlayerId = request?.playerId ?? null;
 
-    if (!request) {
-      overlay.style.display = "none";
+    if (request) {
+      overlay.style.display = "block";
+      actions.style.display = "flex";
+      title.textContent = text.hostControlRequestTitle;
+      body.textContent = text.hostControlRequestBody(request.playerName);
+      hint.textContent = text.hostControlRequestHint;
+      allowButton.textContent = text.hostControlAllow;
+      denyButton.textContent = text.hostControlDeny;
       return;
     }
 
-    overlay.style.display = "block";
-    title.textContent = text.hostControlRequestTitle;
-    body.textContent = text.hostControlRequestBody(request.playerName);
-    hint.textContent = text.hostControlRequestHint;
-    allowButton.textContent = text.hostControlAllow;
-    denyButton.textContent = text.hostControlDeny;
+    // A frozen game with no explanation looks like a crash, so the screen says
+    // who everyone is waiting on. There is nothing for the screen to press —
+    // the phone that opened the menu is the one that closes it.
+    if (pausedBy) {
+      overlay.style.display = "block";
+      actions.style.display = "none";
+      title.textContent = text.roundPausedTitle;
+      body.textContent = pausedBy.playerName
+        ? text.roundPausedByPlayer(pausedBy.playerName)
+        : text.roundPausedByScreen;
+      hint.textContent = text.roundPausedHint;
+      return;
+    }
+
+    overlay.style.display = "none";
   });
 
   return () => {

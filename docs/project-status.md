@@ -23,6 +23,8 @@ Platform:
 - host DEV automation bridge for browser checks exposed only by the Vite dev host
 - portable Windows release assembly with a one-click launcher, bundled Node.js runtime, same-origin host/controller assets, and all known games
 - hosted room isolation with a 20-room capacity, inactive-room eviction, ten-minute empty-room cleanup, and a one-hour room lifetime that the host can extend by one hour during the final five minutes
+- hosted expiry reminders use the server clock and remain top-centre above both games and catalog; extension requests show pending, error, and success feedback, and the five-minute window is shared with the server
+- host settings expose the room code and return-to-menu action; floating room-code and hamburger overlays are removed, and catalog artwork is clipped to rounded tile corners
 - Render hosted builds download the public game repositories as GitHub source archives, so assembling all games does not depend on interactive Git credentials inside the build container
 
 Optional local game repos:
@@ -60,7 +62,7 @@ Lobby/setup:
 
 - most included games are still alpha and may need rule, pacing, scoring, UI, and balancing changes;
 - Magic Arena, Magic Duell, Arena Survivor, MinionsTD, Zeichnen & Erraten, Schaetzorama, Chaos-Kommando, Flatterfluff, Word Tiles, and Drift Racer are the recommended alpha/beta set, but still need normal playtesting and refinement;
-- Schaetzorama now shuffles ranking items and assignment terms once per round, keeps the final paid copy preview visible at zero remaining jokers, and uses direct question/player choices on the phone. Scores and solutions are host-only; every round ends with animated overall rank changes (ties share ranks). Music uses 64-bar arrangements at 100/104 BPM with a quieter reveal mix. Its interface is bilingual, but most legacy question texts still fall back to German in English rooms;
+- Schaetzorama now shuffles ranking items and assignment terms once per round, keeps the final paid copy preview visible at zero remaining jokers, and uses direct question/player choices on the phone. Scores and solutions are host-only; every round ends with animated overall rank changes (ties share ranks). Each category reveal now compares every player's submitted answer with the solution: numeric deviations, individual ranking positions, and each assignment, including missing and copied answers. The reveal window is 50 seconds to allow time to read these comparisons. Music uses 64-bar arrangements at 100/104 BPM with a quieter reveal mix. Its interface is bilingual, but most legacy question texts still fall back to German in English rooms;
 - persistent storage is not wired for production use;
 - the public Render deployment is suitable for testing, but free-instance cold starts and ephemeral in-memory rooms remain production limitations;
 - no formal end-to-end test suite exists yet;

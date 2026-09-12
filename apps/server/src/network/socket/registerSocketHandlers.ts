@@ -1,5 +1,5 @@
 import { normalizeLanguage, type GamePlayerSetupDefinition } from "@open-party-lab/game-core";
-import { hasActiveRound } from "@open-party-lab/protocol";
+import { hasActiveRound, ROOM_EXTENSION_WINDOW_MS } from "@open-party-lab/protocol";
 import type {
   AckResult,
   ClientToServerEvents,
@@ -254,6 +254,9 @@ export function registerSocketHandlers({
   }
 
   function startReadyLockedRound(room: NonNullable<ReturnType<RoomManager["getRoom"]>>) {
+    // Every path into a new round goes through here, so this is the one place
+    // that has to guarantee it does not begin frozen.
+    roomManager.clearPause(room);
     const startedState = gameRuntime.startRound(room);
 
     if (!startedState) {
@@ -450,7 +453,7 @@ export function registerSocketHandlers({
         return;
       }
 
-      if (socket.data.role !== "host" || socket.data.roomCode !== room.code) {
+      if (socket.data.role !== "host" || socket.data.roomCode !== room.code || room.hostSocketId !== socket.id) {
         ack(ackError(en ? "Only the host can extend the room." : "Nur der Host kann den Raum verlaengern."));
         return;
       }
@@ -460,7 +463,7 @@ export function registerSocketHandlers({
         return;
       }
 
-      if (room.expiresAt - now() > 5 * 60_000) {
+      if (room.expiresAt - now() > ROOM_EXTENSION_WINDOW_MS) {
         ack(ackError(en ? "Room extension is available during the final five minutes only." : "Die Raumverlaengerung ist erst in den letzten fuenf Minuten moeglich."));
         return;
       }
@@ -824,11 +827,8 @@ export function registerSocketHandlers({
         return;
       }
 
-      if (room.hostControl.holderPlayerId && room.hostControl.holderPlayerId !== payload.playerId) {
-        ack(ackError(text.hostControlAlreadyHeld));
-        return;
-      }
-
+      // Free controls are taken, not requested; only a handover between two
+      // players is a question, and the room manager decides which this is.
       roomManager.requestHostControl(room, payload.playerId);
 
       ack({ ok: true, data: { room: stateBroadcaster.createRoomSnapshot(room) } });
@@ -844,9 +844,17 @@ export function registerSocketHandlers({
       }
       const text = socketText(room.language === "en");
 
-      // Only the shared screen decides, never a delegated controller — that
-      // would let a holder grant control to someone else.
-      if (socket.data.role !== "host" || socket.data.roomCode !== room.code) {
+      // The question is put to whoever would lose the controls, so the current
+      // holder answers it. The shared screen may answer too — it owns the room
+      // and is the fallback when the holder's phone is unattended. A player who
+      // holds nothing still cannot hand anything to anyone.
+      const isScreen = socket.data.role === "host" && socket.data.roomCode === room.code;
+      const isCurrentHolder =
+        socket.data.role === "controller" &&
+        socket.data.roomCode === room.code &&
+        roomManager.hasHostControl(room, socket.data.playerId);
+
+      if (!isScreen && !isCurrentHolder) {
         ack(ackError(text.hostControlScreenOnly));
         return;
       }
@@ -882,6 +890,44 @@ export function registerSocketHandlers({
 
       ack({ ok: true, data: { room: stateBroadcaster.createRoomSnapshot(room) } });
       stateBroadcaster.broadcastRoomState(room);
+    });
+
+    /**
+     * Holds or releases the running round.
+     *
+     * Whoever drives the room may pause it, which is what makes the host menu
+     * usable mid-game: opening settings or heading back to the catalog no
+     * longer costs everyone the round they were playing.
+     */
+    on("round:pause", (payload) => {
+      const room = roomManager.getRoom(payload.roomCode);
+
+      if (!room) {
+        stateBroadcaster.emitError(socket, "room/not-found", "Raum nicht gefunden.");
+        return;
+      }
+
+      const text = socketText(room.language === "en");
+
+      if (!canControlRoom(room, socket)) {
+        stateBroadcaster.emitError(socket, "room/forbidden", text.hostActionOnly);
+        return;
+      }
+
+      if (!room.currentRound) {
+        return;
+      }
+
+      const pausedByPlayerId =
+        socket.data.role === "controller" ? socket.data.playerId ?? null : null;
+      const changed = payload.paused
+        ? roomManager.pauseRoom(room, pausedByPlayerId)
+        : roomManager.resumeRoom(room);
+
+      if (changed) {
+        stateBroadcaster.broadcastRoomState(room);
+        stateBroadcaster.broadcastGameState(room);
+      }
     });
 
     on("game:select", (payload) => {
@@ -1023,6 +1069,9 @@ export function registerSocketHandlers({
         return;
       }
 
+      // A round that no longer exists cannot stay held, or the next one would
+      // start frozen.
+      roomManager.clearPause(room);
       gameRuntime.abortRound(room);
       stateBroadcaster.clearGameStateCache(room.code);
       stateBroadcaster.broadcastRoomState(room);

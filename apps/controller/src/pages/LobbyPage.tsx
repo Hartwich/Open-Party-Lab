@@ -16,6 +16,7 @@ interface LobbyPageProps {
   onSetPlayerSetup: (selectionKey: string, value: PlayerSetupValue) => void;
   onRequestHostControl: () => void;
   onReleaseHostControl: () => void;
+  onResolveHostControl: (playerId: string, grant: boolean) => void;
   onSelectGame: (gameId: string) => void;
   onHostAction: (gameId: string, action: unknown) => void;
   onStartRound: () => void;
@@ -449,6 +450,7 @@ export function LobbyPage({
   onSetPlayerSetup,
   onRequestHostControl,
   onReleaseHostControl,
+  onResolveHostControl,
   onSelectGame,
   onHostAction,
   onStartRound,
@@ -487,6 +489,7 @@ export function LobbyPage({
             player={currentPlayer}
             onRequestControl={onRequestHostControl}
             onReleaseControl={onReleaseHostControl}
+            onResolveControl={onResolveHostControl}
             onSelectGame={onSelectGame}
             onHostAction={onHostAction}
             onStartRound={onStartRound}

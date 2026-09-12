@@ -91,6 +91,28 @@ Two consequences for game authors:
   is the single place that decides this; router and shell both read it, so they
   cannot disagree about who is drawing.
 
+## Host control and pausing
+
+Anyone may take the host controls. While the shared screen holds them there is
+nothing to approve — nobody is standing at the screen — so the request *is* the
+handover. Only taking them from another player asks, and that question carries
+a thirty-second deadline (`hostControlHandoverMs`): the holder may keep or give
+them, and silence hands them over, because a room must not be stuck behind a
+phone somebody put in their pocket.
+
+`round:pause` holds the running round, and the phone driving the room uses it
+whenever it opens the host menu. Pausing does not stop time — a round resumed a
+minute later would find every deadline it had stored long expired. The room
+keeps its own clock instead (`RoomRecord.clock`): wall time minus everything
+this room has spent paused, and that is the `now` a game sees in its context. A
+game therefore needs no pause handling of its own; from its side the pause never
+happened.
+
+Two rules that are easy to get wrong and are enforced server-side: a round never
+begins paused (every path into one clears it), and the pause is released when
+the player who set it loses control or leaves — otherwise a phone walking out of
+the room freezes the game for everyone still in it.
+
 ## Optional server hooks
 
 | Hook | Purpose |

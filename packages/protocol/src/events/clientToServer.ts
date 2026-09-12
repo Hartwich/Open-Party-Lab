@@ -78,6 +78,18 @@ export interface RoundAbortRequest {
   roomCode: string;
 }
 
+/**
+ * Hold or release the running round.
+ *
+ * Whoever drives the room may pause it — the shared screen, or the phone that
+ * took the controls over. Pausing is what makes a host menu usable mid-game:
+ * nobody has to lose a round because someone needed the settings.
+ */
+export interface RoundPauseRequest {
+  roomCode: string;
+  paused: boolean;
+}
+
 export interface CreateRoomSuccess {
   room: RoomSnapshot;
 }
@@ -226,4 +238,5 @@ export interface ClientToServerEvents {
     payload: RoundAbortRequest,
     ack: (result: AckResult<RoundAbortSuccess>) => void
   ) => void;
+  "round:pause": (payload: RoundPauseRequest) => void;
 }

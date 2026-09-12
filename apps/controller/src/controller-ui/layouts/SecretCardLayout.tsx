@@ -10,17 +10,35 @@ interface SecretCardLayoutProps {
   model: SecretCardLayoutModel;
 }
 
+/**
+ * Role chips sit on a light tint of their own colour, so the label has to be
+ * the full-strength token. The `-soft` variants are near-white on the paper
+ * skin and would vanish against their own background.
+ */
 const ROLE_TONES: Record<SecretCardRoleTone, { bg: string; border: string; text: string }> = {
-  primary: { bg: "color-mix(in srgb, var(--sage) 16%, transparent)", border: "color-mix(in srgb, var(--sage) 55%, transparent)", text: "var(--sage-soft)" },
-  watch: { bg: "color-mix(in srgb, var(--danger) 16%, transparent)", border: "color-mix(in srgb, var(--danger) 55%, transparent)", text: "var(--danger-soft)" },
-  guess: { bg: "color-mix(in srgb, var(--accent) 16%, transparent)", border: "color-mix(in srgb, var(--accent) 55%, transparent)", text: "var(--accent-soft)" },
-  bench: { bg: "color-mix(in srgb, var(--muted) 14%, transparent)", border: "color-mix(in srgb, var(--muted) 40%, transparent)", text: "var(--ink-soft)" }
+  primary: { bg: "color-mix(in srgb, var(--sage) 16%, transparent)", border: "color-mix(in srgb, var(--sage) 55%, transparent)", text: "var(--sage)" },
+  watch: { bg: "color-mix(in srgb, var(--danger) 16%, transparent)", border: "color-mix(in srgb, var(--danger) 55%, transparent)", text: "var(--danger)" },
+  guess: { bg: "color-mix(in srgb, var(--accent) 16%, transparent)", border: "color-mix(in srgb, var(--accent) 55%, transparent)", text: "var(--accent)" },
+  bench: { bg: "color-mix(in srgb, var(--muted) 14%, transparent)", border: "color-mix(in srgb, var(--muted) 40%, transparent)", text: "var(--muted)" }
 };
 
+/** Solid action buttons, so the label uses the on-accent token like ReadyPanel. */
 const ACTION_TONES = {
-  positive: { bg: "linear-gradient(180deg, var(--sage), var(--sage))", border: "var(--sage)", text: "var(--sage-soft)" },
-  neutral: { bg: "linear-gradient(180deg, var(--line-strong), var(--surface-raised))", border: "var(--muted)", text: "var(--ink-soft)" },
-  danger: { bg: "linear-gradient(180deg, var(--danger), var(--danger))", border: "var(--danger-soft)", text: "var(--danger-soft)" }
+  positive: {
+    bg: "linear-gradient(180deg, var(--sage) 0%, var(--sage-strong) 100%)",
+    border: "var(--sage-strong)",
+    text: "var(--on-accent)"
+  },
+  neutral: {
+    bg: "linear-gradient(180deg, var(--surface-raised) 0%, var(--surface-muted) 100%)",
+    border: "var(--line-strong)",
+    text: "var(--ink)"
+  },
+  danger: {
+    bg: "linear-gradient(180deg, var(--danger) 0%, color-mix(in srgb, var(--danger) 78%, var(--ink)) 100%)",
+    border: "var(--danger)",
+    text: "var(--on-accent)"
+  }
 } as const;
 
 /**
@@ -208,11 +226,13 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
         <section
           style={{
             borderRadius: "var(--radius-lg)",
-            border: "1px solid color-mix(in srgb, var(--muted) 35%, transparent)",
-            background: "linear-gradient(165deg, var(--ink) 0%, var(--ink-soft) 100%)",
-            color: "var(--ink-soft)",
+            border: "1px solid var(--line-strong)",
+            // A physical card: the raised surface in both skins, never the ink
+            // colour, so the term stays legible whichever theme is active.
+            background: "linear-gradient(165deg, var(--surface-raised) 0%, var(--surface-muted) 100%)",
+            color: "var(--ink)",
             padding: "16px 16px 14px",
-            boxShadow: "0 12px 30px color-mix(in srgb, var(--paper) 45%, transparent)"
+            boxShadow: "var(--shadow-card)"
           }}
         >
           {model.card.tag ? (
@@ -239,7 +259,7 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
           >
             {model.card.term}
           </div>
-          <div style={{ height: 1, background: "color-mix(in srgb, var(--surface) 14%, transparent)", margin: "0 0 10px" }} />
+          <div style={{ height: 1, background: "var(--line)", margin: "0 0 10px" }} />
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {model.card.forbidden.map((word) => (
               <span
@@ -267,7 +287,7 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
             borderRadius: "var(--radius-lg)",
             border: "1px dashed var(--panel-border)",
             background:
-              "repeating-linear-gradient(135deg, color-mix(in srgb, var(--surface-raised) 75%, transparent) 0 10px, color-mix(in srgb, var(--surface) 75%, transparent) 10px 20px)",
+              "repeating-linear-gradient(135deg, var(--surface) 0 10px, var(--surface-muted) 10px 20px)",
             padding: "22px 16px",
             display: "grid",
             placeItems: "center",
@@ -396,9 +416,9 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
                 fontSize: "0.85rem",
                 color:
                   entry.tone === "positive"
-                    ? "var(--sage-soft)"
+                    ? "var(--sage)"
                     : entry.tone === "danger"
-                      ? "var(--danger-soft)"
+                      ? "var(--danger)"
                       : "var(--text-muted)"
               }}
             >

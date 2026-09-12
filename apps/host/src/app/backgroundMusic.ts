@@ -732,10 +732,28 @@ class HostBackgroundMusicController {
 
     this.audioContext = new AudioContext();
     this.masterGain = this.audioContext.createGain();
-    this.masterGain.gain.value = 1;
+    // The single node everything the music schedules passes through, which is
+    // what makes one volume control possible at all.
+    this.masterGain.gain.value = readHostMusicVolume();
     this.masterGain.connect(this.audioContext.destination);
 
     return this.audioContext;
+  }
+
+  /**
+   * Moves the output to a new level.
+   *
+   * Ramped rather than assigned: stepping a gain node produces an audible click,
+   * and a slider sends a stream of these while it is being dragged.
+   */
+  applyVolume(volume: number): void {
+    if (!this.masterGain || !this.audioContext) {
+      return;
+    }
+
+    const now = this.audioContext.currentTime;
+    this.masterGain.gain.cancelScheduledValues(now);
+    this.masterGain.gain.setTargetAtTime(volume, now, 0.02);
   }
 
   private async syncTrack(): Promise<void> {
@@ -811,11 +829,62 @@ class HostBackgroundMusicController {
   }
 }
 
+/**
+ * Music volume, as the person in the room set it.
+ *
+ * A preference of the machine the music comes out of, not of the room: the
+ * phones make no sound, and the right level depends on the speakers and the
+ * neighbours rather than on which game is running. It therefore lives in local
+ * storage beside the FPS preference instead of in the room state.
+ *
+ * Zero is a real value — silence with the music still scheduled — so the reader
+ * has to tell "not set yet" from "set to none", which a plain falsy check does
+ * not.
+ */
+const volumePreferenceKey = "open-party-lab.host-music-volume";
+const DEFAULT_MUSIC_VOLUME = 0.6;
+
+let activeController: HostBackgroundMusicController | null = null;
+
+function clampVolume(value: number): number {
+  return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : DEFAULT_MUSIC_VOLUME;
+}
+
+export function readHostMusicVolume(): number {
+  if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
+    return DEFAULT_MUSIC_VOLUME;
+  }
+
+  const stored = window.localStorage.getItem(volumePreferenceKey);
+
+  return stored === null ? DEFAULT_MUSIC_VOLUME : clampVolume(Number(stored));
+}
+
+/** Applies a new level immediately and remembers it for the next session. */
+export function setHostMusicVolume(value: number): number {
+  const volume = clampVolume(value);
+
+  if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
+    window.localStorage.setItem(volumePreferenceKey, String(volume));
+  }
+
+  activeController?.applyVolume(volume);
+  return volume;
+}
+
 export function mountBackgroundMusic(client: HostSocketClient): () => void {
   if (typeof window === "undefined" || typeof document === "undefined") {
     return () => undefined;
   }
 
   const controller = new HostBackgroundMusicController(client);
-  return () => controller.dispose();
+  activeController = controller;
+
+  return () => {
+    if (activeController === controller) {
+      activeController = null;
+    }
+
+    controller.dispose();
+  };
 }

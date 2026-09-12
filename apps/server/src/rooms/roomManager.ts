@@ -1,4 +1,5 @@
 import { defaultLanguage, normalizeLanguage, type SupportedLanguage } from "@open-party-lab/game-core";
+import { hostControlHandoverMs } from "@open-party-lab/protocol";
 import { defaultThemeName, normalizeThemeName, type ThemeName } from "@open-party-lab/ui-kit";
 import { createRoomCode } from "./roomCode.js";
 import type { RoomRecord } from "./roomStore.js";
@@ -33,6 +34,7 @@ export class RoomManager {
       hostName,
       hostSocketId: null,
       hostControl: { holderPlayerId: null, pendingRequest: null },
+      clock: { pausedAt: null, pausedTotalMs: 0, pausedByPlayerId: null },
       selectedGameId: null,
       gameSettingsByGameId: {},
       roundCounter: 0,
@@ -87,12 +89,31 @@ export class RoomManager {
   }
 
   /**
-   * Records a takeover request. A newer request replaces an older pending one,
-   * so a forgotten prompt on the shared screen cannot block the room.
+   * Asks for the host controls.
+   *
+   * Returns "granted" when the controls were free — nobody is displaced, so
+   * there is nothing to ask. Returns "pending" when another player holds them:
+   * that player gets `hostControlHandoverMs` to answer, and the handover goes
+   * through by itself if they do not. A newer request replaces an older one.
    */
-  requestHostControl(room: RoomRecord, playerId: string): void {
-    room.hostControl.pendingRequest = { playerId, requestedAt: this.getNow() };
+  requestHostControl(room: RoomRecord, playerId: string): "granted" | "pending" {
+    const holder = room.hostControl.holderPlayerId;
+
+    if (!holder || holder === playerId || !room.players.has(holder)) {
+      room.hostControl.holderPlayerId = playerId;
+      room.hostControl.pendingRequest = null;
+      this.touch(room);
+      return "granted";
+    }
+
+    const requestedAt = this.getNow();
+    room.hostControl.pendingRequest = {
+      playerId,
+      requestedAt,
+      expiresAt: requestedAt + hostControlHandoverMs
+    };
     this.touch(room);
+    return "pending";
   }
 
   /**
@@ -114,8 +135,31 @@ export class RoomManager {
     return true;
   }
 
+  /**
+   * Completes a handover whose deadline has passed.
+   *
+   * Silence is consent here on purpose: the alternative is a room that nobody
+   * can drive because the previous holder walked away with the phone in their
+   * pocket. Returns true when something changed and the room must be rebroadcast.
+   */
+  expireHostControlRequest(room: RoomRecord): boolean {
+    const pending = room.hostControl.pendingRequest;
+
+    if (!pending || this.getNow() < pending.expiresAt) {
+      return false;
+    }
+
+    room.hostControl.pendingRequest = null;
+    room.hostControl.holderPlayerId = room.players.has(pending.playerId)
+      ? pending.playerId
+      : null;
+    this.touch(room);
+    return true;
+  }
+
   /** Hands control back to the shared screen. */
   releaseHostControl(room: RoomRecord): void {
+    this.releasePauseHeldBy(room, room.hostControl.holderPlayerId);
     room.hostControl.holderPlayerId = null;
     room.hostControl.pendingRequest = null;
     this.touch(room);
@@ -138,7 +182,24 @@ export class RoomManager {
       changed = true;
     }
 
+    // The phone that froze the round is the only one that can unfreeze it, so
+    // a player who walks out with the menu open would leave everyone else
+    // staring at a still image.
+    changed = this.releasePauseHeldBy(room, playerId) || changed;
+
     return changed;
+  }
+
+  /**
+   * Resumes the round when the player who paused it is no longer in a position
+   * to resume it themselves. Returns true when it actually unfroze something.
+   */
+  private releasePauseHeldBy(room: RoomRecord, playerId: string | null): boolean {
+    if (playerId === null || room.clock.pausedByPlayerId !== playerId) {
+      return false;
+    }
+
+    return this.resumeRoom(room);
   }
 
   /**
@@ -152,6 +213,63 @@ export class RoomManager {
     }
 
     return room.players.has(playerId);
+  }
+
+  /** True while the round is held. */
+  isPaused(room: RoomRecord): boolean {
+    return room.clock.pausedAt !== null;
+  }
+
+  /**
+   * The clock a game sees.
+   *
+   * Wall time minus everything this room has spent paused, so timestamps a game
+   * stored before a pause stay comparable with the ones it reads after.
+   */
+  roomNow(room: RoomRecord): number {
+    const wall = this.getNow();
+    const running = room.clock.pausedAt === null ? 0 : wall - room.clock.pausedAt;
+    return wall - room.clock.pausedTotalMs - running;
+  }
+
+  /** Returns false when the round was already paused, so callers skip the broadcast. */
+  pauseRoom(room: RoomRecord, playerId: string | null): boolean {
+    if (room.clock.pausedAt !== null) {
+      return false;
+    }
+
+    room.clock.pausedAt = this.getNow();
+    room.clock.pausedByPlayerId = playerId;
+    this.touch(room);
+    return true;
+  }
+
+  /** Returns false when the round was already running. */
+  resumeRoom(room: RoomRecord): boolean {
+    if (room.clock.pausedAt === null) {
+      return false;
+    }
+
+    room.clock.pausedTotalMs += this.getNow() - room.clock.pausedAt;
+    room.clock.pausedAt = null;
+    room.clock.pausedByPlayerId = null;
+    this.touch(room);
+    return true;
+  }
+
+  /**
+   * Clears the pause when a round ends.
+   *
+   * The accumulated offset stays: it belongs to the room's clock, not to the
+   * round, and resetting it would jump every timestamp a following round
+   * inherits.
+   */
+  clearPause(room: RoomRecord): void {
+    if (room.clock.pausedAt !== null) {
+      room.clock.pausedTotalMs += this.getNow() - room.clock.pausedAt;
+      room.clock.pausedAt = null;
+      room.clock.pausedByPlayerId = null;
+    }
   }
 
   setTheme(room: RoomRecord, theme: unknown): RoomRecord {

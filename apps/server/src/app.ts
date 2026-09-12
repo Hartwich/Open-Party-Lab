@@ -64,6 +64,7 @@ export function createApp(environment: AppEnv = loadEnv()) {
   );
   const roundTimerService = new RoundTimerService(
     roomStore,
+    roomManager,
     playerManager,
     gameRegistry,
     gameRuntime,

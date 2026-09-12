@@ -2,7 +2,6 @@
 import { HOST_THEME_REGISTRY_KEY } from "@open-party-lab/game-core";
 import { hostTheme, partyTheme } from "../ui/theme/theme.js";
 import { mountDebugOverlay } from "./debugOverlay.js";
-import { mountHudOverlay } from "./hudOverlay.js";
 import { mountFullscreenOverlay } from "./fullscreenOverlay.js";
 import { mountScreenWakeLock } from "./screenWakeLock.js";
 import { mountBackgroundMusic } from "./backgroundMusic.js";
@@ -109,7 +108,6 @@ export function bootstrapHostApp(requestedRoomCode: string | null = null): Phase
   createHostRouter(game, hostClient);
   mountHostShell(hostClient);
   mountJoinOverlay(hostClient);
-  mountHudOverlay(hostClient);
   mountDebugOverlay(game, hostClient);
   mountHostControlsOverlay(game, hostClient);
   mountHostControlOverlay(hostClient);

@@ -1,8 +1,6 @@
-import { getRoomPhase } from "@open-party-lab/protocol";
 import { themes } from "@open-party-lab/ui-kit";
 import QRCode from "qrcode";
 import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
-import { shouldShowShell } from "../shell/hostShell.js";
 import { getSelectedGameChrome } from "../games/selectedGame.js";
 import { getHostText } from "../i18n/hostText.js";
 import {
@@ -15,34 +13,8 @@ import {
 } from "../ui/chrome/hostChrome.js";
 
 function shouldShowJoinOverlay(state: HostAppState): boolean {
-  const room = state.room;
-
-  if (!room) {
-    return true;
-  }
-
-  // The shell's room card already carries the code, the QR and the link, so a
-  // floating copy of the same information would only be clutter. The overlay's
-  // remaining job is the moment a game holds the screen and latecomers still
-  // need a way in.
-  if (shouldShowShell(state)) {
-    return false;
-  }
-
-  const chrome = getSelectedGameChrome(state);
-
-  if (!chrome.joinOverlay) {
-    return false;
-  }
-
-  const lifecycle = getRoomPhase(room);
-
-  if (lifecycle === "finished") {
-    // Games with a continuing run keep the screen to themselves after a round.
-    return chrome.joinOverlayWhenFinished;
-  }
-
-  return lifecycle === "lobby" || lifecycle === "game_selected";
+  // The catalog and host settings provide joining information once connected.
+  return !state.room;
 }
 
 export function mountJoinOverlay(client: HostSocketClient): () => void {

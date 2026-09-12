@@ -71,38 +71,79 @@ async function makeRoom(count) {
   return { host, room, phones };
 }
 
-/** Requests control and has the screen grant it. */
-async function grantControl(host, room, phone) {
-  await emitAck(phone, "host-control:request", { roomCode: room.code, playerId: phone.playerId });
-  return emitAck(host, "host-control:resolve", {
-    roomCode: room.code,
-    playerId: phone.playerId,
-    grant: true
-  });
+/**
+ * Takes the controls.
+ *
+ * Nothing to grant while the shared screen holds them: the screen is furniture,
+ * so a request against free controls is the handover.
+ */
+async function grantControl(_host, room, phone) {
+  return emitAck(phone, "host-control:request", { roomCode: room.code, playerId: phone.playerId });
 }
 
-async function scenarioDecline() {
+async function scenarioImmediateTakeover() {
   const { host, room, phones } = await makeRoom(1);
   const [phone] = phones;
 
-  await emitAck(phone, "host-control:request", { roomCode: room.code, playerId: phone.playerId });
-  const declined = await emitAck(host, "host-control:resolve", {
+  const taken = await emitAck(phone, "host-control:request", {
     roomCode: room.code,
-    playerId: phone.playerId,
-    grant: false
+    playerId: phone.playerId
   });
 
   check(
-    "Ablehnen laesst die Steuerung beim Bildschirm",
-    declined.ok && declined.data.room.hostControl.holderPlayerId === null
+    "Freie Steuerung wird ohne Rueckfrage uebernommen",
+    taken.ok && taken.data.room.hostControl.holderPlayerId === phone.playerId
   );
-
-  phone.emit("game:select", { roomCode: room.code, gameId: "tap-race" });
-  const rejected = await once(phone, "room:error", () => true, 3000).catch(() => null);
-  check("Abgelehnter Spieler darf nichts steuern", rejected !== null);
+  check(
+    "Dabei bleibt keine Anfrage offen",
+    taken.ok && taken.data.room.hostControl.pendingRequest === null
+  );
 
   host.close();
   phone.close();
+}
+
+async function scenarioDecline() {
+  const { host, room, phones } = await makeRoom(2);
+  const [holder, other] = phones;
+
+  await grantControl(host, room, holder);
+
+  // Taking them from another player is the only case that asks.
+  const asked = await emitAck(other, "host-control:request", {
+    roomCode: room.code,
+    playerId: other.playerId
+  });
+  check(
+    "Uebernahme von einem Spieler fragt nach",
+    asked.ok && asked.data.room.hostControl.pendingRequest?.playerId === other.playerId
+  );
+
+  const deadline = asked.ok ? asked.data.room.hostControl.pendingRequest?.expiresAt : undefined;
+  check(
+    "Die Anfrage traegt eine Frist von 30 s",
+    typeof deadline === "number" && Math.abs(deadline - Date.now() - 30_000) < 5_000,
+    deadline ? `${Math.round((deadline - Date.now()) / 1000)} s` : "keine"
+  );
+
+  // The holder answers, not the screen: they are the one losing something.
+  const declined = await emitAck(holder, "host-control:resolve", {
+    roomCode: room.code,
+    playerId: other.playerId,
+    grant: false
+  });
+  check(
+    "Der Halter darf ablehnen und behaelt die Steuerung",
+    declined.ok && declined.data.room.hostControl.holderPlayerId === holder.playerId
+  );
+
+  other.emit("game:select", { roomCode: room.code, gameId: "tap-race" });
+  const rejected = await once(other, "room:error", () => true, 3000).catch(() => null);
+  check("Abgelehnter Spieler darf nichts steuern", rejected !== null);
+
+  host.close();
+  holder.close();
+  other.close();
 }
 
 async function scenarioHolderLeaves() {
@@ -156,8 +197,11 @@ async function scenarioHolderKicked() {
 }
 
 async function scenarioSecondRequest() {
-  const { host, room, phones } = await makeRoom(2);
-  const [first, second] = phones;
+  const { host, room, phones } = await makeRoom(3);
+  const [holder, first, second] = phones;
+
+  // Someone has to hold the controls for a request to stay pending at all.
+  await grantControl(host, room, holder);
 
   await emitAck(first, "host-control:request", { roomCode: room.code, playerId: first.playerId });
   const replaced = await emitAck(second, "host-control:request", {
@@ -169,12 +213,14 @@ async function scenarioSecondRequest() {
     replaced.ok && replaced.data.room.hostControl.pendingRequest?.playerId === second.playerId
   );
 
-  const staleAnswer = await emitAck(host, "host-control:resolve", {
+  const staleAnswer = await emitAck(holder, "host-control:resolve", {
     roomCode: room.code,
     playerId: first.playerId,
     grant: true
   });
   check("Antwort auf die veraltete Anfrage prallt ab", staleAnswer.ok === false);
+
+  holder.close();
 
   host.close();
   first.close();
@@ -250,6 +296,7 @@ async function scenarioScreenReconnects() {
 }
 
 async function main() {
+  await scenarioImmediateTakeover();
   await scenarioDecline();
   await scenarioHolderLeaves();
   await scenarioHolderKicked();

@@ -67,7 +67,7 @@ function offerKindLabel(kind: ShopOfferModel["kind"], en: boolean): string {
 }
 
 function compactPlayerName(title: string): string {
-  return title.replace(/\s+Shop$/i, "").trim() || title;
+  return title.replace(/\s+(?:Shop|Level[ -]Up)$/i, "").trim() || title;
 }
 
 function detailLinesToStats(lines?: Array<{ label: string; value: string }>): LayoutStat[] | undefined {
@@ -109,9 +109,9 @@ function resolveLevelFrameColor(level?: number): string | null {
   }
 }
 
-function MaterialIcon() {
+function MaterialIcon({ size = 22 }: { size?: number }) {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none">
+    <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} fill="none">
       <path d="M12 3 21 12 12 21 3 12 12 3Z" stroke="currentColor" strokeWidth="2" />
       <path d="M12 3 15 12 12 21 9 12 12 3Z" stroke="currentColor" strokeWidth="1.6" opacity="0.72" />
     </svg>
@@ -121,12 +121,30 @@ function MaterialIcon() {
 function WaveIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none">
-      <path
-        d="M3 14C5.4 10.8 8 10.8 10.4 14C12.8 17.2 15.4 17.2 18 14L21 10"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <circle cx="12" cy="8" r="3" stroke="currentColor" strokeWidth="2" />
+      <circle cx="5.5" cy="10" r="2" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="18.5" cy="10" r="2" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M6.5 19c.4-3.5 2.2-5.3 5.5-5.3s5.1 1.8 5.5 5.3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M2.8 18c.2-2.5 1.3-3.8 3.4-3.8 1 0 1.8.3 2.4.9M21.2 18c-.2-2.5-1.3-3.8-3.4-3.8-1 0-1.8.3-2.4.9" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function NextRoundIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none">
+      <path d="M5 19V5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M6 6h10l-2.5 3L16 12H6V6Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M12 18h8M17 15l3 3-3 3" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function PowerUpIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} fill="none">
+      <path d="m7 12 5-5 5 5M8.5 17l3.5-3.5 3.5 3.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 3v2M4.5 7.5 6 9M19.5 7.5 18 9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
@@ -184,9 +202,10 @@ function StatsIcon() {
 function MergeIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none">
-      <path d="M12 20V5" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" />
-      <path d="M7 10 12 5 17 10" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M6 18H18" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" />
+      <rect x="3" y="15" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="15" y="15" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M6 15v-1c0-2.2 1.8-4 4-4h4c2.2 0 4 1.8 4 4v1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M12 10V3M8.8 6.2 12 3l3.2 3.2" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -285,6 +304,120 @@ function MiniInfoBadge() {
     >
       <InfoIcon />
     </span>
+  );
+}
+
+function PriceBadge({ cost, affordable }: { cost: number; affordable: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        right: -10,
+        bottom: -7,
+        minWidth: 48,
+        height: 28,
+        padding: "0 7px",
+        borderRadius: 8,
+        border: `2px solid ${affordable ? "var(--amber)" : "var(--line-strong)"}`,
+        background: "var(--ink)",
+        color: "var(--surface)",
+        display: "grid",
+        gridTemplateColumns: "14px auto auto",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 3,
+        boxShadow: "0 3px 0 var(--surface), 0 7px 14px color-mix(in srgb, var(--paper) 32%, transparent)",
+        opacity: affordable ? 1 : 0.82,
+        fontWeight: 900,
+        lineHeight: 1
+      }}
+    >
+      <span style={{ color: "var(--amber)", display: "grid", placeItems: "center" }}>
+        <MaterialIcon size={14} />
+      </span>
+      <span>{cost}</span>
+      <span style={{ fontSize: "0.58rem", opacity: 0.78 }}>M</span>
+    </span>
+  );
+}
+
+function PowerUpBadge() {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        right: -9,
+        bottom: -8,
+        width: 34,
+        height: 34,
+        borderRadius: 8,
+        border: "2px solid var(--surface)",
+        background: "var(--accent)",
+        color: "var(--on-accent)",
+        display: "grid",
+        placeItems: "center",
+        boxShadow: "0 7px 16px color-mix(in srgb, var(--accent-strong) 34%, transparent)"
+      }}
+    >
+      <PowerUpIcon size={22} />
+    </span>
+  );
+}
+
+function LevelUpMarker({ choicesRemaining, en }: { choicesRemaining?: number; en: boolean }) {
+  return (
+    <div
+      aria-label={en ? "Level-up power-up selection" : "Level-Up-Power-up-Auswahl"}
+      style={{
+        minHeight: 58,
+        display: "grid",
+        gridTemplateColumns: "42px minmax(0, 1fr) auto",
+        alignItems: "center",
+        gap: 10,
+        padding: "7px 9px",
+        borderRadius: 8,
+        border: "2px solid var(--accent)",
+        background: "linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--amber-soft) 72%, var(--surface)))",
+        color: "var(--text-main)",
+        boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--surface) 54%, transparent)"
+      }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          width: 42,
+          height: 42,
+          borderRadius: 8,
+          display: "grid",
+          placeItems: "center",
+          background: "var(--accent)",
+          color: "var(--on-accent)"
+        }}
+      >
+        <PowerUpIcon size={28} />
+      </span>
+      <strong style={{ fontSize: "1rem", letterSpacing: 0 }}>LVL UP</strong>
+      {typeof choicesRemaining === "number" ? (
+        <strong
+          aria-label={en ? `${choicesRemaining} choices remaining` : `${choicesRemaining} Auswahlen verbleibend`}
+          style={{
+            minWidth: 36,
+            height: 32,
+            padding: "0 8px",
+            borderRadius: 8,
+            display: "grid",
+            placeItems: "center",
+            background: "var(--ink)",
+            color: "var(--surface)",
+            fontSize: "0.82rem"
+          }}
+        >
+          x{choicesRemaining}
+        </strong>
+      ) : null}
+    </div>
   );
 }
 
@@ -497,17 +630,21 @@ function OfferTile({
   offer,
   model,
   en,
+  levelUp,
   onInfo
 }: {
   offer: ShopOfferModel;
   model: ArenaSurvivorModernShopLayoutModel;
   en: boolean;
+  levelUp: boolean;
   onInfo: () => void;
 }) {
-  const canBuy = !model.disabled && offer.affordable && !offer.purchased;
+  const canAcquire = !model.disabled && offer.affordable && !offer.purchased;
   const borderColor = offer.purchased
     ? "color-mix(in srgb, var(--sage) 46%, transparent)"
-    : offer.affordable
+    : levelUp
+      ? "color-mix(in srgb, var(--accent) 72%, transparent)"
+      : offer.affordable
       ? "color-mix(in srgb, var(--accent) 36%, transparent)"
       : "color-mix(in srgb, var(--muted) 16%, transparent)";
 
@@ -521,7 +658,9 @@ function OfferTile({
         border: `1px solid ${borderColor}`,
         background: offer.purchased
           ? "linear-gradient(180deg, color-mix(in srgb, var(--sage-strong) 28%, transparent), color-mix(in srgb, var(--surface) 78%, transparent))"
-          : offer.affordable
+          : levelUp
+            ? "linear-gradient(145deg, color-mix(in srgb, var(--accent-soft) 82%, var(--surface)), color-mix(in srgb, var(--amber-soft) 52%, var(--surface)))"
+            : offer.affordable
             ? "linear-gradient(180deg, color-mix(in srgb, var(--accent-strong) 22%, transparent), color-mix(in srgb, var(--surface) 82%, transparent))"
             : "color-mix(in srgb, var(--surface) 68%, transparent)",
         overflow: "hidden",
@@ -547,38 +686,27 @@ function OfferTile({
       >
         <MiniInfoBadge />
         <span style={{ position: "relative", display: "grid", placeItems: "center" }}>
-          <IconFrame src={offer.iconPath} label={offer.title} size={64} level={offer.targetLevel} />
-          <span
-            style={{
-              position: "absolute",
-              right: -10,
-              bottom: -5,
-              minWidth: 34,
-              padding: "3px 6px",
-              borderRadius: 8,
-              background: offer.affordable ? "color-mix(in srgb, var(--amber) 96%, transparent)" : "color-mix(in srgb, var(--line-strong) 96%, transparent)",
-              color: offer.affordable ? "var(--amber)" : "var(--text-main)",
-              fontSize: "0.72rem",
-              fontWeight: 900
-            }}
-          >
-            {offer.cost}
-          </span>
+          <IconFrame src={offer.iconPath} label={offer.title} size={64} level={levelUp ? undefined : offer.targetLevel} />
+          {levelUp ? <PowerUpBadge /> : <PriceBadge cost={offer.cost} affordable={offer.affordable} />}
         </span>
       </button>
       <button
         type="button"
-        disabled={!canBuy}
+        disabled={!canAcquire}
         onClick={() => model.onBuy(offer.id)}
         aria-label={
           offer.purchased
             ? en ? `${offer.title} bought` : `${offer.title} gekauft`
-            : en ? `Buy ${offer.title}` : `${offer.title} kaufen`
+            : levelUp
+              ? en ? `Choose ${offer.title}` : `${offer.title} waehlen`
+              : en ? `Buy ${offer.title}` : `${offer.title} kaufen`
         }
         title={
           offer.purchased
             ? en ? "Bought" : "Gekauft"
-            : offer.affordable
+            : levelUp
+              ? en ? "Choose power-up" : "Power-up waehlen"
+              : offer.affordable
               ? en ? "Buy" : "Kaufen"
               : en ? "Too expensive" : "Zu teuer"
         }
@@ -587,20 +715,28 @@ function OfferTile({
           borderTop: "1px solid color-mix(in srgb, var(--on-accent) 8%, transparent)",
           background: offer.purchased
             ? "color-mix(in srgb, var(--sage) 18%, transparent)"
-            : canBuy
-              ? "color-mix(in srgb, var(--sage) 34%, transparent)"
+            : levelUp && canAcquire
+              ? "linear-gradient(180deg, var(--accent), var(--accent-strong))"
+              : canAcquire
+              ? "var(--sage)"
               : "color-mix(in srgb, var(--surface-raised) 72%, transparent)",
           // The cart sits on a sage wash, so it needs the deep end of the same
           // hue. `--sage-soft` is the tint itself: near-white on paper, which
           // left the button looking empty.
-          color: canBuy || offer.purchased ? "var(--sage-strong)" : "color-mix(in srgb, var(--ink-soft) 52%, transparent)",
+          color: levelUp && canAcquire
+            ? "var(--on-accent)"
+            : canAcquire
+              ? "var(--on-accent)"
+              : offer.purchased
+              ? "var(--sage-strong)"
+              : "color-mix(in srgb, var(--ink-soft) 52%, transparent)",
           display: "grid",
           placeItems: "center",
-          cursor: canBuy ? "pointer" : "not-allowed",
+          cursor: canAcquire ? "pointer" : "not-allowed",
           touchAction: "manipulation"
         }}
       >
-        {offer.purchased ? <ReadyIcon /> : <BuyIcon />}
+        {offer.purchased ? <ReadyIcon /> : levelUp ? <PowerUpIcon /> : <BuyIcon />}
       </button>
     </article>
   );
@@ -688,7 +824,13 @@ function resolveDetailContent(
     return {
       type: "offer",
       title: offer.title,
-      subtitle: offer.targetLevel ? `${offerKindLabel(offer.kind, en)} | Lv. ${offer.targetLevel} | ${offer.cost} M` : `${offerKindLabel(offer.kind, en)} | ${offer.cost} M`,
+      subtitle: model.shopMode === "level_up"
+        ? offer.targetLevel
+          ? `${offerKindLabel(offer.kind, en)} | Lv. ${offer.targetLevel}`
+          : offerKindLabel(offer.kind, en)
+        : offer.targetLevel
+          ? `${offerKindLabel(offer.kind, en)} | Lv. ${offer.targetLevel} | ${offer.cost} M`
+          : `${offerKindLabel(offer.kind, en)} | ${offer.cost} M`,
       description: offer.description,
       iconPath: offer.iconPath,
       level: offer.targetLevel,
@@ -751,6 +893,7 @@ function DetailSheet({
   }
 
   const canBuy = detail.type === "offer" && !model.disabled && detail.offer.affordable && !detail.offer.purchased;
+  const levelUp = model.shopMode === "level_up";
   const canSell = detail.type === "weapon" && Boolean(detail.weapon.sellable && model.onSellWeapon);
   const canMerge = detail.type === "weapon" && Boolean(detail.weapon.canCombine && model.onCombineWeapon);
 
@@ -795,7 +938,14 @@ function DetailSheet({
             alignItems: "center"
           }}
         >
-          {detail.type === "stats" ? null : <IconFrame src={detail.iconPath} label={detail.title} size={56} level={detail.level} />}
+          {detail.type === "stats" ? null : (
+            <IconFrame
+              src={detail.iconPath}
+              label={detail.title}
+              size={56}
+              level={levelUp && detail.type === "offer" ? undefined : detail.level}
+            />
+          )}
           <div style={{ display: "grid", gap: 4, minWidth: 0 }}>
             <strong style={{ fontSize: "1.05rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {detail.title}
@@ -869,20 +1019,36 @@ function DetailSheet({
               border: "1px solid color-mix(in srgb, var(--on-accent) 14%, transparent)",
               background: detail.offer.purchased
                 ? "color-mix(in srgb, var(--sage) 18%, transparent)"
-                : canBuy
+                : levelUp && canBuy
+                  ? "linear-gradient(180deg, var(--accent), var(--accent-strong))"
+                  : canBuy
                   ? "linear-gradient(180deg, var(--sage) 0%, var(--sage) 100%)"
                   : "color-mix(in srgb, var(--surface-raised) 84%, transparent)",
-              color: "white",
+              color: levelUp && canBuy ? "var(--on-accent)" : "white",
+              display: "grid",
+              gridTemplateColumns: levelUp && !detail.offer.purchased ? "24px auto" : "auto",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 8,
               fontWeight: 900,
               cursor: canBuy ? "pointer" : "not-allowed",
               opacity: canBuy || detail.offer.purchased ? 1 : 0.55
             }}
           >
-            {detail.offer.purchased
-              ? en ? "Bought" : "Gekauft"
-              : detail.offer.affordable
-                ? en ? `Buy for ${detail.offer.cost} M` : `Kaufen fuer ${detail.offer.cost} M`
-                : en ? `Need ${detail.offer.cost} M` : `${detail.offer.cost} M benoetigt`}
+            {detail.offer.purchased ? (
+              levelUp
+                ? en ? "Chosen" : "Gewaehlt"
+                : en ? "Bought" : "Gekauft"
+            ) : levelUp ? (
+              <>
+                <PowerUpIcon />
+                <span>{en ? "Choose" : "Waehlen"}</span>
+              </>
+            ) : detail.offer.affordable ? (
+              en ? `Buy for ${detail.offer.cost} M` : `Kaufen fuer ${detail.offer.cost} M`
+            ) : (
+              en ? `Need ${detail.offer.cost} M` : `${detail.offer.cost} M benoetigt`
+            )}
           </button>
         ) : null}
 
@@ -891,6 +1057,8 @@ function DetailSheet({
             {model.onCombineWeapon ? (
               <button
                 type="button"
+                aria-label={en ? `Combine ${detail.weapon.displayName}` : `${detail.weapon.displayName} kombinieren`}
+                title={en ? "Combine weapons" : "Waffen kombinieren"}
                 disabled={!canMerge}
                 onClick={() => {
                   if (!canMerge) {
@@ -903,8 +1071,8 @@ function DetailSheet({
                   minHeight: 54,
                   borderRadius: 8,
                   border: "1px solid color-mix(in srgb, var(--on-accent) 14%, transparent)",
-                  background: canMerge ? "color-mix(in srgb, var(--sage) 36%, transparent)" : "color-mix(in srgb, var(--surface-raised) 78%, transparent)",
-                  color: canMerge ? "var(--sage-strong)" : "color-mix(in srgb, var(--ink-soft) 56%, transparent)",
+                  background: canMerge ? "var(--sage)" : "color-mix(in srgb, var(--surface-raised) 78%, transparent)",
+                  color: canMerge ? "var(--on-accent)" : "color-mix(in srgb, var(--ink-soft) 56%, transparent)",
                   display: "grid",
                   placeItems: "center",
                   cursor: canMerge ? "pointer" : "not-allowed"
@@ -951,6 +1119,7 @@ function DetailSheet({
 
 export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShopLayoutProps) {
   const en = model.language === "en";
+  const levelUp = model.shopMode === "level_up";
   const [detailTarget, setDetailTarget] = useState<DetailTarget | null>(null);
   const detail = useMemo(() => resolveDetailContent(model, detailTarget, en), [detailTarget, en, model]);
   const weapons = model.loadout?.weapons ?? [];
@@ -991,13 +1160,17 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
           </RoundIconButton>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: ready ? "1fr 1fr 1fr" : "1fr 1fr", gap: 8 }}>
-          <MetricChip icon={<MaterialIcon />} label="M" value={model.materials} tone="gold" />
-          <MetricChip icon={<WaveIcon />} label={en ? "Wave" : "Welle"} value={model.waveNumber} tone="blue" />
-          {ready ? <MetricChip icon={<ReadyIcon />} label="OK" value={`${ready.readyCount}/${ready.playerCount}`} tone="green" /> : null}
-        </div>
+        {levelUp ? (
+          <LevelUpMarker choicesRemaining={model.levelUpChoicesRemaining} en={en} />
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: ready ? "1fr 1fr 1fr" : "1fr 1fr", gap: 8 }}>
+            <MetricChip icon={<MaterialIcon />} label="M" value={model.materials} tone="gold" />
+            <MetricChip icon={<WaveIcon />} label={en ? "Wave" : "Welle"} value={model.waveNumber} tone="blue" />
+            {ready ? <MetricChip icon={<ReadyIcon />} label="OK" value={`${ready.readyCount}/${ready.playerCount}`} tone="green" /> : null}
+          </div>
+        )}
 
-        <div style={{ display: "grid", gridTemplateColumns: model.reroll && ready ? "1fr 1fr" : "1fr", gap: 8 }}>
+        {model.reroll || ready ? <div style={{ display: "grid", gridTemplateColumns: model.reroll && ready ? "1fr 1fr" : "1fr", gap: 8 }}>
           {model.reroll ? (
             <button
               type="button"
@@ -1054,11 +1227,11 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
                 touchAction: "manipulation"
               }}
             >
-              <ReadyIcon />
+              <NextRoundIcon />
               <span>{ready.currentPlayerReady ? "OK" : ready.readyCount === ready.playerCount ? "GO" : `${ready.readyCount}/${ready.playerCount}`}</span>
             </button>
           ) : null}
-        </div>
+        </div> : null}
       </header>
 
       {weapons.length || items.length ? (
@@ -1100,8 +1273,15 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
         </section>
       ) : null}
 
-      <section style={{ display: "grid", gap: 8 }} aria-label="Shop">
-        <div style={{ color: "var(--text-muted)", fontSize: "0.76rem", fontWeight: 900 }}>Shop</div>
+      <section style={{ display: "grid", gap: 8 }} aria-label={levelUp ? (en ? "Level-up power-ups" : "Level-Up-Power-ups") : "Shop"}>
+        {levelUp ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 7, color: "var(--accent)", fontSize: "0.76rem", fontWeight: 900 }}>
+            <PowerUpIcon size={18} />
+            <span>POWER UPS</span>
+          </div>
+        ) : (
+          <div style={{ color: "var(--text-muted)", fontSize: "0.76rem", fontWeight: 900 }}>Shop</div>
+        )}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
           {model.offers.map((offer) => (
             <OfferTile
@@ -1109,6 +1289,7 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
               offer={offer}
               model={model}
               en={en}
+              levelUp={levelUp}
               onInfo={() => setDetailTarget({ type: "offer", id: offer.id })}
             />
           ))}

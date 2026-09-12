@@ -169,6 +169,8 @@ const css = `
 /* ---------- game tile ---------- */
 
 .opl-tile {
+  padding: 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   text-align: left;
@@ -187,6 +189,10 @@ const css = `
 }
 
 .opl-tile-art {
+  border-radius: 15px 15px 0 0;
+  overflow: hidden;
+  width: 100%;
+  flex: none;
   display: grid;
   place-items: center;
   height: 92px;
@@ -231,18 +237,6 @@ const css = `
 }
 
 .opl-tile-meta svg { flex: none; }
-
-.opl-tile-more {
-  display: grid;
-  place-items: center;
-  gap: 6px;
-  min-height: 150px;
-  color: var(--muted);
-  font-size: 12px;
-  background: var(--surface-muted);
-  border: 1px dashed var(--line-strong);
-  border-radius: 16px;
-}
 
 /* ---------- the setup card ---------- */
 

@@ -32,6 +32,18 @@ export class GameRuntime {
     private readonly getNow: () => number = now
   ) {}
 
+  /**
+   * Wall time minus everything this room has spent paused.
+   *
+   * Mirrors `RoomManager.roomNow`; the runtime is not given the manager, and a
+   * pause is a property of the room record rather than of either service.
+   */
+  private roomNow(room: RoomRecord): number {
+    const wall = this.getNow();
+    const running = room.clock.pausedAt === null ? 0 : wall - room.clock.pausedAt;
+    return wall - room.clock.pausedTotalMs - running;
+  }
+
   selectGame(room: RoomRecord, gameId: string | null): void {
     if (gameId) {
       this.gameRegistry.require(gameId);
@@ -258,6 +270,13 @@ export class GameRuntime {
       return null;
     }
 
+    // A paused round advances by nothing at all — not the game's simulation and
+    // not the phase timers. The room's clock absorbs the gap, so the deadlines
+    // the round stored are still in its future when it resumes.
+    if (room.clock.pausedAt !== null) {
+      return null;
+    }
+
     const game = this.gameRegistry.require(room.currentRound.gameId);
     const transitionResult = this.gameTransitionService.progressRoom(
       room,
@@ -454,7 +473,9 @@ export class GameRuntime {
       roomCode: room.code,
       roundNumber,
       players: roomPlayersToSummaries(room, selectedGame.id),
-      now: this.getNow(),
+      // The room's clock, not wall time: a game must never see the gap a pause
+      // left behind, or every deadline it stored would already have passed.
+      now: this.roomNow(room),
       deltaMs,
       language: room.language,
       theme: room.theme,

@@ -516,6 +516,8 @@ export interface ShopLayoutModel {
   language?: import("@open-party-lab/protocol").SupportedLanguage;
   disabled: boolean;
   accentColor?: string;
+  shopMode?: "regular" | "level_up";
+  levelUpChoicesRemaining?: number;
   waveNumber: number;
   materials: number;
   ready?: ReadyLayoutModel;

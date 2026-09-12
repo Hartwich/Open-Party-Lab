@@ -229,7 +229,8 @@ function toHostControlSnapshot(room: RoomRecord): HostControlSnapshot {
         ? {
             playerId: requester.id,
             playerName: requester.name,
-            requestedAt: room.hostControl.pendingRequest.requestedAt
+            requestedAt: room.hostControl.pendingRequest.requestedAt,
+            expiresAt: room.hostControl.pendingRequest.expiresAt
           }
         : null
   };
@@ -252,6 +253,15 @@ export function toRoomSnapshot(
     hostConnected: room.hostSocketId !== null,
     hostControl: toHostControlSnapshot(room),
     lifecycle: deriveRoomLifecycle(room),
+    pausedBy:
+      room.clock.pausedAt === null
+        ? null
+        : {
+            playerId: room.clock.pausedByPlayerId,
+            playerName: room.clock.pausedByPlayerId
+              ? room.players.get(room.clock.pausedByPlayerId)?.name ?? null
+              : null
+          },
     selectedGameId: room.selectedGameId,
     selectedGameSettings: toPublicSelectedGameSettings(room),
     availableGames,
