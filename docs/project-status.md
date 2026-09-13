@@ -15,10 +15,12 @@ Platform:
 - authoritative Socket.IO server
 - reconnect/session recovery
 - shared round lifecycle
+- opening the remote host menu keeps the round continuously paused across controller state updates, preventing repeated resume/pause messages and flickering pause overlays
 - scoreboards
 - host controls for language, FPS, and player moderation outside active rounds
 - synchronized light and dark room themes across the host shell, host overlays, and phone controllers, with accessible focus indicators and contrast-adjusted catalog labels
 - Word Tiles and Draw & Guess keep their Canvas host renderers and read the live room theme for playfield backgrounds, panels, borders, and round screens; Word Tiles premium fields tint the themed board surface while letter tiles and drawing strokes retain their game colours
+- Draw & Guess uses matching 4:3 drawing paper on host and controller to retain stroke proportions across screen sizes; the active host view shows the enlarged drawing board and guesses on the right.
 - optional local game-repo discovery through `npm run games:list` and `npm run games:sync-local`
 - virtual controller helper for AI browser checks through `npm run ai:controllers`
 - host DEV automation bridge for browser checks exposed only by the Vite dev host
@@ -84,3 +86,5 @@ Lobby/setup:
 - improve docs for each game;
 - improve balancing, round pacing, scoring clarity, and player feedback for alpha games;
 - add playtest checklists and fixture rooms.
+
+- Pantomime: Der geheime Begriff wird serverseitig nur an den aktiven Darsteller gesendet. Nur dieser kann während der 60 Sekunden mit ‚Erraten‘ den Begriff öffentlich aufdecken; die Uhr läuft bis zum bisherigen Rundenende weiter. Ein Punkt wird nur bei bestätigtem Erfolg vergeben. Host-Anzeige und Rundenseiten verwenden Theme-Farben; die große Uhr aktualisiert sich unabhängig von Netzwerk-Updates.

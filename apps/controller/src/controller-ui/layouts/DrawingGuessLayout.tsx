@@ -114,12 +114,13 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
             style={{
               position: "relative",
               width: "100%",
-              height: "clamp(320px, 62vh, 560px)",
+              // Match the host renderer: normalized 4:3 drawing paper.
+              aspectRatio: "4 / 3",
               // The same token the shared screen paints its board with, so the
               // drawer is looking at the paper everyone else sees.
               background: "var(--surface-raised)",
-              border: "2px solid var(--line-strong)",
-              borderRadius: 14,
+              boxShadow: "inset 0 0 0 2px var(--line-strong)",
+              borderRadius: 0,
               touchAction: "none",
               overflow: "hidden"
             }}
@@ -147,7 +148,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
               model.onDrawEnd();
             }}
           >
-            <svg width="100%" height="100%" viewBox="0 0 1000 1000" preserveAspectRatio="none" style={{ position: "absolute", inset: 0 }}>
+            <svg width="100%" height="100%" viewBox="0 0 1000 750" style={{ position: "absolute", inset: 0 }}>
               {model.strokes.map((stroke) => {
                 if (stroke.points.length === 0) {
                   return null;
@@ -159,7 +160,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
                     <circle
                       key={stroke.id}
                       cx={point.x * 1000}
-                      cy={point.y * 1000}
+                      cy={point.y * 750}
                       r={4}
                       fill={stroke.color}
                     />
@@ -167,7 +168,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
                 }
 
                 const path = stroke.points
-                  .map((point, index) => `${index === 0 ? "M" : "L"}${point.x * 1000} ${point.y * 1000}`)
+                  .map((point, index) => `${index === 0 ? "M" : "L"}${point.x * 1000} ${point.y * 750}`)
                   .join(" ");
 
                 return (

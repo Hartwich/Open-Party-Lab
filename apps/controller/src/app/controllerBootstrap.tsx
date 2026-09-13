@@ -31,6 +31,10 @@ function resolveDefaultServerUrl(): string {
 
 const controllerClient = new ControllerSocketClient(import.meta.env.VITE_SERVER_URL ?? resolveDefaultServerUrl());
 
+// HostGameMenu owns the pause through an effect. Keep its callback stable so
+// room snapshots do not run the cleanup (resume) and immediately pause again.
+const setRoundPaused = (paused: boolean): void => controllerClient.setRoundPaused(paused);
+
 function resolvePage(state: ControllerAppState): "join" | "reconnect" | "lobby" | "controller" | "missing" {
   if (!state.room || !state.player) {
     return state.hasStoredSession ? "reconnect" : "join";
@@ -125,7 +129,7 @@ export function ControllerApp() {
           {state.room && hasHostControl(state.room.hostControl, state.player?.id) ? (
             <HostGameMenu
               room={state.room}
-              onSetPaused={(paused) => controllerClient.setRoundPaused(paused)}
+              onSetPaused={setRoundPaused}
               onSetTheme={(theme) => controllerClient.setTheme(theme)}
               onSetLanguage={(language) => controllerClient.setRoomLanguage(language)}
               onBackToMenu={() => controllerClient.returnToGameSelection()}
