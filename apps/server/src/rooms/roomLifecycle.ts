@@ -4,6 +4,7 @@ import type {
   RoomLifecycle,
   RoomSnapshot
 } from "@open-party-lab/protocol";
+import { resolveGameMinPlayers } from "@open-party-lab/game-core";
 import type { RoomRecord } from "./roomStore.js";
 
 type PlayerRecord = RoomRecord["players"] extends Map<string, infer TPlayer> ? TPlayer : never;
@@ -147,12 +148,16 @@ export function canStartRound(room: RoomRecord, selectedGame: AvailableGameDto |
   const allPlayersReady = players.length > 0 && players.every((player) => player.isReady);
   const allRequiredPlayerSetupChoicesSelected = areRequiredPlayerSetupChoicesSelected(room, selectedGame);
   const setupConfirmed = isLobbySetupConfirmed(room, selectedGame);
+  const minimumPlayers = resolveGameMinPlayers(
+    selectedGame,
+    room.gameSettingsByGameId[selectedGame.id]
+  );
 
   return (
     allPlayersReady &&
     allRequiredPlayerSetupChoicesSelected &&
     setupConfirmed &&
-    players.length >= selectedGame.minPlayers &&
+    players.length >= minimumPlayers &&
     players.length <= selectedGame.maxPlayers
   );
 }
@@ -172,11 +177,15 @@ export function explainCannotStartRound(
   }
 
   const players = [...room.players.values()];
+  const minimumPlayers = resolveGameMinPlayers(
+    selectedGame,
+    room.gameSettingsByGameId[selectedGame.id]
+  );
 
-  if (players.length < selectedGame.minPlayers) {
+  if (players.length < minimumPlayers) {
     return en
-      ? `${selectedGame.displayName} needs at least ${selectedGame.minPlayers} players.`
-      : `${selectedGame.displayName} braucht mindestens ${selectedGame.minPlayers} Spieler.`;
+      ? `${selectedGame.displayName} needs at least ${minimumPlayers} players.`
+      : `${selectedGame.displayName} braucht mindestens ${minimumPlayers} Spieler.`;
   }
 
   if (players.length > selectedGame.maxPlayers) {

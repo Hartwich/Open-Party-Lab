@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import { resolveGameMinPlayers } from "@open-party-lab/game-core";
 import {
   canManagePlayerRoster,
   hasActiveRound,
@@ -101,7 +102,8 @@ function resolveAction(
     };
   }
 
-  const missing = selected.minPlayers - players.length;
+  const minimumPlayers = resolveGameMinPlayers(selected, room?.selectedGameSettings);
+  const missing = minimumPlayers - players.length;
 
   if (missing > 0) {
     return {

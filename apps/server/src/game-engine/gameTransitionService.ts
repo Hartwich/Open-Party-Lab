@@ -83,8 +83,18 @@ export class GameTransitionService {
     if (state.phase === "locked") {
       if (room.currentRound?.scoreCommittedAt === null) {
         const scoreEntries = game.buildScore(state as never, buildContext(deltaMs));
-        this.scoreManager.apply(room, scoreEntries);
+        if (entry.manifest.scoreScope !== "game") {
+          this.scoreManager.apply(room, scoreEntries);
+        }
         this.roundManager.commitScore(room, scoreEntries, now);
+        if (entry.manifest.scoreScope === "game" && state && typeof state === "object" && "gameScores" in state) {
+          const gameScores = { ...((state as { gameScores?: Record<string, number> }).gameScores ?? {}) };
+          for (const scoreEntry of scoreEntries) {
+            gameScores[scoreEntry.playerId] = (gameScores[scoreEntry.playerId] ?? 0) + scoreEntry.delta;
+          }
+          state = { ...(state as object), gameScores } as unknown as BaseRoundState;
+          this.roundManager.replaceState(room, state);
+        }
         scoreChanged = scoreEntries.length > 0;
       }
 

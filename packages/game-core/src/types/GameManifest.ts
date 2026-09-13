@@ -94,6 +94,12 @@ export interface GameLobbySetupDefinition {
   };
 }
 
+/** Optional minimum-player override driven by a lobby setting. */
+export interface GameMinPlayersBySetting {
+  settingKey: string;
+  values: Readonly<Record<string, number>>;
+}
+
 export interface GamePlayerSetupOption {
   id: string;
   name: string;
@@ -145,6 +151,7 @@ export interface GameManifest {
   description: string;
   listed?: boolean;
   minPlayers: number;
+  minPlayersBySetting?: GameMinPlayersBySetting;
   maxPlayers: number;
   hostView: string;
   controllerView: string;
@@ -153,6 +160,8 @@ export interface GameManifest {
   estimatedRoundDurationMs: number;
   phaseDurations?: Partial<RoundPhaseTimings>;
   roundCompletionMode?: "standard" | "wait_for_ready";
+  /** Whether this game's points belong to the room total or only this game. */
+  scoreScope?: "room" | "game";
   lobbySetup?: GameLobbySetupDefinition;
   playerSetup?: GamePlayerSetupDefinition;
 
@@ -172,6 +181,19 @@ export interface GameManifest {
   audio?: GameAudioDefinition;
   /** State broadcast tuning. */
   broadcast?: GameBroadcastPolicy;
+}
+
+export function resolveGameMinPlayers(
+  manifest: Pick<GameManifest, "minPlayers" | "minPlayersBySetting">,
+  settings: Readonly<Record<string, unknown>> | undefined
+): number {
+  const rule = manifest.minPlayersBySetting;
+  const rawValue = rule && settings ? settings[rule.settingKey] : undefined;
+  const override = rule && rawValue !== undefined ? rule.values[String(rawValue)] : undefined;
+
+  return typeof override === "number" && Number.isFinite(override)
+    ? Math.max(1, Math.round(override))
+    : manifest.minPlayers;
 }
 
 function lobbyFieldKey(field: GameLobbySetupField): string {

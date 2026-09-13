@@ -14,7 +14,7 @@ import { ReconnectService } from "./reconnectService.js";
 const playerColors = [
   "#ef4444",
   "#f59e0b",
-  "#10b981",
+  "#d946ef",
   "#0ea5e9",
   "#8b5cf6",
   "#ec4899",
