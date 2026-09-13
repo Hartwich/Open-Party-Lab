@@ -1,6 +1,7 @@
 import { getControllerText, readStoredControllerLanguage } from "../i18n/controllerText.js";
 
 type FullscreenDocument = Document & {
+  webkitFullscreenEnabled?: boolean;
   webkitFullscreenElement?: Element | null;
   webkitExitFullscreen?: () => Promise<void> | void;
 };
@@ -33,17 +34,30 @@ function isFullscreenActive(targetDocument: FullscreenDocument): boolean {
   return Boolean(targetDocument.fullscreenElement ?? targetDocument.webkitFullscreenElement);
 }
 
+function supportsFullscreen(targetDocument: FullscreenDocument): boolean {
+  const rootElement = targetDocument.documentElement as FullscreenElement;
+  return (typeof rootElement.requestFullscreen === "function" && targetDocument.fullscreenEnabled !== false)
+    || (typeof rootElement.webkitRequestFullscreen === "function" && targetDocument.webkitFullscreenEnabled !== false);
+}
+
+function isAppleMobile(): boolean {
+  return /iPhone|iPad|iPod/.test(navigator.userAgent)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
 async function enterFullscreen(targetDocument: FullscreenDocument): Promise<void> {
   const rootElement = targetDocument.documentElement as FullscreenElement;
 
-  if (typeof rootElement.requestFullscreen === "function") {
+  if (typeof rootElement.requestFullscreen === "function" && targetDocument.fullscreenEnabled !== false) {
     await rootElement.requestFullscreen();
     return;
   }
 
   if (typeof rootElement.webkitRequestFullscreen === "function") {
     await rootElement.webkitRequestFullscreen();
+    return;
   }
+  throw new Error("Fullscreen is unavailable");
 }
 
 async function exitFullscreen(targetDocument: FullscreenDocument): Promise<void> {
@@ -159,8 +173,8 @@ export function mountControllerFullscreenOverlay(): () => void {
   trapOverlayPointerEvents(overlay);
   applyStyles(overlay, {
     position: "fixed",
-    right: "14px",
-    top: "14px",
+    right: "calc(14px + env(safe-area-inset-right, 0px))",
+    top: "calc(14px + env(safe-area-inset-top, 0px))",
     zIndex: "60",
     pointerEvents: "auto",
     display: "flex",
@@ -173,26 +187,97 @@ export function mountControllerFullscreenOverlay(): () => void {
   overlay.appendChild(fullscreenButton);
   document.body.appendChild(overlay);
 
+  const standaloneQuery = window.matchMedia("(display-mode: standalone)");
+  const fullscreenQuery = window.matchMedia("(display-mode: fullscreen)");
+  const dialog = document.createElement("dialog");
+  dialog.setAttribute("aria-labelledby", "controller-fullscreen-help-title");
+  dialog.setAttribute("aria-describedby", "controller-fullscreen-help-body");
+  applyStyles(dialog, {
+    width: "min(360px, calc(100vw - 48px))",
+    maxHeight: "calc(100dvh - 64px)",
+    boxSizing: "border-box",
+    overflowY: "auto",
+    padding: "24px",
+    border: "1px solid var(--line)",
+    borderRadius: "20px",
+    background: "var(--surface)",
+    color: "var(--ink)",
+    fontFamily: "var(--font-body)",
+    boxShadow: "var(--shadow-panel)"
+  });
+  trapOverlayPointerEvents(dialog);
+  const helpTitle = document.createElement("h2");
+  helpTitle.id = "controller-fullscreen-help-title";
+  applyStyles(helpTitle, { margin: "0 0 12px", fontSize: "1.25rem" });
+  const helpBody = document.createElement("p");
+  helpBody.id = "controller-fullscreen-help-body";
+  applyStyles(helpBody, { margin: "0 0 20px", lineHeight: "1.5", whiteSpace: "pre-line" });
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  applyStyles(closeButton, {
+    minHeight: "44px", width: "100%", border: "1px solid var(--accent-strong)",
+    borderRadius: "12px", background: "var(--accent)", color: "var(--on-accent)",
+    font: "inherit", cursor: "pointer"
+  });
+  closeButton.addEventListener("click", () => dialog.close());
+  dialog.addEventListener("close", () => fullscreenButton.focus());
+  dialog.append(helpTitle, helpBody, closeButton);
+  document.body.appendChild(dialog);
+
+  function isStandalone(): boolean {
+    return (navigator as Navigator & { standalone?: boolean }).standalone === true
+      || standaloneQuery.matches
+      || (fullscreenQuery.matches && !isFullscreenActive(targetDocument));
+  }
+
+  function showFullscreenHelp(failed: boolean): void {
+    const text = getControllerText(readStoredControllerLanguage());
+    helpTitle.textContent = isAppleMobile() ? text.fullscreenInstallTitle : text.fullscreen;
+    helpBody.textContent = isAppleMobile()
+      ? text.fullscreenInstallBody
+      : failed ? text.fullscreenFailed : text.fullscreenUnavailable;
+    closeButton.textContent = text.fullscreenHelpClose;
+    if (!dialog.open) dialog.showModal();
+  }
+
   function updateButtonLabel(): void {
+    // A Home Screen app already has no browser toolbar; there is no API exit action.
+    overlay.style.display = isStandalone() ? "none" : "flex";
     const active = isFullscreenActive(targetDocument);
     setFullscreenIconButtonState(fullscreenButton, active);
+    if (!active && !supportsFullscreen(targetDocument)) {
+      const text = getControllerText(readStoredControllerLanguage());
+      fullscreenButton.setAttribute("aria-label", text.fullscreenHelp);
+      fullscreenButton.setAttribute("aria-haspopup", "dialog");
+      fullscreenButton.removeAttribute("aria-pressed");
+      fullscreenButton.title = text.fullscreenHelp;
+    } else {
+      fullscreenButton.removeAttribute("aria-haspopup");
+    }
   }
 
   async function toggleFullscreen(): Promise<void> {
+    if (isStandalone() || dialog.open) return;
     try {
       if (isFullscreenActive(targetDocument)) {
         await exitFullscreen(targetDocument);
         return;
       }
 
+      if (!supportsFullscreen(targetDocument)) {
+        showFullscreenHelp(false);
+        return;
+      }
       await enterFullscreen(targetDocument);
     } catch {
+      showFullscreenHelp(true);
+    } finally {
       updateButtonLabel();
     }
   }
 
   function handleKeydown(event: KeyboardEvent): void {
-    if (event.repeat) {
+    if (event.repeat || event.ctrlKey || event.metaKey || event.altKey || dialog.open) {
       return;
     }
 
@@ -218,13 +303,18 @@ export function mountControllerFullscreenOverlay(): () => void {
   });
   targetDocument.addEventListener("fullscreenchange", updateButtonLabel);
   targetDocument.addEventListener("webkitfullscreenchange", updateButtonLabel as EventListener);
+  standaloneQuery.addEventListener("change", updateButtonLabel);
+  fullscreenQuery.addEventListener("change", updateButtonLabel);
   window.addEventListener("keydown", handleKeydown);
   updateButtonLabel();
 
   return () => {
     targetDocument.removeEventListener("fullscreenchange", updateButtonLabel);
     targetDocument.removeEventListener("webkitfullscreenchange", updateButtonLabel as EventListener);
+    standaloneQuery.removeEventListener("change", updateButtonLabel);
+    fullscreenQuery.removeEventListener("change", updateButtonLabel);
     window.removeEventListener("keydown", handleKeydown);
+    dialog.remove();
     overlay.remove();
   };
 }

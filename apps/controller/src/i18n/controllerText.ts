@@ -77,6 +77,12 @@ export interface ControllerText {
   exitFullscreen: string;
   fullscreenHint: string;
   exitFullscreenHint: string;
+  fullscreenHelp: string;
+  fullscreenInstallTitle: string;
+  fullscreenInstallBody: string;
+  fullscreenUnavailable: string;
+  fullscreenFailed: string;
+  fullscreenHelpClose: string;
   score: string;
   lobbySelected: (gameName: string) => string;
   lobbyWaitingHost: string;
@@ -167,6 +173,12 @@ const controllerText = {
     exitFullscreen: "Vollbild beenden",
     fullscreenHint: "Klick oder F startet den Vollbildmodus",
     exitFullscreenHint: "Esc oder F beendet den Vollbildmodus",
+    fullscreenHelp: "Hilfe zum Vollbildmodus",
+    fullscreenInstallTitle: "Ohne Browserleiste spielen",
+    fullscreenInstallBody: "Dieser Browser kann den Controller nicht per Taste ins Vollbild schalten. Öffne diese Seite in Safari und wähle im Menü „Teilen“ → „Zum Home-Bildschirm“. Falls angezeigt, aktiviere „Als Web-App öffnen“.\n\nStarte den Controller danach über das neue Symbol. Falls nötig, tritt dem Raum dort erneut bei.",
+    fullscreenUnavailable: "Dieser Browser unterstützt keinen Vollbildmodus für den Controller. Du kannst hier weiterspielen oder einen anderen Browser verwenden.",
+    fullscreenFailed: "Der Browser hat den Wechsel in den Vollbildmodus abgelehnt. Schließe diesen Hinweis und versuche es erneut. Du kannst auch ohne Vollbild weiterspielen.",
+    fullscreenHelpClose: "Verstanden",
     score: "Score",
     lobbySelected: (gameName: string) => `Ausgewaehlt: ${gameName}`,
     lobbyWaitingHost: "Der Host waehlt gleich ein Spiel.",
@@ -277,6 +289,12 @@ const controllerText = {
     exitFullscreen: "Exit fullscreen",
     fullscreenHint: "Click or press F to enter fullscreen",
     exitFullscreenHint: "Esc or F exits fullscreen",
+    fullscreenHelp: "Fullscreen help",
+    fullscreenInstallTitle: "Play without browser toolbars",
+    fullscreenInstallBody: "This browser cannot switch the controller to fullscreen with a button. Open this page in Safari and choose Share → Add to Home Screen. If shown, enable Open as Web App.\n\nThen launch the controller from the new icon. Rejoin the room there if needed.",
+    fullscreenUnavailable: "This browser does not support fullscreen for the controller. You can keep playing here or use another browser.",
+    fullscreenFailed: "The browser refused to switch fullscreen mode. Close this message and try again. You can also keep playing without fullscreen.",
+    fullscreenHelpClose: "Got it",
     score: "Score",
     lobbySelected: (gameName: string) => `Selected: ${gameName}`,
     lobbyWaitingHost: "The host is about to pick a game.",

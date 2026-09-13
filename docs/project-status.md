@@ -9,6 +9,7 @@ Platform:
 - local room creation
 - room code and QR join flow
 - phone controller app
+- controller fullscreen uses browser capability detection and reports rejected requests; iPhone/iPad browsers without element fullscreen show German/English Home Screen web-app instructions. The controller supports standalone launch (including the installed room URL), hides the redundant fullscreen control in that mode, and places the browser-mode button inside safe-area insets. Native iPhone Home Screen installation still needs physical-device QA.
 - DOM platform shell plus Phaser or DOM game host surfaces
 - Canvas-backed Phaser rendering so SVG game art remains visible across Chromium/WebGL driver combinations
 - authoritative Socket.IO server

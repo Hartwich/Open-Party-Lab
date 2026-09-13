@@ -1,0 +1,9 @@
+{
+  "id": "./",
+  "name": "Open Party Lab Controller",
+  "short_name": "Party Controller",
+  "display": "standalone",
+  "scope": "./",
+  "background_color": "#f7f1e7",
+  "theme_color": "#f7f1e7"
+}
