@@ -1,6 +1,6 @@
 # Project Status
 
-Snapshot date: 2026-09-01
+Snapshot date: 2026-09-14
 
 ## Available In This Public Cut
 
@@ -85,4 +85,3 @@ Lobby/setup:
 - add more incremental host rendering paths;
 - improve docs for each game;
 - improve balancing, round pacing, scoring clarity, and player feedback for alpha games;
-- add playtest checklists and fixture rooms.
