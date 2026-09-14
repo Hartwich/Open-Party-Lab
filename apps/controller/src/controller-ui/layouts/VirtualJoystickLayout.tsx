@@ -88,8 +88,9 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
   // Only the minimal (stick-only) variant can be anchored; the richer variants
   // stack panels and stats around the stick and keep their flow layout.
   const anchorBottom = minimal && model.stickPlacement === "bottom";
+  const anchorLowerMiddle = minimal && model.stickPlacement === "lower-middle";
   const controlSize = minimal
-    ? anchorBottom
+    ? anchorBottom || anchorLowerMiddle
       ? "min(84vw, 360px, 70dvh)"
       : "min(84vw, 360px)"
     : cleanChrome
@@ -232,7 +233,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
       style={{
         display: "grid",
         gap: minimal ? 0 : cleanChrome ? 12 : 18,
-        minHeight: anchorBottom
+        minHeight: anchorBottom || anchorLowerMiddle
           ? SAFE_VIEWPORT_HEIGHT
           : minimal ? "min(76vh, 680px)" : undefined,
         alignContent: anchorBottom ? "end" : cleanChrome ? "center" : undefined,
@@ -266,6 +267,12 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
         style={{
           display: "grid",
           gridTemplateColumns: hasActionButtons ? "minmax(0, 1fr) auto" : "minmax(0, 1fr)",
+          // Centre the pad in the third viewport quarter, independent of header height.
+          position: anchorLowerMiddle ? "fixed" : undefined,
+          top: anchorLowerMiddle ? "62.5dvh" : undefined,
+          left: anchorLowerMiddle ? 0 : undefined,
+          right: anchorLowerMiddle ? 0 : undefined,
+          transform: anchorLowerMiddle ? "translateY(-50%)" : undefined,
           alignItems: "center",
           gap: cleanChrome ? 12 : 16
         }}

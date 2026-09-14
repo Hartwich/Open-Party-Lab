@@ -1153,14 +1153,23 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
               whiteSpace: "nowrap"
             }}
           >
-            {compactPlayerName(model.title)}
+            {model.survival ? model.title : compactPlayerName(model.title)}
           </strong>
           <RoundIconButton label={en ? "Show stats" : "Stats anzeigen"} onClick={() => setDetailTarget({ type: "stats" })} tone="slate">
             <StatsIcon />
           </RoundIconButton>
         </div>
 
-        {levelUp ? (
+        {model.survival ? (
+          <>
+            <div style={{ color: "var(--text-muted)", fontSize: "0.85rem", lineHeight: 1.45 }} role="status">{model.helperText}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+              <MetricChip icon={<MaterialIcon />} label="M" value={model.materials} tone="gold" />
+              <MetricChip icon={<PowerUpIcon />} label="Cores" value={model.survival.cores} tone="blue" />
+              <MetricChip icon={<WaveIcon />} label="Lv." value={model.survival.level} tone="green" />
+            </div>
+          </>
+        ) : levelUp ? (
           <LevelUpMarker choicesRemaining={model.levelUpChoicesRemaining} en={en} />
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: ready ? "1fr 1fr 1fr" : "1fr 1fr", gap: 8 }}>
@@ -1228,7 +1237,7 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
               }}
             >
               <NextRoundIcon />
-              <span>{ready.currentPlayerReady ? "OK" : ready.readyCount === ready.playerCount ? "GO" : `${ready.readyCount}/${ready.playerCount}`}</span>
+              <span>{model.survival ? ready.currentPlayerReady ? "OK" : ready.label : ready.currentPlayerReady ? "OK" : ready.readyCount === ready.playerCount ? "GO" : `${ready.readyCount}/${ready.playerCount}`}</span>
             </button>
           ) : null}
         </div> : null}

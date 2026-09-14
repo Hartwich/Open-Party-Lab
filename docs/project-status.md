@@ -2,6 +2,13 @@
 
 Snapshot date: 2026-09-01
 
+## Arena Survivor Survival Mode (2026-09-14)
+
+- The optional Arena Survivor package now has selectable Wave and Survival modes. Wave retains its existing round/shop flow; Survival uses Frostfire Saga and a fixed open 4800 × 3600 field. A new repeatable ground texture replaces the repeated arena backgrounds. Separate rock/crystal islands have server collision and local enemy avoidance; there are no prescribed roads. New transparent merchant, chest, rare chest and Forge sprites replace the geometric placeholders. Objective placement avoids obstacles and other objectives; the minimap shows the field and rock islands.
+- Survival integrates shared XP, independent three-option power-up choices, untimed team pauses with immediate continuation after the last selection, map shops, distributed chest loot, personal Evolution Cores, Forge-only weapon evolution, timed mini-bosses, multiplayer respawns, a final boss at twenty active minutes, and optional Endless with the same build. Paused Survival states keep synchronizing to recover from dropped or throttled controller updates at level-up. Navigation includes a minimap and off-screen objective markers; living players share a bounded camera and distance constraint.
+- The core systems, content and controller shop are reused. Survival adds larger evolving hordes, while the normal six-weapon cap and per-item maximum levels remain; there is no global passive-item slot cap.
+- Final verification is a full build at the user's request. Earlier server checks passed; browser QA was stopped at the user's request. Twenty-minute gameplay balance, phone interaction and the map's visual presentation still need playtesting.
+
 ## Available In This Public Cut
 
 Platform:
@@ -88,3 +95,13 @@ Lobby/setup:
 - add playtest checklists and fixture rooms.
 
 - Pantomime: Der geheime Begriff wird serverseitig nur an den aktiven Darsteller gesendet. Nur dieser kann während der 60 Sekunden mit ‚Erraten‘ den Begriff öffentlich aufdecken; die Uhr läuft bis zum bisherigen Rundenende weiter. Ein Punkt wird nur bei bestätigtem Erfolg vergeben. Host-Anzeige und Rundenseiten verwenden Theme-Farben; die große Uhr aktualisiert sich unabhängig von Netzwerk-Updates.
+
+- Arena Survivor: Host-Kampfgeräusche für Schüsse, Nahkampfschwünge und Mob-Treffer sowie kurz aufsteigende serverseitige Schadenszahlen in Wave und Survival ergänzt. Waffen in allen Themes auf 75 % der bisherigen Darstellungsgröße reduziert; Schadenswerte und Reichweiten bleiben unverändert. Keine Browserprüfung durchgeführt.
+
+- Frostfire Survival scenery now combines three ground textures with softly blended frost/ash patches and sparse rocks and frost-covered dead trees. Scenery obstacles are hidden on the minimap; collision footprints and free traversal remain unchanged.
+
+- Arena Survivor: Eigene Projektilgrafiken für Coil (Doppelschiene), Zahnrad (rotierend), Gift (Pfeil) und Prisma (zweifarbiger Kristall); Pistolenmunition, Feuer und Blitz stärker differenziert. Richtungsgebundene Grafiken folgen ihrer Flugrichtung in allen Modi/Themes. Texturen werden einmal erzeugt und wiederverwendet; Kampfwerte unverändert.
+- Arena Survivor Survival: stat-only three-choice level-ups with existing power-up art; chest recipient chooses keep/salvage during a synchronized pause; chests at 45s then every 60s (cap 6); shop/reroll prices +35%; ranged reach -20%; distant ordinary enemies despawn without rewards, off-camera enemy sprites are pooled. Boss objectives are retained.
+- Arena Survivor balance: life-steal healing reduced 75% globally; 16 Survival stat bonuses; +50% Survival XP thresholds; stronger time/tier-based enemies and bosses; chest upgrades target owned weapons; found weapons have resale value; explicit gold/core SVG icons; evolved melee orbits with authoritative swept contact damage and a 500ms per-target hit interval; evolution aura removed.
+
+- Arena Survivor: Virtueller Controller-Stick in beiden Modi auf 62,5 % der sichtbaren Bildschirmhöhe zentriert (Mitte des dritten Viertels); bestehende Touch-Steuerung unverändert. Keine Browserprüfung.

@@ -200,7 +200,8 @@ export interface VirtualJoystickLayoutModel {
    * previous vertically centred pad; "bottom" anchors it to the lower screen
    * edge so the thumb rests where the hand already holds the phone.
    */
-  stickPlacement?: "center" | "bottom";
+  // "lower-middle" places the pad centre at 62.5% of the viewport height.
+  stickPlacement?: "center" | "bottom" | "lower-middle";
   disabled: boolean;
   accentColor?: string;
   resetKey: string;
@@ -566,6 +567,7 @@ export interface ShopLayoutModel {
 }
 
 export interface ArenaSurvivorModernShopLayoutModel extends Omit<ShopLayoutModel, "kind"> {
+  survival?: { phase: string; cores: number; level: number };
   kind: "arena_survivor_modern_shop";
 }
 
