@@ -66,7 +66,7 @@ Lobby/setup:
 ## Not Production-Ready Yet
 
 - most included games are still alpha and may need rule, pacing, scoring, UI, and balancing changes;
-- Magic Arena, Magic Duell, Arena Survivor, MinionsTD, Zeichnen & Erraten, Schaetzorama, Chaos-Kommando, Flatterfluff, Word Tiles, and Drift Racer are the recommended alpha/beta set, but still need normal playtesting and refinement;
+- Magic Arena, Magic Duell, Arena Survivor, MinionsTD, Zeichnen & Erraten, Schaetzorama, Chaos-Kommando, Flatterfluff, Word Tiles, Card-Table and Drift Racer are the recommended alpha/beta set, but still need normal playtesting and refinement;
 - Schaetzorama now shuffles ranking items and assignment terms once per round, keeps the final paid copy preview visible at zero remaining jokers, and uses direct question/player choices on the phone. Scores and solutions are host-only; every round ends with animated overall rank changes (ties share ranks). Each category reveal now compares every player's submitted answer with the solution: numeric deviations, individual ranking positions, and each assignment, including missing and copied answers. The reveal window is 50 seconds to allow time to read these comparisons. Music uses 64-bar arrangements at 100/104 BPM with a quieter reveal mix. Its interface is bilingual, but most legacy question texts still fall back to German in English rooms;
 - persistent storage is not wired for production use;
 - the public Render deployment is suitable for testing, but free-instance cold starts and ephemeral in-memory rooms remain production limitations;
