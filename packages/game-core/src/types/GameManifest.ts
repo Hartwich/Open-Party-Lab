@@ -13,6 +13,8 @@ export interface GameLobbySetupOption {
   id: string;
   label: string;
   description?: string;
+  /** Localized rules shown before starting the selected option. */
+  rules?: Partial<Record<"de" | "en", readonly { title: string; lines: readonly string[] }[]>>;
 }
 
 /**

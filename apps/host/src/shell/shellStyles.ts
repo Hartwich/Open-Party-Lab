@@ -13,6 +13,10 @@
 const STYLE_ELEMENT_ID = "opl-shell-styles";
 
 const css = `
+.opl-rules-preview { padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); line-height: 1.5; }
+.opl-rules-preview summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
+.opl-rules-preview h3 { margin: 16px 0 6px; }
+.opl-rules-preview ul { margin: 0; padding-left: 22px; }
 .opl-shell {
   position: fixed;
   inset: 0;

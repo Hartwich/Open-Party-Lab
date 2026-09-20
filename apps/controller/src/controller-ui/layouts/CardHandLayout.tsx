@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import { useHaptics } from "../../hooks/useHaptics.js";
 import { useOrientationHint } from "../../hooks/useOrientationHint.js";
 import { PlayingCard } from "./cardArt.js";
+import { ReadyPanel } from "../common/ReadyPanel.js";
 import type { CardHandLayoutModel } from "./models.js";
 import type { CardTableActionState, CardTableHandCardState } from "@open-party-lab/protocol";
 
@@ -153,6 +154,7 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
               ? "The result is on the shared screen."
               : "Die Auswertung steht auf dem großen Bildschirm."}
         </span>
+        {model.ready ? <ReadyPanel ready={model.ready} /> : null}
       </div>
     );
   }
@@ -163,7 +165,7 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
         display: "grid",
         // Zwei Reihen: Das Blatt nimmt allen Platz, die Knöpfe sitzen darunter
         // am unteren Rand - dort, wo der Daumen ohnehin liegt.
-        gridTemplateRows: "minmax(0, 1fr) auto",
+        gridTemplateRows: "auto minmax(0, 1fr) auto",
         gap: 6,
         height: "100%",
         minHeight: "min(84dvh, 760px)",
@@ -173,6 +175,12 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
         borderRadius: 16
       }}
     >
+      <div style={{ display: "grid", gap: 2, padding: "2px 6px", fontSize: "0.82rem" }} aria-live="polite">
+        <span style={{ color: "var(--muted)" }}>
+          {model.subtitle}{model.conditionLabel ? ` · ${model.conditionLabel}` : ""}
+        </span>
+        {model.privateNote ? <strong style={{ color: "var(--ink)" }}>{model.privateNote}</strong> : null}
+      </div>
       <section style={{ display: "grid", gap: 8, minHeight: 0 }}>
         <div
           ref={handRef}
@@ -362,6 +370,8 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
           <div
             style={{
               width: "min(560px, 100%)",
+              maxHeight: "calc(100dvh - 32px)",
+              overflowY: "auto",
               display: "grid",
               gap: 10,
               padding: 14,

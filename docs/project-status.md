@@ -6,6 +6,13 @@ Snapshot date: 2026-09-14
 
 Platform:
 
+- Card Table rule audit: corrected Mau-Mau penalty/pass and exhausted-pile handling, Schwimmen initial 31 and visible swaps, Hearts opening restrictions and uneven deals, Trick Bets dealer trump choice and full deals, Go Fish end/tie handling, Cheat final-card challenges, and Old Maid initial completion. Number Rows shows both row ends. Private hand hints are visible on phones. Intentional simplified variants remain documented in the game rules.
+- Card Table round results expose the phone ready control and a host main-menu button for every ruleset. Deals and cumulative ruleset scores survive the countdown; Trick Bets progresses using its own series round rather than the room-wide counter.
+- Card Table selection shows the selected ruleset description and expandable German/English rules before starting, using the rulesets themselves as the source.
+- Number Rows keeps all four colour rows visible, shows both row ends and the next legal ranks, uses ten initial cards independently of hidden lobby settings, and offers Pass when its draw pile is empty. Seeded full-game checks cover 2, 4 and 6 seats.
+
+- Card Table Doppelkopf offers silent wedding, first plain-suit trick and first trump trick directly during reservations with both club queens. Silent wedding stays publicly healthy; announced weddings find a partner within the first three tricks. Browser and physical-device validation of these choices remains pending.
+
 - local room creation
 - room code and QR join flow
 - phone controller app
@@ -64,6 +71,8 @@ Lobby/setup:
 - game repos keep their own setup field declarations and server-side validation.
 
 ## Not Production-Ready Yet
+
+Schattenjagd investigators now move one at a time in seating order, each with an individual timer. The server rejects out-of-turn moves and skips disconnected or blocked investigators. The host uses separate transport lanes, crossing casings, and active-player route/destination highlights generated from the legal move data.
 
 - most included games are still alpha and may need rule, pacing, scoring, UI, and balancing changes;
 - Magic Arena, Magic Duell, Arena Survivor, MinionsTD, Zeichnen & Erraten, Schaetzorama, Chaos-Kommando, Flatterfluff, Word Tiles, Card-Table and Drift Racer are the recommended alpha/beta set, but still need normal playtesting and refinement;

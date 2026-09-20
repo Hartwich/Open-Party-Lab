@@ -52,7 +52,7 @@ function renderTile(game: AvailableGameDto, language: SupportedLanguage): string
   `;
 }
 
-function renderSelectField(field: LobbyField & { kind: "select" }, value: unknown, locked: boolean): string {
+function renderSelectField(field: LobbyField & { kind: "select" }, value: unknown, locked: boolean, language: SupportedLanguage): string {
   const current = String(value);
   const options = field.options
     .map(
@@ -69,10 +69,15 @@ function renderSelectField(field: LobbyField & { kind: "select" }, value: unknow
     )
     .join("");
 
+  const selected = field.options.find((option) => option.id === current);
+  const rules = selected?.rules?.[language] ?? selected?.rules?.de;
+  const help = rules?.length ? `<details class="opl-rules-preview"><summary>${language === "en" ? "Show rules" : "Regeln anzeigen"}</summary>${rules.map((section) => `<section><h3>${escapeHtml(section.title)}</h3><ul>${section.lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul></section>`).join("")}</details>` : "";
   return `
     <div class="opl-field">
       <p class="opl-field-label">${escapeHtml(field.label)}</p>
       <div class="opl-options">${options}</div>
+      ${selected?.description ? `<p class="opl-field-hint">${escapeHtml(selected.description)}</p>` : ""}
+      ${help}
       ${field.description ? `<p class="opl-field-hint">${escapeHtml(field.description)}</p>` : ""}
     </div>
   `;
@@ -124,7 +129,7 @@ function renderNumberField(field: LobbyField & { kind: "number" }, value: unknow
   `;
 }
 
-function renderSetup(game: AvailableGameDto, settings: SettingsMap, locked: boolean): string {
+function renderSetup(game: AvailableGameDto, settings: SettingsMap, locked: boolean, language: SupportedLanguage): string {
   const setup = game.lobbySetup;
 
   if (!setup) {
@@ -140,7 +145,7 @@ function renderSetup(game: AvailableGameDto, settings: SettingsMap, locked: bool
     const value = settings[field.settingKey ?? field.id] ?? field.defaultValue;
 
     if (field.kind === "select") {
-      return renderSelectField(field, value, locked);
+      return renderSelectField(field, value, locked, language);
     }
 
     return field.kind === "toggle"
@@ -245,7 +250,7 @@ function renderOpenGameCard(
             ${renderUiIcon("back", 15)}${escapeHtml(text.shellBackToCatalog)}
           </button>
         </div>
-        ${renderSetup(game, settings, locked)}
+        ${renderSetup(game, settings, locked, language)}
       </div>
     </section>
   `;
