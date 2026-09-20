@@ -94,3 +94,5 @@ Schattenjagd investigators now move one at a time in seating order, each with an
 - add more incremental host rendering paths;
 - improve docs for each game;
 - improve balancing, round pacing, scoring clarity, and player feedback for alpha games;
+
+- Card Table: Stichwette now uses an original arcane SVG deck on host and controller, four suits numbered 1–13 plus four wizards and fools. Dealer/first bidder rotate each deal; a full-deck finale reports shared series winners and Ready restarts at one card with fresh series scores. Zahlenreihe follows the classic player-dependent deal, opening-eleven priority, up-to-three single draws and remaining-card penalty scoring.

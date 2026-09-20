@@ -120,7 +120,23 @@ export function PlayingCard({
         strokeWidth={selected ? 3 : 1.2}
       />
 
-      {style === "modern" ? (
+      {card.art === "arcane" && style !== "clear" ? (
+        <>
+          <rect x="5" y="5" width="90" height="130" rx="5" fill={ink} />
+          <path d="M50 25 80 70 50 115 20 70Z" fill="none" stroke="#ead5a0" />
+          <circle cx="50" cy="70" r="27" fill={paper} stroke="#ead5a0" strokeWidth="2" />
+          <circle cx="50" cy="70" r="33" fill="none" stroke="#ead5a0" strokeDasharray="1 5" />
+          <text x="50" y="82" textAnchor="middle" fill={ink} fontSize={card.centerLabel ? 36 : 32} fontFamily={serif} fontWeight="700">{card.centerLabel ? card.suitSymbol : card.rankLabel}</text>
+          <text x="50" y="25" textAnchor="middle" fill={paper} fontSize="16">{card.suitSymbol}</text>
+          <text x="50" y="124" textAnchor="middle" fill={paper} fontSize={card.centerLabel ? 9 : 17} fontFamily={sans}>{card.centerLabel ?? card.suitSymbol}</text>
+          <text x="11" y="23" fill={paper} fontSize="16" fontWeight="700">{card.rankLabel}</text>
+          <text x="11" y="38" fill={paper} fontSize="13">{card.suitSymbol}</text>
+          <g transform="rotate(180 50 70)">
+            <text x="11" y="23" fill={paper} fontSize="16" fontWeight="700">{card.rankLabel}</text>
+            <text x="11" y="38" fill={paper} fontSize="13">{card.suitSymbol}</text>
+          </g>
+        </>
+      ) : style === "modern" ? (
         <>
           <rect x={6} y={6} width={artWidth - 12} height={artHeight - 12} rx={6} fill={ink} />
           <circle cx={artWidth / 2} cy={artHeight / 2} r={26} fill={paper} fillOpacity={0.92} />

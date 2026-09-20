@@ -22,6 +22,7 @@ export interface CardTableCardState {
   suitLabel: string;
   rankLabel: string;
   color: CardTableColor;
+  art?: "arcane";
   centerLabel?: string;
   points?: number;
 }
