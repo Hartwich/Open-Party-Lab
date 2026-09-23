@@ -115,9 +115,14 @@ export class GameRuntime {
     const game = this.gameRegistry.require(room.currentRound.gameId);
     const currentState = room.currentRound.state as BaseRoundState;
     const gameHandleStart = performance.now();
+    // The socket handler authenticates payload.playerId. Game input lives inside
+    // a second, client-controlled object, so bind its identity again here.
+    const inputFields = payload.input && typeof payload.input === "object"
+      ? payload.input as Record<string, unknown>
+      : {};
     const nextState = game.serverGame.handleInput(
       currentState,
-      payload.input as PlayerInput,
+      { ...inputFields, playerId: payload.playerId } as PlayerInput,
       this.buildContext(room, room.currentRound.roundNumber, game.manifest, 0)
     );
     const gameHandleMs = performance.now() - gameHandleStart;

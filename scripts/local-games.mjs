@@ -80,12 +80,22 @@ async function pathExists(targetPath) {
   }
 }
 
+async function removeExistingLinkOrDirectory(targetPath) {
+  if (!await pathExists(targetPath)) return;
+  const entry = await lstat(targetPath);
+  // On Windows these links are directory junctions. Recursive removal can
+  // traverse into the source package, so always unlink the junction itself.
+  if (entry.isSymbolicLink()) {
+    await unlink(targetPath);
+  } else {
+    await rm(targetPath, { recursive: true, force: true });
+  }
+}
+
 async function removePackageLink(game) {
   const linkPath = resolvePackageLinkPath(game);
 
-  if (existsSync(linkPath) || await pathExists(linkPath)) {
-    await rm(linkPath, { recursive: true, force: true });
-  }
+  await removeExistingLinkOrDirectory(linkPath);
 }
 
 async function ensurePackageLink(game, localPath) {
@@ -158,9 +168,7 @@ async function ensurePlatformDependencyLinks(localPath) {
     const sourcePath = path.join(projectRoot, "packages", packageName);
     const targetPath = path.join(localScopeDir, packageName);
 
-    if (existsSync(targetPath) || await pathExists(targetPath)) {
-      await rm(targetPath, { recursive: true, force: true });
-    }
+    await removeExistingLinkOrDirectory(targetPath);
 
     await symlink(sourcePath, targetPath, process.platform === "win32" ? "junction" : "dir");
   }
@@ -302,15 +310,17 @@ async function listGames() {
     const status = localExists ? (linked ? "linked" : "not installed") : "missing";
 
     console.log(`${game.id}: ${status}`);
-    console.log(`  repo: ${game.repo}`);
+    console.log(`  repo: ${game.repo ?? "first-party workspace package"}`);
     console.log(`  local: ${displayPaths[0]}`);
 
     if (displayPaths.length > 1) {
       console.log(`  alternates: ${displayPaths.slice(1).join(", ")}`);
     }
 
-    if (!localExists) {
+    if (!localExists && game.repo) {
       console.log(`  clone: git clone ${game.repo} ${displayPaths[0]}`);
+    } else if (!localExists) {
+      console.log("  source package is expected in the platform workspace.");
     }
   }
 }

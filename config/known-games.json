@@ -168,5 +168,19 @@
     "alternateLocalPaths": [
       "../card-table"
     ]
+  },
+  {
+    "id": "blickwinkel",
+    "package": "@open-party-lab/game-blickwinkel",
+    "repo": "https://github.com/Hartwich/blickwinkel.git",
+    "defaultLocalPath": "local-games/blickwinkel",
+    "alternateLocalPaths": []
+  },
+  {
+    "id": "dungeon-guild",
+    "package": "@open-party-lab/game-dungeon-guild",
+    "repo": null,
+    "defaultLocalPath": "local-games/dungeon-guild",
+    "alternateLocalPaths": []
   }
 ]

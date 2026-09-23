@@ -11,6 +11,8 @@ import { schaetzoramaText } from "./games/schaetzorama.js";
 import { wordTilesText } from "./games/wordTiles.js";
 import { schattenjagdText } from "./games/schattenjagd.js";
 import { cardTableText } from "./games/cardTable.js";
+import { blickwinkelText } from "./games/blickwinkel.js";
+import { dungeonGuildText } from "./games/dungeonGuild.js";
 
 const gameTextCatalog = {
   "zeichnen-und-erraten": zeichnenUndErratenText,
@@ -24,7 +26,9 @@ const gameTextCatalog = {
   "word-tiles": wordTilesText,
   "light-trails": lightTrailsText,
   schattenjagd: schattenjagdText,
-  "card-table": cardTableText
+  "card-table": cardTableText,
+  blickwinkel: blickwinkelText,
+  "dungeon-guild": dungeonGuildText
 } as const satisfies Record<string, LocalizedGameTextMap>;
 
 export const gameTextById: Record<string, LocalizedGameTextMap> = gameTextCatalog;

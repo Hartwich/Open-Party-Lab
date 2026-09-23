@@ -18,6 +18,7 @@ import { SpellCastingLayout } from "./SpellCastingLayout.js";
 import { MagicArenaLayout } from "./MagicArenaLayout.js";
 import { CardHandLayout } from "./CardHandLayout.js";
 import { DungeonPartyLayout } from "./DungeonPartyLayout.js";
+import { SocialPartyLayout } from "./SocialPartyLayout.js";
 import type { ControllerLayoutModel } from "./models.js";
 
 interface ControllerLayoutRendererProps {
@@ -66,6 +67,8 @@ export function ControllerLayoutRenderer({ model }: ControllerLayoutRendererProp
       return <CardHandLayout model={model} />;
     case "dungeon_party":
       return <DungeonPartyLayout model={model} />;
+    case "social_party":
+      return <SocialPartyLayout model={model} />;
     default:
       return null;
   }

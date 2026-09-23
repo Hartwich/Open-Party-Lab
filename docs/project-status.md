@@ -1,10 +1,10 @@
 # Project Status
 
-Snapshot date: 2026-09-22
+Snapshot date: 2026-09-23
 
 ## In Development
 
-- Dungeon Party (local-games/dungeon-party) keeps its competitive co-op goal: the party advances together while players compete on fame. Route votes, actions, card reactions, and reading the result now have no countdown; each phase advances only after everyone submits. The phone uses a selectable illustrated card hand, and the shared screen shows original room/monster art, revealed dice, played cards and targets, individual score/health changes, and the chosen route. Its eight-room campaign and balance remain alpha; real multi-phone play and the 30–50 minute target still need validation. See local-games/dungeon-party/docs/game-design.md; the game repo is public at https://github.com/Hartwich/dungeon-party.
+- Dungeon Party (local-games/dungeon-party) keeps its competitive co-op goal: the party advances together while players compete on fame. The host resolves fights as illustrated hero-action, card, visible d6 and outcome scenes, with generated background music and short synthesized sound effects. Three shared actions remain available alongside one class-specific action per hero. Players without a legal effect card skip the reaction automatically; successful dragon phases award each hero an effect card. The result recap stays until each player marks Ready. Its eight-room campaign and balance remain alpha; real multi-phone play and the 30–50 minute target still need validation. See local-games/dungeon-party/docs/game-design.md; the game repo is public at https://github.com/Hartwich/dungeon-party.
 
 ## Available In This Public Cut
 
@@ -31,7 +31,7 @@ Platform:
 - host controls for language, FPS, and player moderation outside active rounds
 - synchronized light and dark room themes across the host shell, host overlays, and phone controllers, with accessible focus indicators and contrast-adjusted catalog labels
 - Word Tiles and Draw & Guess keep their Canvas host renderers and read the live room theme for playfield backgrounds, panels, borders, and round screens; Word Tiles premium fields tint the themed board surface while letter tiles and drawing strokes retain their game colours
-- Draw & Guess uses matching 4:3 drawing paper on host and controller to retain stroke proportions across screen sizes; the active host view shows the enlarged drawing board and guesses on the right.
+- Draw & Guess adapts the drawer's no-scroll drawing surface to phone orientation and mirrors its proportions on the host; the host shows the enlarged board, guesses and optional round countdown. Between turns, a brief intro names the next drawer.
 - optional local game-repo discovery through `npm run games:list` and `npm run games:sync-local`
 - virtual controller helper for AI browser checks through `npm run ai:controllers`
 - host DEV automation bridge for browser checks exposed only by the Vite dev host
@@ -43,6 +43,8 @@ Platform:
 
 Optional local game repos:
 
+- Dungeon-Gilde lives in `local-games/dungeon-guild` as an optional standalone game package. It has separate Door and Treasure decks, private phone hands, visible levels/equipment, monster combat, help and reward sharing, escape with monster-specific penalties, room loot, charity, item selling and level-10-by-monster victory. Card names, text and visual design are original; the game reuses the shared card-hand phone layout. Core game flow is implemented for 3–6 players; balance and real multi-phone validation remain open.
+- Blickwinkel lives in `local-games/blickwinkel` as a separate game package. It is playable for 3–8 players with a ten-task session: four private-pick questions, two short-text challenges, two camera/gallery photo challenges, and two finger-drawing challenges with an optional photo background. The game ships 80 original pick questions plus 43 original creative prompts in German and English. The server validates submissions, keeps creative entries anonymous until reveal, blocks votes for one's own entry, resolves deadlines, and awards points; the DOM host and phone controller show all task, vote, reveal and final-score states. The design uses tactile photo-print surfaces, restrained motion and stage-based platform music. Real multi-phone and mobile-camera QA remains open.
 - Magic Arena can be loaded from `local-games/magic-arena` when cloned locally. It is currently recommended alpha and playable.
 - Magic Duell can be loaded from `local-games/magic-duell` when cloned locally. It is currently recommended alpha and playable.
 - Arena Survivor can be loaded from `local-games/arena-survivor` when cloned locally. It is currently beta and recommended. Its in-wave phone stick sits at the lower screen edge; phones receive only their own player at 10 Hz, stick inputs are applied by the next server tick instead of triggering their own broadcast, and the host extrapolates movement between server states.

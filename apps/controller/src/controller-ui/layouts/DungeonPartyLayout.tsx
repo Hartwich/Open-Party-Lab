@@ -35,7 +35,9 @@ export function DungeonPartyLayout({ model }: Props) {
   const haptics = useHaptics();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [targetId, setTargetId] = useState<string | null>(null);
+  const [readyPressed, setReadyPressed] = useState(false);
   const selected = model.hand.find((card) => card.id === selectedId) ?? null;
+  const isReady = model.readySubmitted || readyPressed;
   const targetRequired = Boolean(selected && model.targetRequiredEffects.includes(selected.effect ?? ""));
   const validTargets = model.targets.filter((target) =>
     !(selected && model.targetForbiddenSelfEffects.includes(selected.effect ?? "") && target.id === model.ownPlayerId)
@@ -44,7 +46,12 @@ export function DungeonPartyLayout({ model }: Props) {
   useEffect(() => {
     setSelectedId(null);
     setTargetId(null);
+    setReadyPressed(false);
   }, [model.resetKey]);
+
+  useEffect(() => {
+    if (model.readySubmitted) setReadyPressed(true);
+  }, [model.readySubmitted]);
 
   const playSelected = () => {
     if (!selected || !model.handPlayable || (targetRequired && !targetId)) return;
@@ -61,10 +68,18 @@ export function DungeonPartyLayout({ model }: Props) {
     setTargetId(null);
   };
 
+  const ready = () => {
+    if (isReady) return;
+    haptics.tap(22);
+    setReadyPressed(true);
+    model.onContinue();
+  };
+
   return <main className="dp-phone" style={{ "--dp-accent": model.accentColor ?? "#b7773e" } as CSSProperties}>
     <style>{`
       @keyframes dp-card-arrive{from{opacity:0;transform:translateY(28px) rotate(var(--fan)) scale(.9)}to{opacity:1;transform:translateY(0) rotate(var(--fan)) scale(1)}}
       @keyframes dp-result-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+      @keyframes dp-card-throw{from{opacity:0;transform:translate(38px,-22px) rotate(12deg) scale(.8)}to{opacity:1;transform:translate(0) rotate(0) scale(1)}}
       .dp-phone{--dp-ink:#f6efdf;--dp-muted:#c6b89e;--dp-line:#5b4b37;min-height:min(88dvh,820px);box-sizing:border-box;padding:14px;display:flex;flex-direction:column;gap:12px;border-radius:20px;background:radial-gradient(130% 90% at 50% 0%,#594329 0%,#29231b 47%,#1b1916 100%);color:var(--dp-ink);font-family:ui-sans-serif,system-ui,sans-serif;overflow:hidden}
       .dp-phone-head{display:flex;justify-content:space-between;align-items:start;gap:10px}.dp-phone-head small{display:block;color:#e0b875;font-weight:800;font-size:10px;letter-spacing:.16em;text-transform:uppercase}.dp-phone h2{font:500 26px/1.08 Georgia,serif;margin:5px 0 0}.dp-phone .dp-stage{border:1px solid #705936;color:#f2d69f;border-radius:999px;padding:6px 9px;font-size:10px;white-space:nowrap}
       .dp-phone-copy{font-size:13px;line-height:1.42;color:#d2c5b0;margin:0}.dp-phone-stats{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}.dp-phone-stat{flex:1;min-width:70px;border-top:1px solid #746146;padding:7px 2px 3px}.dp-phone-stat span{display:block;color:#baa98b;font-size:9px;text-transform:uppercase;letter-spacing:.12em}.dp-phone-stat b{display:block;margin-top:3px;font:19px Georgia,serif;color:#f6dfb4}
@@ -72,8 +87,9 @@ export function DungeonPartyLayout({ model }: Props) {
       .dp-phone-section{display:grid;gap:6px;min-height:0}.dp-phone-section-head{display:flex;justify-content:space-between;align-items:baseline;color:#e5c286;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:800}.dp-phone-section-head em{font-style:normal;color:#aa9b7f;font-weight:600;letter-spacing:0;text-transform:none}
       .dp-phone-hand{display:flex;gap:0;overflow-x:auto;overflow-y:hidden;min-height:185px;padding:6px 5px 12px;align-items:flex-start;scrollbar-width:thin;scrollbar-color:#92724a transparent}.dp-phone-card{position:relative;flex:0 0 124px;width:124px;height:166px;border-radius:13px;padding:9px;box-sizing:border-box;border:1px solid #e0c28e;background:linear-gradient(155deg,#f3e6c8,#d7c29a 65%,#bfa67b);color:#2d261d;text-align:left;box-shadow:0 5px 14px #0007;transform:rotate(var(--fan));transform-origin:50% 95%;margin-right:-15px;animation:dp-card-arrive .38s cubic-bezier(.2,.75,.2,1) both;animation-delay:calc(var(--i)*35ms);cursor:pointer;transition:transform .18s,filter .18s,opacity .18s;overflow:hidden}.dp-phone-card:disabled{filter:grayscale(.45);opacity:.62}.dp-phone-card.is-selected{z-index:5;transform:translateY(-10px) rotate(0deg) scale(1.035);box-shadow:0 12px 25px #0009,0 0 0 2px #f2cb82}.dp-phone-card-top{display:flex;justify-content:space-between;align-items:center;font-size:8px;text-transform:uppercase;letter-spacing:.09em;font-weight:900;opacity:.75}.dp-phone-card-art{display:grid;place-items:center;height:57px;margin:5px 0 6px;border-radius:9px;background:radial-gradient(circle at 50% 42%,#fff8 0%,transparent 38%),linear-gradient(150deg,var(--tone),color-mix(in srgb,var(--tone) 58%,#15120f));color:#fff2d5;font:32px Georgia,serif;text-shadow:0 2px 8px #0008}.dp-phone-card-name{display:block;font:600 14px/1.05 Georgia,serif;max-height:31px;overflow:hidden}.dp-phone-card-desc{display:block;margin-top:4px;font-size:9px;line-height:1.18;max-height:31px;overflow:hidden;color:#554734}.dp-phone-targets{display:flex;gap:6px;overflow:auto}.dp-phone-target{white-space:nowrap;border:1px solid #806b49;background:#453827;color:#f5e7cb;border-radius:999px;padding:8px 10px;font-size:11px}.dp-phone-target.selected{background:#d49b4f;color:#241d13;border-color:#f0c879}.dp-phone-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dp-phone-button{border:0;border-radius:11px;padding:12px;background:#d2a35e;color:#241c13;font-weight:800;font-size:13px}.dp-phone-button.secondary{border:1px solid #756044;background:#29231a;color:#e3d0ae}.dp-phone-button:disabled{opacity:.45}.dp-phone-wait{border-left:3px solid var(--dp-accent);padding:8px 10px;background:#ffffff09;color:#d7c8ad;font-size:12px;line-height:1.4}.dp-phone-recap{display:grid;gap:6px;overflow:auto}.dp-phone-verdict{border-radius:13px;padding:11px 13px;display:flex;justify-content:space-between;align-items:center;background:${model.resolution?.success ? "#33442e" : "#512d29"};border:1px solid ${model.resolution?.success ? "#74915c" : "#a95e50"};animation:dp-result-in .35s ease-out both}.dp-phone-verdict b{font:22px Georgia,serif}.dp-phone-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 8px;padding:8px 10px;border-bottom:1px solid #ffffff20;font-size:11px}.dp-phone-row small{grid-column:1/-1;color:#cbbb9f;line-height:1.3}.dp-phone-deltas{white-space:nowrap;color:#ebd29f}.dp-phone-feed{font-size:11px;color:#c7b99e;line-height:1.4}.dp-phone-foot{margin-top:auto;display:grid;gap:6px}
       .dp-phone-played{display:flex;align-items:center;gap:11px;padding:9px 12px;border:1px solid #ac8250;border-radius:12px;background:linear-gradient(110deg,#574027,#30261b);animation:dp-card-throw .48s cubic-bezier(.18,.75,.28,1) both}.dp-phone-played-art{display:grid;place-items:center;width:42px;height:50px;border:1px solid #ead19d;border-radius:7px;background:linear-gradient(145deg,#d1a55d,#6d4c2a);font-size:22px}.dp-phone-played-copy{display:grid;gap:3px}.dp-phone-played-copy small{font-size:9px;letter-spacing:.1em;color:#d8b875;text-transform:uppercase}.dp-phone-played-copy b{font:15px Georgia,serif}.dp-phone-played-copy span{font-size:10px;color:#c6b596}.dp-phone-played-empty{border-style:dashed;color:#cbb894}.dp-phone-played-empty b{font:13px Georgia,serif}.dp-phone-played-empty small{font-size:9px;color:#bba987}@keyframes dp-card-throw{from{opacity:0;transform:translate(38px,-22px) rotate(12deg) scale(.8)}to{opacity:1;transform:translate(0) rotate(0) scale(1)}}
+      .dp-phone-ready{background:#617c4f!important;color:#f7f3df!important;box-shadow:0 0 0 2px #a9ce79,0 4px 18px #719d493b}.dp-phone-reward{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid #bb985c;border-radius:10px;background:linear-gradient(110deg,#554128,#322719);animation:dp-card-throw .46s cubic-bezier(.18,.75,.28,1) both}.dp-phone-reward-art{display:grid;place-items:center;width:35px;height:42px;border-radius:6px;background:linear-gradient(145deg,#ebd39b,#a4763d);box-shadow:inset 0 0 0 2px #fff4;color:#33251a}.dp-phone-reward b{font:13px Georgia,serif}.dp-phone-reward em{display:block;margin-top:2px;color:#cabb9f;font:9px/1.25 ui-sans-serif,system-ui,sans-serif;font-style:normal}.dp-phone-reward small{display:block;color:#ddbf82;font-size:8px;text-transform:uppercase;letter-spacing:.1em}
       @media(max-width:380px){.dp-phone{padding:10px}.dp-phone-card{flex-basis:112px;width:112px;height:158px}.dp-phone h2{font-size:23px}}
-      @media(prefers-reduced-motion:reduce){.dp-phone-card,.dp-phone-verdict{animation:none!important;transition:none!important}}
+      @media(prefers-reduced-motion:reduce){.dp-phone-card,.dp-phone-verdict,.dp-phone-reward{animation:none!important;transition:none!important}}
     `}</style>
     <header className="dp-phone-head"><div><small>{en ? "DUNGEON PARTY · NO TIMER" : "DUNGEON PARTY · OHNE ZEITLIMIT"}</small><h2>{model.title}</h2></div>{model.statusLabel ? <span className="dp-stage">{model.statusLabel}</span> : null}</header>
     <p className="dp-phone-copy">{model.subtitle}<br />{model.helperText}</p>
@@ -102,13 +118,14 @@ export function DungeonPartyLayout({ model }: Props) {
     </section> : null}
 
     {model.mode === "waiting" ? <div className="dp-phone-wait" aria-live="polite">{model.handHint}</div> : null}
-    {model.mode === "reveal" || model.mode === "complete" ? <section className="dp-phone-recap">
+    {model.mode === "reveal" || model.mode === "complete" || model.readyPhase ? <section className="dp-phone-recap">
       {model.resolution ? <>
         <div className="dp-phone-verdict"><b>{model.resolution.success ? (en ? "SUCCESS" : "GESCHAFFT") : (en ? "FAILED" : "GESCHEITERT")}</b><strong>{model.resolution.partyPower} / {model.resolution.targetDifficulty}</strong></div>
         {model.resolution.cards.map((card) => <div className="dp-phone-feed" key={card}>{card}</div>)}
+        {model.resolution.rewards.map((reward) => <div className="dp-phone-reward" key={`${reward.playerName}-${reward.card.id}`}><span className="dp-phone-reward-art"><CardIllustration card={reward.card} /></span><span><small>{reward.playerName} · {reward.source === "boss" ? (en ? "BOSS REWARD" : "BOSSBELOHNUNG") : reward.card.kind === "equipment" ? (en ? "EQUIPPED" : "ANGELEGT") : (en ? "NEW HAND CARD" : "NEUE HANDKARTE")}</small><b>{reward.card.name}</b><em>{reward.card.description}</em></span></div>)}
         {model.resolution.heroes.map((hero) => <div className="dp-phone-row" key={hero.name}><strong>{hero.name} · {hero.action} · d6 {hero.roll} · +{hero.contribution}</strong><span className="dp-phone-deltas">♥ {hero.healthDelta} · ✦ {hero.fameDelta} · ¤ {hero.goldDelta}</span>{hero.outcome ? <small>{hero.outcome}</small> : null}</div>)}
       </> : null}
-      {model.mode === "reveal" ? <div className="dp-phone-foot"><div className="dp-phone-wait">{model.handHint}</div><button type="button" className="dp-phone-button" onClick={model.onContinue}>{model.continueLabel}</button></div> : null}
+      {model.readyPhase ? <div className="dp-phone-foot"><div className="dp-phone-wait">{isReady ? (en ? "You're ready. The recap stays here while the group catches up." : "Du bist bereit. Die Zusammenfassung bleibt sichtbar, bis alle soweit sind.") : model.handHint}</div><button type="button" className={`dp-phone-button ${isReady ? "dp-phone-ready" : ""}`} onClick={ready} disabled={isReady} aria-pressed={isReady}>{isReady ? model.readyLabel : (en ? "Ready" : "Bereit")}</button></div> : null}
     </section> : null}
     {model.teamFeed.length > 0 && model.mode !== "reveal" && model.mode !== "complete" ? <section className="dp-phone-feed">{model.teamFeed.map((line) => <div key={line}>{line}</div>)}</section> : null}
   </main>;

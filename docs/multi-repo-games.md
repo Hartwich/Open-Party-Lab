@@ -51,6 +51,7 @@ git clone https://github.com/Hartwich/arena-survivor.git local-games/arena-survi
 git clone https://github.com/Hartwich/minions-td.git local-games/minions-td
 git clone https://github.com/Hartwich/chaos-kommando.git local-games/chaos-kommando
 git clone https://github.com/Hartwich/schattenjagd.git local-games/schattenjagd
+git clone https://github.com/Hartwich/blickwinkel.git local-games/blickwinkel
 ```
 
 Link local games:

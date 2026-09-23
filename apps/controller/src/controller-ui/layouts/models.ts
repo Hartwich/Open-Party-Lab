@@ -596,6 +596,7 @@ export interface DrawingGuessLayoutModel {
   wordMask: string;
   secretWord?: string;
   currentColor?: string;
+  canvasAspectRatio: number;
   availableColors?: string[];
   strokes: DrawingGuessStrokeModel[];
   guessFeed: DrawingGuessFeedModel[];
@@ -605,6 +606,7 @@ export interface DrawingGuessLayoutModel {
   onDrawEnd: () => void;
   onClearDrawing: () => void;
   onSelectColor?: (color: string) => void;
+  onSetCanvasAspect: (aspectRatio: number) => void;
   onSubmitGuess: (guess: string) => void;
 }
 
@@ -785,14 +787,43 @@ export interface DungeonPartyLayoutModel {
     partyPower: number;
     targetDifficulty: number;
     cards: string[];
+    rewards: Array<{ playerName: string; source: "loot" | "boss"; card: DungeonPartyHandCardModel }>;
     heroes: Array<{ name: string; action: string; roll: number; contribution: number; healthDelta: number; fameDelta: number; goldDelta: number; outcome?: string }>;
   };
+  readyPhase: boolean;
+  readySubmitted: boolean;
+  readyLabel: string;
   continueLabel: string;
   passLabel: string;
   playLabel: string;
   onPlayCard: (cardId: string, targetPlayerId?: string) => void;
   onPass: () => void;
   onContinue: () => void;
+}
+
+export interface SocialPartyLayoutModel {
+  kind: "social_party";
+  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  stage: "submit" | "vote" | "reveal" | "finished" | "waiting";
+  taskKind: "pick" | "text" | "photo" | "draw";
+  resetKey: string;
+  roundLabel: string;
+  prompt: string;
+  helperText: string;
+  deadline: number | null;
+  durationMs: number;
+  submittedCount: number;
+  playerCount: number;
+  hasSubmitted: boolean;
+  disabled?: boolean;
+  selectedId?: string;
+  choices: Array<{ id: string; label: string; text?: string; media?: string; votes?: number; authorName?: string; disabled?: boolean }>;
+  scores: Array<{ id: string; name: string; score: number }>;
+  ready?: ReadyLayoutModel;
+  onSubmitPick: (id: string) => void;
+  onSubmitText: (text: string) => void;
+  onSubmitMedia: (dataUrl: string) => void;
+  onVote: (id: string) => void;
 }
 
 export type ControllerLayoutModel =
@@ -815,6 +846,7 @@ export type ControllerLayoutModel =
   | WordTilesLayoutModel
   | MagicArenaLayoutModel
   | CardHandLayoutModel
-  | DungeonPartyLayoutModel;
+  | DungeonPartyLayoutModel
+  | SocialPartyLayoutModel;
 
 // TODO: Fuer spaetere Minispiele hier weitere Layout-Modelle wie Choice und Swipe ergaenzen.

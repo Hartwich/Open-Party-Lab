@@ -5,6 +5,7 @@ export function SafeAreaLayout({ children }: PropsWithChildren) {
     <div
       style={{
         minHeight: "100dvh",
+        boxSizing: "border-box",
         padding: "max(10px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left))"
       }}
     >
