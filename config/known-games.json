@@ -156,6 +156,7 @@
     "id": "dungeon-party",
     "package": "@open-party-lab/game-dungeon-party",
     "repo": "https://github.com/Hartwich/dungeon-party.git",
+    "defaultBranch": "main",
     "defaultLocalPath": "local-games/dungeon-party",
     "alternateLocalPaths": []
   },

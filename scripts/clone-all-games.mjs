@@ -11,14 +11,14 @@ const localGamesRoot = path.join(projectRoot, "local-games");
 const freshClone = process.argv.includes("--fresh");
 await mkdir(localGamesRoot, { recursive: true });
 
-function githubArchiveUrl(repository) {
+function githubArchiveUrl(repository, defaultBranch = "main") {
   const match = repository.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?$/i);
   if (!match) return null;
-  return `https://codeload.github.com/${match[1]}/${match[2]}/tar.gz/refs/heads/main`;
+  return `https://codeload.github.com/${match[1]}/${match[2]}/tar.gz/refs/heads/${encodeURIComponent(defaultBranch)}`;
 }
 
 async function downloadGithubArchive(game, target) {
-  const archiveUrl = githubArchiveUrl(game.repo);
+  const archiveUrl = githubArchiveUrl(game.repo, game.defaultBranch);
   if (!archiveUrl) return false;
 
   const temporaryRoot = await mkdtemp(path.join(localGamesRoot, ".archive-"));
