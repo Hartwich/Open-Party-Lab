@@ -708,6 +708,10 @@ export interface MagicArenaLayoutModel {
  */
 export interface CardHandLayoutModel {
   kind: "card_hand";
+  /** Rommé wählt Karten direkt im Blatt statt über einzelne Aktionsknöpfe. */
+  isRomme?: boolean;
+  /** Symboljagd löst Treffer direkt über die Bilder auf der Karte aus. */
+  isSymboljagd?: boolean;
   title: string;
   subtitle: string;
   helperText: string;
@@ -744,6 +748,53 @@ export interface CardHandLayoutModel {
   onAction: (actionId: string) => void;
 }
 
+export interface DungeonPartyHandCardModel {
+  id: string;
+  name: string;
+  description: string;
+  kind: "equipment" | "effect";
+  effect?: string;
+  artKey: string;
+}
+
+export interface DungeonPartyLayoutModel {
+  kind: "dungeon_party";
+  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  mode: "planning" | "voting" | "response" | "waiting" | "reveal" | "complete";
+  resetKey: string;
+  ownPlayerId: string;
+  title: string;
+  subtitle: string;
+  helperText: string;
+  accentColor?: string;
+  disabled: boolean;
+  statusLabel?: string;
+  stats: LayoutStat[];
+  choices: ChoiceItemModel[];
+  hand: DungeonPartyHandCardModel[];
+  pendingCard?: DungeonPartyHandCardModel & { targetName?: string };
+  handTitle: string;
+  handHint: string;
+  handPlayable: boolean;
+  targets: Array<{ id: string; name: string }>;
+  targetRequiredEffects: string[];
+  targetForbiddenSelfEffects: string[];
+  teamFeed: string[];
+  resolution?: {
+    success: boolean;
+    partyPower: number;
+    targetDifficulty: number;
+    cards: string[];
+    heroes: Array<{ name: string; action: string; roll: number; contribution: number; healthDelta: number; fameDelta: number; goldDelta: number; outcome?: string }>;
+  };
+  continueLabel: string;
+  passLabel: string;
+  playLabel: string;
+  onPlayCard: (cardId: string, targetPlayerId?: string) => void;
+  onPass: () => void;
+  onContinue: () => void;
+}
+
 export type ControllerLayoutModel =
   | SingleButtonLayoutModel
   | ChoiceLayoutModel
@@ -763,6 +814,7 @@ export type ControllerLayoutModel =
   | SchaetzoramaLayoutModel
   | WordTilesLayoutModel
   | MagicArenaLayoutModel
-  | CardHandLayoutModel;
+  | CardHandLayoutModel
+  | DungeonPartyLayoutModel;
 
 // TODO: Fuer spaetere Minispiele hier weitere Layout-Modelle wie Choice und Swipe ergaenzen.

@@ -45,6 +45,21 @@ const recommendedGames = [
     path: "local-games/chaos-kommando"
   },
   {
+    id: "buzzwort",
+    repo: "https://github.com/Hartwich/buzzwort.git",
+    path: "local-games/buzzwort"
+  },
+  {
+    id: "flatterfluff",
+    repo: "https://github.com/Hartwich/flatterfluff.git",
+    path: "local-games/flatterfluff"
+  },
+  {
+    id: "card-table",
+    repo: "https://github.com/Hartwich/card-table.git",
+    path: "local-games/card-table"
+  },
+  {
     id: "word-tiles",
     repo: "https://github.com/Hartwich/word-tiles.git",
     path: "local-games/word-tiles"

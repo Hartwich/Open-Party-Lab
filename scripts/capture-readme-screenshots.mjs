@@ -41,6 +41,10 @@ const recommendedGames = [
     path: "local-games/chaos-kommando/docs/screenshots/host.png"
   },
   {
+    name: "Buzzword",
+    path: "docs/screenshots/buzzword-host-gameplay.png"
+  },
+  {
     name: "Word Tiles",
     path: "local-games/word-tiles/docs/screenshots/host.png"
   },
@@ -55,7 +59,8 @@ function parseArgs(argv) {
     cdpPort: defaultCdpPort,
     hostUrl: "http://127.0.0.1:5173/",
     outputDir: path.join(projectRoot, "docs", "screenshots"),
-    launchBrowser: true
+    launchBrowser: true,
+    collageOnly: false
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -90,6 +95,11 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === "--collage-only") {
+      args.collageOnly = true;
+      continue;
+    }
+
     throw new Error(`Unknown or incomplete argument: ${arg}`);
   }
 
@@ -105,6 +115,7 @@ function printHelp() {
 
 Usage:
   npm run screenshots:readme
+  npm run screenshots:readme -- --collage-only
   npm run screenshots:readme -- --host-url http://127.0.0.1:5173/
 
 Requirements:
@@ -262,9 +273,9 @@ class Page {
 
   send(method, params = {}) {
     const id = this.nextId++;
-    this.ws.send(JSON.stringify({ id, method, params }));
     return new Promise((resolve, reject) => {
       this.pending.set(id, { resolve, reject });
+      this.ws.send(JSON.stringify({ id, method, params }));
       setTimeout(() => {
         if (this.pending.has(id)) {
           this.pending.delete(id);
@@ -402,7 +413,7 @@ async function createCollageHtml() {
     html, body {
       margin: 0;
       width: 1400px;
-      height: 1028px;
+      height: 1240px;
       overflow: hidden;
       background: #06111f;
       color: #f8fafc;
@@ -456,6 +467,7 @@ async function createCollageHtml() {
       background: rgba(15, 23, 42, 0.85);
       box-shadow: 0 18px 50px rgba(2, 6, 23, 0.48);
     }
+    .card:last-child:nth-child(3n + 1) { grid-column: 2; }
     .card img {
       width: 100%;
       height: 100%;
@@ -500,7 +512,7 @@ async function captureCollage(cdpOrigin, args) {
   const target = await newTarget(cdpOrigin, pathToFileURL(htmlPath).href);
   const page = new Page(target);
   await page.open();
-  await page.setViewport(1400, 1028);
+  await page.setViewport(1400, 1240);
   await page.waitFor("document.images.length > 0 && Array.from(document.images).every((image) => image.complete)", 20_000);
   await wait(500);
 
@@ -524,7 +536,7 @@ async function main() {
 
   try {
     await fs.mkdir(args.outputDir, { recursive: true });
-    const hostSelection = await captureHostSelection(cdpOrigin, args);
+    const hostSelection = args.collageOnly ? null : await captureHostSelection(cdpOrigin, args);
     const collage = await captureCollage(cdpOrigin, args);
 
     console.log(JSON.stringify({

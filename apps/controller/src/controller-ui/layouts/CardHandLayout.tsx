@@ -5,6 +5,7 @@ import { MatchingSymbolIcon, PlayingCard } from "./cardArt.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import type { CardHandLayoutModel } from "./models.js";
 import type { CardTableActionState, CardTableHandCardState } from "@open-party-lab/protocol";
+import { SymboljagdLayout } from "./SymboljagdLayout.js";
 
 /**
  * Handkarten im Querformat.
@@ -69,6 +70,11 @@ function actionColors(kind: CardTableActionState["kind"]): { background: string;
 }
 
 export function CardHandLayout({ model }: CardHandLayoutProps) {
+  if (model.isSymboljagd) return <SymboljagdLayout model={model} />;
+  return <StandardCardHandLayout model={model} />;
+}
+
+function StandardCardHandLayout({ model }: CardHandLayoutProps) {
   const haptics = useHaptics();
   const orientation = useOrientationHint();
   const en = model.language === "en";

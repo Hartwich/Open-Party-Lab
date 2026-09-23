@@ -4,7 +4,7 @@ Snapshot date: 2026-09-22
 
 ## In Development
 
-- Dungeon Party has an early vertical slice under `local-games/dungeon-party`: eight encounter stages, two secret route votes with branching encounters, a three-phase dragon boss with one retry per phase, six selectable classes, secret base actions followed by a ten-second private card response window, six effect families, public resolution, and individual fame. Sabotage cards award their listed fame bonus on success and cost the player 2 fame on a lost fight. Its full design plan is in `docs/dungeon-party-design.md`. This is an early prototype; the 30–50 minute target, expanded encounter pool, browser/device flow, and balance are not yet validated. The game repo is public at `https://github.com/Hartwich/dungeon-party`.
+- Dungeon Party (local-games/dungeon-party) keeps its competitive co-op goal: the party advances together while players compete on fame. Route votes, actions, card reactions, and reading the result now have no countdown; each phase advances only after everyone submits. The phone uses a selectable illustrated card hand, and the shared screen shows original room/monster art, revealed dice, played cards and targets, individual score/health changes, and the chosen route. Its eight-room campaign and balance remain alpha; real multi-phone play and the 30–50 minute target still need validation. See local-games/dungeon-party/docs/game-design.md; the game repo is public at https://github.com/Hartwich/dungeon-party.
 
 ## Available In This Public Cut
 

@@ -1,265 +1,128 @@
 # Open Party Lab
-**Public test server:** [https://open-party-lab.onrender.com](https://open-party-lab.onrender.com)
-The free test server can need about a minute to wake up after inactivity.
 
-Open Party Lab is a local-first browser party-game platform for shared screens and phone controllers. It is also an experiment in AI-assisted software development: the platform is structured so humans and coding agents can improve games, docs, tests, and tooling in small reviewable steps.
+[Try the public test server](https://open-party-lab.onrender.com) · [Download for Windows](https://github.com/Hartwich/Open-Party-Lab/releases) · [Report an issue](https://github.com/Hartwich/Open-Party-Lab/issues)
 
-![Open Party Lab host game selection](docs/screenshots/host-game-selection-en.png)
+Open Party Lab is a browser-based party-game platform for a shared screen and players’ phones. Run it on your local network or use the hosted test server. The platform and its games are actively developed; most games are in alpha or beta.
 
-## Current Status
+The Render service is for testing, not production. It can take about a minute to wake after inactivity, and rooms are kept in memory rather than saved permanently.
 
-This is a playable local prototype, not a hosted production service. It is designed for devices on the same LAN.
+![Current Open Party Lab host selection with the full game catalog](docs/screenshots/host-game-selection-en.png)
 
-Most games are still alpha or beta. The recommended set is already suitable for local sessions, but rules, pacing, scoring, content, UI, and balancing will continue to evolve.
+## Games
 
-## Game Showcase
+The catalog includes 19 optional game projects. Twelve are currently recommended for playtesting; the rest are smaller prototypes, and Dungeon Party is an early development build. All are subject to change.
 
-### Arena Survivor — four complete visual themes
-
-Arena Survivor is a cooperative survival run with character selection, escalating enemy waves, upgrades, and four synchronized host/controller art sets. Marshmallow Mayhem adds an animated wide-body rig with moving eyes, speed-sensitive legs, headbands, and helmets; the screenshots below show Frostfire Saga, Obsidian Relay, and Classic Arena. The theme changes the complete presentation without changing game balance.
-
-| Frostfire Saga | Obsidian Relay | Classic Arena |
-| --- | --- | --- |
-| ![Arena Survivor Frostfire Saga theme](docs/screenshots/arena-survivor-frostfire-saga.jpg) | ![Arena Survivor Obsidian Relay theme](docs/screenshots/arena-survivor-obsidian-relay.jpg) | ![Arena Survivor Classic Arena theme](docs/screenshots/arena-survivor-classic.jpg) |
-
-### All recommended games
-
-Arena Survivor remains recommended alongside the complete existing set. The gallery below shows every other recommended game; none of the earlier recommendations were removed.
-
-| Magic Arena | Magic Duell |
+| Recommended games | Style |
 | --- | --- |
-| ![Magic Arena match](docs/screenshots/magic-arena.png) | ![Magic Duell match](docs/screenshots/magic-duell.png) |
-| **MinionsTD** | **Chaos-Kommando** |
-| ![MinionsTD tower-defense match in progress](docs/screenshots/minions-td-ingame.jpg) | ![Chaos-Kommando artillery match in progress](docs/screenshots/chaos-kommando-ingame.jpg) |
-| **Zeichnen & Erraten** | **Schaetzorama** |
-| ![Zeichnen und Erraten drawing round](docs/screenshots/zeichnen-und-erraten.png) | ![Schaetzorama estimation round](docs/screenshots/schaetzorama.png) |
-| **Word Tiles** | **Drift Racer** |
-| ![Word Tiles shared board](docs/screenshots/word-tiles.png) | ![Drift Racer race](docs/screenshots/drift-racer.png) |
+| Arena Survivor | Cooperative arena survival |
+| Buzzwort | Word guessing with forbidden words |
+| Chaos-Kommando | Turn-based artillery |
+| Drift Racer | Arcade racing |
+| Flatterfluff | Comic-style gallery shooter |
+| Kartentisch (Card Table) | Card games, including Doppelkopf, Rommé and Symboljagd |
+| Magic Arena | Hex tactics |
+| Magic Duell | Wizard duels with phone-drawn spells |
+| MinionsTD | Competitive tower defense |
+| Schaetzorama | Estimation quiz |
+| Word Tiles | Shared word board |
+| Zeichnen & Erraten | Drawing and guessing |
 
-The recommended collection covers arena combat, duels, cooperative survival, tower defense, drawing, estimation, artillery, word play, and arcade racing. Every game uses the shared-screen host and phone-controller flow.
+Other known games include Air Hockey, Imposter, Light Trails, Pantomime, Schattenjagd and Tap Race. Dungeon Party is in development. Optional games are separate repositories, so a fresh source checkout does not include their files until you clone them. The Windows release and hosted build assemble the known game repositories for you.
 
-## How It Works
+### A look at the games
 
-Open Party Lab runs three apps together:
+These screenshots include the current host catalog and a live Buzzword round, alongside sample rounds from other games.
 
-- `apps/server`: authoritative Socket.IO room, round, score, and game-state server
-- `apps/host`: Phaser host screen for a TV, monitor, projector, or shared computer
-- `apps/controller`: React phone controller used by players in the browser
+| Arena Survivor: Frostfire Saga | Buzzword host round | MinionsTD |
+| --- | --- | --- |
+| ![Arena Survivor Frostfire Saga](docs/screenshots/arena-survivor-frostfire-saga.jpg) | ![Live Buzzword host round](docs/screenshots/buzzword-host-gameplay.png) | ![MinionsTD game in progress](docs/screenshots/minions-td-ingame.jpg) |
+| Magic Arena | Chaos-Kommando | Schaetzorama |
+| ![Magic Arena match](docs/screenshots/magic-arena.png) | ![Chaos-Kommando game in progress](docs/screenshots/chaos-kommando-ingame.jpg) | ![Schaetzorama estimation round](docs/screenshots/schaetzorama.png) |
+| Zeichnen & Erraten | Word Tiles | Drift Racer |
+| ![Drawing and guessing round](docs/screenshots/zeichnen-und-erraten.png) | ![Word Tiles shared board](docs/screenshots/word-tiles.png) | ![Drift Racer race](docs/screenshots/drift-racer.png) |
 
-Shared platform code lives in workspace packages:
+## Getting started
 
-- `packages/protocol`: socket events, DTOs, and shared room/game-state contracts
-- `packages/game-core`: game manifests, shared game types, round helpers, and layout keys
-- `packages/ui-kit`: shared visual tokens
-- `packages/utils`: small shared utilities
+### Play online
 
-The platform supports optional multi-repo games. The core platform stays here; individual games can live in separate Git repos under `local-games/`. Missing optional games are normal and are skipped by the generator.
+Open the [public test server](https://open-party-lab.onrender.com), create a room, and scan its QR code with the phones joining the game. The free service may need around a minute to start after sitting idle. Rooms are temporary and may be lost when the service restarts.
 
-## Quick Start
+### Use the Windows release
 
-### Download a portable Windows build
-
-GitHub Releases provide `Open-Party-Lab-windows-x64.zip`. It contains the server, host, phone controller, every known game, and its own Node.js runtime:
-
-1. Download and extract the complete ZIP.
-2. Double-click `Open-Party-Lab.exe`.
-3. The host opens in the default browser; players join from phones on the same LAN/Wi-Fi using the QR code.
-
-No Node.js or npm installation is required for the portable build. Windows may show a SmartScreen warning because community builds are currently not code-signed. Port 3000 must be free, and Windows Firewall must allow private-network access.
-
-## Hosted deployment
-
-**Public test server:** [https://open-party-lab.onrender.com](https://open-party-lab.onrender.com)
-
-Open Party Lab can also run as a single HTTPS web service, without a Windows installation. The included Render Blueprint builds all known games and serves the host and phone controller from the same public origin. The free test server can need about a minute to wake up after inactivity. See [Render deployment](docs/render-deployment.md).
-
-The public test server is limited to 20 simultaneous rooms. Rooms close after one hour, or after ten minutes without connected participants.
+Download the latest `Open-Party-Lab-windows-x64.zip` from [GitHub Releases](https://github.com/Hartwich/Open-Party-Lab/releases), extract the complete archive, then start `Open-Party-Lab.exe`. The shared screen opens in a browser; players join from phones on the same Wi-Fi using the QR code. The release bundles Node.js and the games, so you do not need to install Node.js or npm. Windows may show a SmartScreen warning because community builds are not code-signed.
 
 ### Run from source
 
-Requirements:
-
-- Node.js 20+
-- npm 10+
-
-From a fresh clone:
+Requirements: Node.js 20+ and npm 10+.
 
 ```bash
 npm ci
-npm run games:list
+npm run games:clone-recommended
 npm run build
-```
-
-Run locally on Windows:
-
-```bash
 npm run dev:all
 ```
 
-Run locally on any platform with three terminals:
+`npm run dev:all` starts the local server, shared-screen host and controller. The default addresses are:
 
-```bash
-npm run dev:server
-npm run dev:host
-npm run dev:controller
-```
-
-Default local URLs:
-
-- Server: `http://localhost:3000`
 - Host: `http://localhost:5173`
 - Controller: `http://localhost:5174`
+- Server: `http://localhost:3000`
 
-For phone controllers, open the host through the computer's LAN address and make sure the QR code points to the same address, for example `http://192.168.0.156:5174`. On Windows, `npm run dev:all` tries to detect this automatically. If the QR code shows the wrong IP, restart the stack with an explicit LAN IP:
+For phones to connect, they must use the computer’s LAN address, not `localhost`. On Windows, the launcher tries to find that address. If needed, set it explicitly:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\dev-all.ps1 -LanIp 192.168.0.156
 ```
 
-If a dev port is already occupied, stop the running stack first:
+To stop the local stack, run `npm run dev:stop`.
+
+## How the platform works
+
+The server owns room state, game rules, timers, scoring and round transitions. The host renders the shared screen, while controllers send player input and show phone-sized UI.
+
+- `apps/server` — authoritative Socket.IO server and room lifecycle
+- `apps/host` — shared-screen app for a TV, monitor or computer
+- `apps/controller` — browser controller for phones
+- `packages/protocol` — shared socket and room contracts
+- `packages/game-core` — game manifests, common types and layout keys
+- `packages/ui-kit` and `packages/utils` — shared interface tokens and utilities
+
+Games live in separate repositories under the ignored `local-games/` directory. `config/known-games.json` lists the repositories; `npm run games:sync-local` links the ones present on your machine and generates the local app registries. Missing optional repositories are skipped.
+
+## Useful commands
 
 ```bash
-npm run dev:stop
+npm run games:list          # Show known games and local links
+npm run games:clone-all     # Clone all known game repositories
+npm run games:sync-local    # Refresh local game links and registries
+npm run games:clear-local   # Remove generated local links
+npm run dev:all             # Start the local development stack on Windows
+npm run dev:stop            # Stop the local development stack
+npm run typecheck           # Type-check the platform and linked games
+npm run build               # Build the platform and linked games
+npm run release:windows     # Assemble a portable Windows release
 ```
 
-## Recommended Games
-
-Clone the recommended game repos into `local-games/`:
+To refresh the recommended-game collage, start the host first, then run:
 
 ```bash
-npm run games:clone-recommended
-npm run games:sync-local
+npm run screenshots:readme -- --collage-only
 ```
 
-Recommended optional local game repos:
+The screenshot command uses Chromium or Edge through the Chrome DevTools Protocol and includes screenshots from recommended game repositories when available. The host-selection and live-round images above are captured from the running host.
 
-| Game | Status | Local path |
-| --- | --- | --- |
-| Magic Arena | recommended alpha | `local-games/magic-arena` |
-| Magic Duell | recommended alpha | `local-games/magic-duell` |
-| Arena Survivor | beta, recommended | `local-games/arena-survivor` |
-| MinionsTD | beta, recommended | `local-games/minions-td` |
-| Zeichnen & Erraten | beta, recommended | `local-games/zeichnen-und-erraten` |
-| Schaetzorama | beta, recommended | `local-games/schaetzorama` |
-| Chaos-Kommando | alpha, recommended | `local-games/chaos-kommando` |
-| Word Tiles | alpha, recommended | `local-games/word-tiles` |
-| Drift Racer | alpha, recommended | `local-games/drift-racer` |
-
-Other optional local game repos:
-
-| Game | Notes | Local path |
-| --- | --- | --- |
-| Tap Race | playable prototype | `local-games/tap-race` |
-| Pantomime | playable prototype | `local-games/pantomime` |
-| Air Hockey | playable prototype | `local-games/air-hockey` |
-| Buzzwort | playable prototype | `local-games/buzzwort` |
-| Imposter | playable prototype | `local-games/imposter` |
-| Light Trails | playable prototype | `local-games/light-trails` |
-| Schattenjagd | playable alpha, hidden-movement chase | `local-games/schattenjagd` |
-
-Manual clone example:
-
-```bash
-git clone https://github.com/Hartwich/magic-arena.git local-games/magic-arena
-git clone https://github.com/Hartwich/magic-duell.git local-games/magic-duell
-npm run games:sync-local
-```
-
-`games:sync-local` builds and links only the local game repos it finds. You do not need every game repo.
-
-New game repos should use the short game name as the repo and folder name, for example `tap-race`, not an `open-party-game-` prefix. Package names can still use the scoped npm shape, for example `@open-party-lab/game-tap-race`.
-
-## Useful Scripts
-
-```bash
-npm run games:list
-npm run games:sync-local
-npm run games:clear-local
-npm run games:clone-recommended
-npm run games:clone-all
-npm run ai:controllers
-npm run screenshots:readme
-npm run dev:all
-npm run dev:stop
-npm run typecheck
-npm run build
-npm run release:windows
-```
-
-For AI browser checks, use virtual controllers instead of opening multiple phone browser windows:
+For AI browser checks, add virtual players to an existing room:
 
 ```bash
 npm run ai:controllers -- --room DEBU --players 4 --ready true --hold-ms 600000
 ```
 
-To refresh README screenshots, start the server and host first, then run:
-
-```bash
-npm run screenshots:readme
-```
-
-The screenshot script captures the English host game-selection screen and builds a recommended-games collage from local game screenshots.
-
-## LAN Setup
-
-Phones must reach the server and controller app through the host machine's LAN IP.
-
-Example PowerShell setup:
-
-```powershell
-$env:PUBLIC_CONTROLLER_ORIGIN="http://192.168.178.20:5174"
-$env:VITE_SERVER_URL="http://192.168.178.20:3000"
-```
-
-Then start the platform with `npm run dev:all`, open the host app on the shared screen, and scan the QR code from each phone.
-
-## Browser Notes
-
-Use a Chromium-based browser or Safari for phone controllers when possible. Firefox can work, but controller sessions may sometimes have issues with fullscreen behavior, reconnect/session handling, or touch input timing.
-
-The host screen is intended for a desktop browser. The controller is intended for phone-sized browser windows on the same network as the server.
-
 ## Contributing
 
-Good contributions are usually small and vertical:
+Small, focused contributions are welcome: playtest a game, improve phone controls or host readability, clarify rules, or build a new mini-game. The server must remain authoritative, and user-facing text should follow the project’s localization patterns.
 
-- playtest one game and open a focused report;
-- improve controller text, layout, or feedback on phones;
-- improve host-screen readability for a TV or monitor;
-- propose balance, pacing, scoring, or rule-clarity improvements;
-- add screenshots, docs, setup notes, or small smoke tests;
-- build a new mini-game repo using the Mini-Game SDK.
-
-When behavior changes, update the server logic, protocol types, host view, controller model, and docs together when needed.
-
-Start with:
-
-- [AGENTS.md](AGENTS.md)
-- [CONTRIBUTING.md](CONTRIBUTING.md)
-- [docs/agent-task-guide.md](docs/agent-task-guide.md)
-- [docs/architecture.md](docs/architecture.md)
-- [docs/minigame-sdk.md](docs/minigame-sdk.md)
-- [docs/multi-repo-games.md](docs/multi-repo-games.md)
-- [docs/create-a-game.md](docs/create-a-game.md)
-- [docs/playtesting.md](docs/playtesting.md)
-- [docs/project-status.md](docs/project-status.md)
-- [docs/roadmap.md](docs/roadmap.md)
-
-Recommended verification:
-
-```bash
-npm run games:list
-npm run games:sync-local
-npm run typecheck
-npm run build
-```
-
-Keep generated output, logs, temporary browser profiles, and build artifacts out of source control. If a check cannot be run, state that clearly in the pull request.
-
-Contributions are voluntary and unpaid. The maintainer may publish official builds, including a possible Steam release, to reach a larger player base. See [CONTRIBUTING.md](CONTRIBUTING.md) and [NOTICE.md](NOTICE.md).
+Start with [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), [the architecture guide](docs/architecture.md), [the mini-game SDK](docs/minigame-sdk.md), [the multi-repo game guide](docs/multi-repo-games.md), and [playtesting notes](docs/playtesting.md). See [project status](docs/project-status.md) for current limitations and [Render deployment](docs/render-deployment.md) for hosting details.
 
 ## License
 
-Code is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
-
-Assets, names, generated media, third-party references, and store distribution rights need separate care. See [NOTICE.md](NOTICE.md). This repository is not legal advice; get proper legal review before commercial distribution.
+Code is licensed under the Apache License 2.0; see [LICENSE](LICENSE). Assets, names, generated media and third-party references have separate rights considerations; see [NOTICE.md](NOTICE.md).

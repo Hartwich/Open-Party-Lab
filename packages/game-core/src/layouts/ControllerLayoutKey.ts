@@ -16,4 +16,5 @@
   | "virtual_joystick"
   | "swipe"
   | "tower_defense"
-  | "twin_stick";
+  | "twin_stick"
+  | "dungeon_party";
