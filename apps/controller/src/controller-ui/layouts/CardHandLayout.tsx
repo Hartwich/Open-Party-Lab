@@ -119,6 +119,13 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
   }
 
   function handleCardPress(card: CardTableHandCardState): void {
+    if (model.pendingChoiceCardIds.includes(card.cardId) && model.pendingChoice) {
+      setSelectedCardId(card.cardId);
+      setChoiceCardId(card.cardId);
+      haptics.tap(14);
+      return;
+    }
+
     if (selectedCardId === card.cardId) {
       playCard(card);
       return;

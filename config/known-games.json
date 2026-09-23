@@ -153,6 +153,13 @@
     ]
   },
   {
+    "id": "dungeon-party",
+    "package": "@open-party-lab/game-dungeon-party",
+    "repo": "https://github.com/Hartwich/dungeon-party.git",
+    "defaultLocalPath": "local-games/dungeon-party",
+    "alternateLocalPaths": []
+  },
+  {
     "id": "card-table",
     "package": "@open-party-lab/game-card-table",
     "repo": "https://github.com/Hartwich/card-table.git",
