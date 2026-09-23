@@ -25,6 +25,7 @@ export interface CardTableCardState {
   art?: "arcane";
   centerLabel?: string;
   points?: number;
+  symbols?: string[];
 }
 
 export interface CardTableHandCardState extends CardTableCardState {
@@ -81,6 +82,7 @@ export interface CardTableChoiceOptionState {
   label: string;
   symbol?: string;
   color?: CardTableColor;
+  symbolImage?: string;
 }
 
 export interface CardTableChoiceState {

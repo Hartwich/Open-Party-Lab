@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { useHaptics } from "../../hooks/useHaptics.js";
 import { useOrientationHint } from "../../hooks/useOrientationHint.js";
-import { PlayingCard } from "./cardArt.js";
+import { MatchingSymbolIcon, PlayingCard } from "./cardArt.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import type { CardHandLayoutModel } from "./models.js";
 import type { CardTableActionState, CardTableHandCardState } from "@open-party-lab/protocol";
@@ -415,7 +415,7 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
                     fontSize: "1.05rem"
                   }}
                 >
-                  <div style={{ fontSize: "1.5rem" }}>{option.symbol}</div>
+                  {option.symbolImage ? <MatchingSymbolIcon symbolId={option.symbolImage} size={38} /> : <div style={{ fontSize: "1.5rem" }}>{option.symbol}</div>}
                   {option.label}
                 </button>
               ))}

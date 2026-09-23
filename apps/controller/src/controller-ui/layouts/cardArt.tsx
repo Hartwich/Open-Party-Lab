@@ -50,6 +50,22 @@ const sans = 'Inter, ui-sans-serif, -apple-system, "Segoe UI", sans-serif';
 const paper = "#fffbf4";
 const artWidth = 100;
 const artHeight = 140;
+const symboljagdSpots: Array<[number, number, number]> = [[25, 28, 28], [70, 24, 22], [52, 48, 30], [24, 66, 22], [77, 66, 26], [43, 85, 22], [74, 105, 20], [25, 108, 20]];
+
+function SymboljagdSymbols({ cardId, symbols }: { cardId: string; symbols: string[] }) {
+  const offset = [...cardId].reduce((value, char) => value + char.charCodeAt(0), 0) % 8;
+  return <>{symbols.map((symbol, index) => {
+    const [cx, cy, size] = symboljagdSpots[(index + offset) % symboljagdSpots.length]!;
+    const cell = Math.max(0, Math.min(56, Number.parseInt(symbol, 10) || 0));
+    const edge = size;
+    return <svg key={symbol} x={cx - size / 2} y={(cy - size / 2) * artHeight / 140} width={edge} height={edge} viewBox={`${(cell % 8) * 125} ${Math.floor(cell / 8) * 125} 125 125`} preserveAspectRatio="xMidYMid meet" aria-hidden="true"><image href="/card-table/symboljagd-atlas.png" x="0" y="0" width="1000" height="1000" /></svg>;
+  })}</>;
+}
+
+export function MatchingSymbolIcon({ symbolId, size = 34 }: { symbolId: string; size?: number }) {
+  const cell = Math.max(0, Math.min(56, Number.parseInt(symbolId, 10) || 0));
+  return <span aria-hidden="true" style={{ display: "block", width: size, height: size, margin: "0 auto", backgroundImage: "url('/card-table/symboljagd-atlas.png')", backgroundSize: "800% 800%", backgroundPosition: `${(cell % 8) * 100 / 7}% ${Math.floor(cell / 8) * 100 / 7}%` }} />;
+}
 
 function pipsFor(rankLabel: string): Array<[number, number]> | null {
   const numeric = Number.parseInt(rankLabel, 10);
@@ -120,7 +136,9 @@ export function PlayingCard({
         strokeWidth={selected ? 3 : 1.2}
       />
 
-      {card.art === "arcane" && style !== "clear" ? (
+      {card.symbols?.length === 8 ? (
+        <SymboljagdSymbols cardId={card.cardId} symbols={card.symbols} />
+      ) : card.art === "arcane" && style !== "clear" ? (
         <>
           <rect x="5" y="5" width="90" height="130" rx="5" fill={ink} />
           <path d="M50 25 80 70 50 115 20 70Z" fill="none" stroke="#ead5a0" />
