@@ -4,6 +4,8 @@ Open Party Lab supports optional local game repos. You do not need every game re
 
 Games with no `repo` URL remain local-only. `games:clone-all` skips them on hosted builds and leaves an existing local folder untouched, even with `--fresh`.
 
+Game packages that import unpublished platform packages, such as `@open-party-lab/protocol`, must mark those peer dependencies as optional. The local-game sync installs each game before linking the platform packages from this repository; a required peer would make npm request a package that is not published.
+
 ## Recommended Layout
 
 Use child repos inside the platform working tree:
