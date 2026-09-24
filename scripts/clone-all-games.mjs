@@ -12,6 +12,7 @@ const freshClone = process.argv.includes("--fresh");
 await mkdir(localGamesRoot, { recursive: true });
 
 function githubArchiveUrl(repository, defaultBranch = "main") {
+  if (typeof repository !== "string") return null;
   const match = repository.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?$/i);
   if (!match) return null;
   return `https://codeload.github.com/${match[1]}/${match[2]}/tar.gz/refs/heads/${encodeURIComponent(defaultBranch)}`;
@@ -56,7 +57,14 @@ async function downloadGithubArchive(game, target) {
   }
 }
 
+let availableGames = 0;
+
 for (const game of games) {
+  if (typeof game.repo !== "string" || !game.repo.trim()) {
+    console.log(`Skipping ${game.id}: no remote repository configured.`);
+    continue;
+  }
+
   const target = path.join(projectRoot, game.defaultLocalPath);
 
   if (freshClone) {
@@ -71,10 +79,12 @@ for (const game of games) {
 
   if (existsSync(target)) {
     console.log(`Skipping ${game.id}: ${game.defaultLocalPath} already exists.`);
+    availableGames += 1;
     continue;
   }
 
   if (process.env.RENDER === "true" && (await downloadGithubArchive(game, target))) {
+    availableGames += 1;
     continue;
   }
 
@@ -88,6 +98,7 @@ for (const game of games) {
   if (result.status !== 0 && !(await downloadGithubArchive(game, target))) {
     process.exit(result.status ?? 1);
   }
+  availableGames += 1;
 }
 
-console.log(`All ${games.length} known games are available locally${freshClone ? " from fresh clones" : ""}.`);
+console.log(`${availableGames} of ${games.length} known games are available locally${freshClone ? " from fresh clones" : ""}.`);

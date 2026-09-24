@@ -2,6 +2,8 @@
 
 Open Party Lab supports optional local game repos. You do not need every game repo. The platform loads only games that exist locally and are linked by `npm run games:sync-local`.
 
+Games with no `repo` URL remain local-only. `games:clone-all` skips them on hosted builds and leaves an existing local folder untouched, even with `--fresh`.
+
 ## Recommended Layout
 
 Use child repos inside the platform working tree:
