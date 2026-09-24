@@ -48,6 +48,7 @@ git clone https://github.com/Hartwich/light-trails.git local-games/light-trails
 git clone https://github.com/Hartwich/drift-racer.git local-games/drift-racer
 git clone https://github.com/Hartwich/word-tiles.git local-games/word-tiles
 git clone https://github.com/Hartwich/card-table.git local-games/card-table
+git clone https://github.com/Hartwich/dungeon-guild.git local-games/dungeon-guild
 git clone https://github.com/Hartwich/zeichnen-und-erraten.git local-games/zeichnen-und-erraten
 git clone https://github.com/Hartwich/arena-survivor.git local-games/arena-survivor
 git clone https://github.com/Hartwich/minions-td.git local-games/minions-td

@@ -179,7 +179,7 @@
   {
     "id": "dungeon-guild",
     "package": "@open-party-lab/game-dungeon-guild",
-    "repo": null,
+    "repo": "https://github.com/Hartwich/dungeon-guild.git",
     "defaultLocalPath": "local-games/dungeon-guild",
     "alternateLocalPaths": []
   }
