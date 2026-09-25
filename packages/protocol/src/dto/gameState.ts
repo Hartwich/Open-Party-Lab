@@ -9,6 +9,7 @@ export interface AvailableGameDto {
   minPlayers: number;
   minPlayersBySetting?: GameManifest["minPlayersBySetting"];
   maxPlayers: number;
+  maxPlayersBySetting?: GameManifest["maxPlayersBySetting"];
   hostView: string;
   controllerView: string;
   controllerLayout: ControllerLayoutKey;

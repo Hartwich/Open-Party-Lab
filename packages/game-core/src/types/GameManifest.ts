@@ -102,6 +102,12 @@ export interface GameMinPlayersBySetting {
   values: Readonly<Record<string, number>>;
 }
 
+/** Optional maximum-player override driven by a lobby setting. */
+export interface GameMaxPlayersBySetting {
+  settingKey: string;
+  values: Readonly<Record<string, number>>;
+}
+
 export interface GamePlayerSetupOption {
   id: string;
   name: string;
@@ -155,6 +161,7 @@ export interface GameManifest {
   minPlayers: number;
   minPlayersBySetting?: GameMinPlayersBySetting;
   maxPlayers: number;
+  maxPlayersBySetting?: GameMaxPlayersBySetting;
   hostView: string;
   controllerView: string;
   controllerLayout: ControllerLayoutKey;
@@ -196,6 +203,19 @@ export function resolveGameMinPlayers(
   return typeof override === "number" && Number.isFinite(override)
     ? Math.max(1, Math.round(override))
     : manifest.minPlayers;
+}
+
+export function resolveGameMaxPlayers(
+  manifest: Pick<GameManifest, "maxPlayers" | "maxPlayersBySetting">,
+  settings: Readonly<Record<string, unknown>> | undefined
+): number {
+  const rule = manifest.maxPlayersBySetting;
+  const rawValue = rule && settings ? settings[rule.settingKey] : undefined;
+  const override = rule && rawValue !== undefined ? rule.values[String(rawValue)] : undefined;
+
+  return typeof override === "number" && Number.isFinite(override)
+    ? Math.max(1, Math.round(override))
+    : manifest.maxPlayers;
 }
 
 function lobbyFieldKey(field: GameLobbySetupField): string {

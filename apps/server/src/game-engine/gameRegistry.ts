@@ -59,6 +59,7 @@ export class GameRegistry {
       minPlayers: manifest.minPlayers,
       minPlayersBySetting: manifest.minPlayersBySetting,
       maxPlayers: manifest.maxPlayers,
+      maxPlayersBySetting: manifest.maxPlayersBySetting,
       hostView: manifest.hostView,
       controllerView: manifest.controllerView,
       controllerLayout: manifest.controllerLayout,

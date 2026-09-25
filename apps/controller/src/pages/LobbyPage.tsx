@@ -1,5 +1,5 @@
 import type { PlayerSetupValue, PlayerSnapshot, RoomSnapshot } from "@open-party-lab/protocol";
-import { resolveGameMinPlayers } from "@open-party-lab/game-core";
+import { resolveGameMaxPlayers, resolveGameMinPlayers } from "@open-party-lab/game-core";
 import { ControllerFrame } from "../controller-ui/layout/ControllerFrame.js";
 import { HostControlPanel } from "../controller-ui/common/HostControlPanel.js";
 import { getControllerText } from "../i18n/controllerText.js";
@@ -468,6 +468,9 @@ export function LobbyPage({
   const minimumPlayers = selectedGame
     ? resolveGameMinPlayers(selectedGame, room?.selectedGameSettings)
     : 0;
+  const maximumPlayers = selectedGame
+    ? resolveGameMaxPlayers(selectedGame, room?.selectedGameSettings)
+    : 0;
   const enoughPlayers = selectedGame ? playerCount >= minimumPlayers : false;
   const playerSetup = selectedGame?.playerSetup;
   const hasPlayerSetup = Boolean(playerSetup && playerSetup.options.length > 0);
@@ -536,7 +539,7 @@ export function LobbyPage({
           >
             <strong style={{ color: "var(--text-main)" }}>{selectedGame.displayName}</strong>
             <span>
-              {text.players}: {playerCount}/{selectedGame.maxPlayers} | {text.minRequired(minimumPlayers)}
+              {text.players}: {playerCount}/{maximumPlayers} | {text.minRequired(minimumPlayers)}
             </span>
             <span>
               {text.readyCount}: {readyCount}/{playerCount}
