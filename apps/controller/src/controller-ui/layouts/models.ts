@@ -804,11 +804,13 @@ export interface DungeonPartyLayoutModel {
 export interface SocialPartyLayoutModel {
   kind: "social_party";
   language?: import("@open-party-lab/protocol").SupportedLanguage;
-  stage: "submit" | "vote" | "reveal" | "finished" | "waiting";
+  stage: "avatar" | "submit" | "vote" | "finished" | "waiting";
   taskKind: "pick" | "text" | "photo" | "draw";
   resetKey: string;
   roundLabel: string;
   prompt: string;
+  maxStrokes?: 1 | 2;
+  basePhoto?: string;
   helperText: string;
   deadline: number | null;
   durationMs: number;
@@ -817,12 +819,13 @@ export interface SocialPartyLayoutModel {
   hasSubmitted: boolean;
   disabled?: boolean;
   selectedId?: string;
-  choices: Array<{ id: string; label: string; text?: string; media?: string; votes?: number; authorName?: string; disabled?: boolean }>;
+  choices: Array<{ id: string; label: string; avatar?: string; disabled?: boolean }>;
   scores: Array<{ id: string; name: string; score: number }>;
   ready?: ReadyLayoutModel;
   onSubmitPick: (id: string) => void;
+  onSubmitAvatar: (dataUrl: string) => void;
   onSubmitText: (text: string) => void;
-  onSubmitMedia: (dataUrl: string) => void;
+  onSubmitMedia: (dataUrl: string, strokeCount?: number) => void;
   onVote: (id: string) => void;
 }
 
