@@ -714,6 +714,7 @@ export interface CardHandLayoutModel {
   isRomme?: boolean;
   /** Symboljagd löst Treffer direkt über die Bilder auf der Karte aus. */
   isSymboljagd?: boolean;
+  symboljagdFeedback?: { playerId: string; playerName: string; symbolId: string; occurredAt: number };
   title: string;
   subtitle: string;
   helperText: string;
@@ -829,6 +830,51 @@ export interface SocialPartyLayoutModel {
   onVote: (id: string) => void;
 }
 
+export interface DungeonGuildCardModel {
+  id: string;
+  title: string;
+  kind: "monster" | "curse" | "class" | "race" | "item" | "boost" | "level";
+  artPath: string;
+  effect?: string;
+  level?: number;
+  bonus?: number;
+  levelReward?: number;
+  escapeTarget?: number;
+  badStuff?: string;
+  goldValue?: number;
+  slot?: string;
+  equipped?: boolean;
+  playable?: boolean;
+  hint?: string;
+}
+
+export interface DungeonGuildLayoutModel {
+  kind: "dungeon_guild";
+  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  disabled?: boolean;
+  resetKey: string;
+  title: string;
+  playerName: string;
+  activePlayerName?: string;
+  stage: string;
+  canAct: boolean;
+  ownLevel: number;
+  ownStrength: number;
+  dead: boolean;
+  classCard: DungeonGuildCardModel | null;
+  raceCard: DungeonGuildCardModel | null;
+  equipment: DungeonGuildCardModel[];
+  hand: DungeonGuildCardModel[];
+  actions: import("@open-party-lab/protocol").CardTableActionState[];
+  message?: string;
+  lastError?: string;
+  gameOver: boolean;
+  winnerName?: string;
+  ready?: ReadyLayoutModel;
+  onPlayCard: (cardId: string) => void;
+  onAction: (actionId: string) => void;
+}
+
 export type ControllerLayoutModel =
   | SingleButtonLayoutModel
   | ChoiceLayoutModel
@@ -850,6 +896,7 @@ export type ControllerLayoutModel =
   | MagicArenaLayoutModel
   | CardHandLayoutModel
   | DungeonPartyLayoutModel
+  | DungeonGuildLayoutModel
   | SocialPartyLayoutModel;
 
 // TODO: Fuer spaetere Minispiele hier weitere Layout-Modelle wie Choice und Swipe ergaenzen.

@@ -18,4 +18,5 @@
   | "tower_defense"
   | "twin_stick"
   | "dungeon_party"
+  | "dungeon_guild"
   | "social_party";
