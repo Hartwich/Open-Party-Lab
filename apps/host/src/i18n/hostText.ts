@@ -35,6 +35,7 @@ export interface HostText {
   exitFullscreen: string;
   fpsLabel: string;
   musicVolumeLabel: string;
+  soundEffectsVolumeLabel: string;
   hostControlsTitle: string;
   hostControlsSubtitle: string;
   close: string;
@@ -171,8 +172,9 @@ const hostText = {
     exitFullscreen: "Vollbild beenden",
     fpsLabel: "FPS",
     musicVolumeLabel: "Musik",
+    soundEffectsVolumeLabel: "Soundeffekte",
     hostControlsTitle: "Host-Steuerung",
-    hostControlsSubtitle: "Musik, Bild, Sprache, Spieler",
+    hostControlsSubtitle: "Audio, Bild, Sprache, Spieler",
     close: "Schliessen",
     noGame: "Kein Spiel",
     connected: "Verbunden",
@@ -287,8 +289,9 @@ const hostText = {
     exitFullscreen: "Exit fullscreen",
     fpsLabel: "FPS",
     musicVolumeLabel: "Music",
+    soundEffectsVolumeLabel: "Sound effects",
     hostControlsTitle: "Host Controls",
-    hostControlsSubtitle: "Music, video, language, players",
+    hostControlsSubtitle: "Audio, video, language, players",
     close: "Close",
     noGame: "No game",
     connected: "Connected",

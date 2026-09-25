@@ -1,4 +1,5 @@
 import { resolveGameAudioTrack } from "@open-party-lab/game-core";
+import { markHostMusicAudioContext } from "./audioVolume.js";
 import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
 import { getSelectedGame } from "../games/selectedGame.js";
 
@@ -731,6 +732,7 @@ class HostBackgroundMusicController {
     }
 
     this.audioContext = new AudioContext();
+    markHostMusicAudioContext(this.audioContext);
     this.masterGain = this.audioContext.createGain();
     // The single node everything the music schedules passes through, which is
     // what makes one volume control possible at all.

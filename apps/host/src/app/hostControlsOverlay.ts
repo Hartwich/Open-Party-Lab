@@ -11,6 +11,7 @@ import { getHostText } from "../i18n/hostText.js";
 import { themeNames, type ThemeName } from "@open-party-lab/ui-kit";
 import { hostTheme, partyTheme } from "../ui/theme/theme.js";
 import { readHostMusicVolume, setHostMusicVolume } from "./backgroundMusic.js";
+import { readHostSoundEffectsVolume, setHostSoundEffectsVolume } from "./audioVolume.js";
 import { OPEN_HOST_CONTROLS_EVENT, SHELL_ACTIVE_ATTRIBUTE } from "../shell/hostShell.js";
 import {
   applyStyles,
@@ -368,6 +369,55 @@ export function mountHostControlsOverlay(
 
   renderVolume();
 
+  const soundEffectsVolumeSection = document.createElement("section");
+  soundEffectsVolumeSection.style.display = "grid";
+  soundEffectsVolumeSection.style.gap = "8px";
+  card.appendChild(soundEffectsVolumeSection);
+
+  const soundEffectsVolumeHeader = document.createElement("div");
+  soundEffectsVolumeHeader.style.display = "flex";
+  soundEffectsVolumeHeader.style.alignItems = "baseline";
+  soundEffectsVolumeHeader.style.justifyContent = "space-between";
+  soundEffectsVolumeHeader.style.gap = "12px";
+  soundEffectsVolumeSection.appendChild(soundEffectsVolumeHeader);
+
+  const soundEffectsVolumeLabel = document.createElement("div");
+  soundEffectsVolumeLabel.style.fontSize = "12px";
+  soundEffectsVolumeLabel.style.letterSpacing = "0.12em";
+  soundEffectsVolumeLabel.style.textTransform = "uppercase";
+  soundEffectsVolumeLabel.style.color = "var(--muted)";
+  soundEffectsVolumeHeader.appendChild(soundEffectsVolumeLabel);
+
+  const soundEffectsVolumeReadout = document.createElement("output");
+  soundEffectsVolumeReadout.style.fontFamily = hostTheme.monoFont;
+  soundEffectsVolumeReadout.style.fontSize = "16px";
+  soundEffectsVolumeReadout.style.color = hostTheme.text;
+  soundEffectsVolumeHeader.appendChild(soundEffectsVolumeReadout);
+
+  const soundEffectsVolumeSlider = document.createElement("input");
+  soundEffectsVolumeSlider.type = "range";
+  soundEffectsVolumeSlider.min = "0";
+  soundEffectsVolumeSlider.max = "100";
+  soundEffectsVolumeSlider.step = "5";
+  soundEffectsVolumeSlider.value = String(Math.round(readHostSoundEffectsVolume() * 100));
+  soundEffectsVolumeSlider.style.width = "100%";
+  soundEffectsVolumeSlider.style.minHeight = "40px";
+  soundEffectsVolumeSlider.style.accentColor = hostTheme.accent;
+  soundEffectsVolumeSlider.style.cursor = "pointer";
+  soundEffectsVolumeSection.appendChild(soundEffectsVolumeSlider);
+
+  const renderSoundEffectsVolume = (): void => {
+    const percent = Number(soundEffectsVolumeSlider.value);
+    soundEffectsVolumeReadout.textContent = percent === 0 ? "—" : `${percent}%`;
+  };
+
+  soundEffectsVolumeSlider.addEventListener("input", () => {
+    setHostSoundEffectsVolume(Number(soundEffectsVolumeSlider.value) / 100);
+    renderSoundEffectsVolume();
+  });
+
+  renderSoundEffectsVolume();
+
   const themeSection = document.createElement("section");
   themeSection.style.display = "grid";
   themeSection.style.gap = "8px";
@@ -662,6 +712,8 @@ export function mountHostControlsOverlay(
     themeLabel.textContent = text.themeLabel;
     volumeLabel.textContent = text.musicVolumeLabel;
     volumeSlider.setAttribute("aria-label", text.musicVolumeLabel);
+    soundEffectsVolumeLabel.textContent = text.soundEffectsVolumeLabel;
+    soundEffectsVolumeSlider.setAttribute("aria-label", text.soundEffectsVolumeLabel);
 
     for (const [theme, button] of themeButtonMap) {
       const active = (currentState.room?.theme ?? "light") === theme;

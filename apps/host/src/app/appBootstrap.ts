@@ -5,6 +5,7 @@ import { mountDebugOverlay } from "./debugOverlay.js";
 import { mountFullscreenOverlay } from "./fullscreenOverlay.js";
 import { mountScreenWakeLock } from "./screenWakeLock.js";
 import { mountBackgroundMusic } from "./backgroundMusic.js";
+import { installHostSoundEffectsVolume } from "./audioVolume.js";
 import { createHostRouter } from "./router.js";
 import { HostSocketClient, type HostAppState } from "./hostSocketClient.js";
 import { mountJoinOverlay } from "./joinOverlay.js";
@@ -67,6 +68,7 @@ function resolveDefaultServerUrl(): string {
 }
 
 export function bootstrapHostApp(requestedRoomCode: string | null = null): Phaser.Game {
+  installHostSoundEffectsVolume();
   const serverUrl = import.meta.env.VITE_SERVER_URL ?? resolveDefaultServerUrl();
   const hostClient = new HostSocketClient(serverUrl, requestedRoomCode);
   const preferredFps = readHostFpsPreference();

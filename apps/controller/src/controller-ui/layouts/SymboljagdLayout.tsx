@@ -4,11 +4,12 @@ import type { CardHandLayoutModel } from "./models.js";
 
 const symbolPositions: ReadonlyArray<readonly [number, number, number]> = [
   [22, 15, 23], [75, 17, 19], [49, 40, 37], [19, 62, 20],
-  [80, 61, 30], [43, 87, 20], [74, 114, 20], [22, 127, 20]
+  [80, 61, 30], [43, 87, 20], [74, 114, 20], [22, 127, 20],
+  [49, 11, 16], [49, 108, 17]
 ];
 
 function SymbolImage({ symbolId }: { symbolId: string }) {
-  const cell = Math.max(0, Math.min(56, Number.parseInt(symbolId, 10) || 0));
+  const cell = Math.max(0, Math.min(90, Number.parseInt(symbolId, 10) || 0));
   return (
     <img src={`/card-table/symboljagd-icons/${String(cell).padStart(2, "0")}.png`} alt="" draggable={false} style={{ display: "block", width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none", userSelect: "none" }} />
   );
@@ -19,7 +20,8 @@ export function SymboljagdLayout({ model }: { model: CardHandLayoutModel }) {
   const en = model.language === "en";
   const card = model.hand[0];
   const symbols = card?.symbols ?? [];
-  const offset = card ? [...card.cardId].reduce((sum, char) => sum + char.charCodeAt(0), 0) % symbolPositions.length : 0;
+  const layoutCount = Math.min(symbols.length, symbolPositions.length);
+  const offset = card && layoutCount > 0 ? [...card.cardId].reduce((sum, char) => sum + char.charCodeAt(0), 0) % layoutCount : 0;
 
   if (model.gameOver) {
     return (
@@ -36,13 +38,13 @@ export function SymboljagdLayout({ model }: { model: CardHandLayoutModel }) {
     <main aria-label={en ? "Your picture card" : "Deine Symbolkarte"} style={{
       position: "fixed", inset: 0, zIndex: 20, overflow: "hidden", touchAction: "manipulation",
       background: "radial-gradient(120% 90% at 50% 0%, #f8efd9, #ddcfb5 78%)",
-      padding: "max(76px, calc(env(safe-area-inset-top) + 72px)) max(7px, env(safe-area-inset-right)) max(7px, env(safe-area-inset-bottom)) max(7px, env(safe-area-inset-left))"
+      padding: "max(76px, calc(env(safe-area-inset-top) + 72px)) max(7px, env(safe-area-inset-right)) max(27px, calc(env(safe-area-inset-bottom) + 20px)) max(7px, env(safe-area-inset-left))"
     }}>
       {card ? (
         <section style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", containerType: "size", borderRadius: 24, background: "#fffbf4", border: "1px solid #d7cbb7", boxShadow: "0 12px 36px #4d3b2526" }}>
           <div aria-hidden="true" style={{ position: "absolute", inset: 9, border: "1px solid #eee3d1", borderRadius: 17 }} />
           {symbols.map((symbol, index) => {
-            const [cx, cy, size] = symbolPositions[(index + offset) % symbolPositions.length]!;
+            const [cx, cy, size] = symbolPositions[(index + offset) % layoutCount]!;
             const choice = model.pendingChoice?.options.find((option) => option.symbolImage === symbol);
             const enabled = Boolean(choice && card.playable && !model.disabled);
             return (
