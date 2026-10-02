@@ -1,6 +1,6 @@
 # Project Status
 
-Snapshot date: 2026-09-25
+Snapshot date: 2026-10-02
 
 ## In Development
 
@@ -36,7 +36,11 @@ Platform:
 - optional local game-repo discovery through `npm run games:list` and `npm run games:sync-local`
 - virtual controller helper for AI browser checks through `npm run ai:controllers`
 - host DEV automation bridge for browser checks exposed only by the Vite dev host
-- portable Windows release assembly with a one-click launcher, bundled Node.js runtime, same-origin host/controller assets, and all known games
+- portable Windows x64 release: `npm run release:windows` rebuilds same-origin host/controller assets, requires every known game in all three registries, bundles Node.js and runtime dependencies with licenses, checks an isolated copy of the packaged server and catalog outside the source checkout, and creates a ZIP plus SHA-256 checksum. Release clients connect to their own server regardless of development URL settings. The launcher opens the browser and provides a small status/stop window; closing it stops its server. A second launch and occupied port 3000 report an error.
+- The user confirmed the original portable ZIP works. The subsequent English-only/custom-room-code/automatic-port launcher experiment was withdrawn at the user's request after local Windows application control blocked the final new unsigned EXE (event 3077). The original ZIP and its exact compiled executable are retained; no recompilation is needed to restore that release.
+- Incremental launcher work starts with English text only: exactly four UI strings changed, while port 3000 and automatic room codes remain as before. The original binary, a recompilation of the identical original source, and the English-only binary each passed the local --check start/shutdown check with exit code 0. The separate step1-english package copies the original runtime/web/game payload unchanged, and the user confirmed that it works. Physical phone verification remains unreported.
+- The separate step2 port-fallback experiment was compiled but blocked before startup by local Windows application control (event 3077). In a direct comparison, the retained step1 EXE still started successfully, while a fresh compilation of the identical step1 English source was also blocked. These results do not establish that port fallback caused the block. The user chose to retain the working step1 English package with fixed port 3000. Its exact verified EXE and ZIP are preserved without recompilation; launcher source remains at step1. The port experiment and check evidence remain under ignored artifacts, outside the active release. Further launcher changes are not planned under the current scope.
+- The selected English Windows package is prepared for GitHub release `windows-portable-2026.10.02`, with its existing ZIP and SHA-256 file uploaded directly. This tag does not match the automated `v*` build trigger, so publication retains the tested executable instead of recompiling it.
 - hosted room isolation with a 20-room capacity, inactive-room eviction, ten-minute empty-room cleanup, and a one-hour room lifetime that the host can extend by one hour during the final five minutes
 - hosted expiry reminders use the server clock and remain top-centre above both games and catalog; extension requests show pending, error, and success feedback, and the five-minute window is shared with the server
 - host settings expose the room code and return-to-menu action; floating room-code and hamburger overlays are removed, and catalog artwork is clipped to rounded tile corners

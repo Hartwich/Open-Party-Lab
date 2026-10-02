@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
+using System.Windows.Forms;
 
 internal static class Launcher
 {
@@ -48,7 +49,27 @@ internal static class Launcher
     }
 
     [STAThread]
-    private static int Main()
+    private static int Main(string[] args)
+    {
+        bool checkOnly = Array.IndexOf(args, "--check") >= 0;
+        try
+        {
+            using (var singleInstance = new Mutex(false, "Local\\OpenPartyLabPortable"))
+            {
+                if (!singleInstance.WaitOne(0))
+                    throw new Exception("Open Party Lab is already running. Close its launcher window before starting again.");
+                try { return Run(checkOnly); }
+                finally { singleInstance.ReleaseMutex(); }
+            }
+        }
+        catch (Exception error)
+        {
+            if (!checkOnly) MessageBox.Show(error.Message, "Open Party Lab", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return 1;
+        }
+    }
+
+    private static int Run(bool checkOnly)
     {
         string root = AppDomain.CurrentDomain.BaseDirectory;
         string nodePath = Path.Combine(root, "runtime", "node.exe");
@@ -62,13 +83,14 @@ internal static class Launcher
 
         if (!File.Exists(nodePath) || !File.Exists(serverPath))
         {
-            System.Windows.Forms.MessageBox.Show(
-                "The portable package is incomplete. Please extract the complete ZIP before starting Open Party Lab.",
-                "Open Party Lab",
-                System.Windows.Forms.MessageBoxButtons.OK,
-                System.Windows.Forms.MessageBoxIcon.Error);
-            return 1;
+            throw new Exception("The portable package is incomplete. Please extract the complete ZIP before starting Open Party Lab.");
         }
+
+        // Do not mistake another service's /health response for our own server.
+        var portProbe = new TcpListener(IPAddress.Any, 3000);
+        try { portProbe.Start(); }
+        catch (SocketException) { throw new Exception("Port 3000 is already in use. Stop the other Open Party Lab server or application first."); }
+        finally { portProbe.Stop(); }
 
         var startInfo = new ProcessStartInfo(nodePath, "\"" + serverPath + "\"")
         {
@@ -79,10 +101,16 @@ internal static class Launcher
             RedirectStandardError = true
         };
         startInfo.EnvironmentVariables["NODE_ENV"] = "production";
+        startInfo.EnvironmentVariables["PORT"] = "3000";
+        startInfo.EnvironmentVariables["HOST"] = "0.0.0.0";
+        startInfo.EnvironmentVariables["RENDER"] = "false";
+        startInfo.EnvironmentVariables["RENDER_EXTERNAL_URL"] = "";
+        startInfo.EnvironmentVariables["NODE_OPTIONS"] = "";
+        startInfo.EnvironmentVariables["NODE_PATH"] = "";
         startInfo.EnvironmentVariables["OPEN_PARTY_LAB_WEB_ROOT"] = Path.Combine(appRoot, "web");
         startInfo.EnvironmentVariables["PUBLIC_CONTROLLER_ORIGIN"] = controllerOrigin;
 
-        using (var log = new StreamWriter(logPath, true))
+        using (var log = TextWriter.Synchronized(new StreamWriter(logPath, true) { AutoFlush = true }))
         using (var server = new Process { StartInfo = startInfo, EnableRaisingEvents = true })
         {
             log.WriteLine("Host URL: " + hostUrl);
@@ -92,54 +120,78 @@ internal static class Launcher
             server.OutputDataReceived += delegate(object sender, DataReceivedEventArgs args) { if (args.Data != null) { log.WriteLine(args.Data); log.Flush(); } };
             server.ErrorDataReceived += delegate(object sender, DataReceivedEventArgs args) { if (args.Data != null) { log.WriteLine(args.Data); log.Flush(); } };
 
+            server.Start();
             try
             {
-                server.Start();
                 server.BeginOutputReadLine();
                 server.BeginErrorReadLine();
-            }
-            catch (Exception error)
-            {
-                System.Windows.Forms.MessageBox.Show(error.Message, "Open Party Lab", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
-                return 1;
-            }
-
-            bool ready = false;
-            for (int attempt = 0; attempt < 50 && !server.HasExited; attempt++)
-            {
-                try
+                bool ready = false;
+                for (int attempt = 0; attempt < 50 && !server.HasExited; attempt++)
                 {
-                    var request = WebRequest.CreateHttp("http://127.0.0.1:3000/health");
-                    request.Timeout = 250;
-                    using (request.GetResponse()) { ready = true; }
-                    if (ready) break;
+                    try
+                    {
+                        var request = WebRequest.CreateHttp("http://127.0.0.1:3000/health");
+                        request.Proxy = null;
+                        request.Timeout = 250;
+                        using (request.GetResponse()) { ready = true; }
+                        if (ready) break;
+                    }
+                    catch { Thread.Sleep(100); }
                 }
-                catch { Thread.Sleep(100); }
-            }
 
-            if (!ready)
+                if (!ready)
+                {
+                    throw new Exception("Open Party Lab could not start. Check open-party-lab.log for the exact server error.");
+                }
+
+                if (checkOnly) return 0;
+
+                if (lanIp == null)
+                {
+                    System.Windows.Forms.MessageBox.Show(
+                        "No private LAN IPv4 address was detected. Open Party Lab will use localhost, so phone controllers cannot connect until the computer is connected to a LAN or Wi-Fi network.",
+                        "Open Party Lab",
+                        System.Windows.Forms.MessageBoxButtons.OK,
+                        System.Windows.Forms.MessageBoxIcon.Warning);
+                }
+
+                Application.EnableVisualStyles();
+                using (var window = new Form())
+                using (var timer = new System.Windows.Forms.Timer { Interval = 1000 })
+                {
+                    window.Text = "Open Party Lab";
+                    window.ClientSize = new System.Drawing.Size(460, 190);
+                    window.FormBorderStyle = FormBorderStyle.FixedDialog;
+                    window.MaximizeBox = false;
+                    window.StartPosition = FormStartPosition.CenterScreen;
+                    var label = new Label {
+                        Text = "Open Party Lab is running.\r\n\r\nPhones: same Wi-Fi\r\n" + controllerOrigin + "\r\n\r\nClose this window to stop.",
+                        Left = 16, Top = 16, Width = 430, Height = 110
+                    };
+                    var open = new Button { Text = "Open", Left = 16, Top = 142, Width = 180 };
+                    open.Click += delegate { Process.Start(new ProcessStartInfo(hostUrl) { UseShellExecute = true }); };
+                    var stop = new Button { Text = "Stop", Left = 240, Top = 142, Width = 180 };
+                    stop.Click += delegate { window.Close(); };
+                    window.Controls.AddRange(new Control[] { label, open, stop });
+                    timer.Tick += delegate {
+                        if (server.HasExited) {
+                            timer.Stop();
+                            MessageBox.Show("The server stopped. Check open-party-lab.log.", "Open Party Lab");
+                            window.Close();
+                        }
+                    };
+                    timer.Start();
+                    Process.Start(new ProcessStartInfo(hostUrl) { UseShellExecute = true });
+                    Application.Run(window);
+                    return server.HasExited ? server.ExitCode : 0;
+                }
+            }
+            finally
             {
-                System.Windows.Forms.MessageBox.Show(
-                    "Open Party Lab could not start. Check open-party-lab.log for the exact server error. Port 3000 may be in use, or the downloaded package may be incomplete.",
-                    "Open Party Lab",
-                    System.Windows.Forms.MessageBoxButtons.OK,
-                    System.Windows.Forms.MessageBoxIcon.Error);
                 if (!server.HasExited) server.Kill();
-                return 1;
+                server.WaitForExit();
+                // Drain redirected output before disposing the log writer.
             }
-
-            if (lanIp == null)
-            {
-                System.Windows.Forms.MessageBox.Show(
-                    "No private LAN IPv4 address was detected. Open Party Lab will use localhost, so phone controllers cannot connect until the computer is connected to a LAN or Wi-Fi network.",
-                    "Open Party Lab",
-                    System.Windows.Forms.MessageBoxButtons.OK,
-                    System.Windows.Forms.MessageBoxIcon.Warning);
-            }
-
-            Process.Start(new ProcessStartInfo(hostUrl) { UseShellExecute = true });
-            server.WaitForExit();
-            return server.ExitCode;
         }
     }
 }

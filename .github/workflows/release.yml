@@ -39,20 +39,8 @@ jobs:
       - name: Typecheck complete platform
         run: npm run typecheck
 
-      - name: Build same-origin release assets
-        shell: pwsh
-        run: |
-          $env:OPEN_PARTY_LAB_RELEASE_BUILD = "1"
-          npm run build
-
-      - name: Assemble portable runtime
+      - name: Build, check and package portable runtime
         run: npm run release:windows
-
-      - name: Create ZIP and checksum
-        shell: pwsh
-        run: |
-          Compress-Archive -Path artifacts/Open-Party-Lab-windows-x64/* -DestinationPath artifacts/Open-Party-Lab-windows-x64.zip
-          (Get-FileHash artifacts/Open-Party-Lab-windows-x64.zip -Algorithm SHA256).Hash.ToLower() + "  Open-Party-Lab-windows-x64.zip" | Set-Content artifacts/Open-Party-Lab-windows-x64.zip.sha256
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4

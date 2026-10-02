@@ -2,6 +2,9 @@ import { defineConfig } from "vite";
 import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
+  define: process.env.OPEN_PARTY_LAB_RELEASE_BUILD
+    ? { "import.meta.env.VITE_SERVER_URL": "undefined" }
+    : undefined,
   resolve: {
     dedupe: ["phaser", "@open-party-lab/game-core", "@open-party-lab/protocol"],
     alias: {

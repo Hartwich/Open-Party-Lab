@@ -100,8 +100,10 @@ npm run dev:all             # Start the local development stack on Windows
 npm run dev:stop            # Stop the local development stack
 npm run typecheck           # Type-check the platform and linked games
 npm run build               # Build the platform and linked games
-npm run release:windows     # Assemble a portable Windows release
+npm run release:windows     # Build, check and ZIP a complete Windows x64 release
 ```
+
+To create a distributable Windows build, clone all known games first with `npm run games:clone-all`, then run `npm run release:windows`. Share `artifacts/Open-Party-Lab-windows-x64.zip`; the receiving PC needs no Node.js or npm. Keep the launcher window open while playing and close it to stop the server. See [portable build instructions](docs/release-build.md).
 
 To refresh the recommended-game collage, start the host first, then run:
 
