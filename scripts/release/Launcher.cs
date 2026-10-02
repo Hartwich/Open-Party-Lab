@@ -48,6 +48,19 @@ internal static class Launcher
         return FindLanIPv4(true) ?? FindLanIPv4(false);
     }
 
+    private static int FindAvailablePort()
+    {
+        for (int port = 3000; port <= 3099; port++)
+        {
+            var probe = new TcpListener(IPAddress.Any, port);
+            probe.Server.ExclusiveAddressUse = true;
+            try { probe.Start(); return port; }
+            catch (SocketException) { /* Try the next port. */ }
+            finally { probe.Stop(); }
+        }
+        throw new Exception("No available port between 3000 and 3099. Close another application and try again.");
+    }
+
     [STAThread]
     private static int Main(string[] args)
     {
@@ -78,8 +91,6 @@ internal static class Launcher
         string logPath = Path.Combine(root, "open-party-lab.log");
         string lanIp = FindLanIPv4();
         string publicHost = lanIp ?? "127.0.0.1";
-        string hostUrl = "http://" + publicHost + ":3000/";
-        string controllerOrigin = hostUrl + "controller/";
 
         if (!File.Exists(nodePath) || !File.Exists(serverPath))
         {
@@ -87,10 +98,9 @@ internal static class Launcher
         }
 
         // Do not mistake another service's /health response for our own server.
-        var portProbe = new TcpListener(IPAddress.Any, 3000);
-        try { portProbe.Start(); }
-        catch (SocketException) { throw new Exception("Port 3000 is already in use. Stop the other Open Party Lab server or application first."); }
-        finally { portProbe.Stop(); }
+        int port = FindAvailablePort();
+        string hostUrl = "http://" + publicHost + ":" + port + "/";
+        string controllerOrigin = hostUrl + "controller/";
 
         var startInfo = new ProcessStartInfo(nodePath, "\"" + serverPath + "\"")
         {
@@ -101,7 +111,7 @@ internal static class Launcher
             RedirectStandardError = true
         };
         startInfo.EnvironmentVariables["NODE_ENV"] = "production";
-        startInfo.EnvironmentVariables["PORT"] = "3000";
+        startInfo.EnvironmentVariables["PORT"] = port.ToString();
         startInfo.EnvironmentVariables["HOST"] = "0.0.0.0";
         startInfo.EnvironmentVariables["RENDER"] = "false";
         startInfo.EnvironmentVariables["RENDER_EXTERNAL_URL"] = "";
@@ -130,7 +140,7 @@ internal static class Launcher
                 {
                     try
                     {
-                        var request = WebRequest.CreateHttp("http://127.0.0.1:3000/health");
+                        var request = WebRequest.CreateHttp("http://127.0.0.1:" + port + "/health");
                         request.Proxy = null;
                         request.Timeout = 250;
                         using (request.GetResponse()) { ready = true; }

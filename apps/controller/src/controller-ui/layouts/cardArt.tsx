@@ -8,7 +8,7 @@ import type {
 /**
  * Kartenbilder für die Phone-Hand.
  *
- * Reines SVG im Warm-Paper-Farbklima der Plattform: keine Assets, beliebig
+ * SVG mit optionalen Kartenillustrationen, beliebig
  * skalierbar und deckungsgleich mit den Karten, die der Host aus derselben
  * Beschreibung rendert. Drei Stile teilen sich Rahmen und Modell - klassisch
  * mit Pips, modern als farbiges Feld, klar als große Zahl.
@@ -140,18 +140,22 @@ export function PlayingCard({
         <SymboljagdSymbols cardId={card.cardId} symbols={card.symbols} />
       ) : card.art === "arcane" && style !== "clear" ? (
         <>
-          <rect x="5" y="5" width="90" height="130" rx="5" fill={ink} />
-          <path d="M50 25 80 70 50 115 20 70Z" fill="none" stroke="#ead5a0" />
-          <circle cx="50" cy="70" r="27" fill={paper} stroke="#ead5a0" strokeWidth="2" />
-          <circle cx="50" cy="70" r="33" fill="none" stroke="#ead5a0" strokeDasharray="1 5" />
-          <text x="50" y="82" textAnchor="middle" fill={ink} fontSize={card.centerLabel ? 36 : 32} fontFamily={serif} fontWeight="700">{card.centerLabel ? card.suitSymbol : card.rankLabel}</text>
-          <text x="50" y="25" textAnchor="middle" fill={paper} fontSize="16">{card.suitSymbol}</text>
-          <text x="50" y="124" textAnchor="middle" fill={paper} fontSize={card.centerLabel ? 9 : 17} fontFamily={sans}>{card.centerLabel ?? card.suitSymbol}</text>
-          <text x="11" y="23" fill={paper} fontSize="16" fontWeight="700">{card.rankLabel}</text>
-          <text x="11" y="38" fill={paper} fontSize="13">{card.suitSymbol}</text>
-          <g transform="rotate(180 50 70)">
-            <text x="11" y="23" fill={paper} fontSize="16" fontWeight="700">{card.rankLabel}</text>
-            <text x="11" y="38" fill={paper} fontSize="13">{card.suitSymbol}</text>
+          <svg x="5" y="5" width="90" height="130" viewBox="0 0 90 130" overflow="hidden">
+            <image href={card.imageUrl} width="90" height="130" preserveAspectRatio="xMidYMid slice" />
+            <rect width="90" height="130" fill="#102021" opacity={dimmed ? 0.5 : 0.06} />
+          </svg>
+          <rect x="6" y="6" width="88" height="128" rx="5" fill="none" stroke="#ead5a0" />
+          <g fill={paper} fontFamily={sans} fontWeight="700" textAnchor="middle">
+            <rect x="7" y="7" width="24" height="37" rx="5" fill={colors.ink} stroke="#ead5a0" strokeWidth="0.6" />
+            <text x="19" y="25" fontSize="17">{card.rankLabel}</text>
+            <text x="19" y="39" fontSize="13">{card.suitSymbol}</text>
+            <g transform="rotate(180 50 70)">
+              <rect x="7" y="7" width="24" height="37" rx="5" fill={colors.ink} stroke="#ead5a0" strokeWidth="0.6" />
+              <text x="19" y="25" fontSize="17">{card.rankLabel}</text>
+              <text x="19" y="39" fontSize="13">{card.suitSymbol}</text>
+            </g>
+            <rect x="27" y="111" width="46" height="18" rx="4" fill="#102021" fillOpacity="0.88" />
+            <text x="50" y="123" fontSize="8">{card.centerLabel ?? card.suitLabel}</text>
           </g>
         </>
       ) : style === "modern" ? (

@@ -39,7 +39,7 @@ export function mountRoomExpiryOverlay(client: HostSocketClient): () => void {
     const text = getHostText(state.room?.language ?? state.preferredLanguage);
     const remaining = (state.room?.expiresAt ?? 0) - client.getServerTime();
     const success = Date.now() < successUntil;
-    element.hidden = !state.room || (!success && !pending && (remaining <= 0 || remaining > ROOM_EXTENSION_WINDOW_MS));
+    element.hidden = !state.room || state.room.expiresAt === null || (!success && !pending && (remaining <= 0 || remaining > ROOM_EXTENSION_WINDOW_MS));
     title.textContent = success ? text.roomExpiryExtended : text.roomExpiryTitle;
     const seconds = Math.max(0, Math.ceil(remaining / 1000));
     body.textContent = text.roomExpiryCountdown(`${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`);

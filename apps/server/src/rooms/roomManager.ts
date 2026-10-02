@@ -26,7 +26,7 @@ export class RoomManager {
     return this.roomStore.create({
       code,
       createdAt,
-      expiresAt: createdAt + this.maxLifetimeMs,
+      expiresAt: this.maxLifetimeMs > 0 ? createdAt + this.maxLifetimeMs : null,
       lastActivityAt: createdAt,
       joinUrl: this.createJoinUrl(code),
       language: normalizeLanguage(language),

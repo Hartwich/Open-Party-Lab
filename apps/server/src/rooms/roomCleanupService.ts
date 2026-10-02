@@ -82,7 +82,7 @@ export class RoomCleanupService {
     const removedRoomCodes: string[] = [];
 
     for (const room of this.roomStore.values()) {
-      if (room.expiresAt <= now) {
+      if (room.expiresAt !== null && room.expiresAt <= now) {
         this.closeRoom(room, "expired");
         removedRoomCodes.push(room.code);
         continue;
@@ -103,6 +103,7 @@ export class RoomCleanupService {
   }
 
   extendRoomLifetime(room: RoomRecord): void {
+    if (room.expiresAt === null) return;
     room.expiresAt += this.maxLifetimeMs;
     this.roomManager.touch(room);
   }

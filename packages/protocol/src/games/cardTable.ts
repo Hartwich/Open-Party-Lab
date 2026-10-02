@@ -23,6 +23,7 @@ export interface CardTableCardState {
   rankLabel: string;
   color: CardTableColor;
   art?: "arcane";
+  imageUrl?: string;
   centerLabel?: string;
   points?: number;
   symbols?: string[];

@@ -278,11 +278,15 @@ export interface ChaosKommandoLayoutModel {
   weapons: ChaosKommandoWeaponOptionModel[];
   onMoveChange: (moveX: number, moveY: number) => void;
   onAimChange: (aimX: number, aimY: number) => void;
+  onBackflip?: () => void;
+  onEndTurn?: () => void;
+  fuseSeconds?: number;
+  onSetFuse?: (seconds: number) => void;
+  fireDisabled?: boolean;
   onJump: () => void;
   onFireStart: () => void;
   onFireEnd: () => void;
 }
-
 
 export interface TwinStickLayoutModel {
   kind: "twin_stick";
@@ -611,6 +615,14 @@ export interface DrawingGuessLayoutModel {
 }
 
 export interface SchaetzoramaLayoutModel {
+  revealStep: number;
+  revealAnswersVisible: boolean;
+  ownRevealReady: boolean;
+  autoContinue: boolean;
+  onAutoReady: () => void;
+  onContinueReveal: () => void;
+  onSetAutoContinue: (enabled: boolean) => void;
+
   kind: "schaetzorama";
   currentPlayerId: string;
   title: string;
@@ -835,6 +847,7 @@ export interface DungeonGuildCardModel {
   badStuff?: string;
   goldValue?: number;
   slot?: string;
+  twoHand?: boolean;
   equipped?: boolean;
   playable?: boolean;
   hint?: string;
@@ -863,7 +876,7 @@ export interface DungeonGuildLayoutModel {
   gameOver: boolean;
   winnerName?: string;
   ready?: ReadyLayoutModel;
-  onPlayCard: (cardId: string) => void;
+  onPlayCard: (cardId: string, options?: { combatSide?: "party" | "monster"; itemMode?: "equip" | "store"; targetId?: string }) => void;
   onAction: (actionId: string) => void;
 }
 

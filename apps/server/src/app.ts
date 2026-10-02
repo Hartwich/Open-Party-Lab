@@ -22,6 +22,7 @@ import { RoomCleanupService } from "./rooms/roomCleanupService.js";
 import { RoomStore } from "./rooms/roomStore.js";
 
 export function createApp(environment: AppEnv = loadEnv()) {
+  const roomMaxLifetimeMs = environment.hostedMode ? environment.roomMaxLifetimeMs : 0;
   const httpServer = createHttpServer(environment);
   const io = createIo(httpServer, environment);
 
@@ -33,7 +34,7 @@ export function createApp(environment: AppEnv = loadEnv()) {
     (roomCode) => buildJoinUrl(environment.publicControllerOrigin, roomCode),
     now,
     environment.fixedPrimaryRoomCode,
-    environment.roomMaxLifetimeMs
+    roomMaxLifetimeMs
   );
   const reconnectService = new ReconnectService(sessionStore, now);
   const playerPresenceTracker = new PlayerPresenceTracker(
@@ -80,7 +81,7 @@ export function createApp(environment: AppEnv = loadEnv()) {
     now,
     environment.roomInactivityTimeoutMs,
     environment.roomCleanupIntervalMs,
-    environment.roomMaxLifetimeMs,
+    roomMaxLifetimeMs,
     environment.roomMaxCount
   );
 
@@ -132,7 +133,7 @@ export function createApp(environment: AppEnv = loadEnv()) {
         reconnectWindowMs: environment.playerReconnectWindowMs,
         roundTickMs: environment.roundTickMs,
         roomInactivityTimeoutMs: environment.roomInactivityTimeoutMs,
-        roomMaxLifetimeMs: environment.roomMaxLifetimeMs,
+        roomMaxLifetimeMs,
         roomMaxCount: environment.roomMaxCount
       });
     }

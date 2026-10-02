@@ -458,7 +458,7 @@ export function registerSocketHandlers({
         return;
       }
 
-      if (room.expiresAt <= now()) {
+      if (room.expiresAt === null || room.expiresAt <= now()) {
         ack(ackError(en ? "This room is already expired." : "Dieser Raum ist bereits abgelaufen."));
         return;
       }

@@ -8,7 +8,21 @@ import { fileURLToPath } from "node:url";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDir, "..");
-const outputRoot = path.resolve(projectRoot, process.argv[2] ?? "artifacts/Open-Party-Lab-windows-x64");
+let outputArgument;
+let launcherArgument;
+const argumentsList = process.argv.slice(2);
+for (let index = 0; index < argumentsList.length; index++) {
+  const argument = argumentsList[index];
+  if (argument === "--launcher-from" && !launcherArgument && argumentsList[index + 1]) {
+    launcherArgument = argumentsList[++index];
+  } else if (!argument.startsWith("-") && !outputArgument) {
+    outputArgument = argument;
+  } else {
+    throw new Error(`Unexpected release argument: ${argument}`);
+  }
+}
+const outputRoot = path.resolve(projectRoot, outputArgument ?? "artifacts/Open-Party-Lab-windows-x64");
+const retainedLauncher = launcherArgument ? path.resolve(projectRoot, launcherArgument) : null;
 const appRoot = path.join(outputRoot, "app");
 const knownGames = JSON.parse(await readFile(path.join(projectRoot, "config", "known-games.json"), "utf8"));
 const platformPackages = ["game-core", "protocol", "ui-kit", "utils"];
@@ -24,6 +38,19 @@ for (let directory = outputRoot; directory !== projectRoot; directory = path.dir
   if (existsSync(directory) && (await lstat(directory)).isSymbolicLink()) {
     throw new Error(`Refusing to replace release output through a link: ${directory}`);
   }
+}
+const launcherSource = path.join(projectRoot, "scripts", "release", "Launcher.cs");
+if (retainedLauncher) {
+  const relativeLauncher = path.relative(outputRoot, retainedLauncher);
+  if (!relativeLauncher.startsWith("..") && !path.isAbsolute(relativeLauncher)) {
+    throw new Error("The retained launcher must be outside the release output being replaced.");
+  }
+  const normalizeSource = (source) => source.replace(/^\uFEFF/, "").replaceAll("\r\n", "\n").trim();
+  const sourceSnapshot = path.join(path.dirname(retainedLauncher), "Launcher.cs");
+  if (normalizeSource(await readFile(sourceSnapshot, "utf8")) !== normalizeSource(await readFile(launcherSource, "utf8"))) {
+    throw new Error("The retained launcher's adjacent Launcher.cs does not match the active launcher source.");
+  }
+  await readFile(retainedLauncher);
 }
 const gameSources = knownGames.map((game) => {
   const sourceRoot = [game.defaultLocalPath, ...(game.alternateLocalPaths ?? [])]
@@ -163,19 +190,32 @@ await cp(path.join(projectRoot, "docs", "release-build.md"), path.join(outputRoo
 const nodeLicense = await fetch(`https://raw.githubusercontent.com/nodejs/node/${process.version}/LICENSE`);
 if (!nodeLicense.ok) throw new Error(`Could not include Node.js license: HTTP ${nodeLicense.status}`);
 await writeFile(path.join(outputRoot, "runtime", "LICENSE.txt"), await nodeLicense.text());
+if (process.platform === "win32") {
+  const launcherTarget = path.join(outputRoot, "Open-Party-Lab.exe");
+  if (retainedLauncher) {
+    await cp(retainedLauncher, launcherTarget);
+  } else {
+    const command = `$ErrorActionPreference = 'Stop'; Add-Type -Path '${launcherSource.replaceAll("'", "''")}' -ReferencedAssemblies System.Windows.Forms,System.Drawing -OutputAssembly '${launcherTarget.replaceAll("'", "''")}' -OutputType WindowsApplication`;
+    run("powershell.exe", ["-NoProfile", "-Command", command]);
+  }
+}
+
+const launcherHash = createHash("sha256");
+for await (const chunk of createReadStream(path.join(outputRoot, "Open-Party-Lab.exe"))) launcherHash.update(chunk);
+const revision = (directory) => {
+  const result = spawnSync("git", ["rev-parse", "HEAD"], { cwd: directory, encoding: "utf8" });
+  return result.status === 0 ? result.stdout.trim() : null;
+};
 await writeFile(path.join(outputRoot, "release.json"), JSON.stringify({
   version: JSON.parse(await readFile(path.join(projectRoot, "package.json"), "utf8")).version,
   builtAt: new Date().toISOString(),
   platform: "win32", arch: "x64", node: process.version,
-  games: knownGames.map((game) => game.id)
+  games: knownGames.map((game) => game.id),
+  platformRevision: revision(projectRoot),
+  gameRevisions: Object.fromEntries(gameSources.map((game) => [game.id, revision(game.sourceRoot)])),
+  launcher: { reusedBinary: Boolean(retainedLauncher), sha256: launcherHash.digest("hex") },
+  localRoomLifetime: "unlimited"
 }, null, 2) + "\n");
-
-if (process.platform === "win32") {
-  const launcherSource = path.join(projectRoot, "scripts", "release", "Launcher.cs");
-  const launcherTarget = path.join(outputRoot, "Open-Party-Lab.exe");
-  const command = `$ErrorActionPreference = 'Stop'; Add-Type -Path '${launcherSource.replaceAll("'", "''")}' -ReferencedAssemblies System.Windows.Forms,System.Drawing -OutputAssembly '${launcherTarget.replaceAll("'", "''")}' -OutputType WindowsApplication`;
-  run("powershell.exe", ["-NoProfile", "-Command", command]);
-}
 
 run(process.execPath, [path.join(scriptDir, "release", "smoke-portable.mjs"), outputRoot]);
 const zipPath = `${outputRoot}.zip`;

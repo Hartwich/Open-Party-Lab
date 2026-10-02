@@ -226,7 +226,7 @@ const chargeWindowMs = 1_750;
 
 export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel }) {
   const en = model.language === "en";
-  const [hudMode, setHudMode] = useState<"kommando" | "steuerung">("kommando");
+  const [hudMode, setHudMode] = useState<"kommando" | "steuerung">("steuerung");
   const [isPortrait, setIsPortrait] = useState(() =>
     typeof window !== "undefined" ? window.innerHeight >= window.innerWidth : true
   );
@@ -253,12 +253,11 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
     };
   }, []);
 
-
   useEffect(() => {
     chargingSinceRef.current = null;
     setIsCharging(false);
     setChargePct(0);
-    setHudMode("kommando");
+    setHudMode("steuerung");
   }, [model.resetKey, model.disabled]);
 
   useEffect(() => {
@@ -289,7 +288,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
   }, [model.fireMode]);
 
   function beginCharge(): void {
-    if (model.disabled) {
+    if (model.fireDisabled ?? model.disabled) {
       return;
     }
 
@@ -335,7 +334,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
   endChargeRef.current = endCharge;
 
   function handleFirePointerDown(event: React.PointerEvent<HTMLButtonElement>): void {
-    if (model.disabled) {
+    if (model.fireDisabled ?? model.disabled) {
       return;
     }
 
@@ -371,15 +370,19 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
   const panelRadius = "clamp(20px, 5vw, 24px)";
   const tileRadius = "clamp(18px, 4.5vw, 22px)";
   const iconSize = isPortrait ? "clamp(60px, 18vw, 76px)" : "clamp(58px, 10vw, 74px)";
-  const stickSize = isPortrait ? "min(42vw, 36vh, 264px)" : "min(30vw, 50vh, 280px)";
-  const fireSize = isPortrait ? "min(30vw, 23vh, 164px)" : "min(19vw, 29vh, 164px)";
-  const jumpSize = isPortrait ? "min(22vw, 15vh, 104px)" : "min(13vw, 20vh, 102px)";
+  const stickSize = isPortrait ? "min(30vw, 25vh, 180px)" : "min(30vw, 50vh, 280px)";
+  const fireSize = isPortrait ? "min(23vw, 18vh, 130px)" : "min(19vw, 29vh, 164px)";
+  const jumpSize = isPortrait ? "min(18vw, 12vh, 86px)" : "min(13vw, 20vh, 102px)";
   const weaponColumns = isPortrait ? "repeat(4, minmax(0, 1fr))" : "repeat(5, minmax(0, 1fr))";
 
   return (
     <div style={{ display: "grid", gap: layoutGap, width: "100%" }}>
       {model.ready ? <ReadyPanel ready={model.ready} /> : null}
-
+      <div role="status" style={weaponInfoStyle}>
+        <strong>{model.subtitle} · {model.turnOwnerLabel}</strong>
+        <span>{model.stats?.map((stat) => `${stat.label}: ${stat.value}`).join(" | ")} | {model.windLabel}</span>
+        <span style={{ color: "var(--text-muted)", fontSize: "0.84rem" }}>{model.helperText}</span>
+      </div>
       <div
         style={{
           display: "grid",
@@ -396,8 +399,9 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
           onClick={() => setHudMode("kommando")}
           style={modeToggleStyle(hudMode === "kommando", model.accentColor)}
         >
-          {en ? "COMMAND" : "KOMMANDO"}
+          {en ? "ARSENAL" : "WAFFEN"}
         </button>
+
         <button
           type="button"
           onClick={() => setHudMode("steuerung")}
@@ -438,7 +442,8 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                 key={weapon.id}
                 type="button"
                 disabled={weapon.disabled}
-                onClick={weapon.onSelect}
+                aria-label={`${weapon.label}, ${weapon.ammoLabel}`}
+                onClick={() => { weapon.onSelect(); setHudMode("steuerung"); }}
                 style={{
                   position: "relative",
                   display: "grid",
@@ -487,7 +492,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
         >
           <div style={{ display: "grid", justifyItems: "center" }}>
             <StickPad
-              label="MOVE"
+              label={en ? "WALK / ROPE" : "LAUFEN / SEIL"}
               accentColor={model.accentColor ?? "var(--accent)"}
               disabled={model.disabled}
               resetKey={model.resetKey}
@@ -499,7 +504,10 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
           <div style={{ display: "grid", justifyItems: "center", gap: "clamp(14px, 3vw, 16px)" }}>
             <button
               type="button"
-              disabled={model.disabled}
+              disabled={model.fireDisabled ?? model.disabled}
+              onLostPointerCapture={handleFirePointerUp}
+              onKeyDown={(event) => { if ((event.key === " " || event.key === "Enter") && !event.repeat) { event.preventDefault(); model.fireMode === "charged" ? beginCharge() : model.onFireStart(); } }}
+              onKeyUp={(event) => { if (event.key === " " || event.key === "Enter") endCharge(); }}
               onPointerDown={handleFirePointerDown}
               onPointerUp={handleFirePointerUp}
               onPointerCancel={handleFirePointerUp}
@@ -534,6 +542,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                   }}
                 />
               ) : null}
+
               <div
                 style={{
                   position: "relative",
@@ -556,10 +565,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
             <button
               type="button"
               disabled={model.disabled}
-              onPointerDown={(event) => {
-                event.preventDefault();
-                model.onJump();
-              }}
+              onClick={model.onJump}
               style={{
                 width: jumpSize,
                 aspectRatio: "1 / 1",
@@ -575,13 +581,14 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                 letterSpacing: "0.06em"
               }}
             >
-              {en ? "JUMP" : "SPRUNG"}
+              {en ? "HOP" : "SPRUNG"}
             </button>
+            {model.onBackflip ? <button type="button" disabled={model.disabled} onClick={model.onBackflip} style={toggleStyle(false, model.accentColor)}>{en ? "BACKFLIP" : "SALTO"}</button> : null}
           </div>
 
           <div style={{ display: "grid", justifyItems: "center" }}>
             <StickPad
-              label="AIM"
+              label={en ? "AIM" : "ZIELEN"}
               accentColor="var(--danger)"
               disabled={model.disabled}
               resetKey={model.resetKey}
@@ -591,6 +598,12 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
           </div>
         </div>
       )}
+      {hudMode === "steuerung" && selectedWeapon ? <div style={weaponInfoStyle}><strong>{selectedWeapon.label}</strong><span>{model.fireHint}</span></div> : null}
+      {model.fuseSeconds !== undefined && model.onSetFuse ? <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+        <span>{en ? "Fuse" : "Zuender"}</span>
+        {[1, 2, 3, 4, 5].map((seconds) => <button key={seconds} type="button" disabled={model.fireDisabled ?? model.disabled} onClick={() => model.onSetFuse?.(seconds)} style={toggleStyle(seconds === model.fuseSeconds, model.accentColor)}>{seconds}s</button>)}
+      </div> : null}
+      {model.onEndTurn ? <button type="button" disabled={model.disabled || !model.isLocalPlayersTurn} onClick={model.onEndTurn} style={toggleStyle(false, model.accentColor)}>{en ? "END TURN" : "ZUG BEENDEN"}</button> : null}
     </div>
   );
 }

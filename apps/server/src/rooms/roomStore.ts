@@ -70,7 +70,7 @@ export interface RoomClock {
 export interface RoomRecord {
   code: string;
   createdAt: number;
-  expiresAt: number;
+  expiresAt: number | null;
   lastActivityAt: number;
   joinUrl: string;
   language: SupportedLanguage;

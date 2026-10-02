@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { SchaetzoramaAnswerSet, SchaetzoramaAssignQuestion, SchaetzoramaAssignmentZone, SchaetzoramaCategoryId, SchaetzoramaNumberQuestion, SchaetzoramaPublicQuestion, SchaetzoramaRankQuestion } from "@open-party-lab/protocol";
 import type { SchaetzoramaLayoutModel } from "./models.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
@@ -14,6 +14,12 @@ export function SchaetzoramaLayout({ model }: Props) {
 }
 
 function RoundLayout({ model }: Props) {
+  const automaticReady = model.ready && model.autoContinue && !model.ready.currentPlayerReady;
+  const automaticReadySent = useRef(false);
+  useEffect(() => {
+    if (!automaticReady) { automaticReadySent.current = false; return; }
+    if (!automaticReadySent.current) { automaticReadySent.current = true; model.onAutoReady(); }
+  }, [automaticReady, model.onAutoReady]);
   const [answers, setAnswers] = useState<SchaetzoramaAnswerSet>(() => initialAnswers(model));
   const [active, setActive] = useState<SchaetzoramaCategoryId>("number");
   const [reviewed, setReviewed] = useState<Set<SchaetzoramaCategoryId>>(new Set());
@@ -116,7 +122,19 @@ function CopyView({ model, draft, onDraftChange }: { model: SchaetzoramaLayoutMo
 }
 
 function Preview({ title, text }: { title: string; text: string }) { return <div className="szc-answer-preview"><span>{title}</span><strong>{text}</strong></div>; }
-function ResultView({ model }: { model: SchaetzoramaLayoutModel }) { const en = model.language === "en"; return <section className="szc-status"><h2>{en ? "Eyes on the big screen" : "Blick auf den großen Bildschirm"}</h2><p>{en ? "The answers and standings are being revealed." : "Jetzt werden die Antworten und der Zwischenstand aufgelöst."}</p></section>; }
+function ResultView({ model }: { model: SchaetzoramaLayoutModel }) {
+  const en = model.language === "en";
+  const category = categories[model.revealStep];
+  const waiting = category && !model.revealAnswersVisible;
+  return <section className="szc-result-controls">
+    <span className="szc-result-icon" aria-hidden="true">{waiting ? "◷" : "✓"}</span>
+    <h2>{category ? (waiting ? (en ? "Revealing answers" : "Antworten werden aufgedeckt") : (en ? "All answers revealed" : "Alle Antworten aufgedeckt")) : (en ? "Round standings" : "Rundenwertung")}</h2>
+    <p>{category ? model.categoryLabels[category] : (en ? "The standings are on the big screen." : "Die Wertung steht auf dem großen Bildschirm.")}</p>
+    {category && model.revealAnswersVisible ? <button type="button" className="szc-button szc-button-primary" disabled={model.disabled || model.ownRevealReady || model.autoContinue} onClick={model.onContinueReveal}>{model.ownRevealReady || model.autoContinue ? (en ? "Ready · waiting for everyone" : "Bereit · warte auf alle") : (en ? "Continue →" : "Weiter →")}</button> : null}
+    <label className="szc-auto-continue"><input type="checkbox" checked={model.autoContinue} onChange={(event) => model.onSetAutoContinue(event.currentTarget.checked)} /><span>{en ? "Automatically continue and ready up" : "Automatisch weiter und bereit"}</span></label>
+    <p className="szc-note">{en ? "Continue after everyone is ready. This preference also readies you for the next round." : "Weiter geht es, wenn alle bereit sind. Diese Einstellung meldet dich auch für die nächste Runde bereit."}</p>
+  </section>;
+}
 function Progress({ model }: { model: SchaetzoramaLayoutModel }) { return model.progress.length ? <div className="szc-progress">{model.progress.map((player) => { const done = model.stage === "joker" ? player.jokerReady : player.answered; return <i key={player.playerId} title={player.name} className={done ? "is-done" : ""} style={{ "--player": player.color } as React.CSSProperties}/>; })}</div> : null; }
 
 function initialAnswers(model: SchaetzoramaLayoutModel): SchaetzoramaAnswerSet { if (!model.roundContent) return {}; const number = model.roundContent.questions.number as SchaetzoramaNumberQuestion; const percent = model.roundContent.questions.percent as SchaetzoramaNumberQuestion; const rank = model.roundContent.questions.rank as SchaetzoramaRankQuestion; const assign = model.roundContent.questions.assign as SchaetzoramaAssignQuestion; return { number: model.ownAnswers.number ?? { kind: "number", value: Math.round((number.min + number.max) / 2) }, percent: model.ownAnswers.percent ?? { kind: "number", value: Math.round((percent.min + percent.max) / 2) }, rank: model.ownAnswers.rank ?? { kind: "rank", order: rank.items.map((item) => item.id) }, assign: model.ownAnswers.assign ?? { kind: "assign", assignments: Object.fromEntries(assign.terms.map((term) => [term.id, "both"])) } }; }

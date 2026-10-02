@@ -71,6 +71,7 @@ try {
   const created = await socket.timeout(5000).emitWithAck("room:create", { hostName: "Portable check", language: "de" });
   assert(created.ok, JSON.stringify(created));
   const room = created.data.room;
+  assert.equal(room.expiresAt, null, "Local portable rooms must not have a lifetime limit");
   const games = new Set(room.availableGames.map((game) => game.id));
   for (const id of manifest.games) assert(games.has(id), `Portable catalog is missing ${id}`);
   assert(room.joinUrl.startsWith(`${origin}/controller`), `Unexpected join URL: ${room.joinUrl}`);

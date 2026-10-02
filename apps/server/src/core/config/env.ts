@@ -85,6 +85,7 @@ function readFixedPrimaryRoomCode(source: NodeJS.ProcessEnv): string | null {
 
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): AppEnv {
   const renderExternalUrl = source.RENDER_EXTERNAL_URL?.trim();
+  const hostedMode = source.RENDER === "true" || Boolean(renderExternalUrl);
   return {
     port: readNumber(source.PORT, 3000),
     host: readHost(source),
@@ -94,9 +95,9 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): AppEnv {
     roundTickMs: readNumber(source.ROUND_TICK_MS, 16),
     roomInactivityTimeoutMs: readNumber(source.ROOM_INACTIVITY_TIMEOUT_MS, 600_000),
     roomCleanupIntervalMs: readNumber(source.ROOM_CLEANUP_INTERVAL_MS, 60_000),
-    roomMaxLifetimeMs: readNumber(source.ROOM_MAX_LIFETIME_MS, 3_600_000),
+    roomMaxLifetimeMs: hostedMode ? readNumber(source.ROOM_MAX_LIFETIME_MS, 3_600_000) : 0,
     roomMaxCount: Math.max(1, Math.floor(readNumber(source.ROOM_MAX_COUNT, 20))),
-    hostedMode: source.RENDER === "true" || Boolean(renderExternalUrl),
+    hostedMode,
     jsonSnapshotPath: source.JSON_SNAPSHOT_PATH ?? "./data/room-snapshots.json",
     fixedPrimaryRoomCode: readFixedPrimaryRoomCode(source),
     webRoot: source.OPEN_PARTY_LAB_WEB_ROOT?.trim() || null

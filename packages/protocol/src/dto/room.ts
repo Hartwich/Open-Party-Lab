@@ -32,8 +32,8 @@ export interface RoundSummary {
 export interface RoomSnapshot {
   code: string;
   createdAt: number;
-  /** Server-authoritative time at which the room will be closed. */
-  expiresAt: number;
+  /** Server-authoritative expiry, or null for local rooms without a lifetime limit. */
+  expiresAt: number | null;
   joinUrl: string;
   language: SupportedLanguage;
   /** Skin every screen in this room uses. Set from the host settings. */
