@@ -2,12 +2,6 @@ import { useHaptics } from "../../hooks/useHaptics.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import type { CardHandLayoutModel } from "./models.js";
 
-const symbolPositions: ReadonlyArray<readonly [number, number, number]> = [
-  [22, 15, 23], [75, 17, 19], [49, 40, 37], [19, 62, 20],
-  [80, 61, 30], [43, 87, 20], [74, 114, 20], [22, 127, 20],
-  [49, 11, 16], [49, 108, 17]
-];
-
 function SymbolImage({ symbolId }: { symbolId: string }) {
   const cell = Math.max(0, Math.min(90, Number.parseInt(symbolId, 10) || 0));
   return (
@@ -20,8 +14,7 @@ export function SymboljagdLayout({ model }: { model: CardHandLayoutModel }) {
   const en = model.language === "en";
   const card = model.hand[0];
   const symbols = card?.symbols ?? [];
-  const layoutCount = Math.min(symbols.length, symbolPositions.length);
-  const offset = card && layoutCount > 0 ? [...card.cardId].reduce((sum, char) => sum + char.charCodeAt(0), 0) % layoutCount : 0;
+  const positions = model.symboljagdPositions ?? [];
 
   if (model.gameOver) {
     return (
@@ -44,13 +37,15 @@ export function SymboljagdLayout({ model }: { model: CardHandLayoutModel }) {
         <section style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", containerType: "size", borderRadius: 24, background: "#fffbf4", border: "1px solid #d7cbb7", boxShadow: "0 12px 36px #4d3b2526" }}>
           <div aria-hidden="true" style={{ position: "absolute", inset: 9, border: "1px solid #eee3d1", borderRadius: 17 }} />
           {symbols.map((symbol, index) => {
-            const [cx, cy, size] = symbolPositions[(index + offset) % layoutCount]!;
+            const spot = positions[index];
+            if (!spot) return null;
+            const [cx, cy, size] = spot;
             const choice = model.pendingChoice?.options.find((option) => option.symbolImage === symbol);
             const enabled = Boolean(choice && card.playable && !model.disabled);
             return (
               <button key={`${card.cardId}-${symbol}`} type="button" aria-label={choice?.label ?? (en ? "Picture" : "Symbol")} disabled={!enabled}
                 onClick={() => { if (!choice) return; haptics.tap(18); model.onPlayCard(card.cardId, choice.id); }}
-                style={{ position: "absolute", left: `${cx}%`, top: `${(cy / 140) * 100}%`, transform: "translate(-50%, -50%)", width: `max(54px, min(${size}cqw, ${size * 0.5}cqh))`, aspectRatio: "1", display: "grid", placeItems: "center", padding: 4, border: 0, borderRadius: 18, background: "transparent", cursor: enabled ? "pointer" : "default", filter: enabled ? "drop-shadow(0 2px 3px #392e2020)" : "none", WebkitTapHighlightColor: "transparent" }}>
+                style={{ position: "absolute", left: `${cx}%`, top: `${cy}%`, transform: "translate(-50%, -50%)", width: `min(${size}cqw, ${size}cqh)`, aspectRatio: "1", display: "grid", placeItems: "center", padding: 2, border: 0, borderRadius: 8, background: "transparent", cursor: enabled ? "pointer" : "default", filter: enabled ? "drop-shadow(0 2px 3px #392e2020)" : "none", WebkitTapHighlightColor: "transparent" }}>
                 <SymbolImage symbolId={symbol} />
               </button>
             );

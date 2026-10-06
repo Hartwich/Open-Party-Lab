@@ -36,14 +36,14 @@ export function installHostSoundEffectsVolume(): void {
   originalConnect = AudioNode.prototype.connect;
   const connect = originalConnect;
 
-  const patchedConnect = function (this: AudioNode, destination: AudioNode | AudioParam, output?: number, input?: number): AudioNode {
+  const patchedConnect = function (this: AudioNode, destination: AudioNode | AudioParam, ...ports: number[]): AudioNode {
     const context = this.context;
     if (
       destination !== context.destination ||
       musicContexts.has(context) ||
       typeof OfflineAudioContext !== "undefined" && context instanceof OfflineAudioContext
     ) {
-      return Reflect.apply(connect, this, [destination, output, input]) as AudioNode;
+      return Reflect.apply(connect, this, [destination, ...ports]) as AudioNode;
     }
 
     let bus: GainNode | undefined;
@@ -57,7 +57,9 @@ export function installHostSoundEffectsVolume(): void {
       bus = context.createGain();
       bus.gain.value = readHostSoundEffectsVolume();
       soundEffectBuses.add({ context, gain: bus });
-      bus.connect(context.destination);
+      // Bypass our hook: routing the bus again would connect it to itself and
+      // leave all game effects disconnected from the speakers.
+      Reflect.apply(connect, bus, [context.destination]);
       context.addEventListener("statechange", () => {
         if (context.state === "closed") {
           for (const candidate of soundEffectBuses) {
@@ -67,8 +69,9 @@ export function installHostSoundEffectsVolume(): void {
       });
     }
 
-    Reflect.apply(connect, this, [bus, output]);
-    return bus;
+    Reflect.apply(connect, this, [bus, ...ports]);
+    // Preserve native chaining semantics: connect(node) returns that node.
+    return destination;
   };
   AudioNode.prototype.connect = patchedConnect as unknown as ConnectFunction;
 }

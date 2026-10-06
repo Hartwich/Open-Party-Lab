@@ -726,6 +726,7 @@ export interface CardHandLayoutModel {
   isRomme?: boolean;
   /** Symboljagd löst Treffer direkt über die Bilder auf der Karte aus. */
   isSymboljagd?: boolean;
+  symboljagdPositions?: ReadonlyArray<readonly [number, number, number]>;
   symboljagdFeedback?: { playerId: string; playerName: string; symbolId: string; occurredAt: number };
   title: string;
   subtitle: string;

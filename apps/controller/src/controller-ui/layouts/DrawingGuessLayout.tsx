@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import { contrastInk } from "../common/contrastInk.js";
 import type { DrawingGuessLayoutModel } from "./models.js";
@@ -13,7 +13,6 @@ function clamp01(value: number) {
 
 export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
   const canvasRef = useRef<HTMLDivElement | null>(null);
-  const lastAspectSent = useRef<number | null>(null);
   const setCanvasAspectRef = useRef(model.onSetCanvasAspect);
   setCanvasAspectRef.current = model.onSetCanvasAspect;
   const [guess, setGuess] = useState("");
@@ -33,21 +32,27 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
     return () => window.removeEventListener("resize", updateOrientation);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !model.isDrawer || typeof ResizeObserver === "undefined") return undefined;
+    if (!canvas || !model.isDrawer || model.disabled) return undefined;
 
-    const observer = new ResizeObserver(([entry]) => {
-      const { width, height } = entry?.contentRect ?? {};
+    // Intro measurements are rejected by the server. Measure again when drawing
+    // becomes enabled, each round, and when orientation replaces the canvas node.
+    let lastAspectSent: number | null = null;
+    const reportAspect = () => {
+      const { width, height } = canvas.getBoundingClientRect();
       if (!width || !height) return;
-      const aspectRatio = width / height;
-      if (lastAspectSent.current !== null && Math.abs(lastAspectSent.current - aspectRatio) < 0.025) return;
-      lastAspectSent.current = aspectRatio;
+      const aspectRatio = Math.max(0.4, Math.min(2.5, width / height));
+      if (lastAspectSent !== null && Math.abs(lastAspectSent - aspectRatio) < 0.025) return;
+      lastAspectSent = aspectRatio;
       setCanvasAspectRef.current(aspectRatio);
-    });
+    };
+    reportAspect();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const observer = new ResizeObserver(reportAspect);
     observer.observe(canvas);
     return () => observer.disconnect();
-  }, [model.isDrawer]);
+  }, [model.isDrawer, model.disabled, model.guessResetKey, isLandscape]);
 
   function resolveCanvasPoint(event: PointerEvent<HTMLDivElement>) {
     const element = canvasRef.current;
@@ -275,7 +280,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
           </>
         )
       ) : (
-        <div style={{ gridColumn: "1 / -1", display: "flex", minHeight: 0, flexDirection: "column", justifyContent: "center", gap: 12, overflow: "hidden" }}>
+        <div style={{ gridColumn: "1 / -1", display: "flex", minHeight: 0, flexDirection: "column", justifyContent: "flex-start", paddingTop: isLandscape ? "8dvh" : "18dvh", gap: 12, overflow: "hidden" }}>
           {model.winnerName ? <div style={{ color: "var(--sage)", fontWeight: 700, lineHeight: 1.1 }}>{en ? "Winner" : "Gewinner"}: {model.winnerName}</div> : null}
           {model.ready ? <ReadyPanel ready={model.ready} /> : null}
           <div style={wordStyle}>{word}</div>
