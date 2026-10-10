@@ -95,7 +95,7 @@ Optional local game repos:
 - Pantomime can be loaded from `local-games/pantomime` when cloned locally.
 - Air Hockey can be loaded from `local-games/air-hockey` when cloned locally.
 - Buzzwort can be loaded from `local-games/buzzwort` when cloned locally. It is recommended alpha. Cards now carry real forbidden words, a turn is a timed window in which the explainer can solve several terms, and a rotating watcher from the opposing side sees the card and can buzz when a blocked word is used. Team mode gives each team the same number of turns, free-for-all gives every player exactly one explaining turn and one watching turn. The host screen uses a live turn ring, team/leaderboard panels, and an event feed; phones use the new reusable `secret_card` controller layout.
-- Imposter can be loaded from `local-games/imposter` when cloned locally.
+- Imposter can be loaded from `local-games/imposter` when cloned locally. Its standalone package declares Node.js type definitions explicitly for the server-side photo validation, so GitHub CI does not rely on ambient types from the platform checkout.
 - Light Trails can be loaded from `local-games/light-trails` when cloned locally.
 - Drift Racer can be loaded from `local-games/drift-racer` when cloned locally. It is recommended alpha; its phone controller uses a left virtual drive stick plus Boost, Fire, and Drift action buttons.
 - Word Tiles can be loaded from `local-games/word-tiles` when cloned locally. It is recommended alpha, supports multiple accepted word placements per turn, and uses table-driven word challenges instead of an internal dictionary check.
