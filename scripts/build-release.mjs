@@ -10,10 +10,17 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDir, "..");
 let outputArgument;
 let launcherArgument;
+let hotspotLauncher = false;
+let offlineHotspotLauncher = false;
 const argumentsList = process.argv.slice(2);
 for (let index = 0; index < argumentsList.length; index++) {
   const argument = argumentsList[index];
-  if (argument === "--launcher-from" && !launcherArgument && argumentsList[index + 1]) {
+  if (argument === "--offline-hotspot-launcher" && !hotspotLauncher) {
+    hotspotLauncher = true;
+    offlineHotspotLauncher = true;
+  } else if (argument === "--hotspot-launcher" && !hotspotLauncher) {
+    hotspotLauncher = true;
+  } else if (argument === "--launcher-from" && !launcherArgument && argumentsList[index + 1]) {
     launcherArgument = argumentsList[++index];
   } else if (!argument.startsWith("-") && !outputArgument) {
     outputArgument = argument;
@@ -23,6 +30,7 @@ for (let index = 0; index < argumentsList.length; index++) {
 }
 const outputRoot = path.resolve(projectRoot, outputArgument ?? "artifacts/Open-Party-Lab-windows-x64");
 const retainedLauncher = launcherArgument ? path.resolve(projectRoot, launcherArgument) : null;
+if (hotspotLauncher && retainedLauncher) throw new Error("Choose either --hotspot-launcher or --launcher-from.");
 const appRoot = path.join(outputRoot, "app");
 const knownGames = JSON.parse(await readFile(path.join(projectRoot, "config", "known-games.json"), "utf8"));
 const platformPackages = ["game-core", "protocol", "ui-kit", "utils"];
@@ -39,7 +47,7 @@ for (let directory = outputRoot; directory !== projectRoot; directory = path.dir
     throw new Error(`Refusing to replace release output through a link: ${directory}`);
   }
 }
-const launcherSource = path.join(projectRoot, "scripts", "release", "Launcher.cs");
+const launcherSource = path.join(projectRoot, "scripts", "release", hotspotLauncher ? "HotspotLauncher.cs" : "Launcher.cs");
 if (retainedLauncher) {
   const relativeLauncher = path.relative(outputRoot, retainedLauncher);
   if (!relativeLauncher.startsWith("..") && !path.isAbsolute(relativeLauncher)) {
@@ -152,6 +160,7 @@ const dependencies = {
   "@open-party-lab/utils": "file:packages/utils",
   "socket.io": JSON.parse(await readFile(path.join(projectRoot, "node_modules/socket.io/package.json"), "utf8")).version
 };
+if (hotspotLauncher) dependencies.qrcode = JSON.parse(await readFile(path.join(projectRoot, "node_modules/qrcode/package.json"), "utf8")).version;
 
 for (const game of gameSources) {
   const sourceRoot = game.sourceRoot;
@@ -195,9 +204,21 @@ if (process.platform === "win32") {
   if (retainedLauncher) {
     await cp(retainedLauncher, launcherTarget);
   } else {
-    const command = `$ErrorActionPreference = 'Stop'; Add-Type -Path '${launcherSource.replaceAll("'", "''")}' -ReferencedAssemblies System.Windows.Forms,System.Drawing -OutputAssembly '${launcherTarget.replaceAll("'", "''")}' -OutputType WindowsApplication`;
+    const sourceOption = offlineHotspotLauncher
+      ? `-TypeDefinition (\"#define OFFLINE_HOTSPOT\n\" + [IO.File]::ReadAllText('${launcherSource.replaceAll("'", "''")}'))`
+      : `-Path '${launcherSource.replaceAll("'", "''")}'`;
+    const command = `$ErrorActionPreference = 'Stop'; Add-Type ${sourceOption} -ReferencedAssemblies System.Windows.Forms,System.Drawing${hotspotLauncher ? ",System.Web.Extensions" : ""} -OutputAssembly '${launcherTarget.replaceAll("'", "''")}' -OutputType WindowsApplication`;
     run("powershell.exe", ["-NoProfile", "-Command", command]);
   }
+}
+await cp(launcherSource, path.join(outputRoot, "Launcher.cs"));
+if (offlineHotspotLauncher) {
+  await writeFile(path.join(outputRoot, "Launcher.cs"), "#define OFFLINE_HOTSPOT\n" + await readFile(launcherSource, "utf8"));
+  await cp(path.join(scriptDir, "release", "offline-hotspot.ps1"), path.join(outputRoot, "offline-hotspot.ps1"));
+}
+if (hotspotLauncher) {
+  await cp(path.join(scriptDir, "release", "hotspot.ps1"), path.join(outputRoot, "hotspot.ps1"));
+  await cp(path.join(scriptDir, "release", "wifi-qr.mjs"), path.join(outputRoot, "wifi-qr.mjs"));
 }
 
 const launcherHash = createHash("sha256");
@@ -213,7 +234,7 @@ await writeFile(path.join(outputRoot, "release.json"), JSON.stringify({
   games: knownGames.map((game) => game.id),
   platformRevision: revision(projectRoot),
   gameRevisions: Object.fromEntries(gameSources.map((game) => [game.id, revision(game.sourceRoot)])),
-  launcher: { reusedBinary: Boolean(retainedLauncher), sha256: launcherHash.digest("hex") },
+  launcher: { reusedBinary: Boolean(retainedLauncher), hotspot: hotspotLauncher, offlineHotspot: offlineHotspotLauncher, sha256: launcherHash.digest("hex") },
   localRoomLifetime: "unlimited"
 }, null, 2) + "\n");
 

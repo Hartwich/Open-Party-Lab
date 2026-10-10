@@ -10,6 +10,7 @@ import type {
 } from "@open-party-lab/protocol";
 import { applyThemeVariables, normalizeThemeName, type ThemeName } from "@open-party-lab/ui-kit";
 import { io, type Socket } from "socket.io-client";
+import { ServerClock, startServerClockSync } from "@open-party-lab/game-core";
 import {
   readStoredControllerLanguage,
   writeStoredControllerLanguage
@@ -25,6 +26,7 @@ import {
 } from "./deviceSession.js";
 
 export interface ControllerAppState {
+  getServerTime?: () => number;
   connected: boolean;
   room: RoomSnapshot | null;
   player: PlayerSnapshot | null;
@@ -80,10 +82,13 @@ function shouldUseVolatileInput(input: unknown): boolean {
 }
 
 export class ControllerSocketClient {
+  private readonly serverClock = new ServerClock();
+  private stopClockSync?: () => void;
   private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>;
   private readonly listeners = new Set<ControllerStateListener>();
   private state: ControllerAppState = {
     ...initialState,
+    getServerTime: this.serverClock.now,
     hasStoredSession: Boolean(loadStoredSession()),
     storedSession: loadStoredSession()
   };
@@ -112,7 +117,12 @@ export class ControllerSocketClient {
     }
 
     this.listenersBound = true;
+    this.socket.on("server:hello", ({ serverTime }) => this.serverClock.initialize(serverTime));
     this.socket.on("connect", () => {
+      this.stopClockSync?.();
+      this.stopClockSync = startServerClockSync(this.serverClock, (reply) => {
+        this.socket.timeout(3000).emit("server:time", {}, (error, serverTime) => { if (!error) reply(serverTime); });
+      });
       const storedSession = loadStoredSession();
       this.updateState({
         connected: true,
@@ -123,6 +133,7 @@ export class ControllerSocketClient {
     });
 
     this.socket.on("disconnect", () => {
+      this.stopClockSync?.();
       this.updateState({ connected: false });
     });
 

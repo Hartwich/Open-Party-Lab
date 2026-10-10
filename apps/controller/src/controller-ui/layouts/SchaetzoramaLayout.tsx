@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { SchaetzoramaAnswerSet, SchaetzoramaAssignQuestion, SchaetzoramaAssignmentZone, SchaetzoramaCategoryId, SchaetzoramaNumberQuestion, SchaetzoramaPublicQuestion, SchaetzoramaRankQuestion } from "@open-party-lab/protocol";
+import type { SchaetzoramaAnswerSet, SchaetzoramaAssignQuestion, SchaetzoramaAssignmentZone, SchaetzoramaCategoryId, SchaetzoramaPublicQuestion, SchaetzoramaRankQuestion } from "@open-party-lab/protocol";
 import type { SchaetzoramaLayoutModel } from "./models.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import { AssignmentControl, RankingControl } from "./SchaetzoramaDragControls.js";
@@ -72,7 +72,7 @@ function Question({ question, answer, language, disabled, onChange }: { question
 function questionControl(question: SchaetzoramaPublicQuestion, answer: SchaetzoramaAnswerSet[SchaetzoramaCategoryId], language: SchaetzoramaLayoutModel["language"], disabled: boolean, onChange: (answer: NonNullable<SchaetzoramaAnswerSet[SchaetzoramaCategoryId]>) => void) {
   const en = language === "en";
   if (question.kind === "number" || question.kind === "percent") {
-    const value = answer?.kind === "number" ? answer.value : Math.round((question.min + question.max) / 2);
+    const value = answer?.kind === "number" ? answer.value : 0;
     const progress = ((value - question.min) / Math.max(1, question.max - question.min)) * 100;
     const unit = question.unitLabel ?? (question.kind === "percent" ? "%" : "");
     return <div className="szc-number-control">
@@ -137,7 +137,7 @@ function ResultView({ model }: { model: SchaetzoramaLayoutModel }) {
 }
 function Progress({ model }: { model: SchaetzoramaLayoutModel }) { return model.progress.length ? <div className="szc-progress">{model.progress.map((player) => { const done = model.stage === "joker" ? player.jokerReady : player.answered; return <i key={player.playerId} title={player.name} className={done ? "is-done" : ""} style={{ "--player": player.color } as React.CSSProperties}/>; })}</div> : null; }
 
-function initialAnswers(model: SchaetzoramaLayoutModel): SchaetzoramaAnswerSet { if (!model.roundContent) return {}; const number = model.roundContent.questions.number as SchaetzoramaNumberQuestion; const percent = model.roundContent.questions.percent as SchaetzoramaNumberQuestion; const rank = model.roundContent.questions.rank as SchaetzoramaRankQuestion; const assign = model.roundContent.questions.assign as SchaetzoramaAssignQuestion; return { number: model.ownAnswers.number ?? { kind: "number", value: Math.round((number.min + number.max) / 2) }, percent: model.ownAnswers.percent ?? { kind: "number", value: Math.round((percent.min + percent.max) / 2) }, rank: model.ownAnswers.rank ?? { kind: "rank", order: rank.items.map((item) => item.id) }, assign: model.ownAnswers.assign ?? { kind: "assign", assignments: Object.fromEntries(assign.terms.map((term) => [term.id, "both"])) } }; }
+function initialAnswers(model: SchaetzoramaLayoutModel): SchaetzoramaAnswerSet { if (!model.roundContent) return {}; const rank = model.roundContent.questions.rank as SchaetzoramaRankQuestion; const assign = model.roundContent.questions.assign as SchaetzoramaAssignQuestion; return { number: model.ownAnswers.number ?? { kind: "number", value: 0 }, percent: model.ownAnswers.percent ?? { kind: "number", value: 0 }, rank: model.ownAnswers.rank ?? { kind: "rank", order: rank.items.map((item) => item.id) }, assign: model.ownAnswers.assign ?? { kind: "assign", assignments: Object.fromEntries(assign.terms.map((term) => [term.id, "both"])) } }; }
 function initialJoker(model: SchaetzoramaLayoutModel): JokerDraft { const joker = model.ownJokerPreview ?? model.ownJoker; return { categoryId: joker?.categoryId ?? "number", targetPlayerId: joker?.targetPlayerId ?? model.copyTargets[0]?.playerId ?? "" }; }
 function clamp(value: number, min: number, max: number) { return Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : min; }
 function glyph(category: SchaetzoramaCategoryId) { return category === "number" ? "#" : category === "percent" ? "%" : category === "rank" ? "↕" : "◉"; }

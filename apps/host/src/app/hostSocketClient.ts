@@ -9,6 +9,7 @@ import type {
   SupportedLanguage
 } from "@open-party-lab/protocol";
 import { io, type Socket } from "socket.io-client";
+import { ServerClock, startServerClockSync } from "@open-party-lab/game-core";
 import { hasActiveRound } from "@open-party-lab/protocol";
 import { readStoredHostLanguage, writeStoredHostLanguage } from "../i18n/hostText.js";
 import { hostGameRegistry } from "../games/registry.js";
@@ -59,7 +60,8 @@ export class HostSocketClient {
   private roomRequested = false;
   private listenersBound = false;
   private notifyScheduled = false;
-  private serverClockOffsetMs = 0;
+  private readonly serverClock = new ServerClock();
+  private stopClockSync?: () => void;
   /** Set when a room update switched the theme, so scenes force a redraw. */
   private themeChanged = false;
 
@@ -87,14 +89,19 @@ export class HostSocketClient {
 
     this.listenersBound = true;
     this.socket.on("server:hello", ({ serverTime }) => {
-      this.serverClockOffsetMs = serverTime - Date.now();
+      this.serverClock.initialize(serverTime);
     });
     this.socket.on("connect", () => {
+      this.stopClockSync?.();
+      this.stopClockSync = startServerClockSync(this.serverClock, (reply) => {
+        this.socket.timeout(3000).emit("server:time", {}, (error, serverTime) => { if (!error) reply(serverTime); });
+      });
       this.updateState({ connected: true, error: null });
       this.requestHostRoom();
     });
 
     this.socket.on("disconnect", () => {
+      this.stopClockSync?.();
       this.updateState({ connected: false });
     });
 
@@ -288,7 +295,7 @@ export class HostSocketClient {
   }
 
   getServerTime(): number {
-    return Date.now() + this.serverClockOffsetMs;
+    return this.serverClock.now();
   }
 
   async extendRoomLifetime(): Promise<string | null> {

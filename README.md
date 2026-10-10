@@ -10,7 +10,7 @@ The Render service is for testing, not production. It can take about a minute to
 
 ## Games
 
-The catalog includes 19 optional game projects. Twelve are currently recommended for playtesting; the rest are smaller prototypes, and Dungeon Party is an early development build. All are subject to change.
+The catalog includes 21 optional game projects. Twelve are currently recommended for playtesting; the others include social games and smaller prototypes, and Dungeon Party is an early development build. All are subject to change.
 
 | Recommended games | Style |
 | --- | --- |
@@ -27,7 +27,18 @@ The catalog includes 19 optional game projects. Twelve are currently recommended
 | Word Tiles | Shared word board |
 | Zeichnen & Erraten | Drawing and guessing |
 
-Other known games include Air Hockey, Imposter, Light Trails, Pantomime, Schattenjagd and Tap Race. Dungeon Party is in development. Optional games are separate repositories, so a fresh source checkout does not include their files until you clone them. The Windows release and hosted build assemble the known game repositories for you.
+Other known games include Air Hockey, Blickwinkel, Dungeon-Gilde, Imposter, Light Trails, Pantomime, Schattenjagd and Tap Race. Dungeon Party is in development. Optional games are separate repositories, so a fresh source checkout does not include their files until you clone them. The Windows release and hosted build assemble the known game repositories for you.
+
+Recent game updates include:
+
+- **Kartentisch:** configurable Mau-Mau house rules and hand-card highlighting; Symboljagd supports solo play with a completion time and either a whole-deck deal or an equal target of 1–300 cards per person.
+- **Blickwinkel:** photo and drawing tasks with camera/gallery controls, reliable media submission, and optional remixes of photos from an earlier completed task.
+- **Imposter:** private roles, secret phone voting, an optional curated hint, a final free-text guess, player photos and scores carried across words. Setup can skip confirmed clue rounds.
+- **Pantomime:** Solo or Teams, multiple words per timed actor turn, configurable skips, and actor-controlled score corrections before handing over. Host and phone countdowns use a shared server clock.
+- **Schaetzorama:** 147 active prompts, including 60 bilingual assignment tasks; fresh numeric answers start at zero and submitted answers survive reconnects.
+- **Zeichnen & Erraten:** expanded adult-category prompts, kept separate from the family-friendly U18 pool.
+
+See each game's README for detailed rules and [project status](docs/project-status.md) for validation limits.
 
 ### A look at the games
 
@@ -104,6 +115,8 @@ npm run release:windows     # Build, check and ZIP a complete Windows x64 releas
 ```
 
 To create a distributable Windows build, clone all known games first with `npm run games:clone-all`, then run `npm run release:windows`. Share `artifacts/Open-Party-Lab-windows-x64.zip`; the receiving PC needs no Node.js or npm. Keep the launcher window open while playing and close it to stop the server. See [portable build instructions](docs/release-build.md).
+
+Separate optional launcher builds support Windows Mobile hotspot (`--hotspot-launcher`) or experimental offline Wi-Fi Direct (`--offline-hotspot-launcher`). Both offer an editable room code, controller join QR/link and a keep-awake option. Build them into separate output directories as described in the [hotspot build instructions](docs/release-build.md#optional-windows-hotspot-test-build). Adapter support and phone connectivity still require device testing.
 
 To refresh the recommended-game collage, start the host first, then run:
 

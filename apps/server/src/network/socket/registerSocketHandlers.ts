@@ -328,11 +328,17 @@ export function registerSocketHandlers({
       recoveryEnabled: true
     });
 
+    on("server:time", (_payload, ack) => {
+      if (typeof ack === "function") ack(now());
+    });
+
     on("room:create", (payload, ack) => {
       const hostName = payload.hostName?.trim() || "Host";
       const requestedRoomCode = payload.roomCode?.trim().toUpperCase();
+      const existingRoom = requestedRoomCode ? roomManager.getRoom(requestedRoomCode) : undefined;
+      const createLocalPrimaryRoom = !hostedMode && !!requestedRoomCode && !existingRoom && roomManager.isPrimaryRoomCode(requestedRoomCode);
 
-      if (!requestedRoomCode) {
+      if (!requestedRoomCode || createLocalPrimaryRoom) {
         const capacity = roomCleanupService.prepareForRoomCreation();
 
         if (!capacity.ok) {
@@ -347,8 +353,8 @@ export function registerSocketHandlers({
         }
       }
 
-      const room = requestedRoomCode
-        ? roomManager.getRoom(requestedRoomCode)
+      const room = requestedRoomCode && !createLocalPrimaryRoom
+        ? existingRoom
         : roomManager.createRoom(hostName, normalizeLanguage(payload.language));
 
       if (!room) {

@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import QRCode from "qrcode";
 import {
   canManagePlayerRoster,
   getRoomPhase,
@@ -239,7 +240,28 @@ export function mountHostControlsOverlay(
   roomBadge.style.fontWeight = "800";
   roomBadge.style.letterSpacing = "0.14em";
   roomBadge.style.textAlign = "center";
+  roomBadge.style.display = "flex";
+  roomBadge.style.alignItems = "center";
+  roomBadge.style.justifyContent = "space-between";
+  roomBadge.style.gap = "12px";
+  roomBadge.style.gridColumn = "1 / -1";
   meta.appendChild(roomBadge);
+
+  const roomCodeLabel = document.createElement("span");
+  roomCodeLabel.style.minWidth = "0";
+  roomCodeLabel.style.overflowWrap = "anywhere";
+  roomBadge.appendChild(roomCodeLabel);
+
+  const roomQr = document.createElement("img");
+  roomQr.width = 132;
+  roomQr.height = 132;
+  applyStyles(roomQr, {
+    display: "none",
+    flexShrink: "0",
+    background: "#ffffff"
+  });
+  roomBadge.appendChild(roomQr);
+  let qrSourceUrl: string | null = null;
 
   const connectionBadge = createChromeSection("dark");
   connectionBadge.style.display = "grid";
@@ -250,6 +272,7 @@ export function mountHostControlsOverlay(
   connectionBadge.style.color = "var(--muted)";
   connectionBadge.style.textAlign = "right";
   connectionBadge.style.whiteSpace = "pre-line";
+  connectionBadge.style.gridColumn = "1 / -1";
   meta.appendChild(connectionBadge);
 
   const menuButton = createChromeTextButton("", "neutral");
@@ -601,7 +624,29 @@ export function mountHostControlsOverlay(
     const totalPlayers = room?.players.length ?? 0;
     const lifecycle = getRoomPhase(room) ?? "lobby";
 
-    roomBadge.textContent = `${text.roomCode}\n${room?.code ?? "----"}`;
+    roomCodeLabel.textContent = `${text.roomCode}\n${room?.code ?? "----"}`;
+    roomQr.alt = text.scanQr;
+    const joinUrl = room?.joinUrl ?? null;
+    if (joinUrl !== qrSourceUrl) {
+      qrSourceUrl = joinUrl;
+      roomQr.style.display = "none";
+      roomQr.removeAttribute("src");
+      if (joinUrl) {
+        void QRCode.toDataURL(joinUrl, {
+          width: 264,
+          margin: 4,
+          errorCorrectionLevel: "M",
+          color: { dark: "#000000", light: "#ffffff" }
+        }).then((dataUrl) => {
+          // Never show a previous room's QR after a room change or teardown.
+          if (destroyed || qrSourceUrl !== joinUrl) return;
+          roomQr.src = dataUrl;
+          roomQr.style.display = "block";
+        }).catch(() => {
+          if (!destroyed && qrSourceUrl === joinUrl) qrSourceUrl = null;
+        });
+      }
+    }
     roomBadge.style.whiteSpace = "pre-line";
     roomBadge.style.fontSize = "20px";
     menuButton.textContent = `${text.backToMenu} (G)`;

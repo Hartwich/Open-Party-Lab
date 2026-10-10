@@ -12,6 +12,11 @@ export type CardTableColor = "red" | "black" | "green" | "blue" | "yellow" | "ne
 
 export type CardTableBackStyle = "classic" | "diamond" | "wave" | "grid";
 
+export interface CardTableHandDisplayState {
+  /** Visual help only; the server still enforces card legality. */
+  dimUnplayable?: boolean;
+}
+
 /** Kartenbild, das Host und Handy gemeinsam verwenden. */
 export type CardTableCardStyle = "classic" | "modern" | "clear";
 
@@ -96,4 +101,9 @@ export interface CardTableLogEntryState {
   id: string;
   playerName: string | null;
   text: string;
+}
+
+export interface CardTableSymboljagdResultState {
+  /** Frozen completion time for a solo round, excluding pauses. */
+  symboljagdSoloTimeMs?: number;
 }

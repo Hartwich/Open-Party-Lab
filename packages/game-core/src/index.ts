@@ -18,3 +18,4 @@ export * from "./types/GameManifest.js";
 export * from "./types/HostGame.js";
 export * from "./types/PlayerInput.js";
 export * from "./types/ServerGame.js";
+export * from "./time/ServerClock.js";

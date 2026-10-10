@@ -7,9 +7,7 @@ const isHostRoute = window.location.pathname === "/host" || window.location.path
 if (hostedBuild && !isHostRoute) {
   mountHostedLanding();
 } else {
-  const roomCode = hostedBuild
-    ? new URLSearchParams(window.location.search).get("room")?.trim().toUpperCase() || null
-    : null;
+  const roomCode = new URLSearchParams(window.location.search).get("room")?.trim().toUpperCase() || null;
 
   if (hostedBuild && !roomCode) {
     window.location.replace("/");

@@ -18,6 +18,38 @@ If startup fails, check `open-party-lab.log`. At least one port between 3000 and
 
 ## Build from source
 
+### Optional Windows hotspot test build
+
+The separate hotspot launcher opens an English network setup dialog before starting the game. **Create Wi-Fi hotspot** is off by default. Enable it to edit the prefilled network name and generated password, then select **Start hotspot & game**. The running window displays a Wi-Fi QR code, credentials, and the device limit reported by Windows. Phones scan this QR to join Wi-Fi, then scan the separate game QR on the host screen. Wi-Fi QR recognition depends on the phone camera/scanner; manual credentials remain available.
+
+Windows must support Mobile hotspot and provide a connection profile to share. This build does not create an offline virtual network adapter. Some Windows configurations or managed PCs may refuse hotspot control; the dialog reports the error and lets you use your existing network instead. An already active hotspot is left untouched. After starting its own hotspot, the launcher waits for its virtual adapter's IPv4 address and uses that address for host/controller links. Closing the launcher normally stops its server and its own hotspot; after a forced termination, check Windows Mobile hotspot settings yourself. Network name/password changes apply to Windows' hotspot configuration. Physical phone connections and firewall access still need device testing.
+
+Build this variant into a separate directory:
+
+```powershell
+npm run release:windows -- artifacts/Open-Party-Lab-windows-x64-hotspot-test --hotspot-launcher
+```
+
+### Additional offline Wi-Fi variant (experimental)
+
+Both hotspot launcher variants include **Keep laptop awake while playing (screen stays on)**, enabled by default and independent of hotspot creation. It requests Windows to prevent automatic system sleep and display idle-off while the game is running, then restores the launcher's prior execution state on exit. No permanent power-plan changes or administrator rights are required. Closing the lid, explicitly choosing Sleep, or critical battery conditions can still suspend the laptop. This option does not disable phone Wi-Fi switching or the Wi-Fi driver's own power management.
+
+The setup dialog also prefills an editable four-character **Room code** (A-Z/0-9). The last selected code is saved in `room-code.txt` alongside the EXE when the directory is writable. **Open host** and the initial browser launch use the same room URL, preserving the room's players/game when opening another host tab. Restarting the app retains the selected code but starts a fresh in-memory game session. The local server creates its configured primary room on first host access and reuses it thereafter; hosted room lookup behavior is unchanged.
+
+The running launcher places the Wi-Fi QR on the left only when a hotspot was started, status/buttons and a clickable controller join URL in the middle, and the controller QR on the right with a wide gap between the two codes. Both the controller QR and link include the selected room code. On an existing network, only the controller QR is displayed.
+
+Compile with `--offline-hotspot-launcher` to add a mode selector to the hotspot setup dialog:
+
+```powershell
+npm run release:windows -- artifacts/Open-Party-Lab-windows-x64-offline-test --offline-hotspot-launcher
+```
+
+Choose **Offline local Wi-Fi (no internet required)** to create a standalone Wi-Fi Direct legacy access point. Keep the Wi-Fi radio enabled; a connection to an existing Wi-Fi network or the internet is not required. Phones join with the displayed Wi-Fi QR/password, then use the host's game QR. If the phone warns that the network has no internet, choose to stay connected. Games that require online services remain unavailable offline. Choose **Windows Mobile hotspot (share a connection)** for the existing sharing mode.
+
+The offline helper remains alive until the launcher closes its input pipe, including after a launcher crash, and releases its own publisher in `finally`. It does not install adapters or alter Internet Connection Sharing settings. A supported Wi-Fi Direct driver and a newly assigned private IPv4 address are required; unsupported devices show an error instead of starting an unreachable game. An active Mobile hotspot is refused; Mobile hotspot/Miracast may conflict with Wi-Fi Direct. The device limit depends on the driver and is not reported as a fixed number. Phone connectivity and operation with the upstream Wi-Fi disconnected require physical device testing. `--hotspot-launcher` still compiles the previous dialog without the offline selector. Existing release ZIPs remain unchanged.
+
+The normal launcher source and existing portable packages remain unchanged. `--hotspot-launcher` cannot be combined with `--launcher-from`. The hotspot variant also supports `--check` for server start/stop without changing Wi-Fi, and `--hotspot-check` for a read-only capability check (result in `hotspot-check.json`, errors in `open-party-lab.log`). Normal cleanup restores the Windows hotspot name/password/band saved before this session, provided its settings still match the session. The backend was checked on the development PC with hotspot IP 192.168.137.1 and an eight-device limit. Windows application control blocked the newly compiled unsigned EXE during subsequent checks; the final GUI/phone flow is therefore not confirmed. No Windows security settings were changed.
+
 On Windows x64 with Node.js and npm installed:
 
 ```powershell

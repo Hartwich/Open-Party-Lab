@@ -4,6 +4,8 @@
   highlighted?: boolean;
 }
 
+import type { CardTableHandDisplayState } from "@open-party-lab/protocol";
+
 export interface ReadyLayoutModel {
   currentPlayerReady: boolean;
   readyCount: number;
@@ -720,12 +722,13 @@ export interface MagicArenaLayoutModel {
  * und die Aktionen, die der Server für das aktuelle Regelwerk liefert. Neue
  * Kartenspiele füllen dieselbe Form und bekommen dieselbe Oberfläche.
  */
-export interface CardHandLayoutModel {
+export interface CardHandLayoutModel extends CardTableHandDisplayState {
   kind: "card_hand";
   /** Rommé wählt Karten direkt im Blatt statt über einzelne Aktionsknöpfe. */
   isRomme?: boolean;
   /** Symboljagd löst Treffer direkt über die Bilder auf der Karte aus. */
   isSymboljagd?: boolean;
+  symboljagdSoloTime?: string;
   symboljagdPositions?: ReadonlyArray<readonly [number, number, number]>;
   symboljagdFeedback?: { playerId: string; playerName: string; symbolId: string; occurredAt: number };
   title: string;
@@ -817,12 +820,30 @@ export interface DungeonPartyLayoutModel {
 
 export interface SocialPartyLayoutModel {
   kind: "social_party";
+  deadline?: number;
+  getServerTime?: () => number;
+  title?: string;
+  helperText?: string;
+  statusLabel?: string;
+  secret?: { label: string; term: string; initiallyVisible?: boolean };
+  review?: {
+    title: string; editable: boolean; unassignedLabel: string;
+    entries: Array<{ id: string; label: string; selectedId: string; note?: string }>;
+    options: Array<{ id: string; label: string }>;
+    onAssign: (entryId: string, selectedId: string) => void;
+  };
+  maxTextLength?: number;
+  score?: number;
+  actions?: Array<{ id: string; label: string; disabled?: boolean; onPress: () => void }>;
+  autoReady?: { enabled: boolean; onChange: (enabled: boolean) => void; onReady: () => void };
   language?: import("@open-party-lab/protocol").SupportedLanguage;
   stage: "avatar" | "submit" | "vote" | "finished" | "waiting";
   taskKind: "pick" | "text" | "photo" | "draw";
   resetKey: string;
   maxStrokes?: 1 | 2;
   basePhoto?: string;
+  requirePhoto?: boolean;
+  connected?: boolean;
   hasSubmitted: boolean;
   disabled?: boolean;
   selectedId?: string;

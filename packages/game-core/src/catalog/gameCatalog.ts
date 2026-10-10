@@ -25,7 +25,14 @@ export function localizeGameManifest(
   return {
     ...manifest,
     displayName: text.displayName,
-    description: text.description
+    description: text.description,
+    ...(manifest.lobbySetup && text.lobbySetup ? {
+      lobbySetup: {
+        ...manifest.lobbySetup,
+        title: text.lobbySetup.title ?? manifest.lobbySetup.title,
+        fields: manifest.lobbySetup.fields.map((field) => ({ ...field, ...text.lobbySetup?.fields?.[field.id] }))
+      }
+    } : {})
   };
 }
 

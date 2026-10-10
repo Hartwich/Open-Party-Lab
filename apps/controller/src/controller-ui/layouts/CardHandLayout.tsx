@@ -272,7 +272,7 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
                     card={card}
                     width={cardWidth}
                     selected={selected}
-                    dimmed={!card.playable && !model.disabled}
+                    dimmed={model.dimUnplayable !== false && !card.playable && !model.disabled}
                     style={model.cardStyle}
                   />
                 </button>
@@ -301,21 +301,22 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
           disabled={!selectedCard || !selectedCard.playable || model.disabled}
           onClick={() => selectedCard && playCard(selectedCard)}
           style={{
-            flex: "0 0 auto",
-            minWidth: 120,
+            flex: "1 1 120px",
+            minWidth: 0,
             minHeight: 54,
             borderRadius: 12,
             border: "1px solid var(--sage-strong)",
             background: selectedCard?.playable && !model.disabled ? "var(--sage)" : "var(--surface-muted)",
             color: selectedCard?.playable && !model.disabled ? "var(--on-accent)" : "var(--muted)",
             fontWeight: 700,
+            fontSize: wideActions ? "0.9rem" : "1rem",
             touchAction: "manipulation"
           }}
         >
           {en ? "Play" : "Legen"}
         </button>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, flex: "1 1 auto" }}>
+        <div style={{ display: "contents" }}>
           {model.actions.map((action) => {
             const colors = actionColors(action.kind);
 
@@ -331,6 +332,7 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
                 }}
                 style={{
                   flex: "1 1 120px",
+                  minWidth: 0,
                   minHeight: 54,
                   borderRadius: 12,
                   border: `1px solid ${colors.border}`,

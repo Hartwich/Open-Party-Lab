@@ -20,8 +20,15 @@ export function SymboljagdLayout({ model }: { model: CardHandLayoutModel }) {
     return (
       <div style={{ display: "grid", gap: 10, placeItems: "center", minHeight: "70dvh", padding: 18, textAlign: "center" }}>
         <strong style={{ fontFamily: "var(--font-display)", fontSize: "1.25rem" }}>
-          {model.winnerName ? `${en ? "Winner" : "Sieger"}: ${model.winnerName}` : en ? "Round over" : "Runde vorbei"}
+          {model.symboljagdSoloTime !== undefined ? (en ? "All cards completed!" : "Alle Karten abgelegt!")
+            : model.winnerName ? `${en ? "Winner" : "Gewonnen hat"}: ${model.winnerName}` : en ? "Round over" : "Runde vorbei"}
         </strong>
+        {model.symboljagdSoloTime !== undefined ? (
+          <div style={{ display: "grid", gap: 4 }}>
+            <span>{en ? "Your time" : "Deine Zeit"}</span>
+            <strong style={{ fontFamily: "var(--font-display)", fontSize: "2rem", fontVariantNumeric: "tabular-nums" }}>{model.symboljagdSoloTime}</strong>
+          </div>
+        ) : null}
         {model.ready ? <ReadyPanel ready={model.ready} /> : null}
       </div>
     );

@@ -180,6 +180,7 @@ export interface RoomLifetimeExtensionSuccess {
 }
 
 export interface ClientToServerEvents {
+  "server:time": (payload: Record<string, never>, ack: (serverTime: number) => void) => void;
   "room:create": (
     payload: CreateRoomRequest,
     ack: (result: AckResult<CreateRoomSuccess>) => void

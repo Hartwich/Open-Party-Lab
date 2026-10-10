@@ -43,6 +43,10 @@ export class RoomManager {
     });
   }
 
+  isPrimaryRoomCode(roomCode: string): boolean {
+    return roomCode.trim().toUpperCase() === this.fixedPrimaryRoomCode?.trim().toUpperCase();
+  }
+
   touch(room: RoomRecord): void {
     room.lastActivityAt = this.getNow();
   }

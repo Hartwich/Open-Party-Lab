@@ -1,0 +1,31 @@
+import assert from "node:assert/strict";
+import { ServerClock } from "../packages/game-core/dist/time/ServerClock.js";
+
+let elapsed = 0;
+const serverStart = 1_800_000_000_000;
+const host = new ServerClock(() => elapsed, serverStart + 23_000);
+const phone = new ServerClock(() => elapsed, serverStart - 17_000);
+const sample = (clock, latency) => {
+  const sentAt = elapsed;
+  elapsed += latency;
+  const serverTime = serverStart + elapsed;
+  elapsed += latency;
+  assert.equal(clock.synchronize(serverTime, sentAt), true);
+};
+sample(host, 20);
+sample(phone, 180);
+assert.equal(host.now(), phone.now(), "different device clocks and network latencies must converge");
+assert.equal(phone.now(), serverStart + elapsed);
+elapsed += 43_000;
+const deadline = serverStart + 60_000;
+assert.equal(Math.ceil((deadline - host.now()) / 1000), Math.ceil((deadline - phone.now()) / 1000));
+const before = phone.now();
+assert.equal(phone.synchronize(serverStart + elapsed + 50_000, elapsed - 5000), false);
+assert.equal(phone.now(), before, "stalled replies must not shift the countdown");
+sample(phone, 12);
+assert.equal(host.now(), phone.now(), "periodic resynchronization preserves the shared countdown");
+phone.initialize(serverStart + elapsed);
+sample(phone, 40);
+assert.equal(host.now(), phone.now(), "reconnect recalibrates the clock");
+assert.equal(phone.synchronize(NaN, elapsed), false);
+console.log("PASS: host/phone clocks with 40-second skew, latency correction, stalled replies, refresh and reconnect");
