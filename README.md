@@ -6,7 +6,7 @@ Open Party Lab is a browser-based party-game platform for a shared screen and pl
 
 The Render service is for testing, not production. It can take about a minute to wake after inactivity, and rooms are kept in memory rather than saved permanently.
 
-![Current Open Party Lab host selection with the full game catalog](docs/screenshots/host-game-selection-en.png)
+![Current Open Party Lab host game selection in English](docs/screenshots/host-game-selection-en.jpg)
 
 ## Games
 
@@ -42,15 +42,34 @@ See each game's README for detailed rules and [project status](docs/project-stat
 
 ### A look at the games
 
-These screenshots include the current host catalog and a live Buzzword round, alongside sample rounds from other games.
+The gallery below shows the current game renderers with example players and round states. These are captured interfaces, not concept art. Click an image to open it at full size. See [screenshot notes](docs/screenshots/README.md) for dates and capture scope.
 
-| Arena Survivor: Frostfire Saga | Buzzword host round | MinionsTD |
+| Blickwinkel — vote for a creative answer | Schaetzorama — compare estimates and award points |
+| --- | --- |
+| [![Blickwinkel host with four submitted answers and voting progress](docs/screenshots/blickwinkel-host.jpg)](docs/screenshots/blickwinkel-host.jpg) | [![Schaetzorama result with the correct answer, four estimates and points](docs/screenshots/schaetzorama-reveal.jpg)](docs/screenshots/schaetzorama-reveal.jpg) |
+| **Draw & Guess — draw on a phone, guess together** | **Imposter — find the bluff with secret phone votes** |
+| [![Draw and Guess host showing a rocket drawing and other players' guesses](docs/screenshots/draw-and-guess-host.jpg)](docs/screenshots/draw-and-guess-host.jpg) | [![Imposter host showing four players and secret voting progress](docs/screenshots/imposter-host.jpg)](docs/screenshots/imposter-host.jpg) |
+| **Card Table — Mau Mau on the shared table** | **Card Table — Symbol Hunt** |
+| [![Mau Mau host with four players, the draw pile and a face-up card](docs/screenshots/card-table-host.jpg)](docs/screenshots/card-table-host.jpg) | [![Symbol Hunt host with original illustrated symbols on the center card](docs/screenshots/card-table-symbol-hunt.jpg)](docs/screenshots/card-table-symbol-hunt.jpg) |
+
+**Your phone is the controller.** Card Table keeps your hand private, with touch selection and equally sized action buttons:
+
+[![Card Table phone controller with a selected card and Play, Draw and Pass actions](docs/screenshots/card-table-controller.jpg)](docs/screenshots/card-table-controller.jpg)
+
+<details>
+<summary>More game screenshots</summary>
+
+These additional images include earlier captures of other games and the refreshed Schaetzorama question view.
+
+| Arena Survivor: Frostfire Saga | Buzzword | MinionsTD |
 | --- | --- | --- |
 | ![Arena Survivor Frostfire Saga](docs/screenshots/arena-survivor-frostfire-saga.jpg) | ![Live Buzzword host round](docs/screenshots/buzzword-host-gameplay.png) | ![MinionsTD game in progress](docs/screenshots/minions-td-ingame.jpg) |
-| Magic Arena | Chaos-Kommando | Schaetzorama |
-| ![Magic Arena match](docs/screenshots/magic-arena.png) | ![Chaos-Kommando game in progress](docs/screenshots/chaos-kommando-ingame.jpg) | ![Schaetzorama estimation round](docs/screenshots/schaetzorama.png) |
-| Zeichnen & Erraten | Word Tiles | Drift Racer |
-| ![Drawing and guessing round](docs/screenshots/zeichnen-und-erraten.png) | ![Word Tiles shared board](docs/screenshots/word-tiles.png) | ![Drift Racer race](docs/screenshots/drift-racer.png) |
+| Magic Arena | Chaos-Kommando | Drift Racer |
+| ![Magic Arena match](docs/screenshots/magic-arena.png) | ![Chaos-Kommando game in progress](docs/screenshots/chaos-kommando-ingame.jpg) | ![Drift Racer race](docs/screenshots/drift-racer.png) |
+| Word Tiles | Magic Duell | Schaetzorama — four question types |
+| ![Word Tiles shared board](docs/screenshots/word-tiles.png) | ![Magic Duell spell duel](docs/screenshots/magic-duell.png) | ![Current Schaetzorama host with number, percentage, ranking and assignment tasks](docs/screenshots/schaetzorama-host.jpg) |
+
+</details>
 
 ## Getting started
 
