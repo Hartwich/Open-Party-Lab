@@ -7,12 +7,26 @@ interface DrawingGuessLayoutProps {
   model: DrawingGuessLayoutModel;
 }
 
+interface LocalStroke {
+  points: Array<{ x: number; y: number }>;
+  path: SVGPathElement;
+  ended: boolean;
+}
+
 function clamp01(value: number) {
   return Math.max(0, Math.min(1, value));
 }
 
 export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
   const canvasRef = useRef<HTMLDivElement | null>(null);
+  const previewRef = useRef<SVGGElement | null>(null);
+  const pendingStrokes = useRef(new Map<string, LocalStroke>());
+  const hiddenStrokeIds = useRef(new Set<string>());
+  const hiddenClientIds = useRef(new Set<string>());
+  const activePointer = useRef<{ pointerId: number; strokeId: string; rect: DOMRect } | null>(null);
+  const endDrawingRef = useRef(model.onDrawEnd);
+  endDrawingRef.current = model.onDrawEnd;
+  const [, refreshClearedDrawing] = useState(0);
   const setCanvasAspectRef = useRef(model.onSetCanvasAspect);
   setCanvasAspectRef.current = model.onSetCanvasAspect;
   const [guess, setGuess] = useState("");
@@ -21,6 +35,54 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
   );
   const en = model.language === "en";
   const recentGuesses = useMemo(() => model.guessFeed.slice(-4).reverse(), [model.guessFeed]);
+  const boardHeight = 1000 / Math.max(0.4, Math.min(2.5, model.canvasAspectRatio));
+
+  // React owns the authoritative SVG; this separate layer paints pointer input
+  // immediately, without a network round trip or a React render for each point.
+  useLayoutEffect(() => {
+    if (activePointer.current) endDrawingRef.current();
+    activePointer.current = null;
+    pendingStrokes.current.clear();
+    hiddenStrokeIds.current.clear();
+    hiddenClientIds.current.clear();
+    previewRef.current?.replaceChildren();
+  }, [model.guessResetKey, model.disabled, model.isDrawer, isLandscape]);
+
+  useLayoutEffect(() => {
+    const confirmedByClientId = new Map(model.strokes.map((stroke) => [stroke.clientStrokeId, stroke]));
+    for (const [id, local] of pendingStrokes.current) {
+      const confirmed = confirmedByClientId.get(id);
+      if (local.ended && confirmed && confirmed.points.length >= local.points.length
+        && local.points.every((point, index) => confirmed.points[index].x === point.x && confirmed.points[index].y === point.y)) {
+        local.path.remove();
+        pendingStrokes.current.delete(id);
+      }
+    }
+  }, [model.strokes]);
+
+  useLayoutEffect(() => {
+    for (const local of pendingStrokes.current.values()) {
+      local.path.setAttribute("d", local.points.map((point, index) =>
+        `${index === 0 ? "M" : "L"}${point.x * 1000} ${point.y * boardHeight}`
+      ).join(" ") + (local.points.length === 1 ? " l0 0" : ""));
+    }
+  }, [boardHeight]);
+
+  useEffect(() => {
+    const endStroke = () => {
+      const active = activePointer.current;
+      if (!active) return;
+      const local = pendingStrokes.current.get(active.strokeId);
+      if (local) local.ended = true;
+      activePointer.current = null;
+      endDrawingRef.current();
+    };
+    window.addEventListener("blur", endStroke);
+    return () => {
+      window.removeEventListener("blur", endStroke);
+      endStroke();
+    };
+  }, []);
 
   useEffect(() => {
     setGuess("");
@@ -57,11 +119,46 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
   function resolveCanvasPoint(event: PointerEvent<HTMLDivElement>) {
     const element = canvasRef.current;
     if (!element) return { x: 0.5, y: 0.5 };
-    const rect = element.getBoundingClientRect();
+    const rect = activePointer.current?.rect ?? element.getBoundingClientRect();
     return {
       x: clamp01((event.clientX - rect.left) / rect.width),
       y: clamp01((event.clientY - rect.top) / rect.height)
     };
+  }
+
+  function appendPoint(event: PointerEvent<HTMLDivElement>) {
+    const active = activePointer.current;
+    if (!active || active.pointerId !== event.pointerId || model.disabled) return;
+    const point = resolveCanvasPoint(event);
+    const local = pendingStrokes.current.get(active.strokeId);
+    if (!local) return;
+    const last = local.points[local.points.length - 1];
+    if (last.x === point.x && last.y === point.y) return;
+    local.points.push(point);
+    local.path.setAttribute("d", `${local.path.getAttribute("d")} L${point.x * 1000} ${point.y * boardHeight}`);
+    model.onDrawMove(point.x, point.y);
+  }
+
+  function finishStroke(event: PointerEvent<HTMLDivElement>, includeLastPoint = false) {
+    const active = activePointer.current;
+    if (!active || active.pointerId !== event.pointerId) return;
+    if (includeLastPoint) appendPoint(event);
+    const local = pendingStrokes.current.get(active.strokeId);
+    if (local) local.ended = true;
+    activePointer.current = null;
+    model.onDrawEnd();
+  }
+
+  function clearDrawing() {
+    if (model.disabled) return;
+    if (activePointer.current) model.onDrawEnd();
+    activePointer.current = null;
+    for (const stroke of model.strokes) hiddenStrokeIds.current.add(stroke.id);
+    for (const id of pendingStrokes.current.keys()) hiddenClientIds.current.add(id);
+    pendingStrokes.current.clear();
+    previewRef.current?.replaceChildren();
+    refreshClearedDrawing((version) => version + 1);
+    model.onClearDrawing();
   }
 
   const word = model.isDrawer
@@ -121,7 +218,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
   const clearButton = (
     <button
       type="button"
-      onClick={model.onClearDrawing}
+      onClick={clearDrawing}
       disabled={model.disabled}
       style={{
         width: "100%",
@@ -154,22 +251,31 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
         overflow: "hidden"
       }}
       onPointerDown={(event) => {
-        if (model.disabled) return;
+        if (model.disabled || activePointer.current || (event.pointerType === "mouse" && event.button !== 0)) return;
         const point = resolveCanvasPoint(event);
+        const strokeId = globalThis.crypto?.randomUUID?.()
+          ?? `local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", `M${point.x * 1000} ${point.y * boardHeight} l0 0`);
+        path.setAttribute("stroke", model.currentColor ?? model.availableColors?.[0] ?? "#101418");
+        path.setAttribute("stroke-width", "8");
+        path.setAttribute("stroke-linecap", "round");
+        path.setAttribute("stroke-linejoin", "round");
+        path.setAttribute("fill", "none");
+        previewRef.current?.appendChild(path);
+        pendingStrokes.current.set(strokeId, { points: [point], path, ended: false });
+        activePointer.current = { pointerId: event.pointerId, strokeId, rect: event.currentTarget.getBoundingClientRect() };
         try {
           event.currentTarget.setPointerCapture(event.pointerId);
         } catch {
           // Drawing still works on browsers where touch pointer capture is unavailable.
         }
-        model.onDrawStart(point.x, point.y);
+        model.onDrawStart(point.x, point.y, strokeId);
       }}
-      onPointerMove={(event) => {
-        if (model.disabled || event.buttons === 0) return;
-        const point = resolveCanvasPoint(event);
-        model.onDrawMove(point.x, point.y);
-      }}
-      onPointerUp={model.onDrawEnd}
-      onPointerCancel={model.onDrawEnd}
+      onPointerMove={appendPoint}
+      onPointerUp={(event) => finishStroke(event, true)}
+      onPointerCancel={(event) => finishStroke(event)}
+      onLostPointerCapture={(event) => finishStroke(event)}
     >
       <svg
         width="100%"
@@ -179,6 +285,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
         style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
       >
         {model.strokes.map((stroke) => {
+          if (hiddenStrokeIds.current.has(stroke.id) || (stroke.clientStrokeId && hiddenClientIds.current.has(stroke.clientStrokeId))) return null;
           if (stroke.points.length === 0) return null;
           const boardHeight = 1000 / Math.max(0.4, Math.min(2.5, model.canvasAspectRatio));
           if (stroke.points.length === 1) {
@@ -190,6 +297,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
             .join(" ");
           return <path key={stroke.id} d={path} stroke={stroke.color} strokeWidth={8} strokeLinecap="round" strokeLinejoin="round" fill="none" />;
         })}
+        <g ref={previewRef} />
       </svg>
     </div>
   ) : null;

@@ -106,7 +106,7 @@ function renderPlayer(player: PlayerSnapshot, options: RailOptions): string {
     <div class="opl-player${player.connected ? "" : " is-offline"}">
       <span class="opl-avatar" style="background:${escapeHtml(player.color)};color:${avatarInk(
         player.color
-      )}">${escapeHtml(initials(player.name))}</span>
+      )}">${player.avatar ? `<img src="${escapeHtml(player.avatar)}" alt="" width="30" height="30" style="border-radius:50%;object-fit:cover" />` : escapeHtml(initials(player.name))}</span>
       <span class="opl-player-name">${escapeHtml(player.name)}${subline}</span>
       ${badges.join("")}
       ${kick}

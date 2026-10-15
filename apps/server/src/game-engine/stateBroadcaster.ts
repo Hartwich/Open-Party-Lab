@@ -103,8 +103,9 @@ export class StateBroadcaster {
     // Decide who is due before building anything. Building the public states
     // walks every entity of the round; doing it for an emit the throttle is
     // about to drop was the bulk of the cost of input-triggered broadcasts.
-    const shouldEmitHostState = this.shouldEmitHostState(room.code, round.gameId, round.phase, totalStart);
-    const shouldEmitControllerState = this.shouldEmitControllerState(
+    const reliableState = this.getBroadcastPolicy(round.gameId)?.reliableState === true;
+    const shouldEmitHostState = reliableState || this.shouldEmitHostState(room.code, round.gameId, round.phase, totalStart);
+    const shouldEmitControllerState = reliableState || this.shouldEmitControllerState(
       room.code,
       round.gameId,
       round.phase,
@@ -182,7 +183,7 @@ export class StateBroadcaster {
           game: currentHostGameState
         };
         const shouldUseVolatileHostStream =
-          currentHostGameState.phase === "playing" || currentHostGameState.phase === "locked";
+          !reliableState && (currentHostGameState.phase === "playing" || currentHostGameState.phase === "locked");
 
         if (shouldUseVolatileHostStream) {
           hostEmitter.volatile.emit("game:state", hostPayload);
@@ -209,7 +210,7 @@ export class StateBroadcaster {
 
       const controllerEmitter = socket.compress(false);
       const shouldUseVolatileControllerStream =
-        controllerGameState.phase === "playing" || controllerGameState.phase === "locked";
+        !reliableState && (controllerGameState.phase === "playing" || controllerGameState.phase === "locked");
 
       if (shouldUseVolatileControllerStream) {
         controllerEmitter.volatile.emit("game:state", {

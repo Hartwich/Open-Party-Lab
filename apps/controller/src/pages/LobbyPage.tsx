@@ -3,6 +3,7 @@ import { resolveGameMaxPlayers, resolveGameMinPlayers } from "@open-party-lab/ga
 import { ControllerFrame } from "../controller-ui/layout/ControllerFrame.js";
 import { HostControlPanel } from "../controller-ui/common/HostControlPanel.js";
 import { getControllerText } from "../i18n/controllerText.js";
+import { PlayerProfileEditor } from "../controller-ui/common/PlayerProfileEditor.js";
 
 type AvailableRoomGame = RoomSnapshot["availableGames"][number];
 type PlayerSetup = NonNullable<AvailableRoomGame["playerSetup"]>;
@@ -14,6 +15,7 @@ interface LobbyPageProps {
   error: string | null;
   onLeaveRoom: () => void;
   onSetReady: (isReady: boolean) => void;
+  onSetProfile: (name: string, avatar: string | null) => Promise<string | null>;
   onSetPlayerSetup: (selectionKey: string, value: PlayerSetupValue) => void;
   onRequestHostControl: () => void;
   onReleaseHostControl: () => void;
@@ -448,6 +450,7 @@ export function LobbyPage({
   error,
   onLeaveRoom,
   onSetReady,
+  onSetProfile,
   onSetPlayerSetup,
   onRequestHostControl,
   onReleaseHostControl,
@@ -486,6 +489,7 @@ export function LobbyPage({
       footer={error ? <p style={{ color: "var(--danger)", margin: 0 }}>{error}</p> : null}
     >
       <div style={{ display: "grid", gap: 14 }}>
+        {currentPlayer && room && <PlayerProfileEditor key={currentPlayer.id} player={currentPlayer} language={room.language} onSave={onSetProfile} />}
         <button type="button" onClick={onLeaveRoom} style={secondaryButtonStyle}>
           {text.leaveRoom}
         </button>
@@ -575,7 +579,7 @@ export function LobbyPage({
               }}
             >
               <div style={{ display: "grid", gap: 4 }}>
-                <strong>{entry.name}</strong>
+                <strong>{entry.avatar && <img src={entry.avatar} alt="" width={30} height={30} style={{ borderRadius: "50%", objectFit: "cover", verticalAlign: "middle", marginRight: 8 }} />}{entry.name}</strong>
                 {hasPlayerSetup && playerSetup ? (
                   <span style={{ color: "var(--text-muted)", fontSize: "0.86rem" }}>
                     {renderPlayerSetupPlayerDetail(entry, playerSetup, text)}

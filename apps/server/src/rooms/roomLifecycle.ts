@@ -290,6 +290,7 @@ export function toRoomSnapshot(
         return {
           id: player.id,
           name: player.name,
+          avatar: player.avatar ?? null,
           color: player.color,
           selectedCharacterId: selectedChoiceId,
           selectedCharacterName: selectedChoiceId

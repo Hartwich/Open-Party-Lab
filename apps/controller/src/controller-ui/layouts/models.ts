@@ -579,6 +579,7 @@ export interface ArenaSurvivorModernShopLayoutModel extends Omit<ShopLayoutModel
 
 export interface DrawingGuessStrokeModel {
   id: string;
+  clientStrokeId?: string;
   color: string;
   points: Array<{ x: number; y: number }>;
 }
@@ -607,7 +608,7 @@ export interface DrawingGuessLayoutModel {
   strokes: DrawingGuessStrokeModel[];
   guessFeed: DrawingGuessFeedModel[];
   winnerName?: string;
-  onDrawStart: (x: number, y: number) => void;
+  onDrawStart: (x: number, y: number, clientStrokeId?: string) => void;
   onDrawMove: (x: number, y: number) => void;
   onDrawEnd: () => void;
   onClearDrawing: () => void;
@@ -826,6 +827,7 @@ export interface SocialPartyLayoutModel {
   helperText?: string;
   statusLabel?: string;
   secret?: { label: string; term: string; initiallyVisible?: boolean };
+  feedback?: { label: string; term: string };
   review?: {
     title: string; editable: boolean; unassignedLabel: string;
     entries: Array<{ id: string; label: string; selectedId: string; note?: string }>;

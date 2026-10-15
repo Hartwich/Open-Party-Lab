@@ -8,6 +8,7 @@ import type { PlayerInput } from "./PlayerInput.js";
 export interface GamePlayerSummary {
   id: string;
   name: string;
+  avatar?: string | null;
   color: string;
   score: number;
   isReady: boolean;

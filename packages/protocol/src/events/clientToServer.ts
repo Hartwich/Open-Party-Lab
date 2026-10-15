@@ -53,6 +53,13 @@ export interface PlayerSetupRequest {
   value: PlayerSetupValue;
 }
 
+export interface PlayerProfileRequest {
+  roomCode: string;
+  playerId: string;
+  name: string;
+  avatar: string | null;
+}
+
 export interface GameSelectRequest {
   roomCode: string;
   gameId: string | null;
@@ -214,6 +221,10 @@ export interface ClientToServerEvents {
     ack: (result: AckResult<RoomLifetimeExtensionSuccess>) => void
   ) => void;
   "player:ready": (payload: PlayerReadyRequest) => void;
+  "player:set-profile": (
+    payload: PlayerProfileRequest,
+    ack: (result: AckResult<ResumeSessionSuccess>) => void
+  ) => void;
   "player:select-character": (payload: PlayerSelectCharacterRequest) => void;
   "player:set-setup": (
     payload: PlayerSetupRequest,

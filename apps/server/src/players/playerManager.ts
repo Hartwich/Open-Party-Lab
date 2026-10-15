@@ -224,6 +224,7 @@ export class PlayerManager {
     return {
       id: player.id,
       name: player.name,
+      avatar: player.avatar ?? null,
       color: player.color,
       selectedCharacterId: player.selectedCharacterId,
       selectedCharacterName: null,

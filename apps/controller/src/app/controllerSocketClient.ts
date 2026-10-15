@@ -96,11 +96,17 @@ export class ControllerSocketClient {
   private notifyScheduled = false;
   private sessionTerminated = false;
   private sessionTerminationPending = false;
+  private resumePending = false;
+  private resumeRetry?: ReturnType<typeof setTimeout>;
 
   constructor(private readonly serverUrl: string) {
     this.socket = io(serverUrl, {
       autoConnect: false,
       timeout: 5_000,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 3_000,
       // WebSocket straight away instead of starting on HTTP long-polling and
       // upgrading later: polling adds a request round trip per message and
       // drops volatile packets while a request is in flight. Polling stays as
@@ -125,16 +131,24 @@ export class ControllerSocketClient {
       });
       const storedSession = loadStoredSession();
       this.updateState({
-        connected: true,
+        connected: !storedSession,
         error: null,
         hasStoredSession: Boolean(storedSession),
         storedSession
       });
+      if (storedSession && !this.sessionTerminated && !this.sessionTerminationPending) {
+        this.resumeSession();
+      }
     });
 
-    this.socket.on("disconnect", () => {
+    this.socket.on("disconnect", (reason) => {
       this.stopClockSync?.();
+      this.resumePending = false;
+      clearTimeout(this.resumeRetry);
       this.updateState({ connected: false });
+      if (reason === "io server disconnect" && !this.sessionTerminated && !this.sessionTerminationPending) {
+        this.socket.connect();
+      }
     });
 
     this.socket.on("connect_error", (error) => {
@@ -207,18 +221,21 @@ export class ControllerSocketClient {
     });
 
     this.socket.on("session:resumed", ({ room, player, reconnectToken }) => {
+      if (this.sessionTerminated || this.sessionTerminationPending) return;
       this.sessionTerminated = false;
       this.sessionTerminationPending = false;
       const storedSession = this.persistSession(room.code, player.id, player.name, reconnectToken);
       writeStoredControllerLanguage(room.language);
       applyControllerTheme(room.theme);
       this.updateState({
+        connected: true,
         room,
         player,
         preferredLanguage: room.language,
         hasStoredSession: true,
         storedSession,
-        game: null
+        game: room.currentRound?.gameId === this.state.game?.gameId &&
+          room.currentRound?.roundNumber === this.state.game?.roundNumber ? this.state.game : null
       });
     });
 
@@ -230,6 +247,13 @@ export class ControllerSocketClient {
       });
     });
 
+    const reconnectWhenVisible = () => {
+      if (document.visibilityState === "visible" && !this.socket.connected && !this.sessionTerminated) {
+        this.socket.connect();
+      }
+    };
+    window.addEventListener("online", reconnectWhenVisible);
+    document.addEventListener("visibilitychange", reconnectWhenVisible);
     this.socket.connect();
   }
 
@@ -271,6 +295,7 @@ export class ControllerSocketClient {
           result.data.reconnectToken
         );
         this.updateState({
+          connected: true,
           room: result.data.room,
           player: result.data.player,
           preferredLanguage: result.data.room.language,
@@ -285,6 +310,7 @@ export class ControllerSocketClient {
   }
 
   resumeSession(): void {
+    if (this.resumePending || this.sessionTerminationPending) return;
     const reconnectToken = loadReconnectToken();
 
     if (!reconnectToken) {
@@ -299,24 +325,37 @@ export class ControllerSocketClient {
     }
 
     if (!this.socket.connected) {
+      this.sessionTerminated = false;
       this.socket.connect();
+      return;
     }
 
     this.sessionTerminated = false;
     this.sessionTerminationPending = false;
 
-    this.socket.emit(
+    this.resumePending = true;
+    clearTimeout(this.resumeRetry);
+    const socketId = this.socket.id;
+    this.socket.timeout(8_000).emit(
       "session:resume",
       {
         reconnectToken,
         deviceId: getOrCreateDeviceId()
       },
-      (result) => {
+      (error, result) => {
+        if (this.socket.id !== socketId || this.sessionTerminated || this.sessionTerminationPending) return;
+        this.resumePending = false;
+        if (error) {
+          this.updateState({ connected: false });
+          this.resumeRetry = setTimeout(() => this.resumeSession(), 2_000);
+          return;
+        }
         if (!result.ok) {
           this.sessionTerminated = true;
           this.sessionTerminationPending = false;
           clearStoredControllerIdentity();
           this.updateState({
+            connected: this.socket.connected,
             error: result.error,
             hasStoredSession: false,
             storedSession: null,
@@ -335,6 +374,7 @@ export class ControllerSocketClient {
           result.data.reconnectToken
         );
         this.updateState({
+          connected: true,
           room: result.data.room,
           player: result.data.player,
           preferredLanguage: result.data.room.language,
@@ -389,6 +429,8 @@ export class ControllerSocketClient {
   }): void {
     this.sessionTerminated = true;
     this.sessionTerminationPending = false;
+    this.resumePending = false;
+    clearTimeout(this.resumeRetry);
 
     clearStoredControllerIdentity();
 
@@ -408,6 +450,9 @@ export class ControllerSocketClient {
 
     if (options?.disconnect !== false) {
       this.socket.disconnect();
+      // End the old room session, then keep the join screen usable. The
+      // terminated flag prevents this fresh connection restoring the room.
+      this.socket.connect();
     }
   }
 
@@ -420,6 +465,26 @@ export class ControllerSocketClient {
       roomCode: this.state.room.code,
       playerId: this.state.player.id,
       isReady
+    });
+  }
+
+  async setProfile(name: string, avatar: string | null): Promise<string | null> {
+    const { room, player } = this.state;
+    const en = this.state.preferredLanguage === "en";
+    if (!room || !player || !this.state.connected) {
+      return en ? "Waiting for reconnection." : "Warte auf die Wiederverbindung.";
+    }
+    return new Promise((resolve) => {
+      this.socket.timeout(8_000).emit("player:set-profile", { roomCode: room.code, playerId: player.id, name, avatar }, (error, result) => {
+        if (error) {
+          resolve(en ? "No response. Please try again." : "Keine Antwort. Bitte erneut versuchen.");
+          return;
+        }
+        if (!result.ok) { resolve(result.error); return; }
+        const storedSession = this.persistSession(room.code, player.id, result.data.player.name, result.data.reconnectToken);
+        this.updateState({ room: result.data.room, player: result.data.player, storedSession, error: null });
+        resolve(null);
+      });
     });
   }
 
@@ -660,7 +725,7 @@ export class ControllerSocketClient {
   }
 
   sendInput(input: unknown): void {
-    if (!this.state.room || !this.state.player) {
+    if (!this.state.connected || !this.socket.connected || !this.state.room || !this.state.player) {
       return;
     }
 

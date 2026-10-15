@@ -218,6 +218,10 @@ export function SocialPartyLayout({ model }: Props) {
     {(model.stage === "avatar" || model.stage === "submit") && model.hasSubmitted && <span className="sp-status-mark" role="status" aria-label={en ? "Submitted" : "Abgegeben"}>✓</span>}
     {model.stage === "vote" && <section className="sp-results">{model.choices.map((choice, i) => <button className="sp-choice" key={choice.id} type="button" disabled={Boolean(model.disabled || choice.disabled || model.hasSubmitted)} aria-pressed={model.selectedId === choice.id} onClick={() => model.onVote(choice.id)} style={{ animation: `sp-rise .3s ${i * 45}ms both` }}><span className="sp-choice-avatar">{choice.avatar ? <img className="sp-choice-avatar" src={choice.avatar} alt="" /> : choice.label.slice(0, 1)}</span><span>{choice.label}</span></button>)}</section>}
     {!model.title && (model.stage === "waiting" || model.stage === "finished") && <span className="sp-status-mark" role="status" aria-label={en ? "Watch the shared screen" : "Auf den Hauptbildschirm schauen"}>✓</span>}
+    {model.feedback && <section className="sp-actions sp-paper" role="status" aria-live="polite" style={{ textAlign: "center", boxSizing: "border-box", border: "2px solid #398f87" }}>
+      <span style={{ font: "700 14px system-ui, sans-serif", color: "#398f87" }}>✓ {model.feedback.label}</span>
+      <strong style={{ font: "700 clamp(25px,6vw,36px)/1.15 Georgia,serif", overflowWrap: "anywhere" }}>{model.feedback.term}</strong>
+    </section>}
     {model.review && <section className="sp-actions" aria-label={model.review.title}>
       <h2 style={{ fontSize: 22, margin: "8px 0" }}>{model.review.title}</h2>
       {model.review.entries.map((entry) => <label key={entry.id} style={{ display: "grid", gap: 8, borderBottom: "1px solid #dfd2c5", padding: "8px 0 14px", font: "600 16px system-ui, sans-serif" }}>
@@ -229,7 +233,7 @@ export function SocialPartyLayout({ model }: Props) {
         {entry.note && !entry.selectedId && <small>{entry.note}</small>}
       </label>)}
     </section>}
-    {model.actions?.length ? <section className="sp-actions">{model.actions.map((action) => <button key={action.id} type="button" style={buttonStyle} disabled={action.disabled} onClick={action.onPress}>{action.label}</button>)}</section> : null}
+    {model.actions?.length ? <section className="sp-actions">{model.actions.map((action) => <button key={action.id} type="button" style={{ ...buttonStyle, opacity: action.disabled ? 0.5 : 1 }} disabled={action.disabled} onClick={action.onPress}>{action.label}</button>)}</section> : null}
     {model.autoReady && <label className="sp-auto"><input type="checkbox" checked={model.autoReady.enabled} onChange={(event) => model.autoReady?.onChange(event.currentTarget.checked)} /><span>{en ? "Automatically ready for the next word" : "Automatisch bereit für den nächsten Begriff"}</span></label>}
     {model.ready && <div className="sp-ready"><ReadyPanel ready={model.ready} /></div>}
   </main>;

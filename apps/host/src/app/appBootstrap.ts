@@ -4,6 +4,7 @@ import { hostTheme, partyTheme } from "../ui/theme/theme.js";
 import { mountDebugOverlay } from "./debugOverlay.js";
 import { mountFullscreenOverlay } from "./fullscreenOverlay.js";
 import { mountScreenWakeLock } from "./screenWakeLock.js";
+import { mountConnectionOverlay } from "./connectionOverlay.js";
 import { mountBackgroundMusic } from "./backgroundMusic.js";
 import { installHostSoundEffectsVolume } from "./audioVolume.js";
 import { createHostRouter } from "./router.js";
@@ -118,6 +119,7 @@ export function bootstrapHostApp(requestedRoomCode: string | null = null): Phase
   }
   mountFullscreenOverlay(hostClient);
   mountScreenWakeLock();
+  mountConnectionOverlay(hostClient);
   mountBackgroundMusic(hostClient);
   exposeHostAutomationBridge(hostClient);
   hostClient.connect();

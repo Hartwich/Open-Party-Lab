@@ -3,6 +3,7 @@
 ## What the platform provides
 
 - the room: creation, join URL, QR code, room code, reconnects
+- lobby player profiles: editable names and optional compressed JPEG selfies in `GamePlayerSummary.avatar`; games can reuse these as initial character photos
 - the catalog: browsing, selecting and configuring a game
 - the round lifecycle: phases, timers, scoring storage, broadcast
 - shared libraries: `game-core`, `protocol`, `ui-kit`, `utils`
@@ -65,7 +66,7 @@ Everything here is optional; the defaults suit a simple game.
 | `controllerChrome` | Suppress phone chrome: `minimal`, `wide`, `bare`, `hideSubtitle`. |
 | `visual` | Catalog tile appearance: `accent` (`#rrggbb`), `eyebrow`, `icon`, optional `iconPath`. |
 | `audio` | Background music: an instrument `profile` plus `bpm`, `rootMidi`, `masterGain`. Use `trackBySetting` to swap tracks with a lobby setting. |
-| `broadcast` | `hostStateIntervalMs`, `controllerStateIntervalMs`, `supportsHostPatches`, `deferInputBroadcastToTick` (ticking games whose inputs only take effect in `tick`: no extra broadcast per input while playing). |
+| `broadcast` | `hostStateIntervalMs`, `controllerStateIntervalMs`, `supportsHostPatches`, `deferInputBroadcastToTick` (ticking games whose inputs only take effect in `tick`: no extra broadcast per input while playing). `reliableState: true` uses queued, non-volatile state delivery and bypasses interval throttles for games with discrete answers/stage changes, so busy transports do not lose the final confirmation. |
 
 Instrument templates currently available: `lobby`, `battle`, `chase`, `arcade`,
 `gentle`, `mystery`, `strategy`, `sports`, `frostfire`, `sugarCountry`.

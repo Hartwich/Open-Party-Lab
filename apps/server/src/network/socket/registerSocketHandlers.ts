@@ -708,6 +708,33 @@ export function registerSocketHandlers({
       maybeAutoStartReadyRound(room.code);
     });
 
+    on("player:set-profile", (payload, ack) => {
+      const room = roomManager.getRoom(payload.roomCode);
+      const en = room?.language === "en";
+      const player = room?.players.get(payload.playerId);
+      if (!room || !player || socket.data.role !== "controller" ||
+          socket.data.roomCode !== room.code || socket.data.playerId !== player.id || player.socketId !== socket.id) {
+        ack(ackError(en ? "You can only edit your own profile." : "Du kannst nur dein eigenes Profil ändern."));
+        return;
+      }
+      if (hasActiveRound(room)) {
+        ack(ackError(en ? "Edit your profile in the lobby." : "Ändere dein Profil in der Lobby."));
+        return;
+      }
+      const name = typeof payload.name === "string" ? payload.name.trim() : "";
+      const avatar = payload.avatar;
+      if (!name || name.length > 32 || (avatar !== null &&
+          (typeof avatar !== "string" || avatar.length > 35_000 || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(avatar)))) {
+        ack(ackError(en ? "Use a name of 1–32 characters and a compressed selfie." : "Verwende einen Namen mit 1–32 Zeichen und ein komprimiertes Selfie."));
+        return;
+      }
+      player.name = name;
+      player.avatar = avatar;
+      ack({ ok: true, data: { room: stateBroadcaster.createRoomSnapshot(room), player: playerManager.toSnapshot(player), reconnectToken: player.reconnectToken } });
+      stateBroadcaster.broadcastRoomState(room);
+      stateBroadcaster.broadcastScoreboard(room);
+    });
+
     on("player:select-character", (payload) => {
       const room = roomManager.getRoom(payload.roomCode);
 

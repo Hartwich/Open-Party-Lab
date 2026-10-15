@@ -12,6 +12,7 @@ import { mountControllerDebugOverlay } from "./debugOverlay.js";
 import { readPrefilledRoomCode } from "./deviceSession.js";
 import { mountControllerFullscreenOverlay } from "./fullscreenOverlay.js";
 import { ControllerSocketClient, type ControllerAppState } from "./controllerSocketClient.js";
+import { getProfileText } from "../i18n/profileText.js";
 
 function resolveDefaultServerUrl(): string {
   if (import.meta.env.PROD || window.location.port === "3000") {
@@ -71,9 +72,12 @@ export function ControllerApp() {
   }, []);
 
   const page = resolvePage(state);
+  const connectionText = getProfileText(state.room?.language ?? state.preferredLanguage);
 
   return (
     <SafeAreaLayout>
+      {state.room && (!state.connected || !state.room.hostConnected) && <div className="connection-banner" role="status" aria-live="polite">{!state.connected ? connectionText.reconnecting : connectionText.hostOffline}</div>}
+      <fieldset className="connection-content" disabled={Boolean(state.room) && !state.connected}>
       {page === "join" ? (
         <JoinPage
           defaultRoomCode={readPrefilledRoomCode()}
@@ -102,6 +106,7 @@ export function ControllerApp() {
           error={state.error}
           onLeaveRoom={() => controllerClient.leaveRoom()}
           onSetReady={(isReady) => controllerClient.setReady(isReady)}
+          onSetProfile={(name, avatar) => controllerClient.setProfile(name, avatar)}
           onSetPlayerSetup={(selectionKey, value) => controllerClient.setPlayerSetup(selectionKey, value)}
           onRequestHostControl={() => controllerClient.requestHostControl()}
           onReleaseHostControl={() => controllerClient.releaseHostControl()}
@@ -140,6 +145,7 @@ export function ControllerApp() {
       ) : null}
 
       {page === "missing" ? <NotFoundPage language={state.room?.language ?? state.preferredLanguage} /> : null}
+      </fieldset>
     </SafeAreaLayout>
   );
 }

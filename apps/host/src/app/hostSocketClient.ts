@@ -72,6 +72,10 @@ export class HostSocketClient {
     this.socket = io(serverUrl, {
       autoConnect: false,
       timeout: 5_000,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 3_000,
       // WebSocket straight away instead of starting on HTTP long-polling and
       // upgrading later: polling adds a request round trip per message and
       // drops volatile packets while a request is in flight. Polling stays as
@@ -96,13 +100,15 @@ export class HostSocketClient {
       this.stopClockSync = startServerClockSync(this.serverClock, (reply) => {
         this.socket.timeout(3000).emit("server:time", {}, (error, serverTime) => { if (!error) reply(serverTime); });
       });
-      this.updateState({ connected: true, error: null });
+      this.updateState({ connected: false, error: null });
       this.requestHostRoom();
     });
 
-    this.socket.on("disconnect", () => {
+    this.socket.on("disconnect", (reason) => {
       this.stopClockSync?.();
+      this.roomRequested = false;
       this.updateState({ connected: false });
+      if (reason === "io server disconnect") this.socket.connect();
     });
 
     this.socket.on("connect_error", (error) => {
@@ -160,6 +166,11 @@ export class HostSocketClient {
       }
     });
 
+    const reconnectWhenVisible = () => {
+      if (document.visibilityState === "visible" && !this.socket.connected) this.socket.connect();
+    };
+    window.addEventListener("online", reconnectWhenVisible);
+    document.addEventListener("visibilitychange", reconnectWhenVisible);
     this.socket.connect();
   }
 
@@ -462,12 +473,18 @@ export class HostSocketClient {
     }
 
     this.roomRequested = true;
-    this.socket.emit("room:create", {
+    const socketId = this.socket.id;
+    this.socket.timeout(8_000).emit("room:create", {
       hostName: "Host Screen",
       language: this.state.preferredLanguage,
-      roomCode: this.requestedRoomCode ?? undefined
-    }, (result) => {
+      roomCode: this.state.room?.code ?? this.requestedRoomCode ?? undefined
+    }, (error, result) => {
+      if (this.socket.id !== socketId) return;
       this.roomRequested = false;
+      if (error) {
+        if (this.socket.connected) setTimeout(() => this.requestHostRoom(), 2_000);
+        return;
+      }
 
       if (!result.ok) {
         this.updateState({ error: result.error });
@@ -476,6 +493,7 @@ export class HostSocketClient {
 
       writeStoredHostLanguage(result.data.room.language);
       this.updateState({
+        connected: true,
         room: result.data.room,
         preferredLanguage: result.data.room.language,
         error: null

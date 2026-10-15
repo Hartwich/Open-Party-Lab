@@ -27,13 +27,15 @@ export function mountScreenWakeLock(): () => void {
 
   let active = true;
   let wakeLock: WakeLockSentinelLike | null = null;
+  let requesting = false;
 
   const handleRelease = () => {
     wakeLock?.removeEventListener("release", handleRelease);
     wakeLock = null;
 
     if (active && document.visibilityState === "visible") {
-      void requestWakeLock();
+      // OS releases can be policy-driven; retry without a tight release loop.
+      window.setTimeout(() => { void requestWakeLock(); }, 1_000);
     }
   };
 
@@ -49,14 +51,15 @@ export function mountScreenWakeLock(): () => void {
   };
 
   const requestWakeLock = async () => {
-    if (!active || document.visibilityState !== "visible" || wakeLock) {
+    if (!active || document.visibilityState !== "visible" || wakeLock || requesting) {
       return;
     }
 
+    requesting = true;
     try {
       const nextWakeLock = await nav.wakeLock.request("screen");
 
-      if (!active) {
+      if (!active || document.visibilityState !== "visible") {
         void nextWakeLock.release().catch(() => undefined);
         return;
       }
@@ -65,6 +68,8 @@ export function mountScreenWakeLock(): () => void {
       wakeLock.addEventListener("release", handleRelease);
     } catch {
       wakeLock = null;
+    } finally {
+      requesting = false;
     }
   };
 
@@ -85,6 +90,9 @@ export function mountScreenWakeLock(): () => void {
   window.addEventListener("pointerdown", handleInteraction, { passive: true });
   window.addEventListener("touchstart", handleInteraction, { passive: true });
   window.addEventListener("keydown", handleInteraction);
+  window.addEventListener("focus", handleInteraction);
+  window.addEventListener("pageshow", handleInteraction);
+  const retryInterval = window.setInterval(handleInteraction, 30_000);
 
   return () => {
     active = false;
@@ -92,6 +100,9 @@ export function mountScreenWakeLock(): () => void {
     window.removeEventListener("pointerdown", handleInteraction);
     window.removeEventListener("touchstart", handleInteraction);
     window.removeEventListener("keydown", handleInteraction);
+    window.removeEventListener("focus", handleInteraction);
+    window.removeEventListener("pageshow", handleInteraction);
+    window.clearInterval(retryInterval);
     releaseWakeLock();
   };
 }

@@ -133,6 +133,8 @@ export interface GameVisualDefinition {
  * controllers. Both are now numbers a game declares.
  */
 export interface GameBroadcastPolicy {
+  /** Deliver discrete state changes reliably; do not throttle or drop their confirmations. */
+  reliableState?: boolean;
   /** Minimum gap between host state emits while playing. */
   hostStateIntervalMs?: number;
   /** Minimum gap between controller state emits while playing. */

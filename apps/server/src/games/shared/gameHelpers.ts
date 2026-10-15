@@ -7,6 +7,7 @@ export function roomPlayersToSummaries(room: RoomRecord, gameId: string): GamePl
     .map((player) => ({
       id: player.id,
       name: player.name,
+      avatar: player.avatar ?? null,
       color: player.color,
       score: player.score,
       isReady: player.isReady,

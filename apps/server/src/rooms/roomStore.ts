@@ -9,6 +9,7 @@ export interface PlayerRecord {
   id: string;
   deviceId: string;
   name: string;
+  avatar?: string | null;
   color: string;
   selectedCharacterId: string | null;
   setupSelectionsByGameId: Record<string, Record<string, PlayerSetupValue>>;

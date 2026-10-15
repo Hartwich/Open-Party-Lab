@@ -5,6 +5,7 @@ export type PlayerSetupValue = string | string[];
 export interface PlayerSnapshot {
   id: string;
   name: string;
+  avatar?: string | null;
   color: string;
   selectedCharacterId: string | null;
   selectedCharacterName: string | null;
