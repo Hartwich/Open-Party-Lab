@@ -6,6 +6,9 @@ The English project website lives in `website/` and builds with `npm run
 site:build` into the ignored `dist/site` directory. A dedicated GitHub Pages
 workflow publishes the static landing page, reusing tracked game screenshots.
 It links to the test server and releases; it does not host the multiplayer server.
+The gallery includes all 17 games with available gameplay screenshots, plus
+Card Table's Symbol Hunt mode. Historical captures are labelled; four additional
+game-repository images are tracked here so Pages needs no optional checkouts.
 Verification on 2026-10-16: site build, full platform typecheck and build passed
 (existing large-bundle warnings). In-app browser checks covered desktop and
 390×844 layouts, gallery navigation and screenshot preview opening/closing.

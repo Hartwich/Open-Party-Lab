@@ -34,3 +34,24 @@ The old `schaetzorama.png` and `zeichnen-und-erraten.png` show earlier host
 implementations and are no longer used by the main README. The older PNG catalog
 capture is also superseded there. The additional game gallery retains historical
 captures rather than presenting them as newly verified interfaces.
+
+## Project website gallery
+
+The website also reuses the existing Arena Survivor, Buzzwort, Chaos-Kommando,
+Drift Racer, Magic Arena, Magic Duell, MinionsTD and Word Tiles screenshots above.
+Four additional historical captures were copied unchanged from their game
+repositories on 2026-10-16 so the site can build without optional checkouts:
+
+| Platform file | Source in game repository |
+| --- | --- |
+| `air-hockey-host.png` | `air-hockey/docs/screenshots/host.png` |
+| `light-trails-host.png` | `light-trails/docs/screenshots/host.png` |
+| `pantomime-host.png` | `pantomime/docs/screenshots/host.png` |
+| `tap-race-host.png` | `tap-race/docs/images/tap-race-ingame.png` |
+
+Their original capture dates are not established. These previews show earlier
+implementations, not newly verified gameplay. In particular, Pantomime's old host
+shows the prompt; current gameplay keeps prompts private on the actor's phone.
+Duplicate captures, alternate Arena Survivor themes and controller-only images
+are not separate games in the website gallery. Concept art is not used as a
+gameplay screenshot.

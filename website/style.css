@@ -269,6 +269,8 @@ h3 {
   display:block;
   width:100%;
   height:auto;
+  aspect-ratio:16 / 9;
+  object-fit:contain;
   transition:transform .45s
 }
 .screenshot span {
