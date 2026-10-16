@@ -203,7 +203,7 @@ const StickPad = memo(function StickPad({ label, accentColor, disabled, resetKey
           color: "var(--ink)",
           fontWeight: 900,
           letterSpacing: "0.08em",
-          fontSize: "0.72rem"
+          fontSize: "0.75rem"
         }}
       >
         {label}
@@ -373,7 +373,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
   const stickSize = isPortrait ? "min(30vw, 25vh, 180px)" : "min(30vw, 50vh, 280px)";
   const fireSize = isPortrait ? "min(23vw, 18vh, 130px)" : "min(19vw, 29vh, 164px)";
   const jumpSize = isPortrait ? "min(18vw, 12vh, 86px)" : "min(13vw, 20vh, 102px)";
-  const weaponColumns = isPortrait ? "repeat(4, minmax(0, 1fr))" : "repeat(5, minmax(0, 1fr))";
+  const weaponColumns = isPortrait ? "repeat(3, minmax(0, 1fr))" : "repeat(5, minmax(0, 1fr))";
 
   return (
     <div style={{ display: "grid", gap: layoutGap, width: "100%" }}>
@@ -577,7 +577,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                   : "linear-gradient(180deg, color-mix(in srgb, var(--accent) 94%, transparent) 0%, color-mix(in srgb, var(--accent-strong) 94%, transparent) 100%)",
                 color: "var(--ink-soft)",
                 fontWeight: 800,
-                fontSize: "clamp(0.7rem, 2vw, 0.76rem)",
+                fontSize: "clamp(0.75rem, 2vw, 0.8rem)",
                 letterSpacing: "0.06em"
               }}
             >
@@ -599,7 +599,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
         </div>
       )}
       {hudMode === "steuerung" && selectedWeapon ? <div style={weaponInfoStyle}><strong>{selectedWeapon.label}</strong><span>{model.fireHint}</span></div> : null}
-      {model.fuseSeconds !== undefined && model.onSetFuse ? <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+      {model.fuseSeconds !== undefined && model.onSetFuse ? <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
         <span>{en ? "Fuse" : "Zuender"}</span>
         {[1, 2, 3, 4, 5].map((seconds) => <button key={seconds} type="button" disabled={model.fireDisabled ?? model.disabled} onClick={() => model.onSetFuse?.(seconds)} style={toggleStyle(seconds === model.fuseSeconds, model.accentColor)}>{seconds}s</button>)}
       </div> : null}
@@ -613,6 +613,7 @@ function modeToggleStyle(active: boolean, color: string | undefined) {
 
   return {
     borderRadius: 999,
+    minHeight: 44,
     padding: "clamp(10px, 2.8vw, 12px) clamp(14px, 4vw, 16px)",
     border: `1px solid ${active ? resolvedColor : "transparent"}`,
     background: active ? `${resolvedColor}26` : "transparent",
@@ -628,12 +629,14 @@ function toggleStyle(active: boolean, color: string | undefined) {
 
   return {
     borderRadius: 999,
+    minHeight: 44,
+    minWidth: 44,
     padding: "clamp(9px, 2.4vw, 10px) clamp(12px, 3.6vw, 16px)",
     border: `1px solid ${active ? resolvedColor : "color-mix(in srgb, var(--muted) 18%, transparent)"}`,
     background: active ? `${resolvedColor}22` : "color-mix(in srgb, var(--surface) 60%, transparent)",
     color: "var(--ink)",
     fontWeight: 800,
-    fontSize: "clamp(0.74rem, 2.1vw, 0.82rem)",
+    fontSize: "clamp(0.75rem, 2.1vw, 0.82rem)",
     letterSpacing: "0.06em"
   } as const;
 }
@@ -671,7 +674,7 @@ function ammoBadgeStyle(color: string) {
     border: `1px solid ${color}4d`,
     color: "var(--ink)",
     fontWeight: 800,
-    fontSize: "clamp(0.62rem, 1.8vw, 0.68rem)",
+    fontSize: "clamp(0.75rem, 1.8vw, 0.8rem)",
     lineHeight: 1
   } as const;
 }

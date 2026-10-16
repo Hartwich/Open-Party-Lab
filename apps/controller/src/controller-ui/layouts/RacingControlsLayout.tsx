@@ -258,7 +258,7 @@ function RacingStick({ disabled, accentColor, steering, throttle, brake, onDrive
             placeItems: "center",
             color: "var(--ink)",
             fontWeight: 950,
-            fontSize: "clamp(0.68rem, 2.2vw, 0.9rem)",
+            fontSize: "clamp(0.75rem, 2.2vw, 0.9rem)",
             letterSpacing: "0.06em",
             transition: pointerIdRef.current === null ? "transform 100ms ease-out, box-shadow 140ms ease-out" : "none"
           }}
@@ -270,7 +270,7 @@ function RacingStick({ disabled, accentColor, steering, throttle, brake, onDrive
         style={{
           minHeight: 18,
           color: "color-mix(in srgb, var(--ink-soft) 74%, transparent)",
-          fontSize: "clamp(0.72rem, 2.5vw, 0.92rem)",
+          fontSize: "clamp(0.75rem, 2.5vw, 0.92rem)",
           fontWeight: 800,
           letterSpacing: "0.06em"
         }}
@@ -347,7 +347,7 @@ function TriangleButton({
             : `linear-gradient(180deg, ${color} 0%, ${color} 100%)`,
         color: "var(--ink)",
         fontWeight: 950,
-        fontSize: "clamp(0.72rem, 2.6vw, 1.02rem)",
+        fontSize: "clamp(0.75rem, 2.6vw, 1.02rem)",
         letterSpacing: "0.04em",
         textShadow: "0 2px 8px color-mix(in srgb, var(--paper) 48%, transparent)",
         boxShadow: active ? `0 0 26px ${color}` : "0 18px 34px color-mix(in srgb, var(--paper) 24%, transparent)",
@@ -499,13 +499,14 @@ export function RacingControlsLayout({ model }: RacingControlsLayoutProps) {
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "minmax(156px, 1fr) minmax(156px, 1fr)",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(150px, 100%), 1fr))",
         alignItems: "center",
         justifyItems: "center",
         gap: 14,
         height: "min(80dvh, 430px)",
         minHeight: 240,
         width: "100%",
+        maxWidth: "100%",
         touchAction: "none"
       }}
     >

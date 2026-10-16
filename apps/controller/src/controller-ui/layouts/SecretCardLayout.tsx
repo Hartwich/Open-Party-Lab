@@ -171,7 +171,7 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <span
               style={{
-                fontSize: "0.72rem",
+                fontSize: "0.75rem",
                 fontWeight: 700,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
@@ -238,7 +238,7 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
           {model.card.tag ? (
             <span
               style={{
-                fontSize: "0.66rem",
+                fontSize: "0.75rem",
                 fontWeight: 700,
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
