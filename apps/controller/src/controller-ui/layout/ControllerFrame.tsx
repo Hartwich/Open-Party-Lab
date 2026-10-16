@@ -130,7 +130,7 @@ export function ControllerFrame({ title, subtitle, footer, wide = false, bare = 
           {subtitle ? <p style={{ margin: "6px 0 0", color: night ? "#c9d3bd" : "#4a5a4a" }}>{subtitle}</p> : null}
         </header>
       ) : null}
-      <section style={{ minWidth: 0 }}>{children}</section>
+      <section style={{ minWidth: 0, overflowWrap: "anywhere" }}>{children}</section>
       {footer ? <footer style={{ minWidth: 0 }}>{footer}</footer> : null}
       <footer style={{ textAlign: "center", color: night ? "#c9d3bd" : "#7a6f4d", fontSize: 11, lineHeight: 1.5 }}>
         {LDC_CLUB.footerCredit} ·{" "}
