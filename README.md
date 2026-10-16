@@ -65,11 +65,11 @@ These additional images include earlier captures of other games and the refreshe
 
 | Arena Survivor: Frostfire Saga | Buzzword | MinionsTD |
 | --- | --- | --- |
-| ![Arena Survivor Frostfire Saga](docs/screenshots/arena-survivor-frostfire-saga.jpg) | ![Live Buzzword host round](docs/screenshots/buzzword-host-gameplay.png) | ![MinionsTD game in progress](docs/screenshots/minions-td-ingame.jpg) |
+| ![Arena Survivor Frostfire Saga](docs/screenshots/arena-survivor-frostfire-saga.jpg) | ![Live Buzzword host round](docs/screenshots/buzzword-host-gameplay.png) | ![MinionsTD game in progress](docs/screenshots/minions-td-host.png) |
 | Magic Arena | Chaos-Kommando | Drift Racer |
 | ![Magic Arena match](docs/screenshots/magic-arena.png) | ![Chaos-Kommando game in progress](docs/screenshots/chaos-kommando-ingame.jpg) | ![Drift Racer race](docs/screenshots/drift-racer.png) |
 | Word Tiles | Magic Duell | Schaetzorama — four question types |
-| ![Word Tiles shared board](docs/screenshots/word-tiles.png) | ![Magic Duell spell duel](docs/screenshots/magic-duell.png) | ![Current Schaetzorama host with number, percentage, ranking and assignment tasks](docs/screenshots/schaetzorama-host.jpg) |
+| ![Word Tiles shared board](docs/screenshots/word-tiles-host.png) | ![Magic Duell spell duel](docs/screenshots/magic-duell.png) | ![Current Schaetzorama host with number, percentage, ranking and assignment tasks](docs/screenshots/schaetzorama-host.jpg) |
 
 </details>
 

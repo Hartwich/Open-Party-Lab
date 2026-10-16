@@ -16,6 +16,9 @@ display the gallery without any optional `local-games/` repositories installed.
 | `card-table-host.jpg` | 2026-10-14 | Current Mau Mau host renderer; copied from the Card Table repository |
 | `card-table-symbol-hunt.jpg` | 2026-10-14 | Current Symbol Hunt host renderer with the game's original illustrations; copied from Card Table |
 | `card-table-controller.jpg` | 2026-10-14 | Actual `CardHandLayout` phone controller, selected legal card; copied from Card Table |
+| `pantomime-host-current.png` | 2026-10-16 | Current Pantomime host, acting stage with solved words and standings; current secret term stays private |
+| `word-tiles-host.png` | 2026-10-16 | Current Word Tiles host, sample English board with intersecting words, last move and standings |
+| `minions-td-host.png` | 2026-10-16 | Current MinionsTD host, four active boards with towers, enemies and projectiles |
 
 The new host images use the Codex in-app browser at 1280 × 720. The existing Card
 Table phone image is 844 × 390; its host images are 1280 × 720.
@@ -38,20 +41,26 @@ captures rather than presenting them as newly verified interfaces.
 ## Project website gallery
 
 The website also reuses the existing Arena Survivor, Buzzwort, Chaos-Kommando,
-Drift Racer, Magic Arena, Magic Duell, MinionsTD and Word Tiles screenshots above.
-Four additional historical captures were copied unchanged from their game
-repositories on 2026-10-16 so the site can build without optional checkouts:
+Drift Racer, Magic Arena and Magic Duell screenshots. Pantomime, Word Tiles and
+MinionsTD were refreshed on 2026-10-16 using their actual current host scenes in
+the Codex in-app browser at 1280 × 720. The Word Tiles board and Pantomime round
+use illustrative states with fictional players. MinionsTD uses a server-created
+round advanced through build/send inputs and ticks. These are renderer previews,
+not physical-phone or end-to-end multiplayer checks.
+
+The old `word-tiles.png` and `minions-td-ingame.jpg` are superseded in both the
+website and main README. The earlier Pantomime capture was replaced in place.
+Air Hockey, Light Trails and Tap Race were removed from the website gallery at
+the maintainer's request. Their historical source images remain in this folder:
 
 | Platform file | Source in game repository |
 | --- | --- |
 | `air-hockey-host.png` | `air-hockey/docs/screenshots/host.png` |
 | `light-trails-host.png` | `light-trails/docs/screenshots/host.png` |
-| `pantomime-host.png` | `pantomime/docs/screenshots/host.png` |
 | `tap-race-host.png` | `tap-race/docs/images/tap-race-ingame.png` |
 
 Their original capture dates are not established. These previews show earlier
-implementations, not newly verified gameplay. In particular, Pantomime's old host
-shows the prompt; current gameplay keeps prompts private on the actor's phone.
+implementations, not newly verified gameplay.
 Duplicate captures, alternate Arena Survivor themes and controller-only images
 are not separate games in the website gallery. Concept art is not used as a
 gameplay screenshot.
