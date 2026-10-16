@@ -16,7 +16,7 @@ function themeRootBlock(): string {
 
 const landingText = {
   de: {
-    title: "Open Party Lab – Raum starten",
+    title: "LDC Club Party – Raum starten",
     kicker: "DEIN BILDSCHIRM. EURE HANDYS. EIN RAUM.",
     heading: "Die Party beginnt",
     headingAccent: "mit deinem Raum.",
@@ -38,7 +38,7 @@ const landingText = {
     switchLanguage: "Switch to English"
   },
   en: {
-    title: "Open Party Lab – Start a room",
+    title: "LDC Club Party – Start a room",
     kicker: "YOUR SCREEN. YOUR PHONES. ONE ROOM.",
     heading: "The party starts",
     headingAccent: "with your room.",
@@ -77,7 +77,7 @@ export function mountHostedLanding(): void {
   app.innerHTML = `
     <main class="hosted-landing">
       <section class="hosted-hero" aria-labelledby="landing-title">
-        <div class="hosted-topbar"><div class="hosted-brand"><span aria-hidden="true">OPL</span> Open Party Lab</div><button class="hosted-language" type="button">DE / EN</button></div>
+        <div class="hosted-topbar"><div class="hosted-brand"><img src="./ldc-logo.jpg" alt="LDC Club logo" /> LDC Club Party</div><button class="hosted-language" type="button">DE / EN</button></div>
         <p class="hosted-kicker" data-text="kicker">DEIN BILDSCHIRM. EURE HANDYS. EIN RAUM.</p>
         <h1 id="landing-title"><span data-text="heading">Die Party beginnt</span><br><em data-text="headingAccent">mit deinem Raum.</em></h1>
         <p class="hosted-intro" data-text="intro">Erstelle einen neuen Spielraum auf diesem Bildschirm oder tritt mit deinem Handy einem bestehenden Raum bei.</p>
@@ -97,6 +97,7 @@ export function mountHostedLanding(): void {
           </form>
         </div>
         <p id="hosted-status" class="hosted-status" role="status" data-text="ready">Bereit.</p>
+        <p class="hosted-ldc-footer"><a href="https://www.instagram.com/ldc.club/" target="_blank" rel="noreferrer">@ldc.club on Instagram</a><span>Made by LDC — best member Israa Chiheb</span></p>
       </section>
       <aside class="hosted-art" aria-hidden="true">
         <div class="hosted-orbit orbit-one"></div><div class="hosted-orbit orbit-two"></div>
@@ -114,7 +115,10 @@ export function mountHostedLanding(): void {
     .hosted-hero{position:relative;z-index:2;max-width:760px}
     .hosted-topbar{display:flex;align-items:center;justify-content:space-between;gap:20px}
     .hosted-brand{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.02em}
-    .hosted-brand span{display:grid;place-items:center;width:42px;height:42px;border:1px solid var(--accent);border-radius:var(--radius-md);color:var(--accent);font-size:12px;letter-spacing:.08em}
+    .hosted-brand img{width:42px;height:42px;border-radius:12px;object-fit:cover;border:1px solid var(--line)}
+    .hosted-ldc-footer{margin:22px 0 0;display:grid;gap:4px;font-size:13px;color:var(--muted)}
+    .hosted-ldc-footer a{color:var(--accent);font-weight:800;text-decoration:none}
+    .hosted-ldc-footer a:hover{text-decoration:underline}
     .hosted-language{padding:9px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.08em;cursor:pointer}
     .hosted-language:hover{border-color:var(--accent);color:var(--accent)}
     .hosted-kicker{margin:clamp(30px,5vh,56px) 0 16px;color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.22em}

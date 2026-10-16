@@ -465,7 +465,7 @@ export function LobbyPage({
   const currentPlayer = room?.players.find((entry) => entry.id === player?.id) ?? player;
   const selectedGame =
     room?.availableGames.find((game) => game.id === room.selectedGameId);
-  const selectedGameName = selectedGame?.displayName ?? "Noch kein Spiel";
+  const selectedGameName = selectedGame?.displayName ?? "No game yet";
   const playerCount = room?.players.length ?? 0;
   const readyCount = (room?.players ?? []).filter((entry) => entry.isReady).length;
   const minimumPlayers = selectedGame
