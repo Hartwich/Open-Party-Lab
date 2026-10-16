@@ -157,8 +157,8 @@ export function mountHostedLanding(): void {
   style.textContent = `
     :root{${themeRootBlock()};font-family:var(--font-body);color:var(--ink);background:#07100c}
     .hosted-landing-page,.hosted-landing-page #app{overflow:auto;min-height:100%;height:auto;background:#07100c}
-    .hosted-landing{box-sizing:border-box;position:relative;min-height:100vh;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr);align-items:center;gap:clamp(30px,5vw,76px);padding:clamp(28px,5vw,68px);overflow:hidden;color:#fbf1d6;background:radial-gradient(ellipse 70% 45% at 78% 70%,rgba(255,160,70,.6),transparent 70%),linear-gradient(180deg,#052b38 0%,#0a5350 24%,#37966f 42%,#e9bb5c 58%,#ff9650 68%,#2a1a10 100%)}
-    .hosted-scene{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+    .hosted-landing{box-sizing:border-box;position:relative;min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr);align-items:center;gap:clamp(30px,5vw,76px);padding:clamp(28px,5vw,68px);overflow:visible;color:#fbf1d6;background:radial-gradient(ellipse 70% 45% at 78% 70%,rgba(255,160,70,.6),transparent 70%),linear-gradient(180deg,#052b38 0%,#0a5350 24%,#37966f 42%,#e9bb5c 58%,#ff9650 68%,#2a1a10 100%)}
+    .hosted-scene{position:fixed;inset:0;overflow:hidden;pointer-events:none}
     .hosted-rays{position:absolute;right:20%;bottom:30%;width:150vmax;height:150vmax;transform-origin:100% 100%;background:repeating-conic-gradient(from 270deg at 100% 100%,rgba(255,214,120,.22) 0 3deg,transparent 3deg 9deg);-webkit-mask:radial-gradient(circle at 100% 100%,#000,transparent 60%);mask:radial-gradient(circle at 100% 100%,#000,transparent 60%);animation:hosted-sway 9s ease-in-out infinite alternate;mix-blend-mode:screen}
     @keyframes hosted-sway{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
     .hosted-sun{position:absolute;right:calc(20% - 17vmin);bottom:calc(30% - 17vmin);width:34vmin;height:34vmin;border-radius:50%;background:radial-gradient(circle,#fff6c8 0%,#ffd36a 30%,#ff9a45 58%,rgba(255,130,60,0) 72%)}
