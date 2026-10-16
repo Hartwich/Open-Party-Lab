@@ -41,6 +41,22 @@ function toIdentifier(gameId) {
   return gameId.replace(/-([a-z0-9])/g, (_match, char) => char.toUpperCase()).replace(/[^a-zA-Z0-9_$]/g, "");
 }
 
+/**
+ * Comma-separated game ids to exclude from syncing.
+ *
+ * Used when an upstream game repo drifted ahead of this platform snapshot
+ * and no longer builds against it (e.g. `OPEN_PARTY_LAB_SKIP_GAMES=blickwinkel`).
+ * Skipped games behave as if they were never cloned: unlinked and unlisted.
+ */
+function readSkippedGameIds() {
+  return new Set(
+    String(process.env.OPEN_PARTY_LAB_SKIP_GAMES ?? "")
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+  );
+}
+
 async function readKnownGames() {
   const content = await readFile(knownGamesPath, "utf8");
   return JSON.parse(content);
@@ -327,10 +343,18 @@ async function listGames() {
 
 async function syncLocalGames() {
   const knownGames = await readKnownGames();
+  const skippedGameIds = readSkippedGameIds();
   const linkedGames = [];
   const failedGameIds = [];
 
   for (const game of knownGames) {
+    if (skippedGameIds.has(game.id)) {
+      await removePackageLink(game);
+      await removePublicAssets(game);
+      console.log(`[games] ${game.id}: skipped via OPEN_PARTY_LAB_SKIP_GAMES.`);
+      continue;
+    }
+
     const localPath = resolveLocalPath(game);
 
     if (!existsSync(localPath)) {

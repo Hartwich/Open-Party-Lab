@@ -58,8 +58,19 @@ async function downloadGithubArchive(game, target) {
 }
 
 let availableGames = 0;
+const skippedGameIds = new Set(
+  String(process.env.OPEN_PARTY_LAB_SKIP_GAMES ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+);
 
 for (const game of games) {
+  if (skippedGameIds.has(game.id)) {
+    console.log(`Skipping ${game.id}: listed in OPEN_PARTY_LAB_SKIP_GAMES.`);
+    continue;
+  }
+
   if (typeof game.repo !== "string" || !game.repo.trim()) {
     console.log(`Skipping ${game.id}: no remote repository configured.`);
     continue;
