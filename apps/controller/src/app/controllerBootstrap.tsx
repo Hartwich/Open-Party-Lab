@@ -3,6 +3,7 @@ import { hasHostControl } from "@open-party-lab/protocol";
 import { ControllerPage } from "../pages/ControllerPage.js";
 import { HostGameMenu } from "../controller-ui/common/HostGameMenu.js";
 import { JoinPage } from "../pages/JoinPage.js";
+import { LoadingScreen } from "../pages/LoadingScreen.js";
 import { LobbyPage } from "../pages/LobbyPage.js";
 import { NotFoundPage } from "../pages/NotFoundPage.js";
 import { ReconnectPage } from "../pages/ReconnectPage.js";
@@ -49,6 +50,7 @@ function resolvePage(state: ControllerAppState): "join" | "reconnect" | "lobby" 
 
 export function ControllerApp() {
   const [state, setState] = useState(controllerClient.getState());
+  const [booted, setBooted] = useState(false);
 
   useWakeHint(Boolean(state.room));
 
@@ -71,6 +73,15 @@ export function ControllerApp() {
   }, []);
 
   const page = resolvePage(state);
+  const showBootLoader = !booted && (page === "join" || page === "reconnect");
+
+  if (showBootLoader) {
+    return (
+      <SafeAreaLayout>
+        <LoadingScreen ready={state.connected} onDone={() => setBooted(true)} />
+      </SafeAreaLayout>
+    );
+  }
 
   return (
     <SafeAreaLayout>

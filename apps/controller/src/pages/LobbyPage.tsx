@@ -1,6 +1,7 @@
 import type { PlayerSetupValue, PlayerSnapshot, RoomSnapshot } from "@open-party-lab/protocol";
 import { resolveGameMaxPlayers, resolveGameMinPlayers } from "@open-party-lab/game-core";
 import { ControllerFrame } from "../controller-ui/layout/ControllerFrame.js";
+import { HunterScene } from "./HunterScene.js";
 import { HostControlPanel } from "../controller-ui/common/HostControlPanel.js";
 import { getControllerText } from "../i18n/controllerText.js";
 
@@ -480,124 +481,106 @@ export function LobbyPage({
     : text.chooseCharacterFirst;
 
   return (
-    <ControllerFrame
-      title={`Lobby ${room?.code ?? "----"}`}
-      subtitle={room?.selectedGameId ? text.lobbySelected(selectedGameName) : text.lobbyWaitingHost}
-      footer={error ? <p style={{ color: "var(--danger)", margin: 0 }}>{error}</p> : null}
-    >
-      <div style={{ display: "grid", gap: 14 }}>
-        <button type="button" onClick={onLeaveRoom} style={secondaryButtonStyle}>
-          {text.leaveRoom}
-        </button>
-
-        {room ? (
-          <HostControlPanel
-            room={room}
-            player={currentPlayer}
-            onRequestControl={onRequestHostControl}
-            onReleaseControl={onReleaseHostControl}
-            onResolveControl={onResolveHostControl}
-            onSelectGame={onSelectGame}
-            onHostAction={onHostAction}
-            onStartRound={onStartRound}
-            onBackToMenu={onBackToMenu}
-            onKickPlayer={onKickPlayer}
-          />
-        ) : null}
-
-        <button
-          type="button"
-          onClick={() => onSetReady(!(currentPlayer?.isReady ?? false))}
-          disabled={playerSetupSelectionMissing}
-          style={{
-            border: 0,
-            borderRadius: "var(--radius-md)",
-            background: currentPlayer?.isReady ? "var(--success)" : "var(--accent)",
-            color: "var(--on-accent)",
-            padding: "16px 20px",
-            fontWeight: 800,
-            opacity: playerSetupSelectionMissing ? 0.55 : 1
-          }}
-        >
-          {playerSetupSelectionMissing
-            ? setupBlockedLabel
-            : currentPlayer?.isReady
-              ? text.notReady
-              : text.ready}
-        </button>
-
-        {selectedGame ? (
-          <div
-            style={{
-              display: "grid",
-              gap: 6,
-              padding: "12px 14px",
-              borderRadius: "var(--radius-md)",
-              background: "var(--surface-muted)",
-              color: "var(--text-muted)"
-            }}
-          >
-            <strong style={{ color: "var(--text-main)" }}>{selectedGame.displayName}</strong>
-            <span>
-              {text.players}: {playerCount}/{maximumPlayers} | {text.minRequired(minimumPlayers)}
-            </span>
-            <span>
-              {text.readyCount}: {readyCount}/{playerCount}
-              {enoughPlayers ? "" : ` | ${text.needsMorePlayers}`}
-            </span>
-            {playerSetup ? (
-              <span>
-                {renderPlayerSetupSummary(playerSetup, currentPlayer, text)}
-              </span>
-            ) : null}
+    <>
+      <HunterScene />
+      <ControllerFrame
+        tone="night"
+        title={currentPlayer?.name ?? `Lobby ${room?.code ?? "----"}`}
+        subtitle={room?.selectedGameId ? text.lobbySelected(selectedGameName) : text.lobbyWaitingHost}
+        footer={error ? <p style={{ color: "#ff9c8a", margin: 0 }}>{error}</p> : null}
+      >
+        <div style={{ display: "grid", gap: 14 }}>
+          <div className="hxh-roomcode" aria-label={`${text.room} ${room?.code ?? "----"}`}>
+            <small>{text.room}</small>
+            <strong>{room?.code ?? "----"}</strong>
           </div>
-        ) : null}
 
-        {room && selectedGame && playerSetup?.kind === "choice"
-          ? renderChoicePlayerSetupChooser(room, selectedGame, currentPlayer, text, onSetPlayerSetup)
-          : null}
+          <button
+            type="button"
+            onClick={() => onSetReady(!(currentPlayer?.isReady ?? false))}
+            disabled={playerSetupSelectionMissing}
+            className="hxh-btn"
+            style={playerSetupSelectionMissing ? { opacity: 0.55 } : undefined}
+          >
+            {playerSetupSelectionMissing
+              ? setupBlockedLabel
+              : currentPlayer?.isReady
+                ? text.notReady
+                : text.ready}
+          </button>
 
-        {selectedGame && playerSetup?.kind === "multi-select"
-          ? renderMultiSelectPlayerSetupChooser(selectedGame, currentPlayer, text, onSetPlayerSetup)
-          : null}
+          <p className="hxh-status" style={{ margin: 0 }}>
+            {text.readyCount}: {readyCount}/{playerCount}
+            {enoughPlayers ? "" : ` · ${text.needsMorePlayers}`}
+          </p>
 
-        <div style={{ display: "grid", gap: 10 }}>
-          {(room?.players ?? []).map((entry) => (
-            <div
-              key={entry.id}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 14px",
-                borderRadius: "var(--radius-md)",
-                background: "var(--surface-muted)"
-              }}
-            >
-              <div style={{ display: "grid", gap: 4 }}>
-                <strong>{entry.name}</strong>
-                {hasPlayerSetup && playerSetup ? (
-                  <span style={{ color: "var(--text-muted)", fontSize: "0.86rem" }}>
-                    {renderPlayerSetupPlayerDetail(entry, playerSetup, text)}
-                  </span>
-                ) : null}
-              </div>
-              <span style={{ color: entry.connected ? "var(--success)" : "var(--text-muted)" }}>
-                {entry.connected ? (entry.isReady ? text.connectedReady : text.connectedWaiting) : entry.presence}
+          {selectedGame ? (
+            <div className="hxh-info-box">
+              <strong>{selectedGame.displayName}</strong>
+              <span>
+                {text.players}: {playerCount}/{maximumPlayers} | {text.minRequired(minimumPlayers)}
               </span>
+              {playerSetup ? (
+                <span>
+                  {renderPlayerSetupSummary(playerSetup, currentPlayer, text)}
+                </span>
+              ) : null}
             </div>
-          ))}
+          ) : null}
+
+          {room && selectedGame && playerSetup?.kind === "choice"
+            ? renderChoicePlayerSetupChooser(room, selectedGame, currentPlayer, text, onSetPlayerSetup)
+            : null}
+
+          {selectedGame && playerSetup?.kind === "multi-select"
+            ? renderMultiSelectPlayerSetupChooser(selectedGame, currentPlayer, text, onSetPlayerSetup)
+            : null}
+
+          <p className="hxh-section-label">{text.players} · {playerCount}</p>
+          <div style={{ display: "grid", gap: 10 }}>
+            {(room?.players ?? []).map((entry) => {
+              const isMe = entry.id === currentPlayer?.id;
+              return (
+                <div key={entry.id} className="hxh-player-row">
+                  <span className={`hxh-ready-dot${entry.isReady ? "" : " is-waiting"}`} aria-hidden="true" />
+                  <div style={{ display: "grid", gap: 2, flex: 1, minWidth: 0 }}>
+                    <strong style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {entry.name}{isMe ? " · ★" : ""}
+                    </strong>
+                    {hasPlayerSetup && playerSetup ? (
+                      <span className="hxh-sub">
+                        {renderPlayerSetupPlayerDetail(entry, playerSetup, text)}
+                      </span>
+                    ) : null}
+                  </div>
+                  <span className="hxh-sub">
+                    {entry.connected ? (entry.isReady ? text.connectedReady : text.connectedWaiting) : entry.presence}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {room ? (
+            <HostControlPanel
+              room={room}
+              player={currentPlayer}
+              onRequestControl={onRequestHostControl}
+              onReleaseControl={onReleaseHostControl}
+              onResolveControl={onResolveHostControl}
+              onSelectGame={onSelectGame}
+              onHostAction={onHostAction}
+              onStartRound={onStartRound}
+              onBackToMenu={onBackToMenu}
+              onKickPlayer={onKickPlayer}
+            />
+          ) : null}
+
+          <button type="button" onClick={onLeaveRoom} className="hxh-btn hxh-btn-danger-ghost">
+            {text.leaveRoom}
+          </button>
         </div>
-      </div>
-    </ControllerFrame>
+      </ControllerFrame>
+    </>
   );
 }
-
-const secondaryButtonStyle = {
-  border: "1px solid var(--danger)",
-  borderRadius: "var(--radius-md)",
-  background: "var(--danger-soft)",
-  color: "var(--text-main)",
-  padding: "14px 18px",
-  fontWeight: 700
-} as const;
