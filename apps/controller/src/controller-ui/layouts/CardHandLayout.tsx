@@ -295,7 +295,7 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
         </div>
       </section>
       {/* Die Knöpfe liegen unter dem Blatt, dort wo der Daumen ohnehin ist. */}
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "stretch", gap: 6 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "stretch", gap: 8 }}>
         <button
           type="button"
           disabled={!selectedCard || !selectedCard.playable || model.disabled}
@@ -385,6 +385,8 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
           <div
             style={{
               width: "min(560px, 100%)",
+              minWidth: 0,
+              boxSizing: "border-box",
               maxHeight: "calc(100dvh - 32px)",
               overflowY: "auto",
               display: "grid",
@@ -415,6 +417,8 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
                   }}
                   style={{
                     minHeight: 68,
+                    minWidth: 0,
+                    overflowWrap: "anywhere",
                     borderRadius: 12,
                     border: "1px solid var(--line-strong)",
                     background: "var(--surface-raised)",
@@ -432,7 +436,7 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
               type="button"
               onClick={() => setChoiceCardId(null)}
               style={{
-                minHeight: 46,
+                minHeight: 48,
                 borderRadius: 12,
                 border: "1px solid var(--line-strong)",
                 background: "var(--surface-muted)",

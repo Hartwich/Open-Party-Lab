@@ -126,7 +126,7 @@ function Stick({ label, accentColor, disabled, resetKey, onChange }: StickProps)
           placeItems: "center",
           color: "var(--ink-soft)",
           fontWeight: 700,
-          fontSize: "0.72rem"
+          fontSize: "0.75rem"
         }}
       >
         {label}
@@ -148,11 +148,11 @@ export function TwinStickLayout({ model }: { model: TwinStickLayoutModel }) {
 
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: hasInteractButton ? "auto auto auto" : "auto auto",
-          justifyContent: "space-between",
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
           alignItems: "center",
-          gap: 14
+          gap: 12
         }}
       >
         <Stick

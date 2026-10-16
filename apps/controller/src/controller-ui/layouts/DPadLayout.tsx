@@ -160,8 +160,8 @@ export function DPadLayout({ model }: DPadLayoutProps) {
   const inlineActionButtons = model.horizontalOnly === true && model.inlineActionButtons === true && hasActionButtons;
   const showSeparateActionButtons = hasActionButtons && !inlineActionButtons;
   const buttonColumns = model.actionButtonColumns ?? (actionButtons.length >= 4 ? 2 : 1);
-  const inlineDirectionSize = "clamp(96px, 28vw, 152px)";
-  const inlineActionSize = "clamp(76px, 21vw, 118px)";
+  const inlineDirectionSize = "clamp(84px, 26vw, 152px)";
+  const inlineActionSize = "clamp(64px, 20vw, 118px)";
   const directionLabels: Record<Direction, string> = {
     up: model.directionLabels?.up ?? "UP",
     down: model.directionLabels?.down ?? "DOWN",
@@ -226,7 +226,7 @@ export function DPadLayout({ model }: DPadLayoutProps) {
         gap: inlineActionButtons ? 14 : 12,
         alignItems: "center",
         justifyContent: inlineActionButtons ? "center" : undefined,
-        width: inlineActionButtons ? "min(94vw, 560px)" : "min(58vw, 360px)"
+        width: inlineActionButtons ? "min(100%, 560px)" : "min(58vw, 360px)"
       }}
     >
       <DirectionButton
@@ -272,7 +272,7 @@ export function DPadLayout({ model }: DPadLayoutProps) {
         gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
         gap: 12,
         alignItems: "stretch",
-        width: "min(52vw, 320px)"
+        width: "min(68vw, 300px)"
       }}
     >
       <div />
@@ -352,7 +352,8 @@ export function DPadLayout({ model }: DPadLayoutProps) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: showSeparateActionButtons ? "minmax(0, 1fr) auto" : "minmax(0, 1fr)",
+          gridTemplateColumns: showSeparateActionButtons ? "repeat(auto-fit, minmax(min(100%, 220px), 1fr))" : "minmax(0, 1fr)",
+          justifyItems: showSeparateActionButtons ? "center" : undefined,
           gap: 16,
           alignItems: "center"
         }}

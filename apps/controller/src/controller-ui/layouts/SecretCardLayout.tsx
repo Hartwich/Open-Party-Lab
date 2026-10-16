@@ -346,7 +346,7 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
               >
                 {target.name}
                 {target.hint ? (
-                  <span style={{ display: "block", fontSize: "0.72rem", color: "var(--text-muted)" }}>
+                  <span style={{ display: "block", fontSize: "0.75rem", color: "var(--text-muted)" }}>
                     {target.hint}
                   </span>
                 ) : null}
@@ -395,7 +395,7 @@ export function SecretCardLayout({ model }: SecretCardLayoutProps) {
                 gap: 2
               }}
             >
-              <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>{stat.label}</span>
+              <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{stat.label}</span>
               <strong style={{ fontSize: "1rem", color: stat.highlighted ? "var(--accent)" : undefined }}>
                 {stat.value}
               </strong>

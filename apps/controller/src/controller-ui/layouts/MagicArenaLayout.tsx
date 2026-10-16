@@ -1199,7 +1199,7 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
           </span>
         </section>
       ) : (
-        <section style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 6 }}>
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(140px, 100%), 1fr))", gap: 8 }}>
           {Array.from({ length: totalSlots }, (_, index) => {
             const plan = ownPlans.find((entry) => entry.slotIndex === index);
             const plannedFigure = plan ? ownPlayer?.figures.find((figure) => figure.figureId === plan.figureId) : undefined;
@@ -1233,7 +1233,7 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
 
       <section style={panelStyle}>
         <strong>{en ? "Action" : "Aktion"}</strong>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 6 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
           <button type="button" title="Move" aria-label="Move" disabled={model.disabled} onClick={() => resetTargets("base:move")} style={modeButtonStyle(mode === "base:move")}>
             <ActionIcon actionId="move" large />
           </button>
@@ -1244,7 +1244,7 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
             <ActionIcon actionId="dig" large />
           </button>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: 6 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(64px, 100%), 1fr))", gap: 8 }}>
           {(ownPlayer?.hand ?? []).map((card) => {
             const selected = selectedCardInstanceId === card.instanceId;
             const reserved = plannedCardIds.has(card.instanceId);
@@ -1418,7 +1418,7 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
       {needsDirection(currentCardId, targetSameAsFigure) ? (
         <section style={panelStyle}>
           <strong>{en ? "Direction" : "Richtung"}</strong>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(6, minmax(0, 1fr))", gap: 5 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(6, minmax(0, 1fr))", gap: 6 }}>
             {directionLabels.map((label, index) => (
               <button key={label} type="button" onClick={() => setDirection(index)} style={modeButtonStyle(direction === index)}>
                 {label}
@@ -1440,7 +1440,7 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
           </button>
         </section>
       ) : (
-        <section style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 6 }}>
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
           <button type="button" disabled={model.disabled || !actionComplete} onClick={confirmSlot} style={primaryButtonStyle}>
             {en ? "Lock slot" : "Slot setzen"}
           </button>
@@ -1523,7 +1523,7 @@ const slotFigureNameStyle = {
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
   color: "var(--ink-soft)",
-  fontSize: "0.72rem",
+  fontSize: "0.75rem",
   lineHeight: 1.1,
   fontWeight: 900
 } as const;
@@ -1706,7 +1706,7 @@ const hexCrackBranchRightStyle = {
 
 function modeButtonStyle(selected: boolean) {
   return {
-    minHeight: 42,
+    minHeight: 44,
     border: selected ? "2px solid var(--amber)" : "1px solid color-mix(in srgb, var(--muted) 18%, transparent)",
     borderRadius: 10,
     background: selected ? "color-mix(in srgb, var(--amber) 20%, transparent)" : "color-mix(in srgb, var(--surface) 68%, transparent)",

@@ -80,7 +80,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
   const palette = (
     <div
       aria-label={en ? "Drawing colors" : "Zeichenfarben"}
-      style={{ display: "flex", flexWrap: "wrap", alignContent: "center", gap: isLandscape ? 7 : 6 }}
+      style={{ display: "flex", flexWrap: "wrap", alignContent: "center", gap: isLandscape ? 10 : 8 }}
     >
       {(model.availableColors ?? []).map((color) => {
         const selected = color === (model.currentColor ?? model.availableColors?.[0]);
@@ -93,8 +93,8 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
             aria-label={`${en ? "Color" : "Farbe"} ${color}`}
             aria-pressed={selected}
             style={{
-              width: isLandscape ? 34 : 28,
-              height: isLandscape ? 34 : 28,
+              width: 44,
+              height: 44,
               flex: "0 0 auto",
               borderRadius: 999,
               display: "grid",
@@ -125,7 +125,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
       disabled={model.disabled}
       style={{
         width: "100%",
-        minHeight: isLandscape ? 42 : 44,
+        minHeight: isLandscape ? 44 : 44,
         border: 0,
         borderRadius: 12,
         background: "var(--line-strong)",
@@ -219,7 +219,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
         onChange={(event) => setGuess(event.target.value)}
         disabled={model.disabled}
         placeholder={en ? "Your guess..." : "Dein Tipp..."}
-        style={{ minWidth: 0, width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line-strong)", background: "var(--surface)", color: "var(--ink)", fontSize: 18 }}
+        style={{ minWidth: 0, width: "100%", minHeight: 48, padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line-strong)", background: "var(--surface)", color: "var(--ink)", fontSize: 18 }}
       />
       <button
         type="submit"
@@ -232,7 +232,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
   );
 
   const portraitToolbar = (
-    <div style={{ display: "grid", gap: 5, minHeight: 0, alignContent: "start", overflow: "hidden" }}>
+    <div style={{ display: "grid", gap: 5, minHeight: 0, alignContent: "start", overflowX: "hidden", overflowY: "auto" }}>
       {model.winnerName ? <div style={{ color: "var(--sage)", fontWeight: 700, lineHeight: 1.1 }}>{en ? "Winner" : "Gewinner"}: {model.winnerName}</div> : null}
       {model.ready ? <ReadyPanel ready={model.ready} /> : null}
       <div style={wordStyle}>{word}</div>
@@ -262,7 +262,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
         isLandscape ? (
           <>
             {canvas}
-            <aside style={{ display: "flex", minWidth: 0, minHeight: 0, flexDirection: "column", justifyContent: "space-between", gap: 10, overflow: "hidden" }}>
+            <aside style={{ display: "flex", minWidth: 0, minHeight: 0, flexDirection: "column", justifyContent: "space-between", gap: 10, overflowX: "hidden", overflowY: "auto" }}>
               {model.winnerName ? <div style={{ color: "var(--sage)", fontWeight: 700, lineHeight: 1.1 }}>{en ? "Winner" : "Gewinner"}: {model.winnerName}</div> : null}
               {model.ready ? <ReadyPanel ready={model.ready} /> : null}
               <div style={wordStyle}>{word}</div>
@@ -280,7 +280,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
           </>
         )
       ) : (
-        <div style={{ gridColumn: "1 / -1", display: "flex", minHeight: 0, flexDirection: "column", justifyContent: "flex-start", paddingTop: isLandscape ? "8dvh" : "18dvh", gap: 12, overflow: "hidden" }}>
+        <div style={{ gridColumn: "1 / -1", display: "flex", minHeight: 0, flexDirection: "column", justifyContent: "flex-start", paddingTop: isLandscape ? "8dvh" : "18dvh", gap: 12, overflowX: "hidden", overflowY: "auto" }}>
           {model.winnerName ? <div style={{ color: "var(--sage)", fontWeight: 700, lineHeight: 1.1 }}>{en ? "Winner" : "Gewinner"}: {model.winnerName}</div> : null}
           {model.ready ? <ReadyPanel ready={model.ready} /> : null}
           <div style={wordStyle}>{word}</div>

@@ -290,7 +290,7 @@ function TowerCard({
             border: `1px solid ${tower.color}55`,
             color: tower.color,
             fontWeight: 900,
-            fontSize: "0.54rem"
+            fontSize: "0.75rem"
           }}
         >
           {tower.cost}
@@ -379,7 +379,7 @@ function EnemyCard({
             border: `1px solid ${enemy.color}55`,
             color: enemy.color,
             fontWeight: 900,
-            fontSize: "0.5rem"
+            fontSize: "0.75rem"
           }}
         >
           {enemy.sendCost}
@@ -436,7 +436,7 @@ function DetailStat({
         border: "1px solid color-mix(in srgb, var(--accent) 12%, transparent)"
       }}
     >
-      <div style={{ color: "var(--text-muted)", fontSize: subtle ? "0.72rem" : "0.78rem" }}>{label}</div>
+      <div style={{ color: "var(--text-muted)", fontSize: subtle ? "0.75rem" : "0.78rem" }}>{label}</div>
       <div
         style={{
           fontSize: subtle ? "0.84rem" : "0.94rem",
@@ -646,7 +646,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
           </span>
         </div>
         <div style={{ display: "grid", gap: 8 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 6 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(140px, 100%), 1fr))", gap: 8 }}>
             <button
               type="button"
               disabled={!canBuild}
@@ -792,7 +792,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             {buildTower ? `${buildTower.displayName} | ${buildTower.cost}G` : en ? "Choose a tower for the marked slot" : "Waehl einen Tower fuer den markierten Slot"}
           </span>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 5 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(120px, 100%), 1fr))", gap: 8 }}>
           {model.towerCatalog.map((tower) => (
             <TowerCard
               key={tower.id}
@@ -880,7 +880,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
           <span style={{ color: "var(--text-muted)" }}>{currentGold}G</span>
         </div>
         <div style={{ maxHeight: 284, overflowY: "auto", paddingRight: 2 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 5 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(120px, 100%), 1fr))", gap: 8 }}>
             {model.enemyCatalog.map((enemy) => (
               <EnemyCard
                 key={enemy.id}

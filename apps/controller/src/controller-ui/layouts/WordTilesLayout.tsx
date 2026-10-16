@@ -378,7 +378,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
               >
                 {renderedTile ? (
                   <>
-                    <span style={{ fontSize: "clamp(0.62rem, 2.5vw, 1rem)", fontWeight: 950, lineHeight: 1 }}>
+                    <span style={{ fontSize: "clamp(0.75rem, 3.4vw, 1rem)", fontWeight: 950, lineHeight: 1 }}>
                       {renderedTile.letter}
                     </span>
                     <span
@@ -386,7 +386,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
                         position: "absolute",
                         right: 2,
                         bottom: 1,
-                        fontSize: "0.48rem",
+                        fontSize: "0.625rem",
                         fontWeight: 900,
                         opacity: 0.82
                       }}
@@ -395,7 +395,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
                     </span>
                   </>
                 ) : (
-                  <span style={{ fontSize: "0.46rem", fontWeight: 900, lineHeight: 1 }}>{bonusLabel(cell.bonus)}</span>
+                  <span style={{ fontSize: "0.65rem", fontWeight: 900, lineHeight: 1 }}>{bonusLabel(cell.bonus)}</span>
                 )}
               </button>
             );
@@ -530,7 +530,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
           style={{
             display: "grid",
             gridTemplateColumns: isPendingMoveOwner && pendingMove.challengedByName ? "repeat(2, minmax(0, 1fr))" : isPendingMoveOwner ? "1fr" : "repeat(2, minmax(0, 1fr))",
-            gap: 6
+            gap: 8
           }}
         >
           {isPendingMoveOwner ? (
@@ -582,7 +582,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
           )}
         </section>
       ) : (
-        <section style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 6 }}>
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 8 }}>
           <button type="button" disabled={model.disabled || draft.length === 0} onClick={submitDraft} style={primaryButtonStyle}>
             {en ? "Play" : "Legen"}
           </button>
@@ -681,7 +681,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
             }}
           >
             <strong>{en ? "Blank tile" : "Joker"}</strong>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 6 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(44px, 1fr))", gap: 6 }}>
               {blankLettersFor(en).map((letter) => (
                 <button
                   key={letter}

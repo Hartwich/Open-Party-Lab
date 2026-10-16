@@ -198,7 +198,7 @@ export function SpellCastingLayout({ model }: SpellCastingLayoutProps) {
       {model.ready ? <ReadyPanel ready={model.ready} /> : null}
 
       <div style={{ display: "grid", gap: 5 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 7 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 8 }}>
           {model.spells.slice(0, 12).map((spell) => {
             const selected = spell.id === selectedSpell?.id;
             const color = colorHexByGesture[spell.color];
@@ -255,7 +255,7 @@ export function SpellCastingLayout({ model }: SpellCastingLayoutProps) {
                       bottom: 3,
                       zIndex: 2,
                       color: "var(--ink-soft)",
-                      fontSize: 9,
+                      fontSize: 12,
                       fontWeight: 950,
                       lineHeight: 1,
                       textShadow: "0 1px 3px color-mix(in srgb, var(--paper) 92%, transparent)"
@@ -268,7 +268,7 @@ export function SpellCastingLayout({ model }: SpellCastingLayoutProps) {
             );
           })}
         </div>
-        <small style={{ color: "var(--text-muted)", fontSize: 11, minHeight: 14 }}>
+        <small style={{ color: "var(--text-muted)", fontSize: 12, minHeight: 14 }}>
           {lockRemainingMs > 0 ? formatSeconds(lockRemainingMs) : "0.0s"}
         </small>
       </div>

@@ -52,7 +52,7 @@ export function SymboljagdLayout({ model }: { model: CardHandLayoutModel }) {
             return (
               <button key={`${card.cardId}-${symbol}`} type="button" aria-label={choice?.label ?? (en ? "Picture" : "Symbol")} disabled={!enabled}
                 onClick={() => { if (!choice) return; haptics.tap(18); model.onPlayCard(card.cardId, choice.id); }}
-                style={{ position: "absolute", left: `${cx}%`, top: `${cy}%`, transform: "translate(-50%, -50%)", width: `min(${size}cqw, ${size}cqh)`, aspectRatio: "1", display: "grid", placeItems: "center", padding: 2, border: 0, borderRadius: 8, background: "transparent", cursor: enabled ? "pointer" : "default", filter: enabled ? "drop-shadow(0 2px 3px #392e2020)" : "none", WebkitTapHighlightColor: "transparent" }}>
+                style={{ position: "absolute", left: `${cx}%`, top: `${cy}%`, transform: "translate(-50%, -50%)", width: `min(${size}cqw, ${size}cqh)`, minWidth: 44, minHeight: 44, aspectRatio: "1", display: "grid", placeItems: "center", padding: 2, boxSizing: "border-box", border: 0, borderRadius: 8, background: "transparent", cursor: enabled ? "pointer" : "default", filter: enabled ? "drop-shadow(0 2px 3px #392e2020)" : "none", WebkitTapHighlightColor: "transparent" }}>
                 <SymbolImage symbolId={symbol} />
               </button>
             );

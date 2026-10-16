@@ -266,7 +266,8 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: hasActionButtons ? "minmax(0, 1fr) auto" : "minmax(0, 1fr)",
+          gridTemplateColumns: hasActionButtons ? "repeat(auto-fit, minmax(min(100%, 220px), 1fr))" : "minmax(0, 1fr)",
+          justifyItems: hasActionButtons ? "center" : undefined,
           // Centre the pad in the third viewport quarter, independent of header height.
           position: anchorLowerMiddle ? "fixed" : undefined,
           top: anchorLowerMiddle ? "62.5dvh" : undefined,
@@ -346,7 +347,7 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
                 color: "color-mix(in srgb, var(--ink) 92%, transparent)",
                 fontWeight: 900,
                 letterSpacing: "0.08em",
-                fontSize: "0.72rem",
+                fontSize: "0.75rem",
                 transition: activePointerIdRef.current === null ? "transform 100ms ease-out, box-shadow 140ms ease-out" : "none"
               }}
             >

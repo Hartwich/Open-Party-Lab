@@ -151,6 +151,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                   alignItems: "center",
                   gap: 12,
                   padding: "12px 14px",
+                  minHeight: 44,
                   borderRadius: 16,
                   background:
                     selectedWeapon?.weaponInstanceId === weapon.weaponInstanceId
@@ -183,7 +184,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                 <span>
                   {`W${index + 1} ${weapon.displayName}`}
                   {weapon.sellable ? (
-                    <span style={{ display: "block", color: "var(--text-muted)", fontSize: "0.68rem", marginTop: 2 }}>
+                    <span style={{ display: "block", color: "var(--text-muted)", fontSize: "0.75rem", marginTop: 2 }}>
                       {en ? "Sell" : "Verkauf"} {weapon.sellValue ?? 0} M
                     </span>
                   ) : null}
@@ -193,7 +194,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                         display: "block",
                         marginTop: 2,
                         color: "var(--ink-soft)",
-                        fontSize: "0.68rem",
+                        fontSize: "0.75rem",
                         fontWeight: 700
                       }}
                     >
@@ -255,7 +256,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                 border: "1px solid color-mix(in srgb, var(--accent) 20%, transparent)"
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
                 <strong>{selectedWeapon.displayName}</strong>
                 <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>Lv. {selectedWeapon.level}</span>
               </div>
@@ -284,7 +285,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                           : "color-mix(in srgb, var(--surface) 36%, transparent)"
                       }}
                     >
-                      <span style={{ color: "var(--text-muted)", fontSize: "0.7rem", letterSpacing: "0.04em" }}>
+                      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem", letterSpacing: "0.04em" }}>
                         {stat.label}
                       </span>
                       <strong style={{ fontSize: "0.92rem", lineHeight: 1.1 }}>{stat.value}</strong>
@@ -446,7 +447,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                           : "color-mix(in srgb, var(--surface) 36%, transparent)"
                       }}
                     >
-                      <span style={{ color: "var(--text-muted)", fontSize: "0.7rem", letterSpacing: "0.04em" }}>
+                      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem", letterSpacing: "0.04em" }}>
                         {stat.label}
                       </span>
                       <strong style={{ fontSize: "0.92rem", lineHeight: 1.1 }}>{stat.value}</strong>
