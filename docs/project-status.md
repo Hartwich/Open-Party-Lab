@@ -1,6 +1,14 @@
 # Project Status
 
-Snapshot date: 2026-10-15
+Snapshot date: 2026-10-16
+
+The English project website lives in `website/` and builds with `npm run
+site:build` into the ignored `dist/site` directory. A dedicated GitHub Pages
+workflow publishes the static landing page, reusing tracked game screenshots.
+It links to the test server and releases; it does not host the multiplayer server.
+Verification on 2026-10-16: site build, full platform typecheck and build passed
+(existing large-bundle warnings). In-app browser checks covered desktop and
+390×844 layouts, gallery navigation and screenshot preview opening/closing.
 
 Commit/push verification on 2026-10-15: full platform typecheck and build passed
 with all 21 optional games linked, along with individual typechecks for the five

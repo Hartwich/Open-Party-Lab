@@ -1,5 +1,7 @@
 # Open Party Lab
 
+[Project website](https://hartwich.github.io/Open-Party-Lab/) — screenshots, ways to play and how to get involved.
+
 [Try the public test server](https://open-party-lab.onrender.com) · [Download for Windows](https://github.com/Hartwich/Open-Party-Lab/releases) · [Report an issue](https://github.com/Hartwich/Open-Party-Lab/issues)
 
 Open Party Lab is a browser-based party-game platform for a shared screen and players’ phones. Run it on your local network or use the hosted test server. The platform and its games are actively developed; most games are in alpha or beta.

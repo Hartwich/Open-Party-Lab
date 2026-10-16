@@ -9,6 +9,7 @@
     "packages/*"
   ],
   "scripts": {
+    "site:build": "node scripts/build-site.mjs",
     "games:list": "node scripts/local-games.mjs list",
     "games:sync-local": "node scripts/local-games.mjs sync-local",
     "games:clear-local": "node scripts/local-games.mjs clear-local",
