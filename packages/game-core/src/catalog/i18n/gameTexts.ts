@@ -13,6 +13,11 @@ import { schattenjagdText } from "./games/schattenjagd.js";
 import { cardTableText } from "./games/cardTable.js";
 import { blickwinkelText } from "./games/blickwinkel.js";
 import { dungeonGuildText } from "./games/dungeonGuild.js";
+import { magicArenaText } from "./games/magicArena.js";
+import { magicDuellText } from "./games/magicDuell.js";
+import { chaosKommandoText } from "./games/chaosKommando.js";
+import { flatterfluffText } from "./games/flatterfluff.js";
+import { minionsTdText } from "./games/minionsTd.js";
 
 const gameTextCatalog = {
   "zeichnen-und-erraten": zeichnenUndErratenText,
@@ -28,7 +33,12 @@ const gameTextCatalog = {
   schattenjagd: schattenjagdText,
   "card-table": cardTableText,
   blickwinkel: blickwinkelText,
-  "dungeon-guild": dungeonGuildText
+  "dungeon-guild": dungeonGuildText,
+  "magic-arena": magicArenaText,
+  "magic-duell": magicDuellText,
+  "chaos-kommando": chaosKommandoText,
+  flatterfluff: flatterfluffText,
+  "minions-td": minionsTdText
 } as const satisfies Record<string, LocalizedGameTextMap>;
 
 export const gameTextById: Record<string, LocalizedGameTextMap> = gameTextCatalog;

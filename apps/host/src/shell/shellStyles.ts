@@ -81,11 +81,16 @@ const css = `
   width: 44px;
   height: 44px;
   border-radius: 13px;
-  background: var(--accent);
-  color: var(--on-accent);
-  font-family: var(--font-display);
-  font-size: 14px;
-  letter-spacing: 0.5px;
+  overflow: hidden;
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+}
+
+.opl-brand img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .opl-dock-rule {
@@ -662,6 +667,44 @@ const css = `
 }
 
 .opl-note.is-error { color: var(--danger); }
+
+.opl-ldc-footer {
+  margin: 6px 2px 0;
+  padding: 10px 12px;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--muted);
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.opl-ldc-footer a {
+  display: block;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--accent-strong);
+  text-decoration: none;
+}
+
+.opl-ldc-footer a:hover { text-decoration: underline; }
+
+.opl-tile-art { position: relative; }
+
+.opl-tile-ldc {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: var(--on-accent);
+  background: var(--accent);
+  border-radius: 99px;
+  box-shadow: var(--shadow-card);
+}
 
 /* ---------- narrow screens ---------- */
 

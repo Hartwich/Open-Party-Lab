@@ -5,7 +5,9 @@ import {
   type SupportedLanguage
 } from "@open-party-lab/protocol";
 
-const languagePreferenceKey = "open-party-lab.controller-language";
+// v2 key: the club runs English by default, so phones that stored the old
+// German default start fresh on English. The DE/EN toggle still works.
+const languagePreferenceKey = "open-party-lab.controller-language-v2";
 
 export function readStoredControllerLanguage(): SupportedLanguage {
   if (typeof window === "undefined" || typeof window.localStorage === "undefined") {

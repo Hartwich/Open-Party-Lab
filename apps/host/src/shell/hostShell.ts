@@ -1,5 +1,5 @@
 import QRCode from "qrcode";
-import { resolveGameMinPlayers } from "@open-party-lab/game-core";
+import { LDC_CLUB, resolveGameMinPlayers } from "@open-party-lab/game-core";
 import {
   canManagePlayerRoster,
   hasActiveRound,
@@ -136,7 +136,7 @@ export function mountHostShell(client: HostSocketClient): () => void {
   root.hidden = true;
   root.innerHTML = `
     <nav class="opl-dock" aria-label="Host">
-      <span class="opl-brand">OPL</span>
+      <a class="opl-brand" href="${LDC_CLUB.instagramUrl}" target="_blank" rel="noreferrer" title="${LDC_CLUB.name} on Instagram"><img src="./ldc-logo.jpg" alt="${LDC_CLUB.name} logo" /></a>
       <span class="opl-dock-rule"></span>
       <button type="button" class="opl-dock-button" data-action="show-catalog" aria-pressed="true"
               data-dock="catalog">${renderUiIcon("catalog", 21)}</button>
@@ -162,6 +162,7 @@ export function mountHostShell(client: HostSocketClient): () => void {
       <div class="opl-roster" data-section="roster"></div>
       <button type="button" class="opl-start" data-action="start-round" data-section="start"></button>
       <p class="opl-note" data-section="note"></p>
+      <p class="opl-ldc-footer"><a href="${LDC_CLUB.instagramUrl}" target="_blank" rel="noreferrer">${LDC_CLUB.instagramLabel}</a><span>${LDC_CLUB.footerCredit}</span></p>
     </aside>
   `;
   document.body.appendChild(root);

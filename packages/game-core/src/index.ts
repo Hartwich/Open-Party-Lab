@@ -1,3 +1,4 @@
+export * from "./branding.js";
 export * from "./catalog/gameCatalog.js";
 export * from "./debug/perfTelemetry.js";
 export * from "./i18n/language.js";

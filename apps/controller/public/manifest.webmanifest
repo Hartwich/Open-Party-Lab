@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Open Party Lab Controller",
-  "short_name": "Party Controller",
+  "name": "LDC Club Party Controller",
+  "short_name": "LDC Party",
   "display": "standalone",
   "scope": "./",
   "background_color": "#f7f1e7",

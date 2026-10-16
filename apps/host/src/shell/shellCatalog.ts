@@ -42,7 +42,7 @@ function renderTile(game: AvailableGameDto, language: SupportedLanguage): string
     <button type="button" class="opl-tile" style="${tileVariables(game)}"
             data-action="select-game" data-game-id="${escapeHtml(game.id)}"
             aria-label="${escapeHtml(game.displayName)}">
-      <span class="opl-tile-art">${renderGameGlyph(game.visual?.icon, game.visual?.iconPath, 40)}</span>
+      <span class="opl-tile-art">${renderGameGlyph(game.visual?.icon, game.visual?.iconPath, 40)}<span class="opl-tile-ldc">LDC</span></span>
       <span class="opl-tile-body">
         ${eyebrow ? `<span class="opl-tile-eyebrow">${escapeHtml(eyebrow)}</span>` : ""}
         <span class="opl-tile-name">${escapeHtml(game.displayName)}</span>
@@ -70,7 +70,7 @@ function renderSelectField(field: LobbyField & { kind: "select" }, value: unknow
     .join("");
 
   const selected = field.options.find((option) => option.id === current);
-  const rules = selected?.rules?.[language] ?? selected?.rules?.de;
+  const rules = selected?.rules?.[language] ?? selected?.rules?.en ?? selected?.rules?.de;
   const help = rules?.length ? `<details class="opl-rules-preview"><summary>${language === "en" ? "Show rules" : "Regeln anzeigen"}</summary>${rules.map((section) => `<section><h3>${escapeHtml(section.title)}</h3><ul>${section.lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul></section>`).join("")}</details>` : "";
   return `
     <div class="opl-field">
