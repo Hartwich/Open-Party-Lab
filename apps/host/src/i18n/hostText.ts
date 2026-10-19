@@ -1,4 +1,4 @@
-﻿import {
+import {
   defaultLanguage,
   normalizeLanguage,
   type RoomLifecycle,
@@ -6,7 +6,7 @@
 } from "@open-party-lab/protocol";
 
 // v2 key: the club runs English by default, so browsers that stored the old
-// English default start fresh. No DE/EN toggle — English only.
+// German default start fresh on English. The DE/EN toggle still works.
 const languagePreferenceKey = "open-party-lab.host-language-v2";
 
 export function readStoredHostLanguage(): SupportedLanguage {
@@ -135,6 +135,122 @@ export interface HostText {
 
 const hostText = {
   de: {
+    shellKicker: "Spiel waehlen",
+    shellTitle: "Was spielen wir?",
+    shellSetupKicker: "Einstellungen",
+    shellStartRound: "Runde starten",
+    shellRoundRunning: "Runde laeuft",
+    shellBackToCatalog: "Zur Auswahl",
+    shellRosterEmpty: "Noch niemand da. Code scannen zum Beitreten.",
+    shellNeedsPlayers: (missing: number) =>
+      missing === 1 ? "Es fehlt noch 1 Spieler." : `Es fehlen noch ${missing} Spieler.`,
+    shellReadyCount: (ready: number, total: number) => `${ready} von ${total} bereit`,
+    roomExpiryTitle: "Raum laeuft bald ab",
+    roomExpiryBody: (minutes: number) => `Dieser Raum wird in etwa ${minutes} Minuten geschlossen.`,
+    roomExpiryExtend: "Um 1 Stunde verlaengern",
+    roomExpiryExtending: "Verlaengere...",
+    roomExpiryExtended: "Raum um eine Stunde verlängert.",
+    roomExpiryCountdown: (time: string) => `Dieser Raum wird in ${time} geschlossen.`,
+    roundPausedTitle: "Runde angehalten",
+    roundPausedByPlayer: (name: string) => `${name} hat das Host-Menue geoeffnet.`,
+    roundPausedByScreen: "Das Host-Menue ist geoeffnet.",
+    roundPausedHint: "Es geht weiter, sobald das Menue geschlossen wird.",
+    hostControlRequestTitle: "Steuerung uebernehmen?",
+    hostControlRequestBody: (name: string) => `${name} moechte den Host steuern.`,
+    hostControlRequestHint: "Spielauswahl, Rundenstart und Spielerverwaltung wandern aufs Handy.",
+    hostControlAllow: "Erlauben",
+    hostControlDeny: "Ablehnen",
+    hostControlDelegatedTitle: "Handy steuert",
+    hostControlDelegatedBody: (name: string) => `${name} steuert den Host.`,
+    hostControlReclaim: "Zurueckholen",
+    languageLabel: "Sprache",
+    themeLabel: "Design",
+    themeLight: "Hell",
+    themeDark: "Dunkel",
+    phoneController: "Handy-Controller",
+    showPhoneController: "Handy-Controller anzeigen",
+    hide: "Verstecken",
+    fullscreen: "Vollbild",
+    exitFullscreen: "Vollbild beenden",
+    fpsLabel: "FPS",
+    musicVolumeLabel: "Musik",
+    soundEffectsVolumeLabel: "Soundeffekte",
+    hostControlsTitle: "Host-Steuerung",
+    hostControlsSubtitle: "Audio, Bild, Sprache, Spieler",
+    close: "Schliessen",
+    noGame: "Kein Spiel",
+    connected: "Verbunden",
+    waitingForRoom: "Warte auf Raum",
+    offline: "Offline",
+    connectionMissing: "Verbindung fehlt",
+    players: "Spieler",
+    playerRange: (min: number, max: number) => `${min}-${max} Spieler`,
+    selected: "Ausgewaehlt",
+    lobby: "Lobby",
+    connectedShort: "verbunden",
+    noPlayersJoined: "Noch keine Spieler beigetreten.",
+    noPlayersConnected: "Noch keine Spieler verbunden.",
+    roomListPending: "Sobald ein Raum da ist, erscheint die Liste hier.",
+    moderationAllowed: "Spieler koennen im Lobby- oder Zwischenrunden-Zustand entfernt werden.",
+    moderationLocked: "Waehrend einer aktiven Runde ist Kicken gesperrt.",
+    ready: "bereit",
+    waiting: "wartet",
+    reconnecting: "verbindet neu",
+    notReady: "nicht bereit",
+    kick: "Kicken",
+    kickPlayer: (name: string) => `Spieler ${name} kicken`,
+    roomCode: "RAUMCODE",
+    join: "Join",
+    lobbyTitle: "Party Lobby",
+    lobbyPlayersTitle: "Spieler in der Lobby",
+    quickStartTitle: "Schnellstart",
+    quickStartLines: [
+      "Klick oder Zahlentaste waehlt ein Spiel.",
+      "Start danach automatisch oder mit SPACE."
+    ],
+    gameSelectionFallback: "Spielauswahl",
+    gameSelectRoundActiveSubtitle:
+      "Die Spieluebersicht ist offen. Solange eine Runde laeuft, bleiben Auswahl und Start gesperrt.",
+    gameSelectAutoReadySubtitle:
+      "Spiel per Maus oder Zahlentaste wechseln. Ready-basierte Runden starten automatisch.",
+    gameSelectClassicSubtitle:
+      "Spiel per Maus oder Zahlentaste wechseln. Standard-Runden starten mit SPACE.",
+    playerStatusTitle: "Spielerstatus",
+    noActiveGameTitle: "Noch kein Spiel aktiv",
+    noActiveGameSelectLine: "Waehle oben eine Spielkarte aus.",
+    noActiveGameRoundActiveLine:
+      "Die aktuelle Runde laeuft noch. Nach dem Ende kannst du hier wieder ein neues Spiel waehlen.",
+    noActiveGameStartLine:
+      "Danach startet die Runde je nach Spiel automatisch ueber Bereitschaft oder klassisch mit SPACE.",
+    playersConnected: (count: number, max: number) => `Spieler verbunden: ${count}/${max}`,
+    activeRoundLockedLine:
+      "Aktive Runde laeuft gerade. Die Auswahl bleibt sichtbar, ist aber bis zum Rundenende gesperrt.",
+    setupChoicePendingLine: "Alle Spieler muessen zuerst ihre Auswahl treffen.",
+    autoReadyLine: "Alle Spieler muessen am Handy bereit sein.",
+    spaceStartLine: "SPACE startet die Runde, sobald genug Spieler verbunden sind.",
+    setupControlsLine: "Dieses Spiel hat Setup-Optionen, die direkt hier gesetzt werden.",
+    afterRoundSwitchLine: "Nach dem Rundenende kannst du hier wieder frei umschalten.",
+    autoStartsWhenReadyLine: "Sobald alle wieder bereit sind, startet die Runde automatisch.",
+    readyVisibleLine: "Bereitschaft und Startstatus bleiben hier sichtbar.",
+    setupFollowsTitle: "Setup folgt",
+    readyToStartTitle: "Startbereit",
+    backToMenu: "Zum Hauptmenue",
+    backToMenuShort: "Menue",
+    gameLobbySubtitle: "Stellt die Runde ein und startet gemeinsam.",
+    gameLobbySetupTitle: "Rundeneinstellungen",
+    characterSelecting: "Charakter waehlt noch",
+    morePlayers: (count: number) => `+${count} weitere Spieler`,
+    errorLabel: "Fehler",
+    roomPrefix: "Raum",
+    hostCreatingRoom: "Raum wird erstellt ...",
+    hostConnecting: "Verbinde Host mit Server ...",
+    scanQr: "QR scannen oder Link am Handy oeffnen",
+    hostPageHint: "Am Handy immer den angezeigten Controller-Link oder QR-Code verwenden.",
+    serverOnline: "Server online",
+    serverOffline: "Server offline",
+    readyNextTitle: "Bereit fuer die naechste Runde",
+    lifecycle: (phase: RoomLifecycle | string) => phase
+  },
   en: {
     shellKicker: "Choose a game",
     shellTitle: "What are we playing?",
