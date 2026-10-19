@@ -15,28 +15,6 @@ function themeRootBlock(): string {
 }
 
 const landingText = {
-  de: {
-    title: "LDC Club Party – Raum starten",
-    kicker: "DEIN BILDSCHIRM. EURE HANDYS. EIN RAUM.",
-    heading: "Die Party beginnt",
-    headingAccent: "mit deinem Raum.",
-    intro: "Erstelle einen neuen Spielraum auf diesem Bildschirm oder tritt mit deinem Handy einem bestehenden Raum bei.",
-    create: "Neuen Raum erstellen",
-    createHint: "Dieser Bildschirm wird zum Host",
-    or: "oder",
-    join: "Bestehendem Raum beitreten",
-    roomCode: "RAUMCODE",
-    joinButton: "Beitreten",
-    joinHint: "Du öffnest den Handy-Controller für diesen Raum.",
-    ready: "Bereit.",
-    creating: "Raum wird erstellt …",
-    unavailable: "Der Server ist gerade nicht erreichbar. Bitte versuche es erneut.",
-    invalidCode: "Bitte gib den vierstelligen Raumcode ein.",
-    closedInactive: "Der vorherige Raum wurde nach zehn Minuten ohne Aktivität geschlossen.",
-    closedExpired: "Der vorherige Raum wurde nach einer Stunde automatisch geschlossen.",
-    closedCapacity: "Der vorherige Raum hatte keine aktiven Spieler und wurde geschlossen, um Platz für einen neuen Raum zu schaffen.",
-    switchLanguage: "Switch to English"
-  },
   en: {
     title: "LDC Club Party – Start a room",
     kicker: "YOUR SCREEN. YOUR PHONES. ONE ROOM.",
@@ -57,7 +35,7 @@ const landingText = {
     closedInactive: "The previous room was closed after ten minutes without activity.",
     closedExpired: "The previous room was closed automatically after one hour.",
     closedCapacity: "The previous room had no active players and was closed to make space for a new room.",
-    switchLanguage: "Auf Deutsch wechseln"
+    switchLanguage: "English"
   }
 } as const;
 
@@ -292,9 +270,8 @@ export function mountHostedLanding(): void {
   });
 
   languageButton?.addEventListener("click", () => {
-    language = language === "de" ? "en" : "de";
-    writeStoredHostLanguage(language);
-    renderLanguage();
+    // English only — no language switch
+    languageButton.ariaLabel = landingText.en.switchLanguage;
   });
 
   createButton?.addEventListener("click", () => {

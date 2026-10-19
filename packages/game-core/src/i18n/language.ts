@@ -1,11 +1,10 @@
-export const supportedLanguages = ["de", "en"] as const;
+export const supportedLanguages = ["en"] as const;
 
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 
 export const defaultLanguage: SupportedLanguage = "en";
 
 export const languageLabels: Record<SupportedLanguage, string> = {
-  de: "Deutsch",
   en: "English"
 };
 
