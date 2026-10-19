@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     region: frankfurt
-    buildCommand: export OPEN_PARTY_LAB_SKIP_GAMES=blickwinkel && npm ci --include=dev && npm run games:clone-all -- --fresh && npm run build:hosted
+    buildCommand: export OPEN_PARTY_LAB_SKIP_GAMES=blickwinkel && npm ci --include=dev && npm run games:clone-all -- --fresh && npm run build:hosted # rebuilt: mobile+english+skip
     startCommand: node apps/server/dist/main.js
     healthCheckPath: /health
     envVars:
