@@ -25,11 +25,9 @@ const css = `
   font-family: var(--font-body);
   color: var(--ink);
   background:
-    radial-gradient(120% 90% at 12% -10%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 60%),
-    radial-gradient(100% 80% at 100% 110%, color-mix(in srgb, var(--amber) 12%, transparent), transparent 62%),
-    var(--paper);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+    radial-gradient(140% 80% at 12% -15%, rgba(53, 208, 127, 0.12), transparent 58%),
+    radial-gradient(120% 90% at 100% 120%, rgba(232, 189, 79, 0.12), transparent 60%),
+    linear-gradient(180deg, #07110d 0%, #0a231b 60%, #040906 100%);
   overflow: hidden;
   z-index: 30;
 }
@@ -69,10 +67,12 @@ const css = `
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  padding: 14px 10px;
   width: 76px;
-  padding: 20px 0;
-  background: var(--surface);
-  border-right: 1px solid var(--line);
+  border-right: 1px solid rgba(232, 189, 79, 0.4);
+  background:
+    linear-gradient(180deg, rgba(251, 241, 214, 0.08) 0%, rgba(7, 17, 13, 0.95) 100%);
+  box-shadow: inset -1px 0 0 rgba(232, 189, 79, 0.18);
 }
 
 .opl-brand {
@@ -128,9 +128,11 @@ const css = `
 .opl-main {
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  padding: 26px 30px 24px;
-  overflow: hidden;
+  min-height: 0;
+  padding: 26px clamp(20px, 4vw, 44px);
+  background:
+    radial-gradient(80% 70% at 50% 0%, rgba(53, 208, 127, 0.08), transparent 66%),
+    linear-gradient(180deg, rgba(7, 17, 13, 0.96) 0%, rgba(7, 17, 13, 0.98) 100%);
 }
 
 .opl-kicker {
@@ -184,10 +186,10 @@ const css = `
   flex-direction: column;
   text-align: left;
   overflow: hidden;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(251, 241, 214, 0.1) 0%, rgba(10, 26, 19, 0.92) 100%);
+  border: 1px solid rgba(232, 189, 79, 0.32);
   border-radius: 16px;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55);
   transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
@@ -205,9 +207,11 @@ const css = `
   display: grid;
   place-items: center;
   height: 92px;
-  background: var(--tile-tint, var(--accent-soft));
-  color: var(--tile-accent, var(--accent-strong));
-  border-bottom: 1px solid color-mix(in srgb, var(--tile-accent, var(--accent)) 20%, transparent);
+  background:
+    radial-gradient(120% 80% at 50% 0%, var(--tile-tint), transparent 70%),
+    linear-gradient(180deg, rgba(251, 241, 214, 0.16), rgba(7, 17, 13, 0.9));
+  color: var(--tile-accent, var(--accent));
+  position: relative;
 }
 
 .opl-glyph-img { display: block; }
@@ -258,10 +262,10 @@ const css = `
  */
 .opl-open-card {
   flex: none;
-  background: var(--surface);
-  border: 1px solid var(--tile-accent, var(--accent));
+  background: linear-gradient(180deg, rgba(251, 241, 214, 0.12) 0%, rgba(10, 26, 19, 0.92) 100%);
+  border: 1px solid rgba(232, 189, 79, 0.6);
   border-radius: 16px;
-  box-shadow: var(--shadow-panel);
+  box-shadow: 0 26px 56px rgba(0, 0, 0, 0.58);
 }
 
 .opl-setup {
@@ -477,17 +481,18 @@ const css = `
   gap: 14px;
   width: 268px;
   padding: 20px 18px;
-  background: var(--surface);
-  border-left: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(251, 241, 214, 0.08) 0%, rgba(7, 17, 13, 0.95) 100%);
+  border-left: 1px solid rgba(232, 189, 79, 0.4);
+  box-shadow: inset 1px 0 0 rgba(232, 189, 79, 0.18);
 }
 
 .opl-room-card {
   padding: 14px 14px 16px;
   text-align: center;
-  background: var(--surface-raised);
-  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(251, 241, 214, 0.12) 0%, rgba(10, 26, 19, 0.8) 100%);
+  border: 1px solid rgba(232, 189, 79, 0.5);
   border-radius: 16px;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55);
 }
 
 .opl-room-label {
@@ -585,6 +590,19 @@ const css = `
 
 .opl-player.is-offline .opl-avatar { opacity: 0.4; }
 
+.opl-avatar-hunter {
+  background: transparent;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--hunter-accent, var(--accent)) 60%, transparent);
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.opl-avatar-hunter svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .opl-player-name {
   flex: 1;
   min-width: 0;
@@ -634,12 +652,15 @@ const css = `
   gap: 8px;
   padding: 13px;
   font-size: 15px;
-  font-weight: 500;
-  color: var(--on-accent);
-  background: var(--accent);
+  font-weight: 800;
+  color: #1a1405;
+  background: linear-gradient(135deg, #f0d98c 0%, #c9a24a 100%);
+  border: 1px solid rgba(7, 19, 14, 0.4);
   border-radius: 13px;
-  box-shadow: var(--shadow-card);
-  transition: background 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+  box-shadow: 0 18px 40px rgba(201, 162, 74, 0.28);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 12px;
 }
 
 .opl-start:hover:not(:disabled) {
@@ -715,12 +736,16 @@ const css = `
     inset: 0 0 auto auto;
     height: 100%;
     box-shadow: var(--shadow-modal);
+    z-index: 40;
+    background: linear-gradient(180deg, rgba(251, 241, 214, 0.08) 0%, rgba(7, 17, 13, 0.98) 100%);
   }
 }
 
 @media (max-width: 640px) {
   .opl-rail { width: 220px; }
   .opl-main { padding: 18px 16px; }
+  .opl-dock { width: 66px; }
+  .opl-catalog { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
 }
 `;
 

@@ -7,6 +7,7 @@ import {
   roomLanguages,
   type RoomLanguage
 } from "@open-party-lab/protocol";
+import { getHunterAvatar, renderHunterAvatarSvg } from "@open-party-lab/game-core";
 import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
 import { getHostText } from "../i18n/hostText.js";
 import { themeNames, type ThemeName } from "@open-party-lab/ui-kit";
@@ -689,13 +690,35 @@ export function mountHostControlsOverlay(
     for (const player of players) {
       const row = document.createElement("div");
       row.style.display = "grid";
-      row.style.gridTemplateColumns = "minmax(0, 1fr) auto";
+      row.style.gridTemplateColumns = "auto minmax(0, 1fr) auto";
       row.style.gap = "10px";
       row.style.alignItems = "center";
       row.style.padding = "10px 12px";
       row.style.borderRadius = hostChrome.radius.control;
       row.style.background = hostTheme.panelMuted;
       row.style.border = hostChrome.border.subtle;
+
+      const hunter = getHunterAvatar(player.avatarId);
+      const avatar = document.createElement("span");
+      avatar.style.flex = "none";
+      avatar.style.width = "34px";
+      avatar.style.height = "34px";
+      avatar.style.borderRadius = "50%";
+      avatar.style.display = "grid";
+      avatar.style.placeItems = "center";
+      avatar.style.overflow = "hidden";
+      if (hunter) {
+        avatar.style.boxShadow = `0 0 0 2px ${hunter.color}99`;
+        avatar.innerHTML = renderHunterAvatarSvg(hunter.id, 34);
+        avatar.title = hunter.name;
+      } else {
+        avatar.style.background = player.color;
+        avatar.textContent = player.name.slice(0, 2).toUpperCase();
+        avatar.style.color = "#ffffff";
+        avatar.style.fontSize = "12px";
+        avatar.style.fontWeight = "700";
+      }
+      row.appendChild(avatar);
 
       const details = document.createElement("div");
       details.style.display = "grid";

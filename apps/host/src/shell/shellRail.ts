@@ -1,4 +1,5 @@
 import type { PlayerSnapshot, RoomLanguage } from "@open-party-lab/protocol";
+import { getHunterAvatar, renderHunterAvatarSvg } from "@open-party-lab/game-core";
 import { getHostText } from "../i18n/hostText.js";
 import { renderUiIcon } from "./gameGlyphs.js";
 import { escapeHtml } from "./escapeHtml.js";
@@ -102,11 +103,18 @@ function renderPlayer(player: PlayerSnapshot, options: RailOptions): string {
       )}</span>`
     : "";
 
+  const hunter = getHunterAvatar(player.avatarId);
+  const avatar = hunter
+    ? `<span class="opl-avatar opl-avatar-hunter" style="--hunter-accent:${escapeHtml(
+        hunter.color
+      )}" title="${escapeHtml(hunter.name)}">${renderHunterAvatarSvg(hunter.id, 30)}</span>`
+    : `<span class="opl-avatar" style="background:${escapeHtml(player.color)};color:${avatarInk(
+        player.color
+      )}">${escapeHtml(initials(player.name))}</span>`;
+
   return `
     <div class="opl-player${player.connected ? "" : " is-offline"}">
-      <span class="opl-avatar" style="background:${escapeHtml(player.color)};color:${avatarInk(
-        player.color
-      )}">${escapeHtml(initials(player.name))}</span>
+      ${avatar}
       <span class="opl-player-name">${escapeHtml(player.name)}${subline}</span>
       ${badges.join("")}
       ${kick}

@@ -6,6 +6,7 @@ import { controllerGameRegistry } from "../controller-ui/games/registry.js";
 import { ReadyPanel } from "../controller-ui/common/ReadyPanel.js";
 import { ControllerFrame } from "../controller-ui/layout/ControllerFrame.js";
 import { ControllerLayoutRenderer } from "../controller-ui/layouts/ControllerLayoutRenderer.js";
+import { StandingsPanel } from "../controller-ui/common/StandingsPanel.js";
 import type { ControllerLayoutModel, ReadyLayoutModel } from "../controller-ui/layouts/models.js";
 import { getControllerText } from "../i18n/controllerText.js";
 import { useOrientationHint } from "../hooks/useOrientationHint.js";
@@ -178,9 +179,7 @@ export function ControllerPage({ state, onLeaveRoom, onInput, onSetReady }: Cont
               {!hideSubtitle ? (
                 <small style={{ color: "var(--text-muted)" }}>{text.room} {state.room.code}</small>
               ) : null}
-              {!chrome.hideScore ? <small style={{ color: "var(--text-muted)" }}>
-                {text.score}: {state.scoreboard?.entries.find((entry) => entry.playerId === state.player?.id)?.total ?? state.player.score}
-              </small> : null}
+              {!chrome.hideScore ? <StandingsPanel state={state} label={text.score} /> : null}
             </div>
           ) : null}
         </div>

@@ -1,7 +1,10 @@
 import type { ClientToServerEvents, ServerToClientEvents, RoomLanguage } from "@open-party-lab/protocol";
+import { gameTextById, toSupportedLanguage, type GameGlyphName } from "@open-party-lab/game-core";
 import { defaultThemeName, themeCssVariablesFor } from "@open-party-lab/ui-kit";
 import { io, type Socket } from "socket.io-client";
 import { readStoredHostLanguage, writeStoredHostLanguage } from "../i18n/hostText.js";
+import { renderGameGlyph } from "../shell/gameGlyphs.js";
+import { escapeHtml } from "../shell/escapeHtml.js";
 
 /**
  * Serialises the theme tokens into a `:root { … }` declaration block.
@@ -41,6 +44,88 @@ const landingText = {
 /** The hosted landing copy is English-only; the room language itself still
  *  comes from the stored host preference. */
 const landingCopy = landingText.en;
+
+/**
+ * Landing-page game showcase.
+ *
+ * The hosted landing cannot import the real game registry (it pulls in every
+ * game's Phaser bundle), so the shelf is driven by the framework-free localized
+ * catalog text plus a hand-mapped glyph and hue per game id. Copy comes from
+ * `gameTextById`, so descriptions follow the room language.
+ */
+interface ShowcaseGame {
+  id: string;
+  glyph: GameGlyphName;
+  accent: string;
+}
+
+const showcaseGames: readonly ShowcaseGame[] = [
+  { id: "arena-survivor", glyph: "sparkles", accent: "#bd4727" },
+  { id: "minions-td", glyph: "tower", accent: "#3d7a5a" },
+  { id: "magic-duell", glyph: "wand", accent: "#8b5cf6" },
+  { id: "magic-arena", glyph: "swords", accent: "#a855f7" },
+  { id: "drift-racer", glyph: "car", accent: "#d97706" },
+  { id: "air-hockey", glyph: "puck", accent: "#2563eb" },
+  { id: "buzzwort", glyph: "chat", accent: "#0ea5e9" },
+  { id: "zeichnen-und-erraten", glyph: "brush", accent: "#ec4899" },
+  { id: "schaetzorama", glyph: "question", accent: "#f59e0b" },
+  { id: "word-tiles", glyph: "grid", accent: "#16a34a" },
+  { id: "card-table", glyph: "cards", accent: "#be123c" },
+  { id: "chaos-kommando", glyph: "cannon", accent: "#b45309" },
+  { id: "flatterfluff", glyph: "bird", accent: "#0891b2" },
+  { id: "imposter", glyph: "mask", accent: "#7c3aed" },
+  { id: "pantomime", glyph: "drama", accent: "#db2777" },
+  { id: "schattenjagd", glyph: "ghost", accent: "#4f46e5" },
+  { id: "light-trails", glyph: "bolt", accent: "#eab308" },
+  { id: "dungeon-guild", glyph: "hand", accent: "#65a30d" },
+  { id: "blickwinkel", glyph: "star", accent: "#c2410c" }
+];
+
+function renderShowcase(language: RoomLanguage): string {
+  const supported = toSupportedLanguage(language);
+  const cards = showcaseGames
+    .map((game) => {
+      const text = gameTextById[game.id];
+      if (!text) {
+        return "";
+      }
+
+      const localized = text[language] ?? text[supported] ?? text.en;
+      if (!localized) {
+        return "";
+      }
+
+      return `
+        <article class="hosted-game" style="--game-accent:${escapeHtml(game.accent)}">
+          <span class="hosted-game-glyph">${renderGameGlyph(game.glyph, undefined, 26)}</span>
+          <div class="hosted-game-body">
+            <h3>${escapeHtml(localized.displayName)}</h3>
+            <p>${escapeHtml(localized.description)}</p>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+
+  const heading =
+    language === "ar" ? "الألعاب في الغرفة" : language === "de" ? "Spiele im Raum" : "Games in the room";
+  const hint =
+    language === "ar"
+      ? "اختر لعبتك على شاشة المضيف بعد إنشاء الغرفة."
+      : language === "de"
+        ? "Wählt euer Spiel am Host-Bildschirm, sobald der Raum offen ist."
+        : "Pick your game on the host screen once the room is open.";
+
+  return `
+    <div class="hosted-showcase-head">
+      <span class="hosted-showcase-label">${escapeHtml(heading)}</span>
+      <span class="hosted-showcase-count">${showcaseGames.length}</span>
+    </div>
+    <div class="hosted-showcase-list" role="list">${cards}</div>
+    <p class="hosted-showcase-hint">${escapeHtml(hint)}</p>
+  `;
+}
+
 
 function normalizeRoomCode(value: string): string {
   return value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
@@ -127,9 +212,12 @@ export function mountHostedLanding(): void {
         </div>
         <p class="hosted-ldc-footer"><a href="https://www.instagram.com/ldc.club/" target="_blank" rel="noreferrer">@ldc.club on Instagram</a><span>Made by LDC — best member Israa Chiheb</span></p>
       </section>
-      <aside class="hosted-art" aria-hidden="true">
+      <aside class="hosted-art">
         <div class="hosted-orbit orbit-one"></div><div class="hosted-orbit orbit-two"></div>
-        <div class="hosted-code-card"><small>RAUMCODE</small><strong>PLAY</strong><span>● ● ●</span></div>
+        <div class="hosted-art-inner">
+          <div class="hosted-code-card"><small>RAUMCODE</small><strong>PLAY</strong><span>● ● ●</span></div>
+          <div class="hosted-showcase" id="hosted-showcase"></div>
+        </div>
       </aside>
     </main>
   `;
@@ -206,19 +294,33 @@ export function mountHostedLanding(): void {
     .hosted-ldc-footer{margin:22px 0 0;display:grid;gap:4px;font-size:13px;color:#c9d3bd}
     .hosted-ldc-footer a{color:#35d07f;font-weight:700;text-decoration:none}
     .hosted-ldc-footer a:hover{text-decoration:underline}
-    .hosted-art{position:relative;z-index:1;align-self:center;width:100%;min-height:clamp(340px,58vh,540px);display:grid;place-items:center}
+    .hosted-art{position:relative;z-index:1;align-self:center;width:100%;height:100%;min-height:clamp(340px,58vh,540px);display:grid;place-items:center}
+    .hosted-art-inner{position:relative;z-index:1;width:100%;max-width:420px;height:100%;max-height:clamp(340px,64vh,560px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(12px,2vh,20px)}
+    .hosted-showcase{width:100%;min-height:0;display:flex;flex-direction:column;gap:8px}
+    .hosted-showcase-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .hosted-showcase-label{font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#e8bd4f}
+    .hosted-showcase-count{font-family:var(--font-mono);font-size:12px;font-weight:700;color:#c9d3bd;border:1px solid rgba(232,189,79,.5);border-radius:999px;padding:1px 9px}
+    .hosted-showcase-list{display:grid;gap:7px;max-height:min(46vh,360px);overflow-y:auto;overscroll-behavior:contain;padding-right:2px}
+    .hosted-game{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:8px 10px;border-radius:12px;border:1px solid rgba(243,233,210,.16);background:linear-gradient(135deg,rgba(251,241,214,.08),rgba(8,40,30,.72));border-left:3px solid var(--game-accent,#e8bd4f);transition:transform .15s ease,border-color .15s ease}
+    .hosted-game:hover{transform:translateX(3px);border-color:rgba(232,189,79,.55)}
+    .hosted-game-glyph{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:9px;background:color-mix(in srgb,var(--game-accent,#e8bd4f) 26%,rgba(0,0,0,.4));color:#fbf1d6}
+    .hosted-game-glyph svg{width:22px;height:22px}
+    .hosted-game-body{min-width:0;display:grid;gap:2px}
+    .hosted-game-body h3{margin:0;font-size:13.5px;font-weight:700;color:#fbf1d6;line-height:1.2}
+    .hosted-game-body p{margin:0;font-size:11.5px;line-height:1.4;color:#c9d3bd;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .hosted-showcase-hint{margin:0;font-size:11px;color:#9fb0a2;text-align:center}
     .hosted-orbit{position:absolute;border:1px solid rgba(201,162,74,.4);border-radius:50%;animation:hosted-spin 22s linear infinite}
     .orbit-one{width:min(34vw,520px);height:min(34vw,520px)}
     .orbit-two{width:min(24vw,350px);height:min(24vw,350px);border-color:#35d07f;animation-direction:reverse;animation-duration:16s}
     .hosted-orbit:after{content:"";position:absolute;top:8%;left:14%;width:14px;height:14px;border-radius:50%;background:#35d07f}
     .orbit-two:after{top:auto;left:auto;right:5%;bottom:22%;background:#e8bd4f}
-    .hosted-code-card{position:relative;width:min(72%,360px);aspect-ratio:1.15;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid #e8bd4f;border-radius:18px;background:linear-gradient(160deg,#fbf1d6,#e6d6ac);color:#16261e;box-shadow:0 24px 70px rgba(0,0,0,.55);transform:rotate(-3deg)}
+    .hosted-code-card{position:relative;flex:none;width:min(60%,300px);aspect-ratio:1.5;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid #e8bd4f;border-radius:18px;background:linear-gradient(160deg,#fbf1d6,#e6d6ac);color:#16261e;box-shadow:0 24px 70px rgba(0,0,0,.55);transform:rotate(-3deg)}
     .hosted-code-card small{color:#7a5f1c;font-weight:700;letter-spacing:.18em}
-    .hosted-code-card strong{margin:13px 0;font-family:"Barlow Condensed","Arial Narrow",Impact,sans-serif;font-style:italic;font-weight:800;font-size:clamp(58px,7vw,94px);letter-spacing:.08em}
+    .hosted-code-card strong{margin:8px 0;font-family:"Barlow Condensed","Arial Narrow",Impact,sans-serif;font-style:italic;font-weight:800;font-size:clamp(44px,5vw,72px);letter-spacing:.08em}
     .hosted-code-card span{color:#1f8a62;letter-spacing:.6em}
     @keyframes hosted-spin{to{transform:rotate(360deg)}}
     @media(prefers-reduced-motion:reduce){.hosted-orbit,.hosted-rays,.hosted-gcard,.hosted-ship,.hosted-birds,.hosted-mist,.hosted-aura,.hosted-nenwheel{animation:none}.hosted-ship,.hosted-birds{display:none}}
-    @media(max-width:900px){.hosted-landing{grid-template-columns:minmax(0,1fr);padding:20px 16px 28px;gap:clamp(20px,4vw,40px)}.hosted-art{display:none}.hosted-actions{flex-direction:column}.hosted-or{display:none}.hosted-create,.hosted-join{width:100%;min-width:0}.hosted-create{text-align:center}.hosted-hero{max-width:100%}.hosted-hero h1{font-size:clamp(36px,11vw,64px)}.hosted-hero-wrap{left:5%;height:30%}.hosted-tree{height:48%;right:-12%}.hosted-card{padding:clamp(16px,4vw,24px)}.hosted-join input{font-size:1.15rem}}
+    @media(max-width:900px){.hosted-landing{grid-template-columns:minmax(0,1fr);padding:20px 16px 28px;gap:clamp(20px,4vw,40px)}.hosted-orbit,.hosted-code-card{display:none}.hosted-art{min-height:0;display:block}.hosted-art-inner{max-width:none;max-height:none;height:auto;align-items:stretch}.hosted-actions{flex-direction:column}.hosted-or{display:none}.hosted-create,.hosted-join{width:100%;min-width:0}.hosted-create{text-align:center}.hosted-hero{max-width:100%}.hosted-hero h1{font-size:clamp(36px,11vw,64px)}.hosted-hero-wrap{left:5%;height:30%}.hosted-tree{height:48%;right:-12%}.hosted-card{padding:clamp(16px,4vw,24px)}.hosted-join input{font-size:1.15rem}.hosted-showcase-list{max-height:none;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}}
     @media(max-height:820px){.hosted-landing{padding-top:clamp(14px,2.5vh,36px);padding-bottom:clamp(14px,2.5vh,36px)}.hosted-card{margin-top:clamp(10px,2vh,26px);padding:clamp(16px,2.6vh,28px)}.hosted-hero h1{font-size:clamp(34px,4.6vw,58px)}.hosted-intro{margin:12px 0 16px}.hosted-brand img{width:44px;height:44px}.hosted-status{margin-top:12px}.hosted-ldc-footer{margin-top:12px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}}
     @media(max-height:700px){.hosted-landing{padding-top:12px;padding-bottom:12px;gap:10px}.hosted-card{margin-top:8px;padding:16px 18px}.hosted-hero h1{font-size:clamp(28px,8vw,40px)}.hosted-kicker{margin-bottom:6px}.hosted-intro{margin:8px 0 12px}.hosted-actions{gap:10px}.hosted-create{padding:14px 18px;min-height:46px}.hosted-join{padding:12px 14px}.hosted-join label{margin-bottom:8px}.hosted-join small{display:none}.hosted-join input,.hosted-join button{min-height:46px}.hosted-status{margin-top:8px;min-height:0}.hosted-brand img{width:38px;height:38px}.hosted-ldc-footer{margin-top:8px;font-size:12px}}
     @media(max-height:620px) and (min-aspect-ratio:1/1){.hosted-landing{grid-template-columns:minmax(0,1fr);padding:10px 16px;gap:8px}.hosted-art{display:none}.hosted-topbar{display:none}.hosted-actions{flex-direction:row;align-items:center;flex-wrap:wrap}.hosted-or{display:block}.hosted-create,.hosted-join{width:auto;min-width:0}.hosted-hero{max-width:100%}.hosted-hero-wrap,.hosted-tree,.hosted-tower{display:none}.hosted-card{margin-top:0}.hosted-hero h1{font-size:clamp(26px,5vh,40px)}.hosted-kicker{margin-bottom:6px}.hosted-intro{margin:8px 0 12px;font-size:14px}.hosted-status{margin-top:8px;min-height:0}.hosted-ldc-footer{margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;font-size:12px}}
@@ -242,6 +344,9 @@ export function mountHostedLanding(): void {
     }
 
     if (roomInput) roomInput.placeholder = landingCopy.roomCode;
+
+    const showcase = app.querySelector<HTMLElement>("#hosted-showcase");
+    if (showcase) showcase.innerHTML = renderShowcase(language);
 
     if (closedReason === "inactive") setStatus(landingCopy.closedInactive);
     if (closedReason === "expired") setStatus(landingCopy.closedExpired);

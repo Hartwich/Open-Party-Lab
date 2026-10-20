@@ -172,9 +172,9 @@ export function JoinPage({ defaultRoomCode, connected, error, language, onJoin }
 
             <div className="hxh-field">
               <span className="hxh-label">
-                {language === "en" ? "Choose your hunter" : "Wähle deinen Hunter"}
+                {language === "en" ? "Choose your hunter" : language === "ar" ? "اختر صيادك" : "Wähle deinen Hunter"}
               </span>
-              <div className="hxh-avatar-grid" role="radiogroup" aria-label={language === "en" ? "Choose your hunter" : "Wähle deinen Hunter"}>
+              <div className="hxh-avatar-grid" role="radiogroup" aria-label={language === "en" ? "Choose your hunter" : language === "ar" ? "اختر صيادك" : "Wähle deinen Hunter"}>
                 {HUNTER_AVATARS.map((avatar) => {
                   const isSelected = avatar.id === selectedAvatar.id;
                   return (
@@ -183,19 +183,35 @@ export function JoinPage({ defaultRoomCode, connected, error, language, onJoin }
                       type="button"
                       role="radio"
                       aria-checked={isSelected}
+                      aria-label={`${avatar.name} — ${avatar.title}`}
                       title={`${avatar.name} — ${avatar.title}`}
                       onClick={() => selectAvatar(avatar.id)}
-                      className="hxh-avatar-chip"
-                      style={isSelected ? { borderColor: avatar.color, boxShadow: `0 0 0 2px ${avatar.color}55` } : undefined}
+                      className={`hxh-avatar-chip${isSelected ? " is-selected" : ""}`}
+                      style={{
+                        ["--hxh-chip-accent" as string]: avatar.color,
+                        ["--hxh-chip-glow" as string]: `${avatar.color}44`,
+                      }}
                     >
-                      {avatar.renderSvg(52)}
+                      {avatar.renderSvg(56)}
+                      <span className="hxh-avatar-name">{avatar.name}</span>
+                      <span className="hxh-avatar-nen">{avatar.nenType}</span>
                     </button>
                   );
                 })}
               </div>
-              <p className="hxh-avatar-meta" aria-live="polite">
-                <strong style={{ color: selectedAvatar.color }}>{selectedAvatar.name}</strong>
-                <span> · {selectedAvatar.title}</span>
+              <p
+                className="hxh-avatar-detail"
+                aria-live="polite"
+                style={{
+                  ["--hxh-avatar-accent" as string]: selectedAvatar.color,
+                }}
+              >
+                <span className="hxh-avatar-detail-badge" aria-hidden="true">{selectedAvatar.badge}</span>
+                <span className="hxh-avatar-detail-text">
+                  <strong>{selectedAvatar.name}</strong>
+                  <span>{selectedAvatar.title} · {selectedAvatar.nenType} {selectedAvatar.nenKanji}</span>
+                  <em>“{selectedAvatar.quote}”</em>
+                </span>
               </p>
             </div>
 

@@ -37,7 +37,10 @@ export class ScoreManager {
         .map((player) => ({
           playerId: player.id,
           delta: lastRoundDeltas.get(player.id) ?? 0,
-          total: player.score
+          total: player.score,
+          name: player.name,
+          color: player.color,
+          avatarId: player.avatarId ?? null
         }))
     };
   }

@@ -52,6 +52,7 @@ function describePlayer(player: PlayerSnapshot): string {
     player.id,
     player.name,
     player.color,
+    player.avatarId ?? "",
     player.isReady ? "1" : "0",
     player.connected ? "1" : "0",
     player.selectedCharacterName ?? ""
