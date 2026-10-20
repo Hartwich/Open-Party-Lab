@@ -26,5 +26,18 @@ export const minionsTdText = {
         startingGold: { label: "Starting gold" }
       }
     }
+  },
+  ar: {
+    displayName: "MinionsTD",
+    description: "ابنِ الأبراج وادفع الجنود إلى الأمام واحتفظ بممرّك أطول من الجميع.",
+    lobbySetup: {
+      title: "إعداد MinionsTD",
+      description: "اختر الخريطة ونقاط الحياة والذهب الابتدائي قبل بدء الجولة.",
+      fields: {
+        mapId: { label: "الخريطة" },
+        startingLives: { label: "نقاط الحياة" },
+        startingGold: { label: "الذهب الابتدائي" }
+      }
+    }
   }
 } as const satisfies LocalizedGameTextMap;

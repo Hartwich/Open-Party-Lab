@@ -8,5 +8,9 @@ export const dungeonGuildText = {
   en: {
     displayName: "Dungeon Guild",
     description: "Open doors, collect equipment and form uneasy alliances. The first player to reach level 10 wins."
+  },
+  ar: {
+    displayName: "Dungeon Guild",
+    description: "افتح الأبواب واجمع العتاد وشكّل تحالفات متردّدة. يصل أول لاعب إلى المستوى 10 يفوز."
   }
 } as const satisfies LocalizedGameTextMap;

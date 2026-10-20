@@ -191,7 +191,7 @@ export class PlayerManager {
   removePlayer(room: RoomRecord, playerId: string): RemovePlayerOutcome {
     if (!canManagePlayerRoster(room)) {
       return {
-        error: room.language === "en"
+        error: room.language !== "de"
           ? "Players can only be removed while no active round is running."
           : "Spieler koennen nur entfernt werden, solange keine aktive Runde laeuft."
       };
@@ -201,7 +201,7 @@ export class PlayerManager {
 
     if (!player) {
       return {
-        error: room.language === "en" ? "Player not found." : "Spieler nicht gefunden."
+        error: room.language !== "de" ? "Player not found." : "Spieler nicht gefunden."
       };
     }
 

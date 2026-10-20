@@ -74,5 +74,15 @@ export const magicDuellText = {
       readyBlockedLabel: "Choose spells first",
       options: spellOptionsEn
     }
+  },
+  ar: {
+    displayName: "دوال السحر",
+    description: "دوال سحرة ثلاثية الأبعاد بنمط الحلبة مع تعويذات تُرسم على الهاتف.",
+    playerSetup: {
+      title: "اختر التعويذات",
+      description: "اختر التعويذات المتاحة على متحكّم هاتفك.",
+      readyBlockedLabel: "اختر التعويذات أولًا",
+      options: spellOptionsEn
+    }
   }
 } as const satisfies LocalizedGameTextMap;

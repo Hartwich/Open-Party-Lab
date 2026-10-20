@@ -8,5 +8,9 @@ export const wordTilesText: LocalizedGameTextMap = {
   en: {
     displayName: "Word Tiles",
     description: "Place words on a shared board and use premium squares well."
+  },
+  ar: {
+    displayName: "Word Tiles",
+    description: "ضع الكلمات على لوحة مشتركة واستخدم المربعات المميزة بذكاء."
   }
 };

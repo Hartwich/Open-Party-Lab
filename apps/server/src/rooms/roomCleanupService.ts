@@ -109,7 +109,7 @@ export class RoomCleanupService {
   }
 
   private closeRoom(room: RoomRecord, reason: RoomClosedReason): void {
-    const message = this.closeMessage(room.language === "en", reason);
+    const message = this.closeMessage(room.language !== "de", reason);
 
     this.io.to(room.code).emit("room:closed", {
       roomCode: room.code,

@@ -410,5 +410,14 @@ export const cardTableText: LocalizedGameTextMap = {
       description: "Choose the ruleset, deck and hand cards. Depending on the ruleset up to 6 people play, up to 16 in Symbol Hunt and up to 4 in Doppelkopf.",
       fields: setupFieldsEn
     }
+  },
+  ar: {
+    displayName: "طاولة الأوراق",
+    description: "طاولة أوراق مشتركة لاثني عشر لعبة: ماو ماو، الواحد والثلاثون، رهانات الأوراق، صفوف الأرقام، الاحتيال، العجوز العذراء، اطلب السماء، القلوب، دوبلكوبف، الرامي، صيد الرموز ولعب حر — مع إمكانية إضافة لاعبين افتراضيين.",
+    lobbySetup: {
+      title: "إعداد طاولة الأوراق",
+      description: "اختر قواعد اللعب والمجموعة والأوراق. بحسب القواعد يلعب حتى 6 أشخاص، وحتى 16 في صيد الرموز، وحتى 4 في دوبلكوبف.",
+      fields: setupFieldsEn
+    }
   }
 };

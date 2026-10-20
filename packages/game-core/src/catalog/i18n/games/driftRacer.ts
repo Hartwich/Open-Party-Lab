@@ -78,5 +78,44 @@ export const driftRacerText = {
         }
       }
     }
+  },
+  ar: {
+    displayName: "Drift Racer",
+    description: "سباق أركيد ثلاثي الأبعاد بأسلوب سيارات RC مع كاميرا مطاردة سينمائية وسلاح وخصوم بذكاء اصطناعي.",
+    lobbySetup: {
+      title: "إعداد Drift Racer",
+      description: "اختر الحلبة وعدد اللفات وعدد الخصوم من الذكاء الاصطناعي.",
+      fields: {
+        track: {
+          label: "الحلبة",
+          options: {
+            rotate: {
+              label: "متغيّرة",
+              description: "يقود كل سباق الحلبة التالية تلقائيًا."
+            },
+            "palm-bay": {
+              label: "Palm Bay",
+              description: "مسار جزيرة مدمج بقفزتين."
+            },
+            "lagoon-loop": {
+              label: "Lagoon Loop",
+              description: "منحنيات طويلة انسيابية وثلاث قفزات."
+            },
+            "volcano-ridge": {
+              label: "Volcano Ridge",
+              description: "أطول مسار بأربع قفزات ومنعطفات ضيقة."
+            }
+          }
+        },
+        laps: {
+          label: "اللفات",
+          description: "عدد اللفات حتى خط النهاية."
+        },
+        bots: {
+          label: "خصوم الذكاء الاصطناعي",
+          description: "سائقون إضافيون بحكم الحاسوب في السباق."
+        }
+      }
+    }
   }
 } as const satisfies LocalizedGameTextMap;

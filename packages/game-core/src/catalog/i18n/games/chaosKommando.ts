@@ -8,5 +8,9 @@ export const chaosKommandoText = {
   en: {
     displayName: "Chaos Commando",
     description: "Marshmallow turn-based artillery: roasted squads, six teams, island arenas, mines, crates and fully destructible terrain with tunnels."
+  },
+  ar: {
+    displayName: "Chaos Commando",
+    description: "مدفعية مارشميلو بالأدوار: فرق مشوية، ستة فرق، حلبات جزرية، ألغام وصناديق وأرضية قابلة للتدمير بالكامل مع أنفاق."
   }
 } as const satisfies LocalizedGameTextMap;

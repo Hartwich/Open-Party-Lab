@@ -198,6 +198,11 @@
   z-index: 1;
 }
 
+.hxh-entry-content {
+  display: grid;
+  gap: 16px;
+}
+
 /* ---------- Greed-Island card ---------- */
 
 .hxh-card {
@@ -258,8 +263,8 @@
 
 .hxh-logo-frame {
   position: relative;
-  width: 52px;
-  height: 52px;
+  width: clamp(40px, 6vh, 52px);
+  height: clamp(40px, 6vh, 52px);
   flex: none;
   display: grid;
   place-items: center;
@@ -307,7 +312,7 @@
   font-family: var(--hxh-display);
   font-style: italic;
   font-weight: 800;
-  font-size: clamp(2rem, 9vw, 3rem);
+  font-size: clamp(1.5rem, min(9vw, 7vh), 3rem);
   line-height: 0.95;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -333,9 +338,14 @@
 }
 
 .hxh-tagline {
-  margin: 10px 0 0;
+  margin: clamp(4px, 1vh, 10px) 0 0;
   color: var(--hxh-cream-dim);
   font-size: 0.85rem;
+}
+
+.hxh-entry .hxh-title {
+  font-size: clamp(1.5rem, min(7.5vw, 6vh), 2.1rem);
+  white-space: nowrap;
 }
 
 .hxh-nen {
@@ -669,9 +679,14 @@
 
 .hxh-avatar-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
   margin-top: 4px;
+  max-height: clamp(54px, 9vh, 68px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .hxh-avatar-chip {
@@ -679,11 +694,17 @@
   border: 1px solid rgba(243, 233, 210, 0.2);
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.28);
-  padding: 4px;
+  padding: 3px;
   display: grid;
   place-items: center;
   cursor: pointer;
+  line-height: 0;
   transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.hxh-avatar-chip svg {
+  width: clamp(34px, 8vw, 44px);
+  height: clamp(34px, 8vw, 44px);
 }
 
 .hxh-avatar-chip:hover,
@@ -767,12 +788,45 @@
   .hxh-loading .hxh-phases { margin-top: 8px; }
   .hxh-loading .hxh-phases span { min-height: 40px; padding: 6px 4px; }
   .hxh-loading .hxh-load-pct { font-size: clamp(1.2rem, 5vh, 1.6rem); }
+
+  /* Join card: compact so the whole pass fits without page scroll. */
+  .hxh-entry .hxh-card { padding: clamp(14px, 3vh, 22px); }
+  .hxh-entry .hxh-input { min-height: clamp(44px, 6.5vh, 56px); padding: 10px 14px; }
+  .hxh-entry .hxh-btn { min-height: clamp(44px, 6.5vh, 52px); padding: 12px 16px; }
+  .hxh-entry .hxh-field { gap: 6px; }
+  .hxh-entry form { gap: clamp(8px, 1.6vh, 14px) !important; margin-top: clamp(10px, 2vh, 18px) !important; }
+  .hxh-entry .hxh-nen { margin-top: 6px; }
+  .hxh-entry .hxh-strip { margin-top: 6px; }
+  .hxh-entry .hxh-subtitle { margin-top: 4px; }
 }
 
 @media (max-height: 540px) {
   .hxh-loading .hxh-phases { display: none; }
   .hxh-loading .hxh-logo-frame { width: 44px; height: 44px; }
   .hxh-loading .hxh-strip { display: none; }
+}
+
+/* Very short phones (e.g. 360x640): reclaim the last ~100px so the entry
+   card still fits with no page scroll. */
+@media (max-height: 660px) {
+  .hxh-entry { gap: 8px; padding: 6px 8px; }
+  .hxh-content { gap: 8px; }
+  .hxh-entry-content { gap: 8px; }
+  .hxh-entry .hxh-admin-link { margin: 0; font-size: 0.78rem; }
+  .hxh-entry .hxh-card { padding: clamp(10px, 2vh, 16px) clamp(12px, 3vh, 18px); }
+  .hxh-entry .hxh-strip { display: none; }
+  .hxh-entry .hxh-subtitle { margin-top: 3px; }
+  .hxh-entry .hxh-club { margin: 0; }
+  .hxh-entry form { margin-top: clamp(8px, 1.6vh, 14px) !important; }
+  .hxh-entry .hxh-title { font-size: clamp(1.3rem, 5.5vh, 2rem); }
+  .hxh-entry .hxh-subtitle { letter-spacing: 0.24em; }
+  .hxh-entry .hxh-avatar-grid { max-height: clamp(46px, 8vh, 56px); }
+  .hxh-avatar-chip svg { width: clamp(28px, 6vw, 36px); height: clamp(28px, 6vw, 36px); }
+  .hxh-entry .hxh-input { min-height: clamp(40px, 6vh, 50px); }
+  .hxh-entry .hxh-btn { min-height: clamp(40px, 6vh, 48px); }
+  .hxh-entry form { gap: clamp(6px, 1.3vh, 12px) !important; margin-top: clamp(8px, 1.6vh, 14px) !important; }
+  .hxh-entry .hxh-avatar-meta { margin-top: 4px; font-size: 0.78rem; }
+  .hxh-entry .hxh-admin-link { font-size: 0.78rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

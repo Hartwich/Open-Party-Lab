@@ -350,6 +350,122 @@ const controllerText = {
           return "Waiting";
       }
     }
+  },
+  ar: {
+    hostControlTitle: "أدوات المضيف",
+    hostControlTake: "التحكّم بالمضيف",
+    hostControlPending: "أُرسلت الطلب.",
+    hostControlPendingCountdown: (seconds: number) =>
+      `يتولّى التحكّم خلال ${seconds} ثانية ما لم يعترض أحد.`,
+    hostControlHeldByOther: (name: string) => `${name} يتحكّم بالمضيف الآن.`,
+    hostControlHandoverTitle: "تسليم أدوات التحكّم؟",
+    hostControlHandoverBody: (name: string) => `${name} يريد التحكّم بالمضيف.`,
+    hostControlHandoverKeep: "الاحتفاظ",
+    hostControlHandoverGive: "التسليم",
+    hostControlHandoverCountdown: (seconds: number) =>
+      `دون ردّ سيحصل عليها خلال ${seconds} ثانية.`,
+    hostMenuOpen: "قائمة المضيف",
+    hostMenuTitle: "قائمة المضيف",
+    hostMenuPausedNote: "الجولة متوقفة طالما هذه القائمة مفتوحة.",
+    hostMenuResume: "استئناف",
+    hostMenuToMainMenu: "العودة إلى القائمة الرئيسية",
+    hostControlActive: "أنت تتحكّم بالمضيف.",
+    hostControlRelease: "إعادة التحكّم",
+    themeLabel: "السمة",
+    themeLight: "فاتحة",
+    themeDark: "داكنة",
+    languageLabel: "اللغة",
+    hostControlChooseGame: "اختر لعبة",
+    hostControlStartRound: "ابدأ الجولة",
+    hostControlBackToMenu: "العودة إلى القائمة",
+    hostControlRoster: "اللاعبون في الغرفة",
+    hostControlKick: (name: string) => `إزالة ${name}`,
+    hostControlRoundRunning: "مقفلة أثناء قيام الجولة.",
+    joinTitle: "انضمام",
+    joinSubtitle: "وصّل هاتفك بالغرفة على الشاشة الكبيرة.",
+    roomCode: "رمز الغرفة",
+    name: "الاسم",
+    joinRoom: "انضم إلى الغرفة",
+    connectingController: "جارٍ توصيل المتحكّم بالخادم...",
+    serverConnected: "تم الاتصال بالخادم.",
+    serverNotConnected: "لا اتصال بالخادم بعد.",
+    reconnectTitle: "استئناف الجلسة",
+    reconnectSubtitle: "لا تزال هناك جلسة متحكّم محفوظة على هذا الجهاز.",
+    continueSession: "استئناف الجلسة",
+    discardLocalSession: "تجاهل الجلسة المحلية",
+    room: "الغرفة",
+    notFoundTitle: "الصفحة غير موجودة",
+    notFoundSubtitle: "تعذّر إنشاء عرض المتحكّم.",
+    notFoundBody: "أعد تحميل الصفحة أو انضم إلى الغرفة مجددًا.",
+    controllerTitle: "المتحكّم",
+    preparingGameView: "جارٍ تحضير عرض اللعبة.",
+    unsupportedGame: "لم يبدأ المضيف أي لعبة مدعومة بعد.",
+    phase: "المرحلة",
+    unknown: "غير معروف",
+    logout: "تسجيل الخروج",
+    fullscreen: "ملء الشاشة",
+    exitFullscreen: "الخروج من ملء الشاشة",
+    fullscreenHint: "انقر أو اضغط F لملء الشاشة",
+    exitFullscreenHint: "Esc أو F للخروج من ملء الشاشة",
+    fullscreenHelp: "مساعدة ملء الشاشة",
+    fullscreenInstallTitle: "العب بدون شريط المتصفح",
+    fullscreenInstallBody: "لا يستطيع هذا المتصفح ملء شاشة المتحكّم. افتح الصفحة في Safari ثم اختر مشاركة ← إضافة إلى الشاشة الرئيسية. إن ظهر الخيار فعّل \"فتح كتطبيق ويب\".\n\nبعد ذلك أطلق المتحكّم من الأيقونة الجديدة، وأعد الانضمام إلى الغرفة هناك إن لزم.",
+    fullscreenUnavailable: "لا يدعم هذا المتصفح ملء الشاشة للمتحكّم. يمكنك المتابعة هنا أو استخدام متصفح آخر.",
+    fullscreenFailed: "رفض المتصفح الانتقال إلى ملء الشاشة. أغلق هذه الرسالة وحاول مجددًا. يمكنك أيضًا المتابعة بدون ملء الشاشة.",
+    fullscreenHelpClose: "فهمت",
+    score: "النتيجة",
+    lobbySelected: (gameName: string) => `المُختارة: ${gameName}`,
+    lobbyWaitingHost: "سيختار المضيف لعبة قريبًا.",
+    leaveRoom: "مغادرة الغرفة",
+    ready: "مستعد",
+    notReady: "غير مستعد",
+    chooseCharacterFirst: "اختر شخصيتك أولًا",
+    chooseSetupFirst: "اختر الإعداد أولًا",
+    setup: "الإعداد",
+    setupChooseTitle: "اختر الإعداد",
+    selectionCount: (selected: number, min: number, max: number) =>
+      `تم اختيار ${selected}/${max}، الحد الأدنى ${min}`,
+    characterChooseTitle: "اختر شخصية",
+    characterChooseDescription: "اختر شخصية للجولة أولًا، ثم يمكنك الاستعداد.",
+    yourCharacter: "شخصيتك",
+    select: "اختيار",
+    chosenBy: (names: string) => `اختارها ${names}`,
+    stillFree: "ما زالت حرّة",
+    players: "اللاعبون",
+    minRequired: (minPlayers: number) => `يلزم ${minPlayers} على الأقل`,
+    needsMorePlayers: "تحتاج هذه اللعبة إلى لاعبين أكثر.",
+    readyCount: "مستعدون",
+    character: "الشخصية",
+    noCharacter: "بلا شخصية",
+    connectedReady: "مستعد",
+    connectedWaiting: "ينتظر",
+    nextRound: "الجولة التالية",
+    nextRoundDescription: (readyCount: number, playerCount: number) =>
+      `تبدأ الجولة التالية عند ${readyCount}/${playerCount} مستعدين.`,
+    readyForNextRound: "مستعد للجولة التالية",
+    readyForNextRoundQuestion: "هل أنت مستعد للجولة التالية؟",
+    waitForPlayers: (readyCount: number, playerCount: number) =>
+      `بانتظار جميع اللاعبين. ${readyCount}/${playerCount} مستعدون.`,
+    formatPhase: (phase: PublicGamePhase | string | undefined) => {
+      switch (phase) {
+        case "round_intro":
+          return "مقدمة";
+        case "countdown":
+          return "عدّ تنازلي";
+        case "playing":
+          return "اللعب";
+        case "locked":
+          return "مقفلة";
+        case "result":
+          return "النتيجة";
+        case "scoreboard":
+          return "لوحة النتائج";
+        case "finished":
+          return "انتهت";
+        default:
+          return "انتظار";
+      }
+    }
   }
 } satisfies Record<SupportedLanguage, ControllerText>;
 

@@ -8,5 +8,9 @@ export const imposterText = {
   en: {
     displayName: "Imposter",
     description: "Find the bluffing player through clues and a vote."
+  },
+  ar: {
+    displayName: "Imposter",
+    description: "اكتشف اللاعب المدّعي من خلال الأدلة والتصويت."
   }
 } as const satisfies LocalizedGameTextMap;

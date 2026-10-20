@@ -8,5 +8,9 @@ export const schaetzoramaText = {
   en: {
     displayName: "Schaetzorama",
     description: "Estimate, sort and copy facts on a bright quiz console."
+  },
+  ar: {
+    displayName: "Schaetzorama",
+    description: "قدّر ورتّب وانسخ الحقائق على لوحة أسئلة ملوّنة."
   }
 } as const satisfies LocalizedGameTextMap;

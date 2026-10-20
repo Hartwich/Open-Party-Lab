@@ -73,6 +73,12 @@ export function ControllerApp() {
   }, []);
 
   const page = resolvePage(state);
+  const language = state.room?.language ?? state.preferredLanguage;
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+  }, [language]);
   const showBootLoader = !booted && (page === "join" || page === "reconnect");
 
   if (showBootLoader) {

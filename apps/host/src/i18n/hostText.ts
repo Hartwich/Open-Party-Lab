@@ -25,6 +25,21 @@ export function writeStoredHostLanguage(language: SupportedLanguage): void {
   window.localStorage.setItem(languagePreferenceKey, language);
 }
 
+/**
+ * Reflects the active language on the document itself.
+ *
+ * Arabic reads right to left, so the whole shared screen flips with it.
+ * Everything else stays left to right.
+ */
+export function applyDocumentLanguage(language: SupportedLanguage): void {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  document.documentElement.lang = language;
+  document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+}
+
 export interface HostText {
   languageLabel: string;
   themeLabel: string;
@@ -386,6 +401,146 @@ const hostText = {
           return "scoreboard";
         case "finished":
           return "finished";
+        default:
+          return phase;
+      }
+    }
+  },
+  ar: {
+    shellKicker: "اختر لعبة",
+    shellTitle: "ماذا نلعب؟",
+    shellSetupKicker: "الإعدادات",
+    shellStartRound: "ابدأ الجولة",
+    shellRoundRunning: "الجولة جارية",
+    shellBackToCatalog: "العودة إلى الألعاب",
+    shellRosterEmpty: "لا أحد هنا بعد. امسح الرمز للانضمام.",
+    shellNeedsPlayers: (missing: number) =>
+      missing === 1 ? "يلزم لاعب واحد إضافي." : `يلزم ${missing} لاعبين إضافيين.`,
+    shellReadyCount: (ready: number, total: number) => `${ready} من ${total} جاهزون`,
+    roomExpiryTitle: "الغرفة على وشك الانتهاء",
+    roomExpiryBody: (minutes: number) => `ستُغلق هذه الغرفة خلال حوالي ${minutes} دقيقة.`,
+    roomExpiryExtend: "تمديد ساعة واحدة",
+    roomExpiryExtending: "جارٍ التمديد...",
+    roomExpiryExtended: "تم تمديد الغرفة ساعة واحدة.",
+    roomExpiryCountdown: (time: string) => `ستُغلق هذه الغرفة خلال ${time}.`,
+    roundPausedTitle: "الجولة متوقفة مؤقتًا",
+    roundPausedByPlayer: (name: string) => `فتح ${name} قائمة المضيف.`,
+    roundPausedByScreen: "قائمة المضيف مفتوحة.",
+    roundPausedHint: "تُستأنف اللعبة عند إغلاق القائمة.",
+    hostControlRequestTitle: "تسليم التحكم؟",
+    hostControlRequestBody: (name: string) => `${name} يريد إدارة المضيف.`,
+    hostControlRequestHint: "تنتقل اختيار اللعبة وبدء الجولة وقائمة اللاعبين إلى الهاتف.",
+    hostControlAllow: "السماح",
+    hostControlDeny: "رفض",
+    hostControlDelegatedTitle: "الهاتف يتحكم الآن",
+    hostControlDelegatedBody: (name: string) => `${name} يدير المضيف.`,
+    hostControlReclaim: "استعادة التحكم",
+    languageLabel: "اللغة",
+    themeLabel: "المظهر",
+    themeLight: "فاتح",
+    themeDark: "داكن",
+    phoneController: "وحدة تحكم الهاتف",
+    showPhoneController: "إظهار وحدة تحكم الهاتف",
+    hide: "إخفاء",
+    fullscreen: "ملء الشاشة",
+    exitFullscreen: "إنهاء ملء الشاشة",
+    fpsLabel: "الإطارات/ث",
+    musicVolumeLabel: "الموسيقى",
+    soundEffectsVolumeLabel: "المؤثرات الصوتية",
+    hostControlsTitle: "عناصر تحكم المضيف",
+    hostControlsSubtitle: "الصوت والفيديو واللغة واللاعبون",
+    close: "إغلاق",
+    noGame: "لا توجد لعبة",
+    connected: "متصل",
+    waitingForRoom: "بانتظار الغرفة",
+    offline: "غير متصل",
+    connectionMissing: "الاتصال مفقود",
+    players: "اللاعبون",
+    playerRange: (min: number, max: number) => `${min}-${max} لاعبين`,
+    selected: "محدد",
+    lobby: "الردهة",
+    connectedShort: "متصل",
+    noPlayersJoined: "لم ينضم أي لاعب بعد.",
+    noPlayersConnected: "لا يوجد لاعبون متصلون بعد.",
+    roomListPending: "تظهر قائمة اللاعبين هنا بعد إنشاء الغرفة.",
+    moderationAllowed: "يمكن إزالة اللاعبين في الردهة أو بين الجولات.",
+    moderationLocked: "الإخراج مقفل أثناء جولة نشطة.",
+    ready: "جاهز",
+    waiting: "بانتظار",
+    reconnecting: "إعادة الاتصال",
+    notReady: "غير جاهز",
+    kick: "إخراج",
+    kickPlayer: (name: string) => `إخراج اللاعب ${name}`,
+    roomCode: "رمز الغرفة",
+    join: "انضمام",
+    lobbyTitle: "ردهة الحفلة",
+    lobbyPlayersTitle: "اللاعبون في الردهة",
+    quickStartTitle: "بدء سريع",
+    quickStartLines: [
+      "انقر أو اضغط مفتاح رقم لاختيار لعبة.",
+      "ثم ابدأ تلقائيًا أو باستخدام المسافة."
+    ],
+    gameSelectionFallback: "اختيار اللعبة",
+    gameSelectRoundActiveSubtitle:
+      "نظرة عامة على الألعاب مفتوحة. أثناء تشغيل جولة، يبقى الاختيار والبدء مقفلين.",
+    gameSelectAutoReadySubtitle:
+      "بدّل الألعاب بالفأرة أو مفاتيح الأرقام. الجولات المعتمدة على الجاهزية تبدأ تلقائيًا.",
+    gameSelectClassicSubtitle:
+      "بدّل الألعاب بالفأرة أو مفاتيح الأرقام. الجولات القياسية تبدأ بالمسافة.",
+    playerStatusTitle: "حالة اللاعب",
+    noActiveGameTitle: "لا توجد لعبة نشطة",
+    noActiveGameSelectLine: "اختر بطاقة لعبة أعلاه.",
+    noActiveGameRoundActiveLine:
+      "الجولة الحالية لا تزال جارية. بمجرد انتهائها يمكنك اختيار لعبة جديدة هنا.",
+    noActiveGameStartLine:
+      "بعد ذلك تبدأ الجولة إما من خلال الجاهزية أو بالطريقة القياسية باستخدام المسافة.",
+    playersConnected: (count: number, max: number) => `اللاعبون المتصلون: ${count}/${max}`,
+    activeRoundLockedLine:
+      "هناك جولة نشطة جارية. يبقى الاختيار ظاهرًا لكنه مقفل حتى تنتهي الجولة.",
+    setupChoicePendingLine: "يحتاج جميع اللاعبين إلى إجراء اختيارهم أولاً.",
+    autoReadyLine: "يحتاج جميع اللاعبين إلى أن يكونوا جاهزين على هواتفهم.",
+    spaceStartLine: "تبدأ المسافة الجولة بمجرد اتصال عدد كافٍ من اللاعبين.",
+    setupControlsLine: "تحتوي هذه اللعبة على خيارات إعداد يمكن ضبطها هنا.",
+    afterRoundSwitchLine: "بعد انتهاء الجولة يمكنك التبديل بحرية مرة أخرى.",
+    autoStartsWhenReadyLine: "بمجرد أن يصبح الجميع جاهزين مجددًا تبدأ الجولة تلقائيًا.",
+    readyVisibleLine: "تبقى حالة الجاهزية والبدء ظاهرة هنا.",
+    setupFollowsTitle: "الإعداد التالي",
+    readyToStartTitle: "جاهز للبدء",
+    backToMenu: "العودة إلى القائمة",
+    backToMenuShort: "القائمة",
+    gameLobbySubtitle: "اضبط الجولة وابدأوا معًا.",
+    gameLobbySetupTitle: "إعداد الجولة",
+    characterSelecting: "اختيار الشخصية",
+    morePlayers: (count: number) => `+${count} لاعبين آخرين`,
+    errorLabel: "خطأ",
+    roomPrefix: "غرفة",
+    hostCreatingRoom: "جارٍ إنشاء الغرفة ...",
+    hostConnecting: "جارٍ ربط المضيف بالخادم ...",
+    scanQr: "امسح رمز QR أو افتح الرابط على هاتفك",
+    hostPageHint: "استخدم دائمًا رابط وحدة التحكم المعروض أو رمز QR على الهاتف.",
+    serverOnline: "الخادم متصل",
+    serverOffline: "الخادم غير متصل",
+    readyNextTitle: "جاهز للجولة التالية",
+    lifecycle: (phase: RoomLifecycle | string) => {
+      switch (phase) {
+        case "lobby":
+          return "الردهة";
+        case "game_selected":
+          return "تم اختيار اللعبة";
+        case "round_intro":
+          return "مقدمة";
+        case "countdown":
+          return "العد التنازلي";
+        case "playing":
+          return "قيد اللعب";
+        case "locked":
+          return "مقفل";
+        case "result":
+          return "النتيجة";
+        case "scoreboard":
+          return "لوحة النتائج";
+        case "finished":
+          return "انتهى";
         default:
           return phase;
       }

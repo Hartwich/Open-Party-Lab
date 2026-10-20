@@ -97,7 +97,7 @@ export function JoinPage({ defaultRoomCode, connected, error, language, onJoin }
   return (
     <div className="hxh-scope hxh-entry">
       <HunterScene />
-      <div className="hxh-content" style={{ width: "100%", maxWidth: 560, display: "grid", gap: 16 }}>
+      <div className="hxh-content hxh-entry-content" style={{ width: "100%", maxWidth: 560 }}>
         <div
           className={`hxh-card${shaking ? " hxh-shake" : ""}`}
           onAnimationEnd={() => setShaking(false)}
@@ -115,7 +115,7 @@ export function JoinPage({ defaultRoomCode, connected, error, language, onJoin }
             </span>
             <div style={{ minWidth: 0 }}>
               <p className="hxh-club">LDC — ESTIN</p>
-              <h1 className="hxh-title" style={{ fontSize: "clamp(1.7rem, 7.5vw, 2.4rem)" }}>
+              <h1 className="hxh-title">
                 Hunter <span className="hxh-x">×</span> Hunter
               </h1>
               <p className="hxh-subtitle">LDC Welcome Day</p>

@@ -16,5 +16,13 @@ export const blickwinkelText = {
       title: "Set up Blickwinkel",
       fields: { adultContent: { label: "18+", description: "Add questions and text tasks about flirting, sex and nightlife." } }
     }
+  },
+  ar: {
+    displayName: "Blickwinkel",
+    description: "صوّت سرًّا واكتب إجابات قصيرة والتقط صورًا وارسم. كم تعرفون بعضكم البعض؟",
+    lobbySetup: {
+      title: "إعداد Blickwinkel",
+      fields: { adultContent: { label: "+18", description: "أضف أسئلة ومهام نصية عن التغرّب والجنس وحياة الليل." } }
+    }
   }
 } as const satisfies LocalizedGameTextMap;

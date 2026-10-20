@@ -62,5 +62,36 @@ export const zeichnenUndErratenText = {
         }
       }
     }
+  },
+  ar: {
+    displayName: "ارسم وخمّن",
+    description: "يرسم لاعب واحد على الهاتف بينما يخمّن البقية الكلمة.",
+    lobbySetup: {
+      title: "فئة الكلمة",
+      description: "اختر الكلمات المسموح بها في الجولة.",
+      fields: {
+        category: {
+          label: "الفئة",
+          options: {
+            standard: {
+              label: "للعائلة",
+              description: "كلمات رسم مناسبة للعائلة."
+            },
+            adult: {
+              label: "+18",
+              description: "كلمات حفلات للكبار."
+            },
+            all: {
+              label: "الكل",
+              description: "كلمات العائلة والكبار معًا."
+            }
+          }
+        },
+        roundSeconds: {
+          label: "زمن الجولة بالثواني (0 = بلا حد)",
+          description: "يحدّد مدة التخمين."
+        }
+      }
+    }
   }
 } as const satisfies LocalizedGameTextMap;

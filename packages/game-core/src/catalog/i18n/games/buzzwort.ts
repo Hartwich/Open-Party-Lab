@@ -8,5 +8,9 @@ export const buzzwortText = {
   en: {
     displayName: "Buzzword",
     description: "Explain terms against the clock without saying the forbidden words - a watcher is listening."
+  },
+  ar: {
+    displayName: "Buzzword",
+    description: "اشرح المصطلحات ضدد الوقت دون قول الكلمات الممنوعة — هناك من يراقب."
   }
 } as const satisfies LocalizedGameTextMap;

@@ -16,5 +16,13 @@ export const pantomimeText = {
       mode: { label: "Game mode" }, category: { label: "Words" },
       duration: { label: "Seconds per actor" }, skips: { label: "Skips per actor turn" }
     } }
+  },
+  ar: {
+    displayName: "تمثيل صامت",
+    description: "مثّل كلمات دون كلام، واجمع التخمينات الصحيحة، ومراجعها معًا.",
+    lobbySetup: { title: "إعداد التمثيل الصامت", fields: {
+      mode: { label: "وضع اللعب" }, category: { label: "الكلمات" },
+      duration: { label: "ثوانٍ لكل ممثّل" }, skips: { label: "التجاوزات لكل دور" }
+    } }
   }
 } as const satisfies LocalizedGameTextMap;

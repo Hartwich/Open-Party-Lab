@@ -242,5 +242,58 @@ export const arenaSurvivorText = {
       description: "Choose your character for the run.",
       options: characterOptionsEn
     }
+  },
+  ar: {
+    displayName: "ناجي الساحة",
+    description: "نجَ في الساحة ضد موجات لا تنتهي من الأعداء.",
+    lobbySetup: {
+      title: "إعداد الجولة",
+      description: "حدّد الصعوبة ووافق على الجولة.",
+      fields: {
+        mode: {
+          label: "الوضع",
+          description: "موجات: موجات ومتاجر. بقاء: 20 دقيقة في عالم Frostfire الواسع.",
+          options: {
+            wave: { label: "موجات" },
+            survival: { label: "بقاء · ملحمة Frostfire" }
+          }
+        },
+        visualTheme: {
+          label: "النمط البصري",
+          description: "اختر الطقم البصري الكامل للخريطة والشخصيات والأعداء والعتاد.",
+          options: {
+            "marshmallow-mayhem": {
+              label: "فوضى المارشميلو",
+              description: "عالم ألوان مائية محمّص بأشكال حيوية وتحريك للنظر ووحوش لذيذة."
+            },
+            "frostfire-saga": {
+              label: "ملحمة Frostfire",
+              description: "عالم نوردي مرسوم يدويًا بالجليد والجمر والرموز والخشب المنحوت."
+            },
+            "obsidian-relay": {
+              label: "مرساة السبج",
+              description: "آثار خيال علمي مفصّلة، بلازما، نحاس، ومعدن أسود."
+            },
+            classic: {
+              label: "الساحة الكلاسيكية",
+              description: "تصميم الساحة الدافئ والعضوي المعهود."
+            }
+          }
+        },
+        difficulty: {
+          label: "الصعوبة",
+          description: "الخطر من 1 إلى 5."
+        }
+      },
+      confirmation: {
+        label: "الموافقة على الجولة",
+        description: "يبدأ تلقائيًا بمجرد استعداد جميع اللاعبين."
+      }
+    },
+    playerSetup: {
+      title: "اختر شخصيتك",
+      description: "اختر شخصيتك للجولة.",
+      options: characterOptionsEn
+    }
   }
 } as const satisfies LocalizedGameTextMap;

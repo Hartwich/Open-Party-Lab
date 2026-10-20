@@ -1,3 +1,4 @@
+import type { SupportedLanguage } from "../i18n/language.js";
 import type { ControllerLayoutKey } from "../layouts/ControllerLayoutKey.js";
 import type { RoundPhaseTimings } from "../state/RoundPhaseTimings.js";
 import type {
@@ -14,7 +15,9 @@ export interface GameLobbySetupOption {
   label: string;
   description?: string;
   /** Localized rules shown before starting the selected option. */
-  rules?: Partial<Record<"de" | "en", readonly { title: string; lines: readonly string[] }[]>>;
+  rules?: Partial<
+    Record<SupportedLanguage, readonly { title: string; lines: readonly string[] }[]>
+  >;
 }
 
 /**

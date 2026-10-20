@@ -18,6 +18,16 @@ portable launcher, or verify a hosted deployment.
 
 Platform:
 
+- Arabic (`ar`) is a full room language alongside German and English. It is offered
+  at login and in the room language toggle, and the catalog, host controls, controller
+  UI, join/lobby screens and server messages are translated. Both the shared screen and
+  the phone flip to right-to-left for Arabic. Game catalogs carry Arabic display names and
+  descriptions, and the phone's in-room game picker shows the localized description under
+  each game. Where a game has no Arabic text yet, English is used as the fallback rather
+  than German. Local game repos only carry the Arabic strings needed to typecheck plus
+  translated top-level UI; their per-string language ternaries still fall back to German.
+  RTL layout has not been visually verified on a real device.
+
 - Symboljagd setup defaults to the existing whole-deck deal and can instead set an equal target of 1–300 cards per person (default 30). Fixed-target rounds deal one live card per person, replenish from a hidden reserve, and reshuffle retired center cards when needed; the first to reach the target wins. Host counters show remaining targets, and solo completion time also works with fixed targets. Side hit pictures are larger where space permits. Browser/phone visual QA remains open.
 
 - Pantomime host and phone countdowns now use a shared, monotonic server clock instead of independent device wall clocks. Socket clock samples compensate for half the round-trip latency, prefer low-latency replies and recalibrate every five seconds and after reconnect; stalled replies are ignored. Deterministic clock regressions cover device skew, latency, reconnect and resynchronization. The proposed illustrated host redesign is a concept image only; it has not replaced the host UI yet.

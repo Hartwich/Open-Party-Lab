@@ -11,7 +11,11 @@ import type {
 import { io, type Socket } from "socket.io-client";
 import { ServerClock, startServerClockSync } from "@open-party-lab/game-core";
 import { hasActiveRound } from "@open-party-lab/protocol";
-import { readStoredHostLanguage, writeStoredHostLanguage } from "../i18n/hostText.js";
+import {
+  applyDocumentLanguage,
+  readStoredHostLanguage,
+  writeStoredHostLanguage
+} from "../i18n/hostText.js";
 import { hostGameRegistry } from "../games/registry.js";
 import { applyHostTheme } from "../ui/theme/theme.js";
 
@@ -41,6 +45,8 @@ const initialState: HostAppState = {
   preferredLobbyScreen: null,
   sceneOverride: null
 };
+
+applyDocumentLanguage(initialState.preferredLanguage);
 
 function resolvePreferredLobbyScreen(
   room: RoomSnapshot | null,
@@ -114,6 +120,8 @@ export class HostSocketClient {
 
     this.socket.on("room:state", ({ room }) => {
       writeStoredHostLanguage(room.language);
+
+      applyDocumentLanguage(room.language);
       // The theme is a room setting; adopting it here keeps every scene and
       // overlay in step without each of them subscribing separately.
       this.themeChanged = applyHostTheme(room.theme) || this.themeChanged;
@@ -230,6 +238,7 @@ export class HostSocketClient {
 
   setLanguage(language: SupportedLanguage): void {
     writeStoredHostLanguage(language);
+    applyDocumentLanguage(language);
     this.updateState({ preferredLanguage: language });
 
     const roomCode = this.state.room?.code;
@@ -245,6 +254,9 @@ export class HostSocketClient {
       }
 
       writeStoredHostLanguage(result.data.room.language);
+
+
+      applyDocumentLanguage(result.data.room.language);
       this.updateState({
         room: result.data.room,
         preferredLanguage: result.data.room.language,
@@ -475,6 +487,9 @@ export class HostSocketClient {
       }
 
       writeStoredHostLanguage(result.data.room.language);
+
+
+      applyDocumentLanguage(result.data.room.language);
       this.updateState({
         room: result.data.room,
         preferredLanguage: result.data.room.language,

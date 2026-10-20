@@ -231,6 +231,7 @@ export function mountHostedLanding(): void {
 
   const renderLanguage = () => {
     document.documentElement.lang = language;
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
     document.title = landingCopy.title;
 
     for (const element of app.querySelectorAll<HTMLElement>("[data-text]")) {

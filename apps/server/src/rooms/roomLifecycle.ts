@@ -171,13 +171,15 @@ export function explainCannotStartRound(
   selectedGame: AvailableGameDto | undefined
 ): string | null {
   const en = room.language === "en";
+  const ar = room.language === "ar";
+  const t = (de: string, english: string) => (ar || en ? english : de);
 
   if (!room.selectedGameId || !selectedGame) {
-    return en ? "Please choose a game first." : "Bitte zuerst ein Spiel auswaehlen.";
+    return t("Bitte zuerst ein Spiel auswaehlen.", "Please choose a game first.");
   }
 
   if (room.currentRound && room.currentRound.phase !== "finished") {
-    return en ? "The current round is still running." : "Die aktuelle Runde laeuft noch.";
+    return t("Die aktuelle Runde laeuft noch.", "The current round is still running.");
   }
 
   const players = [...room.players.values()];
@@ -191,23 +193,26 @@ export function explainCannotStartRound(
   );
 
   if (players.length < minimumPlayers) {
-    return en
-      ? `${selectedGame.displayName} needs at least ${minimumPlayers} players.`
-      : `${selectedGame.displayName} braucht mindestens ${minimumPlayers} Spieler.`;
+    return t(
+      `${selectedGame.displayName} braucht mindestens ${minimumPlayers} Spieler.`,
+      `${selectedGame.displayName} needs at least ${minimumPlayers} players.`
+    );
   }
 
   if (players.length > maximumPlayers) {
-    return en
-      ? `${selectedGame.displayName} allows at most ${maximumPlayers} players.`
-      : `${selectedGame.displayName} erlaubt hoechstens ${maximumPlayers} Spieler.`;
+    return t(
+      `${selectedGame.displayName} erlaubt hoechstens ${maximumPlayers} Spieler.`,
+      `${selectedGame.displayName} allows at most ${maximumPlayers} players.`
+    );
   }
 
   const waitingPlayers = players.filter((player) => !player.isReady);
 
   if (waitingPlayers.length > 0) {
-    return en
-      ? `Not everyone is ready yet: ${waitingPlayers.map((player) => player.name).join(", ")}.`
-      : `Es sind noch nicht alle bereit: ${waitingPlayers.map((player) => player.name).join(", ")}.`;
+    return t(
+      `Es sind noch nicht alle bereit: ${waitingPlayers.map((player) => player.name).join(", ")}.`,
+      `Not everyone is ready yet: ${waitingPlayers.map((player) => player.name).join(", ")}.`
+    );
   }
 
   if (!areRequiredPlayerSetupChoicesSelected(room, selectedGame)) {
@@ -216,15 +221,17 @@ export function explainCannotStartRound(
       .map((player) => player.name)
       .join(", ");
 
-    return en
-      ? `These players need to choose their setup first: ${missingChoices}.`
-      : `Diese Spieler muessen erst ihre Auswahl treffen: ${missingChoices}.`;
+    return t(
+      `Diese Spieler muessen erst ihre Auswahl treffen: ${missingChoices}.`,
+      `These players need to choose their setup first: ${missingChoices}.`
+    );
   }
 
   if (!isLobbySetupConfirmed(room, selectedGame)) {
-    return en
-      ? "The host needs to confirm the game setup first."
-      : "Der Host muss das Spiel-Setup erst bestaetigen.";
+    return t(
+      "Der Host muss das Spiel-Setup erst bestaetigen.",
+      "The host needs to confirm the game setup first."
+    );
   }
 
   return null;

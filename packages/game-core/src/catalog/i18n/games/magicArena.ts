@@ -46,5 +46,28 @@ export const magicArenaText = {
         }
       }
     }
+  },
+  ar: {
+    displayName: "Magic Arena",
+    description: "تكتيك سداسي ثلاثي الأبعاد بالأدوار مع بطاقات وعقبات مائية وتخطيط مخفي.",
+    lobbySetup: {
+      title: "إعداد Magic Arena",
+      description: "اختر طريقة لعب الأدوار.",
+      fields: {
+        planningMode: {
+          label: "تخطيط الدور",
+          options: {
+            planned: {
+              label: "تخطيط مسبق",
+              description: "تُخطَّط الأدوار الأربعة كلها مقلوبة ثم تُنفَّذ معًا."
+            },
+            sequential: {
+              label: "دورًا بدور",
+              description: "يتحرك اللاعبون بالتناوب: يُنفَّذ كل فورًا."
+            }
+          }
+        }
+      }
+    }
   }
 } as const satisfies LocalizedGameTextMap;

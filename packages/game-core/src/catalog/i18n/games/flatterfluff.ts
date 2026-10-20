@@ -54,5 +54,32 @@ export const flatterfluffText = {
         }
       }
     }
+  },
+  ar: {
+    displayName: "Flatterfluff",
+    description: "مطاردة أهداف سريعة في سهول السكر مع مارشميلو مجنّح وشحن وصناديق ذخيرة وحتى ستة صلبان مرمية ملوّنة.",
+    lobbySetup: {
+      title: "إعداد Flatterfluff",
+      description: "اختر مطاردة مؤقّتة أو جولة مفتوحة بلا نهاية.",
+      fields: {
+        mode: {
+          label: "وضع اللعب",
+          options: {
+            timed: {
+              label: "مطاردة مؤقّتة",
+              description: "اجمع أكبر عدد من النقاط قبل انتهاء الوقت."
+            },
+            endless: {
+              label: "بلا نهاية",
+              description: "العب دون حد زمني حتى ينهي المضيف الجولة."
+            }
+          }
+        },
+        roundSeconds: {
+          label: "زمن الجولة",
+          description: "مدة المطاردة المؤقّتة بالثواني."
+        }
+      }
+    }
   }
 } as const satisfies LocalizedGameTextMap;

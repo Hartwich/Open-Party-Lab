@@ -229,6 +229,19 @@ export function HostControlPanel({
                   }}
                 >
                   {game.displayName}
+                  {game.description ? (
+                    <span
+                      style={{
+                        display: "block",
+                        marginTop: 2,
+                        fontSize: "0.78em",
+                        fontWeight: 400,
+                        color: "var(--ink-soft)"
+                      }}
+                    >
+                      {game.description}
+                    </span>
+                  ) : null}
                 </button>
               );
             })}
