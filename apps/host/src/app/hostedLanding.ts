@@ -137,7 +137,7 @@ export function mountHostedLanding(): void {
   const style = document.createElement("style");
   style.textContent = `
     :root{${themeRootBlock()};font-family:var(--font-body);color:var(--ink);background:#07100c}
-    .hosted-landing-page,.hosted-landing-page #app{overflow:auto;min-height:100%;height:auto;background:#07100c}
+    .hosted-landing-page,.hosted-landing-page #app{overflow:auto;overflow-x:hidden;min-height:100%;height:auto;background:#07100c}
     .hosted-landing{box-sizing:border-box;position:relative;min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr);align-items:center;gap:clamp(30px,5vw,76px);padding:clamp(28px,5vw,68px);overflow:visible;color:#fbf1d6;background:radial-gradient(ellipse 70% 45% at 78% 70%,rgba(255,160,70,.6),transparent 70%),linear-gradient(180deg,#052b38 0%,#0a5350 24%,#37966f 42%,#e9bb5c 58%,#ff9650 68%,#2a1a10 100%)}
     .hosted-scene{position:fixed;inset:0;overflow:hidden;pointer-events:none}
     .hosted-rays{position:absolute;right:20%;bottom:30%;width:150vmax;height:150vmax;transform-origin:100% 100%;background:repeating-conic-gradient(from 270deg at 100% 100%,rgba(255,214,120,.22) 0 3deg,transparent 3deg 9deg);-webkit-mask:radial-gradient(circle at 100% 100%,#000,transparent 60%);mask:radial-gradient(circle at 100% 100%,#000,transparent 60%);animation:hosted-sway 9s ease-in-out infinite alternate;mix-blend-mode:screen}
@@ -218,7 +218,7 @@ export function mountHostedLanding(): void {
     .hosted-code-card span{color:#1f8a62;letter-spacing:.6em}
     @keyframes hosted-spin{to{transform:rotate(360deg)}}
     @media(prefers-reduced-motion:reduce){.hosted-orbit,.hosted-rays,.hosted-gcard,.hosted-ship,.hosted-birds,.hosted-mist,.hosted-aura,.hosted-nenwheel{animation:none}.hosted-ship,.hosted-birds{display:none}}
-    @media(max-width:900px){.hosted-landing{grid-template-columns:1fr;padding:28px 20px 48px}.hosted-art{display:none}.hosted-actions{flex-direction:column}.hosted-or{display:none}.hosted-create,.hosted-join{width:100%;min-width:0}.hosted-hero h1{font-size:clamp(40px,13vw,68px)}.hosted-hero-wrap{left:5%;height:30%}.hosted-tree{height:48%;right:-12%}}
+    @media(max-width:900px){.hosted-landing{grid-template-columns:1fr;padding:24px 16px 44px;gap:clamp(24px,4vw,48px)}.hosted-art{display:none}.hosted-actions{flex-direction:column}.hosted-or{display:none}.hosted-create,.hosted-join{width:100%;min-width:0}.hosted-hero h1{font-size:clamp(40px,13vw,64px)}.hosted-hero-wrap{left:5%;height:30%}.hosted-tree{height:48%;right:-12%}}
     @media(max-height:560px){.hosted-hero-wrap,.hosted-tree,.hosted-tower{display:none}}
   `;
   document.head.appendChild(style);
