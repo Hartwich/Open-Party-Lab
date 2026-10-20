@@ -19,8 +19,8 @@ const NEN_PHASES = [
 
 const LOAD_MESSAGES = [
   "Ten — preparing your adventure…",
-  "Zetsu — entering the Hunter Association…",
-  "Ren — calling the hunters together…",
+  "Zetsu — entering the Association…",
+  "Ren — calling the hunters…",
   "Hatsu — unleashing your ability…",
   "Your journey begins here."
 ] as const;
@@ -87,54 +87,64 @@ export function LoadingScreen({ ready, maxWaitMs = 9000, onDone }: LoadingScreen
     return () => window.clearTimeout(timer);
   }, [progress]);
 
+  // The loader is a fixed full-viewport overlay: lock the page behind it so
+  // nothing can scroll or rubber-band while it is on screen.
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
   const rounded = Math.round(progress);
   const activePhase = rounded >= 100 ? 3 : Math.min(3, Math.floor(rounded / 25));
 
   return (
     <div className="hxh-scope hxh-loading" role="status" aria-label="Loading LDC Welcome Day">
       <HunterScene />
-      <div className="hxh-content" style={{ width: "100%", maxWidth: 560, display: "grid", gap: "clamp(16px, 3.4vh, 28px)" }}>
-      <div className="hxh-card">
-        <i className="hxh-corner hxh-c1" aria-hidden="true" />
-        <i className="hxh-corner hxh-c2" aria-hidden="true" />
-        <i className="hxh-corner hxh-c3" aria-hidden="true" />
-        <i className="hxh-corner hxh-c4" aria-hidden="true" />
-        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 16, alignItems: "center" }}>
-          <div className="hxh-brand">
-            <span className="hxh-logo-frame">
-              <img src={`${import.meta.env.BASE_URL}ldc-logo.jpg`} alt={`${LDC_CLUB.name} logo`} />
-            </span>
+      <div className="hxh-loading-content">
+        <div className="hxh-card">
+          <i className="hxh-corner hxh-c1" aria-hidden="true" />
+          <i className="hxh-corner hxh-c2" aria-hidden="true" />
+          <i className="hxh-corner hxh-c3" aria-hidden="true" />
+          <i className="hxh-corner hxh-c4" aria-hidden="true" />
+          <div className="hxh-loading-head">
+            <div className="hxh-brand">
+              <span className="hxh-logo-frame">
+                <img src={`${import.meta.env.BASE_URL}ldc-logo.jpg`} alt={`${LDC_CLUB.name} logo`} />
+              </span>
+            </div>
+            <div className="hxh-loading-head-text">
+              <p className="hxh-club">LDC — ESTIN</p>
+              <h1 className="hxh-title">
+                Hunter <span className="hxh-x">×</span> Hunter
+              </h1>
+              <p className="hxh-subtitle">LDC Welcome Day</p>
+            </div>
           </div>
-          <div style={{ minWidth: 0 }}>
-            <p className="hxh-club">LDC — ESTIN</p>
-            <h1 className="hxh-title">
-              Hunter <span className="hxh-x">×</span> Hunter
-            </h1>
-            <p className="hxh-subtitle">LDC Welcome Day</p>
+          <div className="hxh-strip">
+            <span>Entry Pass</span>
           </div>
         </div>
-        <div className="hxh-strip" style={{ marginTop: 14 }}>
-          <span>Entry Pass</span>
-        </div>
-      </div>
 
-      <div style={{ width: "100%" }}>
-        <div className="hxh-track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={rounded} aria-label="Loading">
-          <div className="hxh-fill" style={{ width: `${progress}%` }} />
+        <div className="hxh-progress">
+          <div className="hxh-track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={rounded} aria-label="Loading">
+            <div className="hxh-fill" style={{ width: `${progress}%` }} />
+          </div>
+          <div className="hxh-load-row">
+            <span className="hxh-load-msg" aria-live="polite">{messageFor(rounded)}</span>
+            <span className="hxh-load-pct">{rounded}%</span>
+          </div>
+          <div className="hxh-phases" aria-hidden="true">
+            {NEN_PHASES.map((phase, index) => (
+              <span key={phase.name} className={index <= activePhase ? "on" : undefined}>
+                <b>{phase.kanji}</b>
+                {phase.name}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="hxh-load-row">
-          <span className="hxh-load-msg" aria-live="polite">{messageFor(rounded)}</span>
-          <span className="hxh-load-pct">{rounded}%</span>
-        </div>
-        <div className="hxh-phases" aria-hidden="true">
-          {NEN_PHASES.map((phase, index) => (
-            <span key={phase.name} className={index <= activePhase ? "on" : undefined}>
-              <b>{phase.kanji}</b>
-              {phase.name}
-            </span>
-          ))}
-        </div>
-      </div>
       </div>
     </div>
   );

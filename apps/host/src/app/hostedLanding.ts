@@ -34,10 +34,13 @@ const landingText = {
     invalidCode: "Please enter the four-character room code.",
     closedInactive: "The previous room was closed after ten minutes without activity.",
     closedExpired: "The previous room was closed automatically after one hour.",
-    closedCapacity: "The previous room had no active players and was closed to make space for a new room.",
-    switchLanguage: "English"
+    closedCapacity: "The previous room had no active players and was closed to make space for a new room."
   }
 } as const;
+
+/** The hosted landing copy is English-only; the room language itself still
+ *  comes from the stored host preference. */
+const landingCopy = landingText.en;
 
 function normalizeRoomCode(value: string): string {
   return value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
@@ -46,7 +49,7 @@ function normalizeRoomCode(value: string): string {
 export function mountHostedLanding(): void {
   let language: SupportedLanguage = readStoredHostLanguage();
   const closedReason = new URLSearchParams(window.location.search).get("closed");
-  document.title = landingText[language].title;
+  document.title = landingCopy.title;
   document.body.classList.add("hosted-landing-page");
 
   const app = document.querySelector<HTMLDivElement>("#app");
@@ -100,7 +103,7 @@ export function mountHostedLanding(): void {
         <svg class="hosted-nenwheel" viewBox="-210 -210 420 420" fill="none" stroke="#e8bd4f" stroke-width="1.2"><polygon points="0,-150 130,-75 130,75 0,150 -130,75 -130,-75"/><polygon points="0,-100 87,-50 87,50 0,100 -87,50 -87,-50" stroke-opacity=".6"/><path d="M0 -150V150M-130 -75L130 75M130 -75L-130 75" stroke-opacity=".5"/><circle r="150" stroke-opacity=".35"/><circle r="172" stroke-opacity=".25" stroke-dasharray="3 7"/><g stroke="none"><circle cx="0" cy="-150" r="11" fill="#35d07f"/><circle cx="130" cy="-75" r="11" fill="#38bdf8"/><circle cx="130" cy="75" r="11" fill="#ff5a5f"/><circle cx="0" cy="150" r="11" fill="#ff9650"/><circle cx="-130" cy="75" r="11" fill="#f472b6"/><circle cx="-130" cy="-75" r="11" fill="#a78bfa"/></g></svg>
       </div>
       <section class="hosted-hero" aria-labelledby="landing-title">
-        <div class="hosted-topbar"><div class="hosted-brand"><img src="./ldc-logo.jpg" alt="LDC Club logo" /><span><strong>LDC — ESTIN</strong><small>Welcome Day · Hunter × Hunter</small></span></div><button class="hosted-language" type="button">DE / EN</button></div>
+        <div class="hosted-topbar"><div class="hosted-brand"><img src="./ldc-logo.jpg" alt="LDC Club logo" /><span><strong>LDC — ESTIN</strong><small>Welcome Day · Hunter × Hunter</small></span></div></div>
         <div class="hosted-card">
           <p class="hosted-kicker" data-text="kicker">DEIN BILDSCHIRM. EURE HANDYS. EIN RAUM.</p>
           <h1 id="landing-title"><span data-text="heading">Die Party beginnt</span><br><em data-text="headingAccent">mit deinem Raum.</em></h1>
@@ -177,8 +180,6 @@ export function mountHostedLanding(): void {
     .hosted-brand span{display:grid;line-height:1.3}
     .hosted-brand strong{font-size:15px;letter-spacing:.1em;text-transform:uppercase}
     .hosted-brand small{font-size:11px;letter-spacing:.22em;color:#e8bd4f;text-transform:uppercase;font-weight:600}
-    .hosted-language{min-height:44px;padding:9px 16px;border:1px solid rgba(201,162,74,.5);border-radius:999px;background:rgba(0,0,0,.4);color:#c9d3bd;font-size:12px;font-weight:700;letter-spacing:.08em;cursor:pointer}
-    .hosted-language:hover{border-color:#35d07f;color:#35d07f}
     .hosted-card{margin-top:clamp(24px,4vh,44px);padding:clamp(20px,3.4vw,34px);border-radius:18px;border:1px solid rgba(232,189,79,.6);background:linear-gradient(135deg,rgba(251,241,214,.1),rgba(251,241,214,.03) 45%,rgba(8,40,30,.9));box-shadow:0 24px 70px rgba(0,0,0,.55)}
     .hosted-kicker{margin:0 0 12px;color:#e8bd4f;font-size:12px;font-weight:700;letter-spacing:.22em}
     .hosted-hero h1{margin:0;font-family:"Barlow Condensed","Arial Narrow",Impact,sans-serif;font-style:italic;font-weight:800;font-size:clamp(42px,5.2vw,72px);line-height:.96;letter-spacing:.02em}
@@ -226,25 +227,22 @@ export function mountHostedLanding(): void {
   const joinForm = app.querySelector<HTMLFormElement>(".hosted-join");
   const roomInput = app.querySelector<HTMLInputElement>("#hosted-room-code");
   const status = app.querySelector<HTMLParagraphElement>("#hosted-status");
-  const languageButton = app.querySelector<HTMLButtonElement>(".hosted-language");
   let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 
   const renderLanguage = () => {
-    const text = landingText[language];
     document.documentElement.lang = language;
-    document.title = text.title;
+    document.title = landingCopy.title;
 
     for (const element of app.querySelectorAll<HTMLElement>("[data-text]")) {
-      const key = element.dataset.text as keyof typeof text;
-      element.textContent = text[key];
+      const key = element.dataset.text as keyof typeof landingCopy;
+      element.textContent = landingCopy[key];
     }
 
-    if (roomInput) roomInput.placeholder = text.roomCode;
-    if (languageButton) languageButton.ariaLabel = text.switchLanguage;
+    if (roomInput) roomInput.placeholder = landingCopy.roomCode;
 
-    if (closedReason === "inactive") setStatus(text.closedInactive);
-    if (closedReason === "expired") setStatus(text.closedExpired);
-    if (closedReason === "capacity") setStatus(text.closedCapacity);
+    if (closedReason === "inactive") setStatus(landingCopy.closedInactive);
+    if (closedReason === "expired") setStatus(landingCopy.closedExpired);
+    if (closedReason === "capacity") setStatus(landingCopy.closedCapacity);
   };
 
   const setStatus = (message: string, error = false) => {
@@ -269,19 +267,14 @@ export function mountHostedLanding(): void {
     roomInput.value = normalizeRoomCode(roomInput.value);
   });
 
-  languageButton?.addEventListener("click", () => {
-    // English only — no language switch
-    languageButton.ariaLabel = landingText.en.switchLanguage;
-  });
-
   createButton?.addEventListener("click", () => {
     createButton.disabled = true;
-    setStatus(landingText[language].creating);
+    setStatus(landingCopy.creating);
     triggerFlare();
     socket = io(window.location.origin, { timeout: 8_000 });
     socket.on("connect_error", () => {
       createButton.disabled = false;
-      setStatus(landingText[language].unavailable, true);
+      setStatus(landingCopy.unavailable, true);
       socket?.disconnect();
     });
     socket.emit("room:create", { hostName: "Hosted Screen", language }, (result) => {
@@ -301,7 +294,7 @@ export function mountHostedLanding(): void {
     const roomCode = normalizeRoomCode(roomInput?.value ?? "");
 
     if (roomCode.length !== 4) {
-      setStatus(landingText[language].invalidCode, true);
+      setStatus(landingCopy.invalidCode, true);
       roomInput?.focus();
       return;
     }

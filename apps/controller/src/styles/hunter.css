@@ -472,16 +472,44 @@
 
 /* ---------- loading ---------- */
 
+/* Fixed full-viewport overlay: it owns the safe-area padding itself, never
+   grows past the screen and never lets the page behind it scroll. */
 .hxh-loading {
-  min-height: 100vh;
-  min-height: calc(100dvh - 20px);
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(16px, 3.4vh, 28px);
-  padding: 12px 8px;
+  gap: clamp(12px, 2.8vh, 26px);
+  padding: max(14px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
 }
+
+.hxh-loading-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 560px;
+  display: grid;
+  gap: clamp(14px, 3vh, 26px);
+}
+
+.hxh-loading-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: clamp(12px, 3vw, 16px);
+  align-items: center;
+}
+
+.hxh-loading-head-text { min-width: 0; }
+
+.hxh-loading .hxh-strip { margin-top: clamp(10px, 1.8vh, 14px); }
+
+.hxh-progress { width: 100%; min-width: 0; }
 
 .hxh-track {
   position: relative;
@@ -510,7 +538,15 @@
   margin-top: 10px;
 }
 
-.hxh-load-msg { font-size: 0.9rem; letter-spacing: 0.04em; color: var(--hxh-cream); }
+.hxh-load-msg {
+  font-size: clamp(0.74rem, 3.6vw, 0.9rem);
+  letter-spacing: 0.04em;
+  color: var(--hxh-cream);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .hxh-load-pct {
   font-family: var(--hxh-display);
@@ -645,7 +681,7 @@
 /* ---------- entry layout ---------- */
 
 .hxh-entry {
-  min-height: 100vh;
+  min-height: calc(100vh - 20px);
   min-height: calc(100dvh - 20px);
   display: flex;
   flex-direction: column;
@@ -674,8 +710,26 @@
 }
 
 @media (max-height: 600px) {
-  .hxh-loading, .hxh-entry { gap: 10px; justify-content: flex-start; padding-top: 12px; }
-  .hxh-phases { margin-top: 8px; }
+  .hxh-entry { gap: 10px; justify-content: flex-start; padding-top: 12px; }
+}
+
+/* Short viewports (small phones, landscape): tighten the loader so the whole
+   screen still fits without clipping or scrolling. */
+@media (max-height: 700px) {
+  .hxh-loading { gap: 12px; }
+  .hxh-loading-content { gap: 12px; }
+  .hxh-loading .hxh-card { padding: clamp(14px, 3.5vh, 22px); }
+  .hxh-loading .hxh-title { font-size: clamp(1.6rem, 8vh, 2.4rem); }
+  .hxh-loading .hxh-strip { margin-top: 10px; }
+  .hxh-loading .hxh-phases { margin-top: 8px; }
+  .hxh-loading .hxh-phases span { min-height: 40px; padding: 6px 4px; }
+  .hxh-loading .hxh-load-pct { font-size: clamp(1.2rem, 5vh, 1.6rem); }
+}
+
+@media (max-height: 540px) {
+  .hxh-loading .hxh-phases { display: none; }
+  .hxh-loading .hxh-logo-frame { width: 44px; height: 44px; }
+  .hxh-loading .hxh-strip { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
