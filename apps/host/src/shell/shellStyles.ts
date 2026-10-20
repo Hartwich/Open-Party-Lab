@@ -23,11 +23,8 @@ const css = `
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   font-family: var(--font-body);
-  color: var(--ink);
-  background:
-    radial-gradient(140% 80% at 12% -15%, rgba(53, 208, 127, 0.12), transparent 58%),
-    radial-gradient(120% 90% at 100% 120%, rgba(232, 189, 79, 0.12), transparent 60%),
-    linear-gradient(180deg, #07110d 0%, #0a231b 60%, #040906 100%);
+  color: #f8fafc;
+  background: radial-gradient(ellipse at top, #153328 0%, #050b08 70%);
   overflow: hidden;
   z-index: 30;
 }
@@ -69,10 +66,9 @@ const css = `
   gap: 10px;
   padding: 14px 10px;
   width: 76px;
-  border-right: 1px solid rgba(232, 189, 79, 0.4);
-  background:
-    linear-gradient(180deg, rgba(251, 241, 214, 0.08) 0%, rgba(7, 17, 13, 0.95) 100%);
-  box-shadow: inset -1px 0 0 rgba(232, 189, 79, 0.18);
+  border-right: 1px solid #1f4d3a;
+  background: linear-gradient(180deg, #1a2f26 0%, #0f1f18 100%);
+  box-shadow: inset -1px 0 0 rgba(53, 208, 127, 0.15);
 }
 
 .opl-brand {
@@ -130,9 +126,7 @@ const css = `
   flex-direction: column;
   min-height: 0;
   padding: 26px clamp(20px, 4vw, 44px);
-  background:
-    radial-gradient(80% 70% at 50% 0%, rgba(53, 208, 127, 0.08), transparent 66%),
-    linear-gradient(180deg, rgba(7, 17, 13, 0.96) 0%, rgba(7, 17, 13, 0.98) 100%);
+  background: radial-gradient(ellipse at top, #0f1f18 0%, #050b08 100%);
 }
 
 .opl-kicker {
@@ -182,14 +176,14 @@ const css = `
 .opl-tile {
   padding: 0;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr);
   text-align: left;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(251, 241, 214, 0.1) 0%, rgba(10, 26, 19, 0.92) 100%);
-  border: 1px solid rgba(232, 189, 79, 0.32);
+  background: linear-gradient(180deg, rgba(251, 241, 214, 0.08) 0%, rgba(15, 31, 24, 0.95) 100%);
+  border: 1px solid #1f4d3a;
   border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
   transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
@@ -205,20 +199,46 @@ const css = `
   width: 100%;
   flex: none;
   display: grid;
-  place-items: center;
-  height: 92px;
+  grid-template-columns: auto minmax(0,1fr);
+  align-items: center;
+  gap: 12px;
+  height: 76px;
+  padding: 0 14px;
   background:
-    radial-gradient(120% 80% at 50% 0%, var(--tile-tint), transparent 70%),
-    linear-gradient(180deg, rgba(251, 241, 214, 0.16), rgba(7, 17, 13, 0.9));
+    radial-gradient(120% 80% at 0% 50%, var(--tile-tint), transparent 70%),
+    linear-gradient(90deg, color-mix(in srgb, var(--tile-accent,#e8bd4f) 18%, transparent) 0%, rgba(15, 31, 24, 0.9) 100%);
+  color: var(--tile-accent, var(--accent));
+  position: relative;
+}
+
+.opl-tile-art {
+  border-radius: 15px 15px 0 0;
+  overflow: hidden;
+  width: 100%;
+  flex: none;
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  align-items: center;
+  gap: 12px;
+  height: 76px;
+  padding: 0 14px;
+  background:
+    radial-gradient(120% 80% at 0% 50%, var(--tile-tint), transparent 70%),
+    linear-gradient(90deg, color-mix(in srgb, var(--tile-accent,#e8bd4f) 18%, transparent) 0%, rgba(15, 31, 24, 0.9) 100%);
   color: var(--tile-accent, var(--accent));
   position: relative;
 }
 
 .opl-glyph-img { display: block; }
 
+.opl-tile-badge { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 12px; background: color-mix(in srgb, var(--tile-accent,#e8bd4f) 26%, rgba(0,0,0,.4)); color: #fbf1d6; }
+.opl-tile-badge svg { width: 28px; height: 28px; }
+.opl-tile-art-text { display: grid; gap: 2px; }
+
 .opl-tile-body {
-  display: block;
-  padding: 10px 12px 12px;
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
 }
 
 .opl-tile-eyebrow {
@@ -227,24 +247,24 @@ const css = `
   font-size: 10px;
   letter-spacing: 1.6px;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--tile-accent, var(--muted)) 45%, var(--ink));
+  color: color-mix(in srgb, var(--tile-accent, var(--muted)) 60%, var(--ink));
 }
 
 .opl-tile-name {
   display: block;
-  margin: 2px 0 0;
+  margin: 0;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.25;
-  /* Two lines' worth, so a wrapping title does not make the row ragged. */
-  min-height: 2.5em;
 }
+
+.opl-tile-desc { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--ink-soft); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
 .opl-tile-meta {
   display: flex;
   align-items: center;
   gap: 5px;
-  margin: 3px 0 0;
+  margin: 0;
   font-size: 12px;
   color: var(--muted);
 }
@@ -260,13 +280,20 @@ const css = `
  * strip of colour above a form is a lot of empty colour — so the glyph shrinks
  * to a badge beside the title and the space goes to the controls.
  */
-.opl-open-card {
-  flex: none;
-  background: linear-gradient(180deg, rgba(251, 241, 214, 0.12) 0%, rgba(10, 26, 19, 0.92) 100%);
-  border: 1px solid rgba(232, 189, 79, 0.6);
-  border-radius: 16px;
-  box-shadow: 0 26px 56px rgba(0, 0, 0, 0.58);
-}
+/* ---------- game confirmation card ---------- */
+.opl-game-confirm-card { display: grid; gap: 18px; padding: clamp(18px, 3vw, 28px); }
+.opl-game-confirm-header { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 16px; align-items: center; }
+.opl-game-confirm-badge { width: 62px; height: 62px; display: grid; place-items: center; border-radius: 16px; background: color-mix(in srgb, var(--tile-accent,#e8bd4f) 24%, rgba(0,0,0,.4)); color: #fbf1d6; }
+.opl-game-confirm-badge svg { width: 42px; height: 42px; }
+.opl-game-confirm-meta { display: grid; gap: 4px; }
+.opl-game-confirm-eyebrow { margin: 0; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--tile-accent,#e8bd4f); }
+.opl-game-confirm-title { margin: 0; font-size: clamp(26px,3vw,38px); font-weight: 800; }
+.opl-game-confirm-players { margin: 0; display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.opl-game-confirm-back { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink); }
+.opl-game-confirm-body { display: grid; gap: 16px; }
+.opl-game-confirm-desc { margin: 0; font-size: clamp(15px,1.2vw,18px); line-height: 1.7; color: var(--ink-soft); max-width: 820px; }
+.opl-game-confirm-footer { display: flex; justify-content: flex-end; }
+.opl-game-confirm-action { padding: 12px 22px; border-radius: 12px; border: 1px solid rgba(7,19,14,.4); background: linear-gradient(135deg, #f0d98c 0%, #c9a24a 100%); color: #1a1405; font-weight: 800; text-transform: uppercase; letter-spacing: .18em; font-size: 12px; }
 
 .opl-setup {
   display: grid;
@@ -481,18 +508,18 @@ const css = `
   gap: 14px;
   width: 268px;
   padding: 20px 18px;
-  background: linear-gradient(180deg, rgba(251, 241, 214, 0.08) 0%, rgba(7, 17, 13, 0.95) 100%);
-  border-left: 1px solid rgba(232, 189, 79, 0.4);
-  box-shadow: inset 1px 0 0 rgba(232, 189, 79, 0.18);
+  background: linear-gradient(180deg, #1a2f26 0%, #0f1f18 100%);
+  border-left: 1px solid #1f4d3a;
+  box-shadow: inset 1px 0 0 rgba(53, 208, 127, 0.15);
 }
 
 .opl-room-card {
   padding: 14px 14px 16px;
   text-align: center;
-  background: linear-gradient(180deg, rgba(251, 241, 214, 0.12) 0%, rgba(10, 26, 19, 0.8) 100%);
-  border: 1px solid rgba(232, 189, 79, 0.5);
+  background: linear-gradient(180deg, #1a2f26 0%, #0f1f18 100%);
+  border: 1px solid #1f4d3a;
   border-radius: 16px;
-  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
 }
 
 .opl-room-label {

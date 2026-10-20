@@ -36,18 +36,21 @@ function tileVariables(game: AvailableGameDto): string {
 }
 
 function renderTile(game: AvailableGameDto, language: RoomLanguage): string {
-  const eyebrow = game.visual?.eyebrow ?? "";
+  const description = game.lobbySetup?.description ?? game.description;
 
   return `
-    <button type="button" class="opl-tile" style="${tileVariables(game)}"
-            data-action="select-game" data-game-id="${escapeHtml(game.id)}"
-            aria-label="${escapeHtml(game.displayName)}">
-      <span class="opl-tile-art">${renderGameGlyph(game.visual?.icon, game.visual?.iconPath, 40)}<span class="opl-tile-ldc">LDC</span></span>
-      <span class="opl-tile-body">
-        ${eyebrow ? `<span class="opl-tile-eyebrow">${escapeHtml(eyebrow)}</span>` : ""}
-        <span class="opl-tile-name">${escapeHtml(game.displayName)}</span>
-        <span class="opl-tile-meta">${renderUiIcon("users", 13)}${game.minPlayers}–${game.maxPlayers}</span>
-      </span>
+    <button type="button" class="opl-tile" data-action="select-game" data-game-id="${escapeHtml(game.id)}" style="${tileVariables(game)}">
+      <div class="opl-tile-art">
+        <span class="opl-tile-badge">${renderGameGlyph(game.visual?.icon, game.visual?.iconPath, 38)}</span>
+        <div class="opl-tile-art-text">
+          <p class="opl-tile-eyebrow">${escapeHtml(game.visual?.eyebrow ?? getHostText(language).shellSetupKicker)}</p>
+          <p class="opl-tile-name">${escapeHtml(game.displayName)}</p>
+        </div>
+      </div>
+      <div class="opl-tile-body">
+        ${description ? `<p class="opl-tile-desc">${escapeHtml(description)}</p>` : ""}
+        <p class="opl-tile-meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> ${game.minPlayers}–${game.maxPlayers} ${escapeHtml(language === "de" ? "Spieler" : language === "ar" ? "لاعبين" : "players")}</p>
+      </div>
     </button>
   `;
 }
@@ -230,31 +233,46 @@ function renderOpenGameCard(
   locked: boolean
 ): string {
   const text = getHostText(language);
+  const accent = game.visual?.accent ?? "#bd4727";
+  const tint = `color-mix(in srgb, ${accent} 16%, transparent)`;
+  const eyebrow = game.visual?.eyebrow ?? text.shellSetupKicker;
   const description = game.lobbySetup?.description ?? game.description;
+  const rules = game.rules?.[language] ?? game.rules?.en ?? game.rules?.de;
+  const rulesPreview = rules?.length
+    ? `<details class="opl-rules-preview"><summary>${escapeHtml(text.shellRulesPreview)}</summary>${rules
+        .map(
+          (section) =>
+            `<div><h3>${escapeHtml(section.title)}</h3><ul>${section.lines
+              .map((line) => `<li>${escapeHtml(line)}</li>`)
+              .join("")}</ul></div>`
+        )
+        .join("")}</details>`
+    : "";
 
   return `
-    <section class="opl-open-card" style="${tileVariables(game)}">
-      <div class="opl-setup">
-        <div class="opl-setup-head">
-          <span class="opl-setup-badge">${renderGameGlyph(
-            game.visual?.icon,
-            game.visual?.iconPath,
-            30
-          )}</span>
-          <div class="opl-setup-title">
-            <p class="opl-tile-eyebrow">${escapeHtml(game.visual?.eyebrow ?? text.shellSetupKicker)}</p>
-            <p class="opl-tile-name" style="font-size:19px;min-height:0">${escapeHtml(
-              game.displayName
-            )}</p>
-            ${description ? `<p class="opl-setup-desc">${escapeHtml(description)}</p>` : ""}
-          </div>
-          <button type="button" class="opl-back" data-action="back">
-            ${renderUiIcon("back", 15)}${escapeHtml(text.shellBackToCatalog)}
-          </button>
+    <article class="opl-open-card opl-game-confirm-card" style="--tile-accent:${escapeHtml(accent)};--tile-tint:${escapeHtml(tint)}">
+      <header class="opl-game-confirm-header">
+        <div class="opl-game-confirm-badge">${renderGameGlyph(game.visual?.icon, game.visual?.iconPath, 42)}</div>
+        <div class="opl-game-confirm-meta">
+          <p class="opl-game-confirm-eyebrow">${escapeHtml(eyebrow)}</p>
+          <h2 class="opl-game-confirm-title">${escapeHtml(game.displayName)}</h2>
+          <p class="opl-game-confirm-players"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> ${game.minPlayers}–${game.maxPlayers} ${escapeHtml(language === "de" ? "Spieler" : language === "ar" ? "لاعبين" : "players")}</p>
         </div>
+        <button type="button" class="opl-game-confirm-back" data-action="back" title="${escapeHtml(text.shellBack)}">
+          ${renderUiIcon("back", 18)} <span>${escapeHtml(text.shellBack)}</span>
+        </button>
+      </header>
+      <div class="opl-game-confirm-body">
+        ${description ? `<p class="opl-game-confirm-desc">${escapeHtml(description)}</p>` : ""}
+        ${rulesPreview}
         ${renderSetup(game, settings, locked, language)}
       </div>
-    </section>
+      <footer class="opl-game-confirm-footer">
+        <button type="button" class="opl-game-confirm-action" data-action="setup-confirm" data-action-type="select-game">
+          ${escapeHtml(language === "de" ? "Dieses Spiel wählen" : language === "ar" ? "اختيار هذه اللعبة" : "Select this game")}
+        </button>
+      </footer>
+    </article>
   `;
 }
 

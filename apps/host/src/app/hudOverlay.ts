@@ -22,15 +22,16 @@ export function mountHudOverlay(client: HostSocketClient): () => void {
     left: hostChrome.offset.edge,
     top: hostChrome.offset.edge,
     zIndex: hostChrome.zIndex.hud,
-    maxWidth: "min(440px, calc(100vw - 24px))",
+    maxWidth: "min(520px, calc(100vw - 24px))",
     pointerEvents: "none"
   });
 
   const card = createChromeCard("dark");
-  card.style.gap = "6px";
-  card.style.padding = "12px 14px";
+  card.style.gap = "8px";
+  card.style.padding = "14px 16px";
   card.style.boxShadow = hostChrome.shadow.card;
   card.style.pointerEvents = "auto";
+  card.style.border = "1px solid rgba(232, 189, 79, 0.45)";
   overlay.appendChild(card);
 
   const line1 = document.createElement("strong");
@@ -41,6 +42,26 @@ export function mountHudOverlay(client: HostSocketClient): () => void {
   line2.style.fontSize = "13px";
   line2.style.color = "var(--ink-soft)";
   card.appendChild(line2);
+
+  const instruction = document.createElement("div");
+  instruction.style.display = "grid";
+  instruction.style.gap = "4px";
+  instruction.style.padding = "10px 12px";
+  instruction.style.borderRadius = "12px";
+  instruction.style.background = "rgba(53, 208, 127, 0.12)";
+  instruction.style.border = "1px solid rgba(53, 208, 127, 0.4)";
+  instruction.style.fontSize = "13px";
+  instruction.style.lineHeight = "1.5";
+  instruction.style.color = "#f8fafc";
+
+  const instructionTitle = document.createElement("strong");
+  instructionTitle.textContent = "Instructions";
+  instruction.appendChild(instructionTitle);
+
+  const instructionText = document.createElement("div");
+  instruction.appendChild(instructionText);
+
+  card.appendChild(instruction);
 
   const line3 = document.createElement("div");
   line3.style.fontSize = "12px";
@@ -58,6 +79,7 @@ export function mountHudOverlay(client: HostSocketClient): () => void {
     const connectedPlayers = (state.room?.players ?? []).filter((player) => player.connected).length;
     const totalPlayers = state.room?.players.length ?? 0;
     const roundActive = hasActiveRound(state.room);
+    const message = state.game?.message;
 
     overlay.style.display = showOverlay ? "block" : "none";
 
@@ -65,13 +87,24 @@ export function mountHudOverlay(client: HostSocketClient): () => void {
       return;
     }
 
-    line1.textContent = `${text.roomPrefix} ${state.room?.code ?? "----"}`;
-    line2.textContent = `${gameName} | ${state.connected ? text.serverOnline : text.serverOffline} | ${text.players}: ${connectedPlayers}/${totalPlayers}`;
-    line3.textContent = state.game?.message ?? state.error ?? text.readyNextTitle;
-    line2.style.display = roundActive ? "none" : "block";
-    line3.style.display = roundActive ? "none" : "block";
-    card.style.padding = roundActive ? "8px 12px" : "12px 14px";
+    line1.textContent = `${text.roomPrefix} ${state.room?.code ?? "----"} · ${gameName}`;
+    line2.textContent = `${state.connected ? text.serverOnline : text.serverOffline} · ${text.players}: ${connectedPlayers}/${totalPlayers}`;
+    instructionTitle.textContent = state.room?.language === "de" ? "Anleitung" : state.room?.language === "ar" ? "التعليمات" : "Instructions";
+    if (message) {
+      instructionText.textContent = message;
+      instruction.style.display = "grid";
+    } else {
+      instruction.style.display = "none";
+    }
+    line3.textContent = state.error ?? text.readyNextTitle;
+    card.style.padding = roundActive ? "10px 14px" : "14px 16px";
   });
+
+  return () => {
+    unsubscribe();
+    overlay.remove();
+  };
+}
 
   return () => {
     unsubscribe();
