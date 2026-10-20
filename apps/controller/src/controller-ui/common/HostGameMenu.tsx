@@ -4,7 +4,7 @@ import {
   languageLabels,
   supportedLanguages,
   type RoomSnapshot,
-  type SupportedLanguage
+  type RoomLanguage
 } from "@open-party-lab/protocol";
 import { themeNames, type ThemeName } from "@open-party-lab/ui-kit";
 import { getControllerText } from "../../i18n/controllerText.js";
@@ -13,7 +13,7 @@ export interface HostGameMenuProps {
   room: RoomSnapshot;
   onSetPaused: (paused: boolean) => void;
   onSetTheme: (theme: ThemeName) => void;
-  onSetLanguage: (language: SupportedLanguage) => void;
+  onSetLanguage: (language: RoomLanguage) => void;
   onBackToMenu: () => void;
   onReleaseControl: () => void;
 }

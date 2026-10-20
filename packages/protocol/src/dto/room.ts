@@ -1,7 +1,7 @@
 import type { AvailableGameDto, PublicGamePhase } from "./gameState.js";
 import type { HostControlSnapshot } from "./hostControl.js";
 import type { ThemeName } from "@open-party-lab/ui-kit";
-import type { SupportedLanguage } from "@open-party-lab/game-core";
+import type { RoomLanguage } from "@open-party-lab/game-core";
 import type { PlayerSnapshot } from "./player.js";
 
 /** Shared warning/extension window for the hosted room lifetime. */
@@ -35,7 +35,7 @@ export interface RoomSnapshot {
   /** Server-authoritative expiry, or null for local rooms without a lifetime limit. */
   expiresAt: number | null;
   joinUrl: string;
-  language: SupportedLanguage;
+  language: RoomLanguage;
   /** Skin every screen in this room uses. Set from the host settings. */
   theme: ThemeName;
   hostConnected: boolean;

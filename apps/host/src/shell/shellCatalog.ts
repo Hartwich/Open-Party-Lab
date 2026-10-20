@@ -1,4 +1,4 @@
-import { isLobbyFieldVisible, type AvailableGameDto, type SupportedLanguage } from "@open-party-lab/protocol";
+import { isLobbyFieldVisible, type AvailableGameDto, type RoomLanguage } from "@open-party-lab/protocol";
 import { getHostText } from "../i18n/hostText.js";
 import { renderGameGlyph, renderUiIcon } from "./gameGlyphs.js";
 import { escapeHtml } from "./escapeHtml.js";
@@ -10,7 +10,7 @@ export interface CatalogOptions {
   games: readonly AvailableGameDto[];
   selectedGameId: string | null;
   settings: SettingsMap;
-  language: SupportedLanguage;
+  language: RoomLanguage;
   /** Selection and setup are frozen while a round is running. */
   locked: boolean;
 }
@@ -35,7 +35,7 @@ function tileVariables(game: AvailableGameDto): string {
   );
 }
 
-function renderTile(game: AvailableGameDto, language: SupportedLanguage): string {
+function renderTile(game: AvailableGameDto, language: RoomLanguage): string {
   const eyebrow = game.visual?.eyebrow ?? "";
 
   return `
@@ -52,7 +52,7 @@ function renderTile(game: AvailableGameDto, language: SupportedLanguage): string
   `;
 }
 
-function renderSelectField(field: LobbyField & { kind: "select" }, value: unknown, locked: boolean, language: SupportedLanguage): string {
+function renderSelectField(field: LobbyField & { kind: "select" }, value: unknown, locked: boolean, language: RoomLanguage): string {
   const current = String(value);
   const options = field.options
     .map(
@@ -71,7 +71,9 @@ function renderSelectField(field: LobbyField & { kind: "select" }, value: unknow
 
   const selected = field.options.find((option) => option.id === current);
   const rules = selected?.rules?.[language] ?? selected?.rules?.en ?? selected?.rules?.de;
-  const help = rules?.length ? `<details class="opl-rules-preview"><summary>${language === "en" ? "Show rules" : "Regeln anzeigen"}</summary>${rules.map((section) => `<section><h3>${escapeHtml(section.title)}</h3><ul>${section.lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul></section>`).join("")}</details>` : "";
+  const rulesSummary =
+    language === "ar" ? "إظهار القواعد" : language === "en" ? "Show rules" : "Regeln anzeigen";
+  const help = rules?.length ? `<details class="opl-rules-preview"><summary>${rulesSummary}</summary>${rules.map((section) => `<section><h3>${escapeHtml(section.title)}</h3><ul>${section.lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul></section>`).join("")}</details>` : "";
   return `
     <div class="opl-field">
       <p class="opl-field-label">${escapeHtml(field.label)}</p>
@@ -129,7 +131,7 @@ function renderNumberField(field: LobbyField & { kind: "number" }, value: unknow
   `;
 }
 
-function renderSetup(game: AvailableGameDto, settings: SettingsMap, locked: boolean, language: SupportedLanguage): string {
+function renderSetup(game: AvailableGameDto, settings: SettingsMap, locked: boolean, language: RoomLanguage): string {
   const setup = game.lobbySetup;
 
   if (!setup) {
@@ -215,7 +217,7 @@ function renderSetup(game: AvailableGameDto, settings: SettingsMap, locked: bool
 export function renderOpenGame(
   game: AvailableGameDto | undefined,
   settings: SettingsMap,
-  language: SupportedLanguage,
+  language: RoomLanguage,
   locked: boolean
 ): string {
   return game ? renderOpenGameCard(game, settings, language, locked) : "";
@@ -224,7 +226,7 @@ export function renderOpenGame(
 function renderOpenGameCard(
   game: AvailableGameDto,
   settings: SettingsMap,
-  language: SupportedLanguage,
+  language: RoomLanguage,
   locked: boolean
 ): string {
   const text = getHostText(language);

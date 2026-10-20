@@ -6,7 +6,7 @@ import type {
   RoomSnapshot,
   ScoreboardSnapshot,
   ServerToClientEvents,
-  SupportedLanguage
+  RoomLanguage
 } from "@open-party-lab/protocol";
 import { applyThemeVariables, normalizeThemeName, type ThemeName } from "@open-party-lab/ui-kit";
 import { io, type Socket } from "socket.io-client";
@@ -33,7 +33,7 @@ export interface ControllerAppState {
   game: GameStateEnvelope | null;
   scoreboard: ScoreboardSnapshot | null;
   error: string | null;
-  preferredLanguage: SupportedLanguage;
+  preferredLanguage: RoomLanguage;
   hasStoredSession: boolean;
   storedSession: StoredControllerSession | null;
 }
@@ -580,7 +580,7 @@ export class ControllerSocketClient {
   }
 
   /** Host action: switch the room's language. */
-  setRoomLanguage(language: SupportedLanguage): void {
+  setRoomLanguage(language: RoomLanguage): void {
     if (!this.state.room) {
       return;
     }

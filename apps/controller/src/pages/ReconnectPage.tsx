@@ -1,4 +1,4 @@
-import type { SupportedLanguage } from "@open-party-lab/protocol";
+import type { RoomLanguage } from "@open-party-lab/protocol";
 import type { StoredControllerSession } from "../app/deviceSession.js";
 import { ControllerFrame } from "../controller-ui/layout/ControllerFrame.js";
 import { getControllerText } from "../i18n/controllerText.js";
@@ -7,7 +7,7 @@ interface ReconnectPageProps {
   connected: boolean;
   storedSession: StoredControllerSession | null;
   error: string | null;
-  language: SupportedLanguage;
+  language: RoomLanguage;
   onReconnect: () => void;
   onReset: () => void;
 }

@@ -6,7 +6,7 @@ import type {
   ScoreboardSnapshot,
   ServerToClientEvents,
   ClientToServerEvents,
-  SupportedLanguage
+  RoomLanguage
 } from "@open-party-lab/protocol";
 import { io, type Socket } from "socket.io-client";
 import { ServerClock, startServerClockSync } from "@open-party-lab/game-core";
@@ -28,7 +28,7 @@ export interface HostAppState {
   game: GameStateEnvelope | null;
   scoreboard: ScoreboardSnapshot | null;
   error: string | null;
-  preferredLanguage: SupportedLanguage;
+  preferredLanguage: RoomLanguage;
   preferredLobbyScreen: HostLobbyScreen;
   sceneOverride: HostSceneOverride;
 }
@@ -236,7 +236,7 @@ export class HostSocketClient {
     this.socket.emit("game:host-action", { roomCode, gameId, action });
   }
 
-  setLanguage(language: SupportedLanguage): void {
+  setLanguage(language: RoomLanguage): void {
     writeStoredHostLanguage(language);
     applyDocumentLanguage(language);
     this.updateState({ preferredLanguage: language });

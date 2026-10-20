@@ -4,8 +4,8 @@ import {
   canManagePlayerRoster,
   getRoomPhase,
   languageLabels,
-  supportedLanguages,
-  type SupportedLanguage
+  roomLanguages,
+  type RoomLanguage
 } from "@open-party-lab/protocol";
 import type { HostAppState, HostSocketClient } from "./hostSocketClient.js";
 import { getHostText } from "../i18n/hostText.js";
@@ -494,13 +494,13 @@ export function mountHostControlsOverlay(
 
   const languageButtons = document.createElement("div");
   languageButtons.style.display = "grid";
-  languageButtons.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+  languageButtons.style.gridTemplateColumns = "repeat(3, minmax(0, 1fr))";
   languageButtons.style.gap = "8px";
   languageSection.appendChild(languageButtons);
 
-  const languageButtonMap = new Map<SupportedLanguage, HTMLButtonElement>();
+  const languageButtonMap = new Map<RoomLanguage, HTMLButtonElement>();
 
-  for (const language of supportedLanguages) {
+  for (const language of roomLanguages) {
     const button = document.createElement("button");
     button.type = "button";
     button.textContent = languageLabels[language];
@@ -592,7 +592,7 @@ export function mountHostControlsOverlay(
     toggleButton.style.display = shellActive ? "none" : "grid";
   }
 
-  function resolveLanguage(): SupportedLanguage {
+  function resolveLanguage(): RoomLanguage {
     return currentState.room?.language ?? currentState.preferredLanguage;
   }
 

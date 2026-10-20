@@ -4,7 +4,7 @@ import {
   canManagePlayerRoster,
   hasActiveRound,
   type PlayerSnapshot,
-  type SupportedLanguage
+  type RoomLanguage
 } from "@open-party-lab/protocol";
 import {
   applyThemeVariables,
@@ -82,7 +82,7 @@ function toRailOptions(state: HostAppState, qrDataUrl: string | null): RailOptio
  */
 function resolveAction(
   state: HostAppState,
-  language: SupportedLanguage
+  language: RoomLanguage
 ): { label: string; icon: string; enabled: boolean; note: string | null } {
   const text = getHostText(language);
   const room = state.room;

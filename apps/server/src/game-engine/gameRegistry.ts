@@ -3,7 +3,7 @@
   localizeGameManifest,
   type GameManifest,
   type ServerGame,
-  type SupportedLanguage
+  type RoomLanguage
 } from "@open-party-lab/game-core";
 import type { AvailableGameDto } from "@open-party-lab/protocol";
 import { externalServerGameEntries } from "./.generated/externalGames.js";
@@ -37,14 +37,14 @@ export class GameRegistry {
 
   getAvailableGame(
     gameId: string,
-    language: SupportedLanguage = defaultLanguage
+    language: RoomLanguage = defaultLanguage
   ): AvailableGameDto | undefined {
     const manifest = this.get(gameId)?.manifest;
 
     return manifest ? this.toAvailableGameDto(localizeGameManifest(manifest, language)) : undefined;
   }
 
-  listAvailableGames(language: SupportedLanguage = defaultLanguage): AvailableGameDto[] {
+  listAvailableGames(language: RoomLanguage = defaultLanguage): AvailableGameDto[] {
     return [...this.games.values()]
       .map((entry) => entry.manifest)
       .filter((manifest) => manifest.listed !== false)

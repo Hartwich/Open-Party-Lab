@@ -1,23 +1,23 @@
 import {
   defaultLanguage,
-  normalizeLanguage,
-  type RoomLifecycle,
-  type SupportedLanguage
+  normalizeRoomLanguage,
+  type RoomLanguage,
+  type RoomLifecycle
 } from "@open-party-lab/protocol";
 
 // v2 key: the club runs English by default, so browsers that stored the old
 // German default start fresh on English. The DE/EN toggle still works.
 const languagePreferenceKey = "open-party-lab.host-language-v2";
 
-export function readStoredHostLanguage(): SupportedLanguage {
+export function readStoredHostLanguage(): RoomLanguage {
   if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
     return defaultLanguage;
   }
 
-  return normalizeLanguage(window.localStorage.getItem(languagePreferenceKey));
+  return normalizeRoomLanguage(window.localStorage.getItem(languagePreferenceKey));
 }
 
-export function writeStoredHostLanguage(language: SupportedLanguage): void {
+export function writeStoredHostLanguage(language: RoomLanguage): void {
   if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
     return;
   }
@@ -31,7 +31,7 @@ export function writeStoredHostLanguage(language: SupportedLanguage): void {
  * Arabic reads right to left, so the whole shared screen flips with it.
  * Everything else stays left to right.
  */
-export function applyDocumentLanguage(language: SupportedLanguage): void {
+export function applyDocumentLanguage(language: RoomLanguage): void {
   if (typeof document === "undefined") {
     return;
   }
@@ -546,8 +546,8 @@ const hostText = {
       }
     }
   }
-} satisfies Record<SupportedLanguage, HostText>;
+} satisfies Record<RoomLanguage, HostText>;
 
-export function getHostText(language: SupportedLanguage | null | undefined): HostText {
-  return hostText[normalizeLanguage(language)];
+export function getHostText(language: RoomLanguage | null | undefined): HostText {
+  return hostText[normalizeRoomLanguage(language)];
 }

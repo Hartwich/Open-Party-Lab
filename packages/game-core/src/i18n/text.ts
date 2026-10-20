@@ -1,6 +1,15 @@
-import type { SupportedLanguage } from "./language.js";
+import type { RoomLanguage, SupportedLanguage } from "./language.js";
 
 export type LocalizedTextMap<T> = Record<SupportedLanguage, T>;
+
+/**
+ * Catalog text the platform itself ships.
+ *
+ * Keyed by every language a room can run in, unlike `LocalizedTextMap`, which
+ * external game repos implement exhaustively and therefore has to stay at
+ * `SupportedLanguage`.
+ */
+export type RoomTextMap<T> = Record<RoomLanguage, T>;
 
 export interface LocalizedLobbySetupOptionText {
   label: string;
@@ -41,4 +50,4 @@ export interface LocalizedGameText {
   };
 }
 
-export type LocalizedGameTextMap = LocalizedTextMap<LocalizedGameText>;
+export type LocalizedGameTextMap = RoomTextMap<LocalizedGameText>;

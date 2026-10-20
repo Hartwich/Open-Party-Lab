@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { SupportedLanguage } from "@open-party-lab/protocol";
+import type { RoomLanguage } from "@open-party-lab/protocol";
 import { LDC_CLUB } from "@open-party-lab/game-core";
 import { getControllerText } from "../i18n/controllerText.js";
 import { HunterScene } from "./HunterScene.js";
@@ -9,7 +9,7 @@ interface JoinPageProps {
   defaultRoomCode: string;
   connected: boolean;
   error: string | null;
-  language: SupportedLanguage;
+  language: RoomLanguage;
   onJoin: (roomCode: string, playerName: string, avatarId: string, preferredColor: string) => void;
 }
 

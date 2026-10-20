@@ -1,4 +1,4 @@
-import type { SupportedLanguage } from "@open-party-lab/game-core";
+import type { RoomLanguage } from "@open-party-lab/game-core";
 import type { ThemeName } from "@open-party-lab/ui-kit";
 import type { HostControlDenyReason } from "../dto/hostControl.js";
 import type { RoomSnapshot } from "../dto/room.js";
@@ -18,7 +18,7 @@ export type AckResult<T> = OkResult<T> | ErrorResult;
 
 export interface CreateRoomRequest {
   hostName?: string;
-  language?: SupportedLanguage;
+  language?: RoomLanguage;
   roomCode?: string;
 }
 
@@ -157,7 +157,7 @@ export interface HostControlSuccess {
 
 export interface RoomLanguageRequest {
   roomCode: string;
-  language: SupportedLanguage;
+  language: RoomLanguage;
 }
 
 export interface RoomLanguageSuccess {

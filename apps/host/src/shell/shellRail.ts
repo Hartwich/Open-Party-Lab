@@ -1,4 +1,4 @@
-import type { PlayerSnapshot, SupportedLanguage } from "@open-party-lab/protocol";
+import type { PlayerSnapshot, RoomLanguage } from "@open-party-lab/protocol";
 import { getHostText } from "../i18n/hostText.js";
 import { renderUiIcon } from "./gameGlyphs.js";
 import { escapeHtml } from "./escapeHtml.js";
@@ -8,7 +8,7 @@ export interface RailOptions {
   joinUrl: string;
   qrDataUrl: string | null;
   players: readonly PlayerSnapshot[];
-  language: SupportedLanguage;
+  language: RoomLanguage;
   canKick: boolean;
   /** Player currently driving the room from a phone, if any. */
   hostControlHolderId: string | null;

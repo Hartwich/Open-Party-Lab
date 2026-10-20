@@ -43,7 +43,7 @@ export class GameTransitionService {
     const now = context.now;
     const selectedGameName = context.selectedGame.displayName;
     const phaseMessage = (de: string, english: string, arabic: string) =>
-      context.language === "ar" ? arabic : context.language === "en" ? english : de;
+      room.language === "ar" ? arabic : room.language === "en" ? english : de;
 
     if (state.phase === "round_intro" && state.phaseEndsAt !== null && now >= state.phaseEndsAt) {
       state = transitionRoundState(state, "countdown", now, {

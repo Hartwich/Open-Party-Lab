@@ -15,8 +15,14 @@ export * from "./games/cardTable.js";
 export {
   defaultLanguage,
   isLobbyFieldVisible,
+  isRoomLanguage,
+  isSupportedLanguage,
   languageLabels,
   normalizeLanguage,
+  normalizeRoomLanguage,
+  roomLanguages,
   supportedLanguages,
+  toSupportedLanguage,
+  type RoomLanguage,
   type SupportedLanguage
 } from "@open-party-lab/game-core";

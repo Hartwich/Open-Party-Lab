@@ -1,8 +1,8 @@
-import { normalizeLanguage, type GamePlayerSetupDefinition } from "@open-party-lab/game-core";
+import { normalizeRoomLanguage, type GamePlayerSetupDefinition } from "@open-party-lab/game-core";
 import {
   hasActiveRound,
   ROOM_EXTENSION_WINDOW_MS,
-  type SupportedLanguage
+  type RoomLanguage
 } from "@open-party-lab/protocol";
 import type {
   AckResult,
@@ -80,7 +80,7 @@ function normalizePlayerSetupValue(
   return normalized;
 }
 
-function socketText(language: SupportedLanguage) {
+function socketText(language: RoomLanguage) {
   const en = language === "en";
   const ar = language === "ar";
   const t = (de: string, english: string, arabic: string) => (ar ? arabic : en ? english : de);
@@ -371,7 +371,7 @@ export function registerSocketHandlers({
         const capacity = roomCleanupService.prepareForRoomCreation();
 
         if (!capacity.ok) {
-          const en = normalizeLanguage(payload.language) === "en";
+          const en = normalizeRoomLanguage(payload.language) === "en";
           const maxRoomCount = roomCleanupService.getMaxRoomCount();
           ack(ackError(
             en
@@ -384,7 +384,7 @@ export function registerSocketHandlers({
 
       const room = requestedRoomCode && !createLocalPrimaryRoom
         ? existingRoom
-        : roomManager.createRoom(hostName, normalizeLanguage(payload.language));
+        : roomManager.createRoom(hostName, normalizeRoomLanguage(payload.language));
 
       if (!room) {
         ack(ackError("Raumcode nicht gefunden."));
@@ -437,7 +437,7 @@ export function registerSocketHandlers({
         return;
       }
 
-      roomManager.setLanguage(room, normalizeLanguage(payload.language, room.language));
+      roomManager.setLanguage(room, normalizeRoomLanguage(payload.language, room.language));
 
       ack({
         ok: true,
@@ -476,7 +476,7 @@ export function registerSocketHandlers({
 
     on("room:extend-lifetime", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
-      const extendText = socketText(normalizeLanguage(room?.language));
+      const extendText = socketText(normalizeRoomLanguage(room?.language));
 
       if (!hostedMode) {
         ack(

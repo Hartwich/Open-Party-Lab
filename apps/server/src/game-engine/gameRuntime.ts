@@ -1,4 +1,4 @@
-import { localizeGameManifest } from "@open-party-lab/game-core";
+import { localizeGameManifest, toSupportedLanguage } from "@open-party-lab/game-core";
 import type {
   BaseRoundState,
   GameManifest,
@@ -482,7 +482,7 @@ export class GameRuntime {
       // left behind, or every deadline it stored would already have passed.
       now: this.roomNow(room),
       deltaMs,
-      language: room.language,
+      language: toSupportedLanguage(room.language),
       theme: room.theme,
       selectedGame: localizeGameManifest(selectedGame, room.language),
       previousRound,

@@ -1,5 +1,10 @@
 ﻿import type { GameManifest } from "../types/GameManifest.js";
-import { defaultLanguage, normalizeLanguage, type SupportedLanguage } from "../i18n/language.js";
+import {
+  defaultLanguage,
+  normalizeRoomLanguage,
+  toSupportedLanguage,
+  type RoomLanguage
+} from "../i18n/language.js";
 import { gameTextById } from "./i18n/gameTexts.js";
 import type { LocalizedGameText } from "../i18n/text.js";
 
@@ -111,9 +116,11 @@ function localizePlayerSetup(
 
 export function localizeGameManifest(
   manifest: GameManifest,
-  language: SupportedLanguage = defaultLanguage
+  language: RoomLanguage = defaultLanguage
 ): GameManifest {
-  const text = gameTextById[manifest.id]?.[normalizeLanguage(language)] ?? gameTextById[manifest.id]?.[defaultLanguage];
+  const text =
+    gameTextById[manifest.id]?.[normalizeRoomLanguage(language)] ??
+    gameTextById[manifest.id]?.[toSupportedLanguage(defaultLanguage)];
 
   if (!text) {
     return manifest;
@@ -129,7 +136,7 @@ export function localizeGameManifest(
 }
 
 export function listLocalizedGameCatalog(
-  language: SupportedLanguage = defaultLanguage
+  language: RoomLanguage = defaultLanguage
 ): GameManifest[] {
   return gameCatalog.map((entry) => localizeGameManifest(entry, language));
 }

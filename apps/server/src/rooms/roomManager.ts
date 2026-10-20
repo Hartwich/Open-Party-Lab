@@ -1,4 +1,4 @@
-import { defaultLanguage, normalizeLanguage, type SupportedLanguage } from "@open-party-lab/game-core";
+import { defaultLanguage, normalizeRoomLanguage, type RoomLanguage } from "@open-party-lab/game-core";
 import { hostControlHandoverMs } from "@open-party-lab/protocol";
 import { defaultThemeName, normalizeThemeName, type ThemeName } from "@open-party-lab/ui-kit";
 import { createRoomCode } from "./roomCode.js";
@@ -14,7 +14,7 @@ export class RoomManager {
     private readonly maxLifetimeMs = 3_600_000
   ) {}
 
-  createRoom(hostName: string, language: SupportedLanguage = defaultLanguage): RoomRecord {
+  createRoom(hostName: string, language: RoomLanguage = defaultLanguage): RoomRecord {
     const fixedCode = this.fixedPrimaryRoomCode?.trim().toUpperCase() ?? null;
     const code =
       fixedCode && !this.roomStore.has(fixedCode)
@@ -29,7 +29,7 @@ export class RoomManager {
       expiresAt: this.maxLifetimeMs > 0 ? createdAt + this.maxLifetimeMs : null,
       lastActivityAt: createdAt,
       joinUrl: this.createJoinUrl(code),
-      language: normalizeLanguage(language),
+      language: normalizeRoomLanguage(language),
       theme: defaultThemeName,
       hostName,
       hostSocketId: null,
@@ -87,8 +87,8 @@ export class RoomManager {
     return room;
   }
 
-  setLanguage(room: RoomRecord, language: SupportedLanguage): RoomRecord {
-    room.language = normalizeLanguage(language, room.language);
+  setLanguage(room: RoomRecord, language: RoomLanguage): RoomRecord {
+    room.language = normalizeRoomLanguage(language, room.language);
     return room;
   }
 

@@ -1,4 +1,4 @@
-import type { ScoreEntry, SupportedLanguage } from "@open-party-lab/game-core";
+import type { RoomLanguage, ScoreEntry } from "@open-party-lab/game-core";
 import type { PlayerSetupValue, PublicGamePhase } from "@open-party-lab/protocol";
 import type { ThemeName } from "@open-party-lab/ui-kit";
 import { MemoryStore } from "../persistence/memoryStore.js";
@@ -74,7 +74,7 @@ export interface RoomRecord {
   expiresAt: number | null;
   lastActivityAt: number;
   joinUrl: string;
-  language: SupportedLanguage;
+  language: RoomLanguage;
   theme: ThemeName;
   hostName: string;
   hostSocketId: string | null;

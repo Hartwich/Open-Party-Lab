@@ -12,7 +12,7 @@ export interface ReadyLayoutModel {
   playerCount: number;
   label: string;
   description?: string;
-  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  language?: import("@open-party-lab/protocol").RoomLanguage;
   onToggleReady: () => void;
 }
 
@@ -263,7 +263,7 @@ export interface ChaosKommandoLayoutModel {
   title: string;
   subtitle?: string;
   helperText?: string;
-  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  language?: import("@open-party-lab/protocol").RoomLanguage;
   disabled: boolean;
   accentColor?: string;
   resetKey: string;
@@ -366,7 +366,7 @@ export interface SpellCastingLayoutModel {
   title: string;
   subtitle?: string;
   helperText?: string;
-  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  language?: import("@open-party-lab/protocol").RoomLanguage;
   disabled: boolean;
   ready?: ReadyLayoutModel;
   resetKey: string;
@@ -477,7 +477,7 @@ export interface TowerDefenseLayoutModel {
   title: string;
   subtitle?: string;
   helperText?: string;
-  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  language?: import("@open-party-lab/protocol").RoomLanguage;
   disabled: boolean;
   buildDisabled: boolean;
   sendDisabled: boolean;
@@ -520,7 +520,7 @@ export interface ShopLayoutModel {
   title: string;
   subtitle?: string;
   helperText?: string;
-  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  language?: import("@open-party-lab/protocol").RoomLanguage;
   disabled: boolean;
   accentColor?: string;
   shopMode?: "regular" | "level_up";
@@ -594,7 +594,7 @@ export interface DrawingGuessLayoutModel {
   title: string;
   subtitle?: string;
   helperText?: string;
-  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  language?: import("@open-party-lab/protocol").RoomLanguage;
   disabled: boolean;
   ready?: ReadyLayoutModel;
   guessResetKey?: string;
@@ -630,7 +630,7 @@ export interface SchaetzoramaLayoutModel {
   title: string;
   subtitle?: string;
   helperText?: string;
-  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  language?: import("@open-party-lab/protocol").RoomLanguage;
   disabled: boolean;
   ready?: ReadyLayoutModel;
   stage: import("@open-party-lab/protocol").SchaetzoramaStage;
@@ -664,7 +664,7 @@ export interface WordTilesLayoutModel {
   title: string;
   subtitle?: string;
   helperText?: string;
-  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  language?: import("@open-party-lab/protocol").RoomLanguage;
   disabled: boolean;
   canAct: boolean;
   ready?: ReadyLayoutModel;
@@ -704,7 +704,7 @@ export interface MagicArenaLayoutModel {
   title: string;
   subtitle?: string;
   helperText?: string;
-  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  language?: import("@open-party-lab/protocol").RoomLanguage;
   disabled: boolean;
   ready?: ReadyLayoutModel;
   resetKey: string;
@@ -734,7 +734,7 @@ export interface CardHandLayoutModel extends CardTableHandDisplayState {
   title: string;
   subtitle: string;
   helperText: string;
-  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  language?: import("@open-party-lab/protocol").RoomLanguage;
   disabled: boolean;
   canAct: boolean;
   resetKey: string;
@@ -778,7 +778,7 @@ export interface DungeonPartyHandCardModel {
 
 export interface DungeonPartyLayoutModel {
   kind: "dungeon_party";
-  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  language?: import("@open-party-lab/protocol").RoomLanguage;
   mode: "planning" | "voting" | "response" | "waiting" | "reveal" | "complete";
   resetKey: string;
   ownPlayerId: string;
@@ -836,7 +836,7 @@ export interface SocialPartyLayoutModel {
   score?: number;
   actions?: Array<{ id: string; label: string; disabled?: boolean; onPress: () => void }>;
   autoReady?: { enabled: boolean; onChange: (enabled: boolean) => void; onReady: () => void };
-  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  language?: import("@open-party-lab/protocol").RoomLanguage;
   stage: "avatar" | "submit" | "vote" | "finished" | "waiting";
   taskKind: "pick" | "text" | "photo" | "draw";
   resetKey: string;
@@ -877,7 +877,7 @@ export interface DungeonGuildCardModel {
 
 export interface DungeonGuildLayoutModel {
   kind: "dungeon_guild";
-  language?: import("@open-party-lab/protocol").SupportedLanguage;
+  language?: import("@open-party-lab/protocol").RoomLanguage;
   disabled?: boolean;
   resetKey: string;
   title: string;

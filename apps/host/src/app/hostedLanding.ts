@@ -1,4 +1,4 @@
-import type { ClientToServerEvents, ServerToClientEvents, SupportedLanguage } from "@open-party-lab/protocol";
+import type { ClientToServerEvents, ServerToClientEvents, RoomLanguage } from "@open-party-lab/protocol";
 import { defaultThemeName, themeCssVariablesFor } from "@open-party-lab/ui-kit";
 import { io, type Socket } from "socket.io-client";
 import { readStoredHostLanguage, writeStoredHostLanguage } from "../i18n/hostText.js";
@@ -47,7 +47,7 @@ function normalizeRoomCode(value: string): string {
 }
 
 export function mountHostedLanding(): void {
-  let language: SupportedLanguage = readStoredHostLanguage();
+  let language: RoomLanguage = readStoredHostLanguage();
   const closedReason = new URLSearchParams(window.location.search).get("closed");
   document.title = landingCopy.title;
   document.body.classList.add("hosted-landing-page");

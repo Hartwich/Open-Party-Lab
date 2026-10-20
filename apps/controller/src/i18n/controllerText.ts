@@ -1,23 +1,23 @@
 import {
   defaultLanguage,
-  normalizeLanguage,
+  normalizeRoomLanguage,
   type PublicGamePhase,
-  type SupportedLanguage
+  type RoomLanguage
 } from "@open-party-lab/protocol";
 
 // v2 key: the club runs English by default, so phones that stored the old
 // German default start fresh on English. The DE/EN toggle still works.
 const languagePreferenceKey = "open-party-lab.controller-language-v2";
 
-export function readStoredControllerLanguage(): SupportedLanguage {
+export function readStoredControllerLanguage(): RoomLanguage {
   if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
     return defaultLanguage;
   }
 
-  return normalizeLanguage(window.localStorage.getItem(languagePreferenceKey));
+  return normalizeRoomLanguage(window.localStorage.getItem(languagePreferenceKey));
 }
 
-export function writeStoredControllerLanguage(language: SupportedLanguage): void {
+export function writeStoredControllerLanguage(language: RoomLanguage): void {
   if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
     return;
   }
@@ -467,8 +467,8 @@ const controllerText = {
       }
     }
   }
-} satisfies Record<SupportedLanguage, ControllerText>;
+} satisfies Record<RoomLanguage, ControllerText>;
 
-export function getControllerText(language: SupportedLanguage | null | undefined): ControllerText {
-  return controllerText[normalizeLanguage(language)];
+export function getControllerText(language: RoomLanguage | null | undefined): ControllerText {
+  return controllerText[normalizeRoomLanguage(language)];
 }
