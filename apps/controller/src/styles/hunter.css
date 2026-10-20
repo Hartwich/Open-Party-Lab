@@ -658,6 +658,46 @@
   box-shadow: none;
 }
 
+.hxh-player-avatar {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  line-height: 0;
+}
+
+.hxh-avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.hxh-avatar-chip {
+  appearance: none;
+  border: 1px solid rgba(243, 233, 210, 0.2);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.28);
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.hxh-avatar-chip:hover,
+.hxh-avatar-chip:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(243, 233, 210, 0.5);
+}
+
+.hxh-avatar-meta {
+  margin: 6px 0 0;
+  color: var(--hxh-cream-dim);
+  font-size: 0.85rem;
+}
+
 .hxh-btn-danger-ghost {
   background: rgba(255, 90, 95, 0.1);
   color: #ffb3ab;
@@ -686,7 +726,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* Auto margins (not justify-content: center) so an overflowing card can never
+     push the top half out of reach on short phones. */
+  justify-content: flex-start;
+  margin-block: auto;
   gap: 16px;
   padding: 12px 8px;
 }

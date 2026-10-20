@@ -243,7 +243,7 @@ export class ControllerSocketClient {
     return this.state;
   }
 
-  joinRoom(roomCode: string, playerName: string): void {
+  joinRoom(roomCode: string, playerName: string, avatarId?: string, preferredColor?: string): void {
     if (!this.socket.connected) {
       this.socket.connect();
     }
@@ -256,7 +256,9 @@ export class ControllerSocketClient {
       {
         roomCode: roomCode.toUpperCase(),
         playerName,
-        deviceId: getOrCreateDeviceId()
+        deviceId: getOrCreateDeviceId(),
+        ...(avatarId ? { avatarId } : {}),
+        ...(preferredColor ? { preferredColor } : {})
       },
       (result) => {
         if (!result.ok) {

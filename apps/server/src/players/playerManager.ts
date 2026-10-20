@@ -56,6 +56,10 @@ export class PlayerManager {
         existingPlayer.name = request.playerName.trim();
       }
 
+      if (request.avatarId) {
+        existingPlayer.avatarId = request.avatarId;
+      }
+
       this.presenceTracker.markConnected(existingPlayer, socketId);
       this.reconnectService.bindPlayer(existingPlayer, room.code, socketId);
 
@@ -70,6 +74,7 @@ export class PlayerManager {
       deviceId: request.deviceId,
       name: request.playerName.trim(),
       color: request.preferredColor ?? this.pickColor(room),
+      avatarId: request.avatarId ?? null,
       selectedCharacterId: null,
       setupSelectionsByGameId: {},
       score: 0,
@@ -225,6 +230,7 @@ export class PlayerManager {
       id: player.id,
       name: player.name,
       color: player.color,
+      avatarId: player.avatarId ?? null,
       selectedCharacterId: player.selectedCharacterId,
       selectedCharacterName: null,
       setupSelections,

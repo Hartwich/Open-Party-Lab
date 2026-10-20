@@ -291,6 +291,7 @@ export function toRoomSnapshot(
           id: player.id,
           name: player.name,
           color: player.color,
+          avatarId: player.avatarId ?? null,
           selectedCharacterId: selectedChoiceId,
           selectedCharacterName: selectedChoiceId
             ? selectedGame?.playerSetup?.options.find((option) => option.id === selectedChoiceId)?.name ?? null

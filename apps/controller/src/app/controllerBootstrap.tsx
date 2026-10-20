@@ -91,7 +91,9 @@ export function ControllerApp() {
           connected={state.connected}
           error={state.error}
           language={state.room?.language ?? state.preferredLanguage}
-          onJoin={(roomCode, playerName) => controllerClient.joinRoom(roomCode, playerName)}
+          onJoin={(roomCode, playerName, avatarId, preferredColor) =>
+            controllerClient.joinRoom(roomCode, playerName, avatarId, preferredColor)
+          }
         />
       ) : null}
 

@@ -4,6 +4,7 @@ import { ControllerFrame } from "../controller-ui/layout/ControllerFrame.js";
 import { HunterScene } from "./HunterScene.js";
 import { HostControlPanel } from "../controller-ui/common/HostControlPanel.js";
 import { getControllerText } from "../i18n/controllerText.js";
+import { getAvatarById } from "../controller-ui/common/HunterAvatars.js";
 
 type AvailableRoomGame = RoomSnapshot["availableGames"][number];
 type PlayerSetup = NonNullable<AvailableRoomGame["playerSetup"]>;
@@ -540,9 +541,14 @@ export function LobbyPage({
           <div style={{ display: "grid", gap: 10 }}>
             {(room?.players ?? []).map((entry) => {
               const isMe = entry.id === currentPlayer?.id;
+              const avatar = entry.avatarId ? getAvatarById(entry.avatarId) : null;
               return (
                 <div key={entry.id} className="hxh-player-row">
-                  <span className={`hxh-ready-dot${entry.isReady ? "" : " is-waiting"}`} aria-hidden="true" />
+                  {avatar ? (
+                    <span className="hxh-player-avatar" aria-hidden="true">{avatar.renderSvg(30)}</span>
+                  ) : (
+                    <span className={`hxh-ready-dot${entry.isReady ? "" : " is-waiting"}`} aria-hidden="true" />
+                  )}
                   <div style={{ display: "grid", gap: 2, flex: 1, minWidth: 0 }}>
                     <strong style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {entry.name}{isMe ? " · ★" : ""}

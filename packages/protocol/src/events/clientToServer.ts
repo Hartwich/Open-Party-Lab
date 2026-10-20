@@ -27,6 +27,8 @@ export interface JoinRoomRequest {
   playerName: string;
   deviceId: string;
   preferredColor?: string;
+  /** Optional avatar id (e.g. a Hunter face) chosen before joining. */
+  avatarId?: string;
 }
 
 export interface ResumeSessionRequest {

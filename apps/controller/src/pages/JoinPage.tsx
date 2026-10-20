@@ -3,13 +3,28 @@ import type { SupportedLanguage } from "@open-party-lab/protocol";
 import { LDC_CLUB } from "@open-party-lab/game-core";
 import { getControllerText } from "../i18n/controllerText.js";
 import { HunterScene } from "./HunterScene.js";
+import { HUNTER_AVATARS } from "../controller-ui/common/HunterAvatars.js";
 
 interface JoinPageProps {
   defaultRoomCode: string;
   connected: boolean;
   error: string | null;
   language: SupportedLanguage;
-  onJoin: (roomCode: string, playerName: string) => void;
+  onJoin: (roomCode: string, playerName: string, avatarId: string, preferredColor: string) => void;
+}
+
+const AVATAR_STORAGE_KEY = "ldc.selectedAvatarId";
+
+function readStoredAvatarId(): string {
+  try {
+    const stored = window.localStorage.getItem(AVATAR_STORAGE_KEY);
+    if (stored && HUNTER_AVATARS.some((avatar) => avatar.id === stored)) {
+      return stored;
+    }
+  } catch {
+    // localStorage can be blocked in private mode; fall through to default.
+  }
+  return HUNTER_AVATARS[0].id;
 }
 
 function resolveHostUrl(): string {
@@ -33,10 +48,22 @@ function resolveHostUrl(): string {
 export function JoinPage({ defaultRoomCode, connected, error, language, onJoin }: JoinPageProps) {
   const [roomCode, setRoomCode] = useState(defaultRoomCode);
   const [playerName, setPlayerName] = useState("");
+  const [avatarId, setAvatarId] = useState(readStoredAvatarId);
   const [localError, setLocalError] = useState<string | null>(null);
   const [shaking, setShaking] = useState(false);
   const text = getControllerText(language);
   const shownError = localError ?? error;
+  const selectedAvatar = HUNTER_AVATARS.find((avatar) => avatar.id === avatarId) ?? HUNTER_AVATARS[0];
+
+  const selectAvatar = (nextId: string): void => {
+    setAvatarId(nextId);
+    setLocalError(null);
+    try {
+      window.localStorage.setItem(AVATAR_STORAGE_KEY, nextId);
+    } catch {
+      // Non-fatal: selection still applies for this join attempt.
+    }
+  };
 
   const flagError = (message: string): void => {
     setLocalError(message);
@@ -64,7 +91,7 @@ export function JoinPage({ defaultRoomCode, connected, error, language, onJoin }
     }
 
     setLocalError(null);
-    onJoin(code, name);
+    onJoin(code, name, selectedAvatar.id, selectedAvatar.color);
   };
 
   return (
@@ -142,6 +169,36 @@ export function JoinPage({ defaultRoomCode, connected, error, language, onJoin }
                 }}
               />
             </label>
+
+            <div className="hxh-field">
+              <span className="hxh-label">
+                {language === "en" ? "Choose your hunter" : "Wähle deinen Hunter"}
+              </span>
+              <div className="hxh-avatar-grid" role="radiogroup" aria-label={language === "en" ? "Choose your hunter" : "Wähle deinen Hunter"}>
+                {HUNTER_AVATARS.map((avatar) => {
+                  const isSelected = avatar.id === selectedAvatar.id;
+                  return (
+                    <button
+                      key={avatar.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      title={`${avatar.name} — ${avatar.title}`}
+                      onClick={() => selectAvatar(avatar.id)}
+                      className="hxh-avatar-chip"
+                      style={isSelected ? { borderColor: avatar.color, boxShadow: `0 0 0 2px ${avatar.color}55` } : undefined}
+                    >
+                      {avatar.renderSvg(52)}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="hxh-avatar-meta" aria-live="polite">
+                <strong style={{ color: selectedAvatar.color }}>{selectedAvatar.name}</strong>
+                <span> · {selectedAvatar.title}</span>
+              </p>
+            </div>
+
             <p className="hxh-error" role="alert">{shownError ?? ""}</p>
             <button type="submit" className="hxh-btn" disabled={!connected}>
               {connected ? text.joinRoom : text.connectingController}

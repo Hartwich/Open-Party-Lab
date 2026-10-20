@@ -6,6 +6,7 @@ export interface PlayerSnapshot {
   id: string;
   name: string;
   color: string;
+  avatarId: string | null;
   selectedCharacterId: string | null;
   selectedCharacterName: string | null;
   setupSelections: Record<string, PlayerSetupValue>;
