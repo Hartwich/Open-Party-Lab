@@ -280,6 +280,11 @@ export interface ChaosKommandoLayoutModel {
   weapons: ChaosKommandoWeaponOptionModel[];
   onMoveChange: (moveX: number, moveY: number) => void;
   onAimChange: (aimX: number, aimY: number) => void;
+  onRopeToggle?: () => void;
+  onReelChange?: (direction: -1 | 0 | 1) => void;
+  ropeAttached?: boolean;
+  ropeReeling?: boolean;
+  ropeDisabled?: boolean;
   onBackflip?: () => void;
   onEndTurn?: () => void;
   fuseSeconds?: number;
@@ -790,7 +795,11 @@ export interface DungeonPartyLayoutModel {
   disabled: boolean;
   statusLabel?: string;
   stats: LayoutStat[];
-  choices: ChoiceItemModel[];
+  choices: Array<ChoiceItemModel & { symbol?: string }>;
+  scene: "camp" | "dungeon";
+  roomRule?: { name: string; description: string; symbol: string };
+  preparedPower: number;
+  campResults?: Array<{ playerName: string; action: string; symbol: string; healthDelta: number; goldDelta: number; powerDelta: number; cards: DungeonPartyHandCardModel[] }>;
   hand: DungeonPartyHandCardModel[];
   pendingCard?: DungeonPartyHandCardModel & { targetName?: string };
   handTitle: string;
@@ -803,10 +812,12 @@ export interface DungeonPartyLayoutModel {
   resolution?: {
     success: boolean;
     partyPower: number;
+    sharedPower: number;
+    difficultyModifier: number;
     targetDifficulty: number;
     cards: string[];
-    rewards: Array<{ playerName: string; source: "loot" | "boss"; card: DungeonPartyHandCardModel }>;
-    heroes: Array<{ name: string; action: string; roll: number; contribution: number; healthDelta: number; fameDelta: number; goldDelta: number; outcome?: string }>;
+    rewards: Array<{ playerName: string; source: "loot" | "boss" | "room"; card: DungeonPartyHandCardModel }>;
+    heroes: Array<{ name: string; action: string; roll: number; originalRoll?: number; contribution: number; healthDelta: number; fameDelta: number; goldDelta: number; outcome?: string }>;
   };
   readyPhase: boolean;
   readySubmitted: boolean;

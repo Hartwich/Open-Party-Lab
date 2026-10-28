@@ -23,6 +23,15 @@ interface ControlVector {
 
 const DEADZONE = 0.12;
 
+function readableControlInk(color: string): string {
+  if (!/^#[\da-f]{6}$/i.test(color)) return "var(--ink)";
+  const channels = [1, 3, 5].map((at) => {
+    const value = Number.parseInt(color.slice(at, at + 2), 16) / 255;
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  });
+  return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722 > 0.179 ? "#000000" : "#ffffff";
+}
+
 function clampUnit(x: number, y: number): StickVector {
   const magnitude = Math.hypot(x, y);
 
@@ -193,20 +202,23 @@ const StickPad = memo(function StickPad({ label, accentColor, disabled, resetKey
           position: "absolute",
           left: "50%",
           top: "50%",
-          width: "28%",
+          width: "36%",
           aspectRatio: "1 / 1",
           borderRadius: "999px",
           transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))`,
-          background: `linear-gradient(180deg, ${accentColor} 0%, color-mix(in srgb, var(--accent) 92%, transparent) 100%)`,
+          background: accentColor,
           display: "grid",
           placeItems: "center",
-          color: "var(--ink)",
+          color: readableControlInk(accentColor),
+          opacity: disabled ? 0.45 : 1,
           fontWeight: 900,
-          letterSpacing: "0.08em",
-          fontSize: "0.72rem"
+          letterSpacing: "0.02em",
+          fontSize: "0.64rem",
+          lineHeight: 1.15,
+          whiteSpace: "pre-line"
         }}
       >
-        {label}
+        {label.replace(" / ", "\n")}
       </div>
     </div>
   );
@@ -226,6 +238,8 @@ const chargeWindowMs = 1_750;
 
 export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel }) {
   const en = model.language === "en";
+  const controlColor = model.accentColor ?? "#ae4938";
+  const fireDisabled = model.fireDisabled ?? model.disabled;
   const [hudMode, setHudMode] = useState<"kommando" | "steuerung">("steuerung");
   const [isPortrait, setIsPortrait] = useState(() =>
     typeof window !== "undefined" ? window.innerHeight >= window.innerWidth : true
@@ -519,11 +533,11 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                 borderRadius: "999px",
                 overflow: "hidden",
                 border: "1px solid color-mix(in srgb, var(--danger) 34%, transparent)",
-                background: model.disabled
-                  ? "linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 86%, transparent) 0%, color-mix(in srgb, var(--surface-raised) 98%, transparent) 100%)"
-                  : "linear-gradient(180deg, color-mix(in srgb, var(--danger) 95%, transparent) 0%, color-mix(in srgb, var(--danger) 96%, transparent) 100%)",
-                color: "var(--ink-soft)",
-                boxShadow: model.disabled ? "none" : "0 18px 40px color-mix(in srgb, var(--danger) 22%, transparent)",
+                background: fireDisabled
+                  ? "var(--surface-raised)"
+                  : controlColor,
+                color: fireDisabled ? "var(--ink-soft)" : readableControlInk(controlColor),
+                boxShadow: fireDisabled ? "none" : "0 18px 40px color-mix(in srgb, var(--danger) 22%, transparent)",
                 touchAction: "none",
                 userSelect: "none",
                 WebkitUserSelect: "none",
@@ -574,8 +588,8 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                 border: "1px solid color-mix(in srgb, var(--accent) 28%, transparent)",
                 background: model.disabled
                   ? "linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 86%, transparent) 0%, color-mix(in srgb, var(--surface-raised) 98%, transparent) 100%)"
-                  : "linear-gradient(180deg, color-mix(in srgb, var(--accent) 94%, transparent) 0%, color-mix(in srgb, var(--accent-strong) 94%, transparent) 100%)",
-                color: "var(--ink-soft)",
+                  : controlColor,
+                color: model.disabled ? "var(--ink-soft)" : readableControlInk(controlColor),
                 fontWeight: 800,
                 fontSize: "clamp(0.7rem, 2vw, 0.76rem)",
                 letterSpacing: "0.06em"
@@ -599,6 +613,23 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
         </div>
       )}
       {hudMode === "steuerung" && selectedWeapon ? <div style={weaponInfoStyle}><strong>{selectedWeapon.label}</strong><span>{model.fireHint}</span></div> : null}
+      {model.onRopeToggle ? <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+        <button type="button" disabled={model.ropeDisabled ?? model.disabled}
+          onClick={() => { model.onRopeToggle?.(); setHudMode("steuerung"); }}
+          style={toggleStyle(Boolean(model.ropeAttached), model.accentColor)}>
+          {model.ropeAttached ? en ? "RELEASE HOOK" : "HAKEN LOESEN" : en ? "HOOK" : "HAKEN"}
+        </button>
+        <button type="button" disabled={model.disabled || !model.ropeAttached}
+          aria-pressed={model.ropeReeling}
+          onPointerDown={(event) => { event.preventDefault(); try { event.currentTarget.setPointerCapture(event.pointerId); } catch {} model.onReelChange?.(-1); }}
+          onPointerUp={() => model.onReelChange?.(0)} onPointerCancel={() => model.onReelChange?.(0)}
+          onLostPointerCapture={() => model.onReelChange?.(0)} onBlur={() => model.onReelChange?.(0)}
+          onKeyDown={(event) => { if ((event.key === " " || event.key === "Enter") && !event.repeat) { event.preventDefault(); model.onReelChange?.(-1); } }}
+          onKeyUp={(event) => { if (event.key === " " || event.key === "Enter") model.onReelChange?.(0); }}
+          style={{ ...toggleStyle(Boolean(model.ropeReeling), model.accentColor), touchAction: "none" }}>
+          {en ? "PULL UP (HOLD)" : "HOCHZIEHEN (HALTEN)"}
+        </button>
+      </div> : null}
       {model.fuseSeconds !== undefined && model.onSetFuse ? <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
         <span>{en ? "Fuse" : "Zuender"}</span>
         {[1, 2, 3, 4, 5].map((seconds) => <button key={seconds} type="button" disabled={model.fireDisabled ?? model.disabled} onClick={() => model.onSetFuse?.(seconds)} style={toggleStyle(seconds === model.fuseSeconds, model.accentColor)}>{seconds}s</button>)}

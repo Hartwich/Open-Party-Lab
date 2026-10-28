@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
 import type { MagicArenaLayoutModel } from "./models.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 
@@ -329,6 +330,15 @@ function getPlannedActionIcon(action: MagicArenaPlannedAction | undefined): stri
   return action.actionKind === "base" ? getActionIcon(action.baseActionId) : getActionIcon(action.cardId);
 }
 
+// Row-major positions in the original 5×5 illustrated action atlas.
+const actionArtIds: readonly string[] = [
+  "move", "punch", "dig", "sprint", "charge_run",
+  "enemy_swap", "lightning_strike", "fireball", "hammer_blow", "bomb",
+  "meteor_strike", "rift", "earthquake", "platform_break", "stealth",
+  "shockwave", "chain_lightning", "pitfall", "teleport", "kraken",
+  "time_rift", "magic_mine", "storm_cloud", "ally_swap", "magnet_pull"
+];
+
 function getActionIconPath(actionId: MagicArenaBaseActionId | MagicArenaCardId | undefined): string | null {
   if (!actionId) {
     return null;
@@ -336,7 +346,7 @@ function getActionIconPath(actionId: MagicArenaBaseActionId | MagicArenaCardId |
 
   // Respect the Vite base path so icons also resolve when the controller is served under /controller/.
   const base = import.meta.env.BASE_URL || "/";
-  return `${base.endsWith("/") ? base : `${base}/`}magic-arena/${actionId}.svg`;
+  return `${base.endsWith("/") ? base : `${base}/`}magic-arena/action-art-atlas.png`;
 }
 
 function getPlannedActionId(action: MagicArenaPlannedAction | undefined): MagicArenaBaseActionId | MagicArenaCardId | undefined {
@@ -355,13 +365,14 @@ function ActionIcon({
   large?: boolean;
 }) {
   const src = getActionIconPath(actionId);
+  const artIndex = actionArtIds.indexOf(actionId ?? "");
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     setFailed(false);
   }, [src]);
 
-  if (!src) {
+  if (!src || artIndex < 0) {
     return <span style={emptyIconStyle}>-</span>;
   }
 
@@ -375,19 +386,29 @@ function ActionIcon({
   }
 
   return (
+    <span aria-hidden="true" style={{
+      display: "block", position: "relative", overflow: "hidden", borderRadius: 4,
+      width: large ? "100%" : 36, maxWidth: large ? 108 : 36,
+      aspectRatio: "1", flexShrink: 0, background: "#142420"
+    }}>
     <img
       src={src}
       alt=""
       draggable={false}
       onError={() => setFailed(true)}
       style={{
-        width: large ? 30 : 24,
-        height: large ? 30 : 24,
+        position: "absolute",
+        width: "500%",
+        maxWidth: "none",
+        height: "500%",
+        left: `${-(artIndex % 5) * 100}%`,
+        top: `${-Math.floor(artIndex / 5) * 100}%`,
         display: "block",
-        objectFit: "contain",
+        objectFit: "fill",
         pointerEvents: "none"
       }}
     />
+    </span>
   );
 }
 
@@ -1161,10 +1182,11 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
         : en ? "Game over" : "Spielende";
 
   return (
-    <div style={{ display: "grid", gap: 10 }}>
+    <div className="magic-arena-controller" style={arenaControllerStyle}>
+      <style>{arenaControllerCss}</style>
       <header style={panelStyle}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
-          <strong style={{ fontSize: "1.18rem", color: "var(--ink)" }}>{model.title}</strong>
+          <strong style={{ fontSize: "1.35rem", fontFamily: "Georgia, serif", color: "var(--ink)" }}>{model.title}</strong>
           <span style={{ color: "var(--ink-soft)", fontWeight: 900 }}>R{state.roundIndex} {phaseLabel}</span>
         </div>
         <span style={{ color: "var(--text-muted)", lineHeight: 1.35 }}>{model.subtitle ?? model.helperText}</span>
@@ -1234,17 +1256,20 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
       <section style={panelStyle}>
         <strong>{en ? "Action" : "Aktion"}</strong>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 6 }}>
-          <button type="button" title="Move" aria-label="Move" disabled={model.disabled} onClick={() => resetTargets("base:move")} style={modeButtonStyle(mode === "base:move")}>
+          <button type="button" title={en ? "Move" : "Bewegen"} aria-label={en ? "Move" : "Bewegen"} disabled={model.disabled} onClick={() => resetTargets("base:move")} style={modeButtonStyle(mode === "base:move")}>
             <ActionIcon actionId="move" large />
+            <span style={actionArtCaptionStyle}>{en ? "Move" : "Bewegen"}</span>
           </button>
-          <button type="button" title="Punch" aria-label="Punch" disabled={model.disabled} onClick={() => resetTargets("base:punch")} style={modeButtonStyle(mode === "base:punch")}>
+          <button type="button" title={en ? "Punch" : "Schlagen"} aria-label={en ? "Punch" : "Schlagen"} disabled={model.disabled} onClick={() => resetTargets("base:punch")} style={modeButtonStyle(mode === "base:punch")}>
             <ActionIcon actionId="punch" large />
+            <span style={actionArtCaptionStyle}>{en ? "Punch" : "Schlagen"}</span>
           </button>
-          <button type="button" title="Graben" aria-label="Graben" disabled={model.disabled} onClick={() => resetTargets("base:dig")} style={modeButtonStyle(mode === "base:dig")}>
+          <button type="button" title={en ? "Dig" : "Graben"} aria-label={en ? "Dig" : "Graben"} disabled={model.disabled} onClick={() => resetTargets("base:dig")} style={modeButtonStyle(mode === "base:dig")}>
             <ActionIcon actionId="dig" large />
+            <span style={actionArtCaptionStyle}>{en ? "Dig" : "Graben"}</span>
           </button>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: 6 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 6 }}>
           {(ownPlayer?.hand ?? []).map((card) => {
             const selected = selectedCardInstanceId === card.instanceId;
             const reserved = plannedCardIds.has(card.instanceId);
@@ -1263,6 +1288,7 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
                 }}
               >
                 <ActionIcon actionId={card.cardId} large />
+                <span style={actionArtCaptionStyle}>{cardName}</span>
               </button>
             );
           })}
@@ -1386,16 +1412,23 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
                 ) : null}
                 <span style={hexFigureDotsStyle}>
                   {figures.slice(0, 3).map((entry, index) => (
-                    <span
+                    <svg
                       key={entry.figure.figureId}
+                      viewBox="0 0 20 28"
+                      aria-hidden="true"
                       style={{
                         ...hexFigureDotStyle,
-                        background: entry.color,
+                        color: entry.color,
                         opacity: entry.figure.status === "in_water" ? 0.62 : entry.figure.stealthUntilRound ? 0.54 : 1,
                         transform: `translate(${(index - (Math.min(figures.length, 3) - 1) / 2) * 8}px, 3px)`,
                         boxShadow: entry.own ? "0 0 0 2px color-mix(in srgb, var(--ink) 65%, transparent)" : "0 0 0 1px color-mix(in srgb, var(--surface) 85%, transparent)"
                       }}
-                    />
+                    >
+                      <path d="M10 1 4 10h12Z" fill="currentColor" stroke="#f2e4c5" strokeWidth=".7" />
+                      <circle cx="10" cy="12" r="3" fill="#dfb58b" />
+                      <path d="m6 15-3 11h14l-3-11Z" fill="currentColor" stroke="#f2e4c5" strokeWidth=".7" />
+                      <path d="M17 11v15" stroke="#d8b26a" strokeWidth="1.6" />
+                    </svg>
                   ))}
                 </span>
                 {bombs.length > 0 ? (
@@ -1467,13 +1500,37 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
   );
 }
 
+const arenaControllerStyle = {
+  display: "grid", gap: 10, padding: 12, borderRadius: 8,
+  color: "#f2e4c5", background: "#111a19", colorScheme: "dark",
+  "--ink": "#f2e4c5", "--ink-soft": "#ded0b2", "--text-main": "#f2e4c5",
+  "--text-muted": "#b5b8a7", "--muted": "#8d9787", "--paper": "#192521",
+  "--surface": "#24322c", "--surface-raised": "#34433a", "--line-strong": "#7e8876",
+  "--accent": "#b8914e", "--accent-soft": "#d8b875", "--amber": "#e1b867",
+  "--sage": "#91b9a0", "--sage-soft": "#b4d1bb", "--sage-strong": "#15291f",
+  "--danger": "#f28d7b"
+} as CSSProperties;
+
+const arenaControllerCss = `
+  .magic-arena-controller button { font-family: inherit; transition: border-color 140ms, background 140ms, transform 140ms; }
+  .magic-arena-controller button:focus-visible { outline: 3px solid #f2d794; outline-offset: 3px; }
+  .magic-arena-controller button:disabled { cursor: default; opacity: .48; }
+  .magic-arena-controller button:not(:disabled):active { filter: brightness(1.18); }
+  @media (prefers-reduced-motion: reduce) { .magic-arena-controller button { transition: none; } }
+`;
+
 const panelStyle = {
   display: "grid",
   gap: 8,
   padding: 10,
-  borderRadius: 12,
-  border: "1px solid color-mix(in srgb, var(--muted) 14%, transparent)",
-  background: "color-mix(in srgb, var(--paper) 48%, transparent)"
+  borderRadius: 4,
+  border: "1px solid color-mix(in srgb, var(--accent) 26%, transparent)",
+  background: "var(--paper)"
+} as const;
+
+const actionArtCaptionStyle = {
+  fontSize: "0.7rem", lineHeight: 1.15, minHeight: "2.3em", maxWidth: "100%",
+  display: "grid", alignItems: "center", overflowWrap: "anywhere", fontWeight: 750
 } as const;
 
 const roundEventNoticeStyle = {
@@ -1547,7 +1604,7 @@ const hexBoardStyle = {
   overflow: "hidden",
   borderRadius: 10,
   border: "1px solid color-mix(in srgb, var(--muted) 12%, transparent)",
-  background: "linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 42%, transparent), color-mix(in srgb, var(--surface) 72%, transparent))"
+  background: "radial-gradient(ellipse at 50% 45%, #33473e, #15272a 72%)"
 } as const;
 
 const hexCellStyle = {
@@ -1594,10 +1651,10 @@ const hexFigureDotsStyle = {
 
 const hexFigureDotStyle = {
   position: "absolute",
-  width: 10,
-  height: 10,
-  borderRadius: 999,
-  border: "1px solid color-mix(in srgb, var(--paper) 72%, transparent)"
+  width: 15,
+  height: 22,
+  overflow: "visible",
+  filter: "drop-shadow(0 1px 1px #000)"
 } as const;
 
 const hexBadgeStyle = {
@@ -1706,16 +1763,16 @@ const hexCrackBranchRightStyle = {
 
 function modeButtonStyle(selected: boolean) {
   return {
-    minHeight: 42,
+    minHeight: 70,
     border: selected ? "2px solid var(--amber)" : "1px solid color-mix(in srgb, var(--muted) 18%, transparent)",
-    borderRadius: 10,
+    borderRadius: 6,
     background: selected ? "color-mix(in srgb, var(--amber) 20%, transparent)" : "color-mix(in srgb, var(--surface) 68%, transparent)",
     color: "var(--text-main)",
     fontWeight: 900,
     display: "grid",
-    gap: 2,
+    gap: 5,
     placeItems: "center",
-    padding: "7px 8px"
+    padding: "5px"
   } as const;
 }
 

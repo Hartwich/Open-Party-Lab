@@ -33,6 +33,11 @@ Other known games include Air Hockey, Blickwinkel, Dungeon-Gilde, Imposter, Ligh
 
 Recent game updates include:
 
+- **Magic Arena:** a fantasy-island diorama with articulated mages, action-follow camera and illustrated action cards shared with the phone layout.
+- **Arena Survivor:** revised weapon and stat balance, bounded enemy scaling, stronger late level-ups, swept projectile contacts and a wider, steadier host view.
+- **Chaos-Kommando:** three-level destructible island arenas, follow camera and minimap, aligned weapon effects, and dedicated grappling-hook and reeling controls.
+- **Dungeon-Gilde:** a Three.js dungeon diorama with animated doors, torchlight and distinct monster miniatures, with an illustrated fallback when WebGL is unavailable.
+- **Dungeon Party:** varied room rules and secret routes, campfire choices, equipment upgrades and an expanded action-card pool. Its campaign remains an early development build.
 - **Kartentisch:** configurable Mau-Mau house rules and hand-card highlighting; Symboljagd supports solo play with a completion time and either a whole-deck deal or an equal target of 1–300 cards per person.
 - **Blickwinkel:** photo and drawing tasks with camera/gallery controls, reliable media submission, and optional remixes of photos from an earlier completed task.
 - **Imposter:** private roles, secret phone voting, an optional curated hint, a final free-text guess, player photos and scores carried across words. Setup can skip confirmed clue rounds.
