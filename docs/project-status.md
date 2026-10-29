@@ -1,6 +1,60 @@
 # Project Status
 
-Snapshot date: 2026-10-28
+Snapshot date: 2026-10-29
+
+DE/EN game localization pass (2026-10-29): all 21 optional games now provide
+game-owned German/English catalog and complete English lobby/player setup
+copy. Generic manifest localization covers descriptions, confirmations,
+field groups/options, character/spell choices and catalog category labels while
+preserving IDs, action keys, constraints, selection limits and artwork.
+English names include Magic Duel, Charades, Buzzword, Guess-o-Rama, Draw & Guess,
+Chaos Squad, Shadow Hunt, Flutterfluff, Card Table, Perspectives and Dungeon
+Guild. Runtime host/controller titles use the same names.
+Draw & Guess now selects from 568 authored bilingual word pairs by room
+language, preserving the existing family/adult categories. Guess-o-Rama adds
+140 missing English legacy question records, including archived content.
+Magic Duel translates all 24 spells; Magic Arena adds card/event/action text;
+Dungeon Party/Guild localize outcomes, class selections and card messages.
+Arena Survivor translates 13 characters, 21 weapons with all four tiers and
+22 items at presentation serialization; MinionsTD translates tower/minion
+descriptions, targeting and traits. Six stale weapon-damage display numbers
+were aligned with existing combat values; combat behavior is unchanged.
+Generic controller fallbacks now use the room language, including racing
+controls, joystick hints and status-report headings. Independent review fixed
+a Magic Arena no-op tick identity regression before delivery and checked that
+player names, technical IDs, gameplay values and private-state boundaries remain
+intact. All game content stays inside the optional repositories; publishing
+requires coordinated commits across the platform and all 21 game working trees.
+Verification: full platform typecheck/build with all 21 games, 26 catalog/setup contract tests
+and 13 focused card/character/spell/serialization localization tests passed.
+The game agents also passed 40 party-game regressions, 160 Card Table
+regressions and the Magic Arena rule suite. In-app rendered checks covered
+DE/EN catalog switching and English Shadow Hunt setup at 1280x720, plus room
+join and Magic Duel's English spell selection at 390x844 (12 to 11 selections).
+No console warnings/errors or horizontal phone overflow were observed. These
+were representative dev-server checks, not full matches or physical-device QA.
+Existing Vite bundle-size warnings remain. Release order is the 21 game
+repositories first, followed by the platform repository.
+
+Game ownership cleanup (2026-10-28): the 13 Schattenjagd/Symboljagd runtime
+asset copies are removed from the platform index and ignored; identical source
+files are already tracked in Schattenjagd/Card Table. All 14 centralized game
+catalog translation maps now live in their game repositories and are delivered
+as `GameManifest.translations` through the existing manifest export. game-core
+only selects the language and applies fallback/setup labels. A build-time
+boundary check rejects tracked runtime game assets, centralized catalog texts
+and optional game package imports in game-core. Localization contract tests
+cover an unknown game, serialized manifests, setup labels and fallback.
+The 14 game working trees must be published alongside the platform change;
+they are separate ignored repositories. Dedicated game controller layouts and
+game-specific protocol copies remain follow-up migrations. No gameplay or
+visual behavior changes are intended; browser/device checks were not repeated.
+Verification: full platform typecheck and build passed with all 21 optional
+games linked, as did individual typechecks of the 14 changed games and three
+catalog contract tests. All 14 exported translation maps match their previous
+DE/EN values; all 13 asset copies regenerated identically and remain ignored.
+The boundary guard rejected a temporary direct optional-game import. Existing
+Vite bundle-size warnings remain.
 
 Commit/push verification on 2026-10-28: full platform typecheck and production
 build passed with all 21 optional games linked. Individual typechecks passed

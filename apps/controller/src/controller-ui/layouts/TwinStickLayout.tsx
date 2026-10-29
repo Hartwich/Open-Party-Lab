@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ActionButtonPad } from "../common/ActionButtonPad.js";
 import type { TwinStickLayoutModel } from "./models.js";
+import { getControllerText } from "../../i18n/controllerText.js";
 
 interface StickVector {
   x: number;
@@ -136,6 +137,7 @@ function Stick({ label, accentColor, disabled, resetKey, onChange }: StickProps)
 }
 
 export function TwinStickLayout({ model }: { model: TwinStickLayoutModel }) {
+  const text = getControllerText(model.language).inputs;
   const hasInteractButton = Boolean(model.interactButton);
 
   return (
@@ -156,7 +158,7 @@ export function TwinStickLayout({ model }: { model: TwinStickLayoutModel }) {
         }}
       >
         <Stick
-          label={model.leftStickLabel ?? "MOVE"}
+          label={model.leftStickLabel ?? text.move}
           accentColor={model.accentColor}
           disabled={model.disabled}
           resetKey={model.resetKey}
@@ -174,7 +176,7 @@ export function TwinStickLayout({ model }: { model: TwinStickLayoutModel }) {
         ) : null}
 
         <Stick
-          label={model.rightStickLabel ?? "AIM"}
+          label={model.rightStickLabel ?? text.aim}
           accentColor="var(--amber)"
           disabled={model.disabled}
           resetKey={model.resetKey}

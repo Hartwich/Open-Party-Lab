@@ -11,6 +11,8 @@
   "scripts": {
     "site:build": "node scripts/build-site.mjs",
     "games:list": "node scripts/local-games.mjs list",
+    "check:game-boundaries": "node scripts/check-game-boundaries.mjs",
+    "test:game-catalog": "npm run build:packages && node --test scripts/tests/game-catalog.test.mjs scripts/tests/installed-game-localization.test.mjs",
     "games:sync-local": "node scripts/local-games.mjs sync-local",
     "games:clear-local": "node scripts/local-games.mjs clear-local",
     "games:clone-recommended": "node scripts/clone-recommended-games.mjs",
@@ -24,7 +26,7 @@
     "test:connections": "node --import tsx scripts/test-session-recovery.mjs",
     "smoke:remote-setup": "node scripts/smoke-remote-setup.mjs",
     "postinstall": "node scripts/local-games.mjs ensure-generated",
-    "build:packages": "tsc -b packages/utils packages/ui-kit packages/game-core packages/protocol",
+    "build:packages": "npm run check:game-boundaries && tsc -b packages/utils packages/ui-kit packages/game-core packages/protocol",
     "watch:packages": "tsc -b packages/utils packages/ui-kit packages/game-core packages/protocol -w",
     "dev:all": "powershell -ExecutionPolicy Bypass -File ./scripts/dev-all.ps1",
     "dev:stop": "powershell -ExecutionPolicy Bypass -File ./scripts/stop-dev.ps1",

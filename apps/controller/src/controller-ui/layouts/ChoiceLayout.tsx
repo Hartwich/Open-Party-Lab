@@ -1,5 +1,6 @@
 import type { ChoiceLayoutModel } from "./models.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
+import { getControllerText } from "../../i18n/controllerText.js";
 
 interface ChoiceLayoutProps {
   model: ChoiceLayoutModel;
@@ -104,7 +105,7 @@ export function ChoiceLayout({ model }: ChoiceLayoutProps) {
 
       {model.feed?.length ? (
         <div style={{ display: "grid", gap: 6 }}>
-          <strong style={{ fontSize: "0.9rem", color: "var(--text-muted)" }}>Lagebericht</strong>
+          <strong style={{ fontSize: "0.9rem", color: "var(--text-muted)" }}>{getControllerText(model.language).inputs.statusReport}</strong>
           {model.feed.map((entry, index) => (
             <span key={`${entry}-${index}`} style={{ fontSize: "0.88rem", color: "var(--text-muted)" }}>
               {entry}

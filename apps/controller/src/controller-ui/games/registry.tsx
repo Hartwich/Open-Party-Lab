@@ -85,7 +85,10 @@ export const controllerGameRegistry: Record<string, ControllerGameRegistration> 
       {
         ...registration,
         buildLayout(context: ControllerGameRenderContext) {
-          return withAutoReady(registration.buildLayout(context), context);
+          return withAutoReady({
+            ...registration.buildLayout(context),
+            language: context.state.room?.language ?? context.state.preferredLanguage
+          } as ControllerLayoutModel, context);
         }
       }
     ])

@@ -4,6 +4,7 @@ import type {
   CardTableCardStyle,
   CardTableColor
 } from "@open-party-lab/protocol";
+import { getControllerText } from "../../i18n/controllerText.js";
 
 /**
  * Kartenbilder für die Phone-Hand.
@@ -297,13 +298,14 @@ export function PlayingCard({
 }
 
 interface CardBackProps {
+  language?: import("@open-party-lab/protocol").SupportedLanguage;
   style: CardTableBackStyle;
   width: number;
   count?: number;
 }
 
 /** Verdeckter Stapel mit optionaler Kartenzahl. */
-export function CardBack({ style, width, count }: CardBackProps) {
+export function CardBack({ style, width, count, language }: CardBackProps) {
   const patternId = `card-back-${style}`;
   const unit = 14;
   const pattern =
@@ -329,7 +331,7 @@ export function CardBack({ style, width, count }: CardBackProps) {
       width={width}
       height={width * 1.4}
       role="img"
-      aria-label="Kartenrücken"
+      aria-label={getControllerText(language).inputs.cardBack}
       style={{ display: "block" }}
     >
       <defs>

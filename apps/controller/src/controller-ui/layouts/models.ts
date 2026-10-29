@@ -70,6 +70,7 @@ export interface ChoiceItemModel {
 
 export interface ChoiceLayoutModel {
   kind: "choice";
+  language?: import("@open-party-lab/protocol").SupportedLanguage;
   title: string;
   subtitle?: string;
   helperText?: string;
@@ -191,6 +192,7 @@ export interface DPadLayoutModel {
 
 export interface VirtualJoystickLayoutModel {
   kind: "virtual_joystick";
+  language?: import("@open-party-lab/protocol").SupportedLanguage;
   title: string;
   subtitle?: string;
   helperText?: string;
@@ -228,6 +230,7 @@ export interface RacingControlsState {
 
 export interface RacingControlsLayoutModel {
   kind: "racing_controls";
+  language?: import("@open-party-lab/protocol").SupportedLanguage;
   disabled: boolean;
   accentColor?: string;
   resetKey: string;
@@ -297,6 +300,7 @@ export interface ChaosKommandoLayoutModel {
 
 export interface TwinStickLayoutModel {
   kind: "twin_stick";
+  language?: import("@open-party-lab/protocol").SupportedLanguage;
   title: string;
   subtitle?: string;
   helperText?: string;

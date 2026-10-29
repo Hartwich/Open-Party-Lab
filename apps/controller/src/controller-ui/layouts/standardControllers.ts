@@ -5,6 +5,8 @@ import type {
   TwinStickLayoutModel,
   VirtualJoystickLayoutModel
 } from "./models.js";
+import type { SupportedLanguage } from "@open-party-lab/protocol";
+import { getControllerText } from "../../i18n/controllerText.js";
 
 export type StandardControllerPresetId =
   | "joystick_a"
@@ -46,7 +48,22 @@ export const standardControllerPresetCatalog: StandardControllerPresetDefinition
   }
 ];
 
+const englishPresetDescriptions: Record<StandardControllerPresetId, string> = {
+  joystick_a: "An analog stick on the left and a large action button on the right.",
+  joystick_abcd: "An analog stick on the left and four action buttons on the right.",
+  dual_joystick: "A left stick for movement and a right stick for aiming or looking around.",
+  dpad_abcd: "Four direction buttons on the left and four action buttons on the right."
+};
+
+export function listStandardControllerPresets(language: SupportedLanguage = "de"): StandardControllerPresetDefinition[] {
+  return standardControllerPresetCatalog.map((preset) => ({
+    ...preset,
+    description: language === "en" ? englishPresetDescriptions[preset.id] : preset.description
+  }));
+}
+
 interface StandardControllerBaseOptions {
+  language?: SupportedLanguage;
   title: string;
   subtitle?: string;
   helperText?: string;
@@ -97,6 +114,7 @@ export interface StandardDpadAbcdControllerOptions extends StandardControllerBas
 
 function resolveBaseOptions(options: StandardControllerBaseOptions) {
   return {
+    language: options.language,
     title: options.title,
     subtitle: options.subtitle,
     helperText: options.helperText,
@@ -130,7 +148,7 @@ export function createStandardJoystickAController(
   return {
     kind: "virtual_joystick",
     ...base,
-    centerLabel: options.centerLabel ?? "MOVE",
+    centerLabel: options.centerLabel ?? getControllerText(options.language).inputs.move,
     actionButtons: [createActionButton("a", "A", options.buttonA)],
     actionButtonColumns: 1,
     onMoveChange: options.onMoveChange
@@ -145,7 +163,7 @@ export function createStandardJoystickAbcdController(
   return {
     kind: "virtual_joystick",
     ...base,
-    centerLabel: options.centerLabel ?? "MOVE",
+    centerLabel: options.centerLabel ?? getControllerText(options.language).inputs.move,
     actionButtons: [
       createActionButton("a", "A", options.buttonA),
       createActionButton("b", "B", options.buttonB),
@@ -165,8 +183,8 @@ export function createStandardDualJoystickController(
   return {
     kind: "twin_stick",
     ...base,
-    leftStickLabel: options.leftStickLabel ?? "MOVE",
-    rightStickLabel: options.rightStickLabel ?? "LOOK",
+    leftStickLabel: options.leftStickLabel ?? getControllerText(options.language).inputs.move,
+    rightStickLabel: options.rightStickLabel ?? getControllerText(options.language).inputs.look,
     onMoveChange: options.onMoveChange,
     onAimChange: options.onAimChange
   };

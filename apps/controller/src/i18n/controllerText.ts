@@ -24,6 +24,24 @@ export function writeStoredControllerLanguage(language: SupportedLanguage): void
 }
 
 export interface ControllerText {
+  inputs: {
+    move: string;
+    aim: string;
+    look: string;
+    joystickHint: string;
+    statusReport: string;
+    cardBack: string;
+    driveStick: string;
+    raceActions: string;
+    left: string;
+    right: string;
+    forward: string;
+    reverse: string;
+    ready: string;
+    boost: string;
+    fire: string;
+    drift: string;
+  };
   hostControlTitle: string;
   hostControlTake: string;
   hostControlPending: string;
@@ -118,6 +136,14 @@ export interface ControllerText {
 
 const controllerText = {
   de: {
+    inputs: {
+      move: "BEWEGEN", aim: "ZIELEN", look: "UMSEHEN",
+      joystickHint: "Innen fein steuern, am Rand mit voller Geschwindigkeit laufen.",
+      statusReport: "Lagebericht", cardBack: "Kartenrücken",
+      driveStick: "Fahrsteuerung", raceActions: "Fahraktionen",
+      left: "LINKS", right: "RECHTS", forward: "VORWÄRTS", reverse: "RÜCKWÄRTS",
+      ready: "BEREIT", boost: "TURBO", fire: "FEUERN", drift: "DRIFT"
+    },
     hostControlTitle: "Host-Steuerung",
     hostControlTake: "Steuerung uebernehmen",
     hostControlPending: "Anfrage laeuft.",
@@ -234,6 +260,14 @@ const controllerText = {
     }
   },
   en: {
+    inputs: {
+      move: "MOVE", aim: "AIM", look: "LOOK",
+      joystickHint: "Move gently near the center, or push to the edge for full speed.",
+      statusReport: "Status report", cardBack: "Card back",
+      driveStick: "Drive stick", raceActions: "Race actions",
+      left: "LEFT", right: "RIGHT", forward: "FORWARD", reverse: "REVERSE",
+      ready: "READY", boost: "BOOST", fire: "FIRE", drift: "DRIFT"
+    },
     hostControlTitle: "Host controls",
     hostControlTake: "Take host control",
     hostControlPending: "Request sent.",

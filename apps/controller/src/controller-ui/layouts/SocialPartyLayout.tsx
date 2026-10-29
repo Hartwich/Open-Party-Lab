@@ -162,7 +162,7 @@ export function SocialPartyLayout({ model }: Props) {
     : (en ? "Photo could not be prepared. Try another photo." : "Foto konnte nicht vorbereitet werden. Versuche ein anderes Foto.");
   const sendLabel = sending ? (en ? "Sending…" : "Wird gesendet …") : sendError ? (en ? "Send again" : "Erneut senden") : null;
 
-  return <main className={`social-party${model.title ? " has-context" : ""}`} key={model.resetKey} aria-label={model.title ?? (en ? "Blickwinkel controller" : "Blickwinkel-Eingabe")}>
+  return <main className={`social-party${model.title ? " has-context" : ""}`} key={model.resetKey} aria-label={model.title ?? (en ? "Game controller" : "Spieleingabe")}>
     {model.deadline !== undefined && <RoundTimer deadline={model.deadline} en={en} getServerTime={model.getServerTime} />}
     <style>{`
       .social-party{--paper:#fffaf1;--plum:#39283c;--coral:#e97763;--teal:#398f87;color:var(--plum);font-family:Georgia,'Times New Roman',serif;display:grid;align-content:center;justify-items:center;gap:12px;box-sizing:border-box;padding:72px clamp(14px,4vw,24px) 24px;min-height:calc(100dvh - max(10px,env(safe-area-inset-top)) - max(10px,env(safe-area-inset-bottom)));background:radial-gradient(ellipse at 92% 4%,#f8ded4 0,transparent 32%),radial-gradient(ellipse at 0 75%,#d9eee8 0,transparent 35%),#f5eee2;animation:sp-in .38s cubic-bezier(.2,.8,.2,1) both}

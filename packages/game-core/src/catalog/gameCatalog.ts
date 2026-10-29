@@ -1,6 +1,5 @@
 ﻿import type { GameManifest } from "../types/GameManifest.js";
 import { defaultLanguage, normalizeLanguage, type SupportedLanguage } from "../i18n/language.js";
-import { gameTextById } from "./i18n/gameTexts.js";
 
 export const gameCatalog: readonly GameManifest[] = [];
 
@@ -16,7 +15,7 @@ export function localizeGameManifest(
   manifest: GameManifest,
   language: SupportedLanguage = defaultLanguage
 ): GameManifest {
-  const text = gameTextById[manifest.id]?.[normalizeLanguage(language)] ?? gameTextById[manifest.id]?.[defaultLanguage];
+  const text = manifest.translations?.[normalizeLanguage(language)] ?? manifest.translations?.[defaultLanguage];
 
   if (!text) {
     return manifest;
@@ -30,8 +29,37 @@ export function localizeGameManifest(
       lobbySetup: {
         ...manifest.lobbySetup,
         title: text.lobbySetup.title ?? manifest.lobbySetup.title,
-        fields: manifest.lobbySetup.fields.map((field) => ({ ...field, ...text.lobbySetup?.fields?.[field.id] }))
+        description: text.lobbySetup.description ?? manifest.lobbySetup.description,
+        ...(manifest.lobbySetup.confirmation && text.lobbySetup.confirmation ? {
+          confirmation: { ...manifest.lobbySetup.confirmation, ...text.lobbySetup.confirmation }
+        } : {}),
+        fields: manifest.lobbySetup.fields.map((field) => {
+          const translated = text.lobbySetup?.fields?.[field.id];
+          if (!translated) return field;
+          const { options, ...copy } = translated;
+          return {
+            ...field,
+            ...copy,
+            ...(field.kind === "select" && options ? {
+              options: field.options.map((option) => ({ ...option, ...options[option.id] }))
+            } : {})
+          };
+        })
       }
+    } : {}),
+    ...(manifest.playerSetup && text.playerSetup ? {
+      playerSetup: {
+        ...manifest.playerSetup,
+        title: text.playerSetup.title ?? manifest.playerSetup.title,
+        description: text.playerSetup.description ?? manifest.playerSetup.description,
+        ...(manifest.playerSetup.kind === "multi-select" ? {
+          readyBlockedLabel: text.playerSetup.readyBlockedLabel ?? manifest.playerSetup.readyBlockedLabel
+        } : {}),
+        options: manifest.playerSetup.options.map((option) => ({ ...option, ...text.playerSetup?.options?.[option.id] }))
+      }
+    } : {}),
+    ...(manifest.visual && text.visual ? {
+      visual: { ...manifest.visual, ...text.visual }
     } : {})
   };
 }

@@ -4,6 +4,7 @@ import type {
   RacingControlsLayoutModel,
   RacingControlsState
 } from "./models.js";
+import { getControllerText, type ControllerText } from "../../i18n/controllerText.js";
 
 interface RacingControlsLayoutProps {
   model: RacingControlsLayoutModel;
@@ -89,6 +90,7 @@ function resolveDriveControls(x: number, y: number): Pick<RacingControlsState, "
 }
 
 interface RacingStickProps {
+  text: ControllerText["inputs"];
   disabled: boolean;
   accentColor: string;
   steering: number;
@@ -97,7 +99,7 @@ interface RacingStickProps {
   onDriveChange: (controls: Pick<RacingControlsState, "steering" | "throttle" | "brake">) => void;
 }
 
-function RacingStick({ disabled, accentColor, steering, throttle, brake, onDriveChange }: RacingStickProps) {
+function RacingStick({ disabled, accentColor, steering, throttle, brake, onDriveChange, text }: RacingStickProps) {
   const padRef = useRef<HTMLDivElement | null>(null);
   const pointerIdRef = useRef<number | null>(null);
   const [thumbOffset, setThumbOffset] = useState<ThumbOffset>({ x: 0, y: 0, active: false });
@@ -176,7 +178,7 @@ function RacingStick({ disabled, accentColor, steering, throttle, brake, onDrive
     >
       <div
         ref={padRef}
-        aria-label="Drive stick"
+        aria-label={text.driveStick}
         role="application"
         onPointerDown={beginPointer}
         onPointerMove={movePointer}
@@ -275,7 +277,7 @@ function RacingStick({ disabled, accentColor, steering, throttle, brake, onDrive
           letterSpacing: "0.06em"
         }}
       >
-        {steering < -0.18 ? "LEFT" : steering > 0.18 ? "RIGHT" : throttle ? "FORWARD" : brake ? "REVERSE" : "READY"}
+        {steering < -0.18 ? text.left : steering > 0.18 ? text.right : throttle ? text.forward : brake ? text.reverse : text.ready}
       </div>
     </div>
   );
@@ -373,15 +375,16 @@ function TriangleButton({
 }
 
 interface ActionTriangleProps {
+  text: ControllerText["inputs"];
   controls: RacingControlsState;
   disabled: boolean;
   onButtonChange: (control: RacingControlKey, active: boolean) => void;
 }
 
-function ActionTriangle({ controls, disabled, onButtonChange }: ActionTriangleProps) {
+function ActionTriangle({ controls, disabled, onButtonChange, text }: ActionTriangleProps) {
   return (
     <div
-      aria-label="Race actions"
+      aria-label={text.raceActions}
       style={{
         position: "relative",
         width: "min(43vw, 60dvh, 280px)",
@@ -391,7 +394,7 @@ function ActionTriangle({ controls, disabled, onButtonChange }: ActionTrianglePr
       }}
     >
       <TriangleButton
-        label="BOOST"
+        label={text.boost}
         control="boost"
         active={controls.boost}
         disabled={disabled}
@@ -408,7 +411,7 @@ function ActionTriangle({ controls, disabled, onButtonChange }: ActionTrianglePr
         onChange={onButtonChange}
       />
       <TriangleButton
-        label="FIRE"
+        label={text.fire}
         control="fire"
         active={controls.fire}
         disabled={disabled}
@@ -425,7 +428,7 @@ function ActionTriangle({ controls, disabled, onButtonChange }: ActionTrianglePr
         onChange={onButtonChange}
       />
       <TriangleButton
-        label="DRIFT"
+        label={text.drift}
         control="drift"
         active={controls.drift}
         disabled={disabled}
@@ -446,6 +449,7 @@ function ActionTriangle({ controls, disabled, onButtonChange }: ActionTrianglePr
 }
 
 export function RacingControlsLayout({ model }: RacingControlsLayoutProps) {
+  const text = getControllerText(model.language).inputs;
   const [controls, setControls] = useState<RacingControlsState>(idleControls);
   const controlsRef = useRef(controls);
   const onControlsChangeRef = useRef(model.onControlsChange);
@@ -510,6 +514,7 @@ export function RacingControlsLayout({ model }: RacingControlsLayoutProps) {
       }}
     >
       <RacingStick
+        text={text}
         disabled={model.disabled}
         accentColor={accentColor}
         steering={controls.steering}
@@ -517,7 +522,7 @@ export function RacingControlsLayout({ model }: RacingControlsLayoutProps) {
         brake={controls.brake}
         onDriveChange={updateDrive}
       />
-      <ActionTriangle controls={controls} disabled={model.disabled} onButtonChange={updateButton} />
+      <ActionTriangle controls={controls} disabled={model.disabled} onButtonChange={updateButton} text={text} />
     </div>
   );
 }

@@ -95,6 +95,73 @@ For Magic Arena, Magic Duell, Air Hockey, Buzzwort, Imposter, Schaetzorama, Ligh
 
 The platform generates registry imports only for local repos that exist and build successfully. Missing repos are skipped.
 
+## Game Content and Asset Ownership
+
+Game rules, scoring, special state, content, translations, dedicated views and
+original assets belong to the game repository. The platform owns rooms,
+connections, shared lifecycle control, localization mechanisms and reusable
+controller inputs (such as joystick, card selection and drawing).
+
+Catalog translations are optional data on `GameManifest.translations`, exported
+through the existing `./manifest` package entrypoint and included in each game
+registration's manifest. Keep the text source inside the game package:
+
+```ts
+import type { LocalizedGameTextMap } from "@open-party-lab/game-core";
+
+export const catalogText = {
+  de: { displayName: "Mein Spiel", description: "Beschreibung" },
+  en: { displayName: "My game", description: "Description" }
+} satisfies LocalizedGameTextMap;
+
+// Set `translations: catalogText` on the game's manifest.
+```
+
+`localizeGameManifest` selects the requested language, falls back to German,
+then keeps the base manifest when no translation exists. This works for games
+unknown to the platform and needs no static game imports or central text list.
+Optional translated setup titles and field labels use the same mechanism.
+
+The same text map also supports lobby descriptions and confirmation text;
+`lobbySetup.fields[fieldId]` can translate `label`, `description`, `group` and
+`options[optionId].label/description`. `playerSetup` can translate its title,
+description, ready-blocked label and option names, titles, archetypes and
+descriptions. `visual.eyebrow` localizes the catalog category. These maps replace
+only copy: field/option IDs, action keys, constraints, selection counts, rules
+and artwork stay intact. Translate the display name for each language while
+keeping the game ID and package name stable.
+
+Runtime text and content pools must follow the room language as well. A
+translated manifest does not translate card descriptions, secret words, quiz
+questions, effects or event messages. Games should select authored localized
+content on the server, expose only the permitted public/private text and use
+their own text modules for host/controller rendering. The controller registry
+supplies room language to generic input models so their fallback labels match
+the room too.
+
+Asset sources live in `public/host/<game-id>/` and
+`public/controller/<game-id>/` inside the game repo. Sync/build copies them to
+the corresponding app's public directory. Add both destination paths to the
+platform `.gitignore` when introducing assets; never track these build copies.
+`npm run check:game-boundaries` checks tracked copies, centralized game catalog
+texts and optional game imports in game-core. Package builds run this check.
+
+Publish game-side migrations together with the platform change: the ignored
+`local-games/` working trees are separate repositories and are not included in
+a platform commit. Deployments must fetch those updated game revisions.
+
+Dedicated game controller views and game-specific protocol copies still in
+the platform are follow-up migrations. Move each through the documented
+controller/protocol exports as a separate vertical slice while keeping reusable
+input layouts in the platform.
+
+The next slices include `SymboljagdLayout.tsx` and the Symboljagd-specific
+fields of the platform's `CardHandLayoutModel` (owned by Card Table), followed
+by the duplicated contracts in `packages/protocol/src/games/`. Controller
+registration currently supplies layout models; a reusable custom-view contract
+must be introduced before moving dedicated renderers. Keep each game's public
+and private payload boundaries intact during that change.
+
 ## Lobby Setup Boundary
 
 The platform owns generic lobby/setup rendering, navigation, room snapshots, and start-button behavior. Game repos own game-specific setup declarations and validation.

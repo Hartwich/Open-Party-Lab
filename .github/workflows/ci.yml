@@ -31,5 +31,8 @@ jobs:
       - name: Run typecheck
         run: npm run typecheck
 
+      - name: Verify game catalog localization contract
+        run: npm run test:game-catalog
+
       - name: Run build
         run: npm run build

@@ -1,4 +1,5 @@
 import type { ControllerLayoutKey } from "../layouts/ControllerLayoutKey.js";
+import type { LocalizedGameTextMap } from "../i18n/text.js";
 import type { RoundPhaseTimings } from "../state/RoundPhaseTimings.js";
 import type {
   GameAudioDefinition,
@@ -157,6 +158,8 @@ export interface GameManifest {
   id: string;
   displayName: string;
   description: string;
+  /** Game-owned catalog copy, delivered through the package's manifest export. */
+  translations?: Partial<LocalizedGameTextMap>;
   listed?: boolean;
   minPlayers: number;
   minPlayersBySetting?: GameMinPlayersBySetting;

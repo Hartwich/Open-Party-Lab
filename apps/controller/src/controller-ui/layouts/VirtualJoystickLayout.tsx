@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ActionButtonPad } from "../common/ActionButtonPad.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import type { VirtualJoystickLayoutModel } from "./models.js";
+import { getControllerText } from "../../i18n/controllerText.js";
 
 interface VirtualJoystickLayoutProps {
   model: VirtualJoystickLayoutModel;
@@ -72,6 +73,7 @@ function hasMeaningfulVectorChange(previous: Vector2, next: Vector2): boolean {
 }
 
 export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
+  const text = getControllerText(model.language).inputs;
   const padRef = useRef<HTMLDivElement | null>(null);
   const activePointerIdRef = useRef<number | null>(null);
   const lastVectorRef = useRef<Vector2>({ moveX: 0, moveY: 0 });
@@ -350,12 +352,12 @@ export function VirtualJoystickLayout({ model }: VirtualJoystickLayoutProps) {
                 transition: activePointerIdRef.current === null ? "transform 100ms ease-out, box-shadow 140ms ease-out" : "none"
               }}
             >
-              {minimal ? null : model.centerLabel ?? "MOVE"}
+              {minimal ? null : model.centerLabel ?? text.move}
             </div>
           </div>
 
           {!minimal && !cleanChrome ? <div style={{ color: "var(--text-muted)", fontSize: "0.95rem", letterSpacing: "0.03em" }}>
-            {model.stickHint ?? "Innen fein steuern, am Rand mit voller Geschwindigkeit laufen."}
+            {model.stickHint ?? text.joystickHint}
           </div> : null}
         </div>
 
