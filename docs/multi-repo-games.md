@@ -150,6 +150,24 @@ Publish game-side migrations together with the platform change: the ignored
 `local-games/` working trees are separate repositories and are not included in
 a platform commit. Deployments must fetch those updated game revisions.
 
+### Publishing changes to shared package contracts
+
+Game CI checks out the platform separately and builds its packages before
+typechecking the game. When games start using a new shared contract, publish
+the backward-compatible platform contract first and wait for its CI to pass.
+Then publish the dependent games. Remove old platform-owned game content only
+after those game revisions are available. A blanket games-first release order
+does not work for changes to shared interfaces.
+
+The 2026-10-29 localization release initially pushed games before the platform
+contract. Fifteen game CI jobs checked out the older platform commit; fourteen
+failed on `GameManifest.translations` and nested localized text fields, while
+Drift Racer also had an outdated dependency lockfile. Retrying the failed jobs
+after publishing the platform makes the separate checkout use the current
+contract. Check the platform checkout SHA in the job log when
+diagnosing this mismatch; rerunning a game alone does not pin its external
+platform dependency to the SHA used by the previous attempt.
+
 Dedicated game controller views and game-specific protocol copies still in
 the platform are follow-up migrations. Move each through the documented
 controller/protocol exports as a separate vertical slice while keeping reusable

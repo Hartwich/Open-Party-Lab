@@ -1,6 +1,27 @@
 # Project Status
 
-Snapshot date: 2026-10-29
+Snapshot date: 2026-10-30
+
+Player limits (2026-10-30): Pantomime / Charades now supports 2–20 players
+(team mode still requires at least 4). Schaetzorama supports 1–16 players;
+its host standings include everyone, and progress, round/final standings and
+animated standings can scroll in large groups. Blickwinkel already supports
+1–16 players with adaptive galleries and scoreboards.
+
+Localization CI follow-up (2026-10-30): the 15 games with CI initially checked
+out the platform before its localization-contract commit was published. The
+Arena Survivor job log confirms platform `74c4ae3`, which predates the
+`GameManifest.translations` and expanded text types in `70ee365`. The platform's
+own CI for `70ee365` passed. Retrying against the current platform fixed 14
+game CIs, including Arena Survivor, MinionsTD and Schaetzorama. Drift Racer
+also had an out-of-date dependency lockfile: its declared Three.js and Node
+types were missing. The lockfile was synchronized in `5e77766`, and a clean
+`npm ci`, game typecheck and build passed in an isolated directory with the
+current platform packages linked. The new remote CI for `5e77766` also passed
+installation, typecheck, build and packaging. All 15 game CIs are now green.
+Shared-contract releases must publish the compatible platform interface before
+dependent games, then remove legacy platform content
+after the games are available; the release guidance below has been corrected.
 
 DE/EN game localization pass (2026-10-29): all 21 optional games now provide
 game-owned German/English catalog and complete English lobby/player setup
@@ -33,8 +54,9 @@ DE/EN catalog switching and English Shadow Hunt setup at 1280x720, plus room
 join and Magic Duel's English spell selection at 390x844 (12 to 11 selections).
 No console warnings/errors or horizontal phone overflow were observed. These
 were representative dev-server checks, not full matches or physical-device QA.
-Existing Vite bundle-size warnings remain. Release order is the 21 game
-repositories first, followed by the platform repository.
+Existing Vite bundle-size warnings remain. For shared-interface changes,
+publish the compatible platform contract before dependent game changes; final
+platform content cleanup follows the game publications.
 
 Game ownership cleanup (2026-10-28): the 13 Schattenjagd/Symboljagd runtime
 asset copies are removed from the platform index and ignored; identical source
