@@ -70,7 +70,7 @@ function BodyEquipment({ equipment, en, selectedId, onSelect }: { equipment: Dun
 function stats(card: DungeonGuildCardModel, en: boolean): Array<[string, string]> {
   if (card.kind === "monster") return [
     [en ? "Strength" : "Stärke", String(card.level ?? 0)],
-    [en ? "Rewards" : "Beute", (card.levelReward ?? 1) + (en ? " level" : " Stufe") + " · " + (card.goldValue ?? 1) + (en ? " cards" : " Karten")],
+    [en ? "Rewards" : "Beute", "+" + (card.levelReward ?? 1) + (en ? " level" : " Stufe") + " · " + (card.treasureCount ?? 1) + (en ? " treasures" : " Schätze")],
     [en ? "Escape" : "Flucht", (card.escapeTarget ?? 5) + "+"]
   ];
   if (card.kind === "item") return [
@@ -83,13 +83,13 @@ function stats(card: DungeonGuildCardModel, en: boolean): Array<[string, string]
   return [];
 }
 
-function Gear({ card, en, equip, sell, canSell, canEquip = false, replaced = [] }: { card: DungeonGuildCardModel; en: boolean; equip?: () => void; sell?: () => void; canSell: boolean; canEquip?: boolean; replaced?: DungeonGuildCardModel[] }) {
+function Gear({ card, en, equip, sell, canSell, canEquip = false, replaced = [], selling = false }: { card: DungeonGuildCardModel; en: boolean; equip?: () => void; sell?: () => void; canSell: boolean; canEquip?: boolean; replaced?: DungeonGuildCardModel[]; selling?: boolean }) {
   const isEquipped = card.equipped !== false;
   return <article className={"dg-phone-gear" + (isEquipped ? " is-equipped" : " is-carried")}>
     <Art card={card} className="dg-phone-gear-art" />
     <div className="dg-phone-gear-copy"><strong>{card.title}</strong><small>{card.kind === "item" ? slotLabel(card, en) + (isEquipped ? " · +" + (card.bonus ?? 0) : (en ? " · no active bonus" : " · kein aktiver Bonus")) : names[card.kind][en ? 1 : 0]}</small>{!isEquipped && replaced.length ? <small className="dg-phone-replacement">{en ? "Replaces: " : "Ersetzt: "}{replaced.map((item) => item.title).join(", ")}</small> : null}</div>
     {equip ? <button className="dg-phone-icon-action" type="button" disabled={!canEquip} aria-label={(isEquipped ? (en ? "Put in backpack: " : "In den Rucksack: ") : (en ? "Equip: " : "Anlegen: ")) + card.title} onClick={equip}><Icon name="equip" /><span>{isEquipped ? (en ? "Stow" : "Ablegen") : (en ? "Equip" : "Anlegen")}</span></button> : null}
-    {sell ? <button className="dg-phone-sell" type="button" disabled={!canSell} onClick={sell} aria-label={(en ? "Sell " : "Verkaufen ") + card.title}><Icon name="sell" /><span>{card.goldValue ?? 0}</span></button> : null}
+    {sell ? <button className="dg-phone-sell" type="button" disabled={!canSell} onClick={sell} aria-pressed={selling} aria-label={(en ? "Select for sale: " : "Zum Verkauf auswählen: ") + card.title}><Icon name="sell" /><span>{selling ? "✓ " : ""}{card.goldValue ?? 0}</span></button> : null}
   </article>;
 }
 
@@ -99,13 +99,18 @@ export function DungeonGuildLayout({ model }: Props) {
   const [page, setPage] = useState<Page>("cards");
   const [selection, setSelection] = useState<{ round: string; id: string } | null>(null);
   const [equipmentId, setEquipmentId] = useState<string | null>(null);
+  const [saleSelection, setSaleSelection] = useState<{ round: string; ids: string[] }>({ round: model.resetKey, ids: [] });
+  const [targetId, setTargetId] = useState("");
+  const saleCards = [...model.equipment, ...model.hand].filter((card) => card.kind === "item" && saleSelection.round === model.resetKey && saleSelection.ids.includes(card.id));
+  const saleTotal = saleCards.reduce((sum, card) => sum + (card.goldValue ?? 0), 0);
+  const saleLevels = Math.min(Math.max(0, 9 - model.ownLevel), Math.floor(saleTotal / 1000));
+  const toggleSale = (id: string) => setSaleSelection((previous) => ({ round: model.resetKey, ids: previous.round === model.resetKey ? previous.ids.includes(id) ? previous.ids.filter((value) => value !== id) : [...previous.ids, id] : [id] }));
   const inCombat = model.stage === "combat" || model.stage === "help";
   const selected = (selection?.round === model.resetKey ? model.hand.find((card) => card.id === selection.id) : undefined) ?? (inCombat ? model.hand.find((card) => card.playable) : undefined) ?? model.hand[0] ?? null;
   const equipped = model.equipment.filter((card) => card.equipped !== false);
   const backpack = model.equipment.filter((card) => card.equipped === false);
   const inspectedGear = equipped.find((card) => card.id === equipmentId) ?? equipped[0];
   const replaced = selected?.kind === "item" ? replacements(selected, model.equipment) : [];
-  const playableCount = model.hand.filter((card) => card.playable).length;
   const actions = useMemo(() => new Map(model.actions.map((action) => [action.id, action])), [model.actions]);
   const sellActions = model.actions.filter((action) => action.id.startsWith("sell:"));
   const gearActions = model.actions.filter((action) => action.id.startsWith("gear:"));
@@ -124,14 +129,13 @@ export function DungeonGuildLayout({ model }: Props) {
   const playSelected = (options?: Parameters<DungeonGuildLayoutModel["onPlayCard"]>[1]) => {
     if (!selected?.playable || !model.canAct) return;
     haptics.tap(18);
-    model.onPlayCard(selected.id, options);
+    model.onPlayCard(selected.id, { ...options, ...((selected.kind === "curse" || selected.kind === "level") ? { targetId: model.playerTargets.find((player) => player.id === targetId)?.id ?? model.playerTargets[0]?.id } : {}) });
   };
 
   if (model.gameOver) return <main className="dg-phone dg-phone-result">
     <span className="dg-phone-result-mark" aria-hidden="true">✦</span>
     <span className="dg-phone-kicker">{en ? "THE DUNGEON IS QUIET" : "DER DUNGEON IST STILL"}</span>
     <h1>{model.winnerName ? (en ? model.winnerName + " wins" : model.winnerName + " gewinnt") : (en ? "The journey ends" : "Das Abenteuer endet")}</h1>
-    <p>{en ? "The shared table has the final tally." : "Die Auswertung liegt auf dem großen Tisch."}</p>
     {model.ready ? <ReadyPanel ready={model.ready} /> : null}
   </main>;
 
@@ -145,29 +149,31 @@ export function DungeonGuildLayout({ model }: Props) {
       <div className="dg-phone-vital"><span className="dg-phone-vital-icon">⚔</span><div><span>{en ? "Strength" : "Kampfstärke"}</span><strong>{model.ownStrength}</strong></div></div>
     </section>
     {model.lastError ? <div className="dg-phone-message" role="alert"><b aria-hidden="true">!</b><span>{model.lastError}</span></div> : null}
+    {page === "character" ? <div className="dg-phone-sale-panel">
+      <strong>{en ? "Sale value" : "Verkaufswert"}: {model.saleValue} {en ? "gold" : "Gold"}</strong>
+      {saleCards.length ? <><span>{saleCards.length} {en ? "selected" : "ausgewählt"} · {saleTotal} {en ? "gold" : "Gold"} → +{saleLevels} {en ? (saleLevels === 1 ? "level" : "levels") : (saleLevels === 1 ? "Stufe" : "Stufen")}</span>{saleTotal > saleLevels * 1000 ? <small>{saleTotal - saleLevels * 1000}{en ? " remaining value is lost." : " Restwert verfallen."}</small> : null}<button type="button" className="dg-phone-play" disabled={!model.canAct || model.disabled || saleLevels < 1} onClick={() => { model.onSellCards(saleCards.map((card) => card.id)); setSaleSelection({ round: model.resetKey, ids: [] }); }}>{en ? "Sell selected items" : "Auswahl verkaufen"}</button></> : null}
+    </div> : null}
     <section className="dg-phone-content">
       {page === "character" ? <div className="dg-phone-character">
         {model.dead ? <div className="dg-phone-dead">{en ? "Your adventurer returns next turn." : "Deine Figur kehrt im nächsten Zug zurück."}</div> : null}
-        <div className="dg-phone-section-title"><span>{en ? "Character" : "Charakter"}</span><small>{model.ownStrength} {en ? "strength" : "Stärke"}</small></div>
         <div className="dg-phone-identity">
           {model.classCard ? <Gear card={model.classCard} en={en} canSell={false} /> : <div className="dg-phone-gear dg-phone-empty-gear"><span>♜</span><strong>{en ? "No class" : "Keine Klasse"}</strong></div>}
           {model.raceCard ? <Gear card={model.raceCard} en={en} canSell={false} /> : <div className="dg-phone-gear dg-phone-empty-gear"><span>◇</span><strong>{en ? "No ancestry" : "Keine Herkunft"}</strong></div>}
         </div>
-        <div className="dg-phone-section-title"><span>{en ? "On your body" : "Am Körper"}</span><small>{en ? "Tap a slot" : "Platz antippen"}</small></div>
+        <div className="dg-phone-section-title"><span>{en ? "On your body" : "Am Körper"}</span></div>
         <BodyEquipment equipment={model.equipment} en={en} selectedId={inspectedGear?.id} onSelect={(id) => { haptics.tap(8); setEquipmentId(id); }} />
-        {inspectedGear ? <Gear card={inspectedGear} en={en} canSell={Boolean(actions.get("sell:" + inspectedGear.id)?.enabled && model.canAct)} sell={actions.has("sell:" + inspectedGear.id) ? () => act("sell:" + inspectedGear.id) : undefined} equip={actions.has("gear:" + inspectedGear.id) ? () => act("gear:" + inspectedGear.id) : undefined} canEquip={Boolean(actions.get("gear:" + inspectedGear.id)?.enabled && model.canAct)} /> : null}
-        <div className="dg-phone-section-title"><span>{en ? "Backpack" : "Rucksack"}</span><small>{backpack.length} · {en ? "not equipped" : "nicht angelegt"}</small></div>
-        <p className="dg-phone-backpack-note">{en ? "Backpack gear gives no strength until equipped." : "Diese Gegenstände geben erst Stärke, wenn du sie anlegst."}</p>
+        {inspectedGear ? <Gear card={inspectedGear} en={en} canSell={Boolean(actions.get("sell:" + inspectedGear.id)?.enabled && model.canAct)} selling={saleCards.some((card) => card.id === inspectedGear.id)} sell={actions.has("sell:" + inspectedGear.id) ? () => toggleSale(inspectedGear.id) : undefined} equip={actions.has("gear:" + inspectedGear.id) ? () => act("gear:" + inspectedGear.id) : undefined} canEquip={Boolean(actions.get("gear:" + inspectedGear.id)?.enabled && model.canAct)} /> : null}
+        <div className="dg-phone-section-title"><span>{en ? "Backpack" : "Rucksack"}</span><small>{backpack.length}</small></div>
         {backpack.length ? backpack.map((card) => {
           const equip = gearActions.find((action) => action.id === "gear:" + card.id);
           const sell = actions.get("sell:" + card.id);
-          return <Gear key={card.id} card={card} en={en} canSell={Boolean(sell?.enabled && model.canAct)} canEquip={Boolean(equip?.enabled && model.canAct)} replaced={replacements(card, model.equipment)} equip={equip ? () => act(equip.id) : undefined} sell={sell ? () => act(sell.id) : undefined} />;
-        }) : <p className="dg-phone-hint">{en ? "Your backpack is empty." : "Dein Rucksack ist leer."}</p>}
+          return <Gear key={card.id} card={card} en={en} canSell={Boolean(sell?.enabled && model.canAct)} canEquip={Boolean(equip?.enabled && model.canAct)} replaced={replacements(card, model.equipment)} equip={equip ? () => act(equip.id) : undefined} selling={saleCards.some((item) => item.id === card.id)} sell={sell ? () => toggleSale(card.id) : undefined} />;
+        }) : null}
         {sellActions.some((action) => model.hand.some((card) => card.id === action.id.slice(5))) ? <>
-          <div className="dg-phone-section-title"><span>{en ? "Sell from hand" : "Aus der Hand verkaufen"}</span><small>{en ? "Coin value" : "Münzwert"}</small></div>
+          <div className="dg-phone-section-title"><span>{en ? "Sell from hand" : "Aus der Hand verkaufen"}</span></div>
           <div className="dg-phone-bag">{sellActions.map((action) => {
             const card = model.hand.find((candidate) => candidate.id === action.id.slice(5));
-            return card ? <div className="dg-phone-bag-row" key={card.id}><Art card={card} /><strong>{card.title}</strong><button className="dg-phone-sell" type="button" disabled={!action.enabled || !model.canAct} aria-label={(en ? "Sell " : "Verkaufen: ") + card.title} onClick={() => act(action.id)}><Icon name="sell" /><span>{card.goldValue ?? 0}</span></button></div> : null;
+            return card ? <div className="dg-phone-bag-row" key={card.id}><Art card={card} /><strong>{card.title}</strong><button className="dg-phone-sell" type="button" disabled={!action.enabled || !model.canAct} aria-pressed={saleCards.some((item) => item.id === card.id)} aria-label={(en ? "Select for sale: " : "Zum Verkauf auswählen: ") + card.title} onClick={() => toggleSale(card.id)}><Icon name="sell" /><span>{card.goldValue ?? 0}</span></button></div> : null;
           })}</div>
         </> : null}
       </div> : <>
@@ -175,6 +181,7 @@ export function DungeonGuildLayout({ model }: Props) {
           <Art key={selected.id} card={selected} className="dg-phone-card-art-large" />
           <span className="dg-phone-card-kind">{names[selected.kind][en ? 1 : 0]}{selected.slot ? " · " + slotLabel(selected, en) : ""}</span>
           <h2 className="dg-phone-card-title">{selected.title}</h2>
+          {selected.kind === "curse" || selected.kind === "level" ? <label className="dg-phone-target">{en ? "Target" : "Zielperson"}<select aria-label={en ? "Target" : "Zielperson"} value={model.playerTargets.some((player) => player.id === targetId) ? targetId : model.playerTargets[0]?.id ?? ""} onChange={(event) => setTargetId(event.target.value)}>{model.playerTargets.map((player) => <option key={player.id} value={player.id}>{player.name}</option>)}</select></label> : null}
           {selected.effect ? <p className="dg-phone-card-effect">{selected.effect}</p> : null}
           {stats(selected, en).length ? <div className="dg-phone-card-stats">{stats(selected, en).map(([label, value]) => <div className="dg-phone-card-stat" key={label}><span>{label}</span><b>{value}</b></div>)}</div> : null}
           {selected.kind === "item" && replaced.length ? <p className="dg-phone-replacement">{en ? "Moves to backpack: " : "Wandert in den Rucksack: "}{replaced.map((card) => card.title).join(", ")}</p> : null}
@@ -187,10 +194,8 @@ export function DungeonGuildLayout({ model }: Props) {
               <button className="dg-phone-play dg-phone-store-play" type="button" disabled={!selected.playable || !model.canAct} onClick={() => playSelected({ itemMode: "store" })}>{en ? "Backpack" : "In Rucksack"}</button>
             </> : <button className="dg-phone-play" type="button" disabled={!selected.playable || !model.canAct} onClick={() => playSelected()}>{en ? "Play card" : "Karte spielen"}</button>}
           </div>
-          {!selected.playable || !model.canAct ? <span className="dg-phone-hint">{en ? "Unavailable in this phase." : "In dieser Phase nicht spielbar."}</span> : null}
-        </div> : <div className="dg-phone-card-focus"><span className="dg-phone-brand-mark">✦</span><p>{en ? "Your cards will appear here." : "Deine Karten erscheinen hier."}</p></div>}
+        </div> : <div className="dg-phone-card-focus"><span className="dg-phone-brand-mark">✦</span></div>}
         <div className="dg-phone-hand-wrap">
-          <div className="dg-phone-hand-head"><span>{inCombat ? (en ? "Intervene in combat" : "In den Kampf eingreifen") : (en ? "Your hand" : "Deine Hand")}</span><span>{inCombat ? playableCount + (en ? " playable" : " spielbar") : model.hand.length}</span></div>
           <div className="dg-phone-hand" aria-label={en ? "Cards in your hand" : "Karten auf deiner Hand"}>
             {model.hand.map((card) => <button key={card.id} type="button" className={"dg-phone-thumb" + (selected?.id === card.id ? " is-selected" : "") + (inCombat ? (card.playable ? " is-combat-playable" : " is-combat-inactive") : "")} onClick={() => { haptics.tap(9); setSelection({ round: model.resetKey, id: card.id }); }} aria-label={card.title + ". " + (inCombat && card.playable ? (en ? "Playable now. " : "Jetzt spielbar. ") : "") + (card.effect ?? "")} aria-pressed={selected?.id === card.id}><Art card={card} /><strong>{card.title}</strong>{inCombat && card.playable ? <span className="dg-phone-thumb-playable" aria-hidden="true">⚔</span> : null}</button>)}
             {!model.hand.length ? <span className="dg-phone-hint">{en ? "No cards in hand." : "Keine Handkarten."}</span> : null}

@@ -200,7 +200,10 @@ function renderSetup(game: AvailableGameDto, settings: SettingsMap, locked: bool
        </div>`
     : "";
 
-  return fields + confirmButton;
+  const teams = game.playerSetup;
+  const shuffle = teams?.kind === "choice" && teams.assignment === "balanced-random"
+    ? `<button type="button" class="opl-option" data-action="setup-confirm" data-action-type="shuffle-player-setup" ${locked ? "disabled" : ""}>${escapeHtml(teams.shuffleLabel ?? (language === "en" ? "Shuffle teams" : "Teams neu mischen"))}</button>` : "";
+  return fields + shuffle + confirmButton;
 }
 
 /**

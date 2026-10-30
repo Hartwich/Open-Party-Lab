@@ -600,6 +600,10 @@ export interface DrawingGuessFeedModel {
 }
 
 export interface DrawingGuessLayoutModel {
+  turnActions?: Array<{ id: string; label: string; disabled?: boolean; onPress: () => void }>;
+  turnStatus?: string;
+  turnDeadline?: number;
+  getServerTime?: () => number;
   kind: "drawing_guess";
   title: string;
   subtitle?: string;
@@ -835,6 +839,10 @@ export interface DungeonPartyLayoutModel {
 }
 
 export interface SocialPartyLayoutModel {
+  privateTextList?: {
+    values: string[]; count: number; maxLength: number; submitted: boolean;
+    onSave: (values: string[], submit: boolean) => void;
+  };
   kind: "social_party";
   deadline?: number;
   getServerTime?: () => number;
@@ -885,6 +893,7 @@ export interface DungeonGuildCardModel {
   escapeTarget?: number;
   badStuff?: string;
   goldValue?: number;
+  treasureCount?: number;
   slot?: string;
   twoHand?: boolean;
   equipped?: boolean;
@@ -904,6 +913,14 @@ export interface DungeonGuildLayoutModel {
   canAct: boolean;
   ownLevel: number;
   ownStrength: number;
+  saleValue: number;
+  combatPending: boolean;
+  combatPassed: boolean;
+  combatWaitingNames: string[];
+  helpRequested: boolean;
+  helperName?: string | null;
+  helperOffer: number;
+  playerTargets: Array<{ id: string; name: string }>;
   dead: boolean;
   classCard: DungeonGuildCardModel | null;
   raceCard: DungeonGuildCardModel | null;
@@ -917,6 +934,7 @@ export interface DungeonGuildLayoutModel {
   ready?: ReadyLayoutModel;
   onPlayCard: (cardId: string, options?: { combatSide?: "party" | "monster"; itemMode?: "equip" | "store"; targetId?: string }) => void;
   onAction: (actionId: string) => void;
+  onSellCards: (cardIds: string[]) => void;
 }
 
 export type ControllerLayoutModel =

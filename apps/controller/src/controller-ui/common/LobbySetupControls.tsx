@@ -358,6 +358,10 @@ export function LobbySetupControls({
         );
       })}
 
+      {game.playerSetup?.kind === "choice" && game.playerSetup.assignment === "balanced-random" ?
+        <button type="button" disabled={disabled} style={optionBase} onClick={() => onHostAction(game.id, { type: "shuffle-player-setup" })}>
+          {game.playerSetup.shuffleLabel ?? "Teams neu mischen"}
+        </button> : null}
       {confirmation ? (
         <div style={{ display: "grid", gap: 7 }}>
           <button

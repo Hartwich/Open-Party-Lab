@@ -129,6 +129,7 @@ export interface GamePlayerSetupOption {
 }
 
 interface GamePlayerSetupDefinitionBase {
+  visibleWhen?: GameLobbySetupVisibility;
   title?: string;
   description?: string;
   required?: boolean;
@@ -137,6 +138,9 @@ interface GamePlayerSetupDefinitionBase {
 
 export interface GamePlayerSetupChoiceDefinition extends GamePlayerSetupDefinitionBase {
   kind: "choice";
+  assignment?: "balanced-random";
+  minPlayersPerOption?: number;
+  shuffleLabel?: string;
   options: readonly GamePlayerSetupOption[];
 }
 

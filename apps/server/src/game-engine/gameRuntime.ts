@@ -12,6 +12,7 @@ import { performance } from "node:perf_hooks";
 import { serverPerfRegistry } from "../core/perf/serverPerfRegistry.js";
 import { now } from "../core/time/now.js";
 import { roomPlayersToSummaries } from "../games/shared/gameHelpers.js";
+import { assignPlayerSetup } from "../rooms/playerSetupAssignments.js";
 import type { RoomRecord } from "../rooms/roomStore.js";
 import { GameRegistry } from "./gameRegistry.js";
 import { GameTransitionService } from "./gameTransitionService.js";
@@ -51,6 +52,10 @@ export class GameRuntime {
 
     room.selectedGameId = gameId;
     room.currentRound = null;
+    if (gameId) {
+      const game = this.gameRegistry.getAvailableGame(gameId, room.language, room.gameSettingsByGameId[gameId]);
+      if (game) assignPlayerSetup(room, game);
+    }
   }
 
   abortRound(room: RoomRecord): boolean {

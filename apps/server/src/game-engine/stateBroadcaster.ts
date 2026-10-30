@@ -10,6 +10,7 @@ import type { Server } from "socket.io";
 import { performance } from "node:perf_hooks";
 import { serverPerfRegistry } from "../core/perf/serverPerfRegistry.js";
 import { toRoomSnapshot } from "../rooms/roomLifecycle.js";
+import { assignPlayerSetup } from "../rooms/playerSetupAssignments.js";
 import type { RoomRecord } from "../rooms/roomStore.js";
 import { GameRegistry } from "./gameRegistry.js";
 import { GameRuntime } from "./gameRuntime.js";
@@ -44,7 +45,11 @@ export class StateBroadcaster {
   private readonly lastControllerEmitAtByRoom = new Map<string, number>();
 
   createRoomSnapshot(room: RoomRecord) {
-    return toRoomSnapshot(room, this.gameRegistry.listAvailableGames(room.language));
+    if (room.selectedGameId) {
+      const game = this.gameRegistry.getAvailableGame(room.selectedGameId, room.language, room.gameSettingsByGameId[room.selectedGameId]);
+      if (game) assignPlayerSetup(room, game);
+    }
+    return toRoomSnapshot(room, this.gameRegistry.listAvailableGames(room.language, room.gameSettingsByGameId));
   }
 
   sendRoomState(

@@ -7,6 +7,24 @@ type Props = { model: SocialPartyLayoutModel };
 type Stroke = { color: string; points: Array<{ x: number; y: number }> };
 const INK = ["#352436", "#ed715e", "#399b91", "#e6b33e", "#657db5"];
 
+function PrivateTextList({ model, en }: { model: NonNullable<SocialPartyLayoutModel["privateTextList"]>; en: boolean }) {
+  const [values, setValues] = useState(() => Array.from({ length: model.count }, (_, index) => model.values[index] ?? ""));
+  const normalized = values.map((value) => value.trim().replace(/\s+/g, " "));
+  const unique = new Set(normalized.map((value) => value.toLocaleLowerCase()));
+  const valid = normalized.every((value) => value.length > 0 && value.length <= model.maxLength) && unique.size === model.count;
+  return <form className="sp-actions" onSubmit={(event) => { event.preventDefault(); if (valid) model.onSave(values, true); }}>
+    {values.map((value, index) => <label key={index} className="sp-actions" style={{ gap: 4 }}>
+      <span className="sp-caption">{en ? "Word" : "Begriff"} {index + 1}</span>
+      <input className="sp-field" value={value} maxLength={model.maxLength} autoComplete="off"
+        onChange={(event) => setValues((old) => old.map((entry, position) => position === index ? event.target.value : entry))}
+        onBlur={() => model.onSave(values, false)} />
+    </label>)}
+    {unique.size !== model.count && normalized.some(Boolean) ? <p role="status" className="sp-caption">{en ? "Use a different word in each field." : "Schreibe in jedes Feld einen anderen Begriff."}</p> : null}
+    <button type="submit" className="sp-choice" disabled={!valid}>{model.submitted ? (en ? "Update words" : "Begriffe aktualisieren") : (en ? "Submit words" : "Begriffe abgeben")}</button>
+    <p className="sp-caption" role="status">{model.submitted ? (en ? "Submitted. You may edit until everyone is done." : "Abgegeben. Bis alle fertig sind, kannst du noch ändern.") : (en ? "Only you can see these words. Saved when you leave a field." : "Nur du siehst diese Begriffe. Beim Verlassen eines Feldes gespeichert.")}</p>
+  </form>;
+}
+
 function RoundTimer({ deadline, en, getServerTime = Date.now }: { deadline: number; en: boolean; getServerTime?: () => number }) {
   const [now, setNow] = useState(getServerTime);
   useEffect(() => {
@@ -183,6 +201,7 @@ export function SocialPartyLayout({ model }: Props) {
       <header className="sp-context"><div className="sp-head"><span className="sp-kicker">{model.title}</span>{model.score !== undefined && <span>{model.score} {en ? "points" : "Punkte"}</span>}</div><h1>{model.statusLabel ?? model.title}</h1>{model.helperText && <p className="sp-helper" role="status">{model.helperText}</p>}</header>
       {model.secret && <button className="sp-secret" type="button" aria-expanded={showSecret} onClick={() => setShowSecret((value) => !value)}><span>{model.secret.label}</span><strong>{showSecret ? model.secret.term : en ? "Tap to reveal" : "Tippen zum Anzeigen"}</strong><small>{showSecret ? (en ? "Tap to hide" : "Tippen zum Verbergen") : (en ? "For your eyes only" : "Nur für deine Augen")}</small></button>}
     </>}
+    {model.privateTextList ? <PrivateTextList key={model.resetKey} model={model.privateTextList} en={en} /> : null}
     {model.stage === "avatar" && !model.hasSubmitted && <section className="sp-actions">
       <PhotoPicker en={en} selfie disabled={photoDisabled} onImage={(file) => { void onImage(file); }} />
       {photo && <><img className="sp-photo is-avatar" src={photo} alt={en ? "Character photo preview" : "Vorschau deines Charakterfotos"} /><button style={buttonStyle} type="button" disabled={photoDisabled || model.connected === false} onClick={() => sendMedia(() => model.onSubmitAvatar(photo))}>{sendLabel ?? (en ? "Use this photo" : "Dieses Foto verwenden")}</button></>}

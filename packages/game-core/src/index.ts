@@ -1,4 +1,5 @@
 export * from "./catalog/gameCatalog.js";
+export * from "./catalog/resolvePlayerSetup.js";
 export * from "./debug/perfTelemetry.js";
 export * from "./i18n/language.js";
 export * from "./i18n/text.js";
@@ -6,6 +7,7 @@ export * from "./layouts/ControllerLayoutKey.js";
 export * from "./registry/createGameRegistry.js";
 export * from "./scoring/ScoreEntry.js";
 export * from "./state/BaseRoundState.js";
+export * from "./state/drawing.js";
 export * from "./state/GamePhase.js";
 export * from "./state/RoundPhase.js";
 export * from "./state/RoundPhaseTimings.js";

@@ -17,6 +17,12 @@ function clamp01(value: number) {
   return Math.max(0, Math.min(1, value));
 }
 
+function TurnTimer({ deadline, getServerTime = Date.now }: { deadline: number; getServerTime?: () => number }) {
+  const [now, setNow] = useState(getServerTime);
+  useEffect(() => { const timer = window.setInterval(() => setNow(getServerTime()), 250); return () => window.clearInterval(timer); }, [getServerTime]);
+  return <strong role="timer" style={{ fontVariantNumeric: "tabular-nums" }}>{Math.max(0, Math.ceil((deadline - now) / 1000))} s</strong>;
+}
+
 export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const previewRef = useRef<SVGGElement | null>(null);
@@ -164,6 +170,13 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
   const word = model.isDrawer
     ? `${en ? "Your word" : "Dein Wort"}: ${model.secretWord ?? "…"}`
     : `${en ? "Word" : "Wort"}: ${model.wordMask}`;
+
+  const turnControls = model.turnActions ? <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
+    {model.turnDeadline ? <TurnTimer deadline={model.turnDeadline} getServerTime={model.getServerTime} /> : null}
+    {model.turnStatus ? <span style={{ fontSize: 13, flex: "1 1 auto" }}>{model.turnStatus}</span> : null}
+    {model.turnActions.map((action) => <button key={action.id} type="button" disabled={model.disabled || action.disabled}
+      onClick={action.onPress} style={{ padding: "10px 14px", minHeight: 44, borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface-muted)", color: "var(--ink)" }}>{action.label}</button>)}
+  </div> : null;
 
   const wordStyle = {
     color: "var(--ink)",
@@ -375,7 +388,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
               {model.ready ? <ReadyPanel ready={model.ready} /> : null}
               <div style={wordStyle}>{word}</div>
               {palette}
-              {clearButton}
+              <div style={{ display: "grid", gap: 5 }}>{clearButton}{turnControls}</div>
               {guesses}
             </aside>
           </>
@@ -383,7 +396,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
           <>
             {portraitToolbar}
             {canvas}
-            {clearButton}
+            <div style={{ display: "grid", gap: 5 }}>{clearButton}{turnControls}</div>
             {guesses}
           </>
         )
@@ -392,7 +405,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
           {model.winnerName ? <div style={{ color: "var(--sage)", fontWeight: 700, lineHeight: 1.1 }}>{en ? "Winner" : "Gewinner"}: {model.winnerName}</div> : null}
           {model.ready ? <ReadyPanel ready={model.ready} /> : null}
           <div style={wordStyle}>{word}</div>
-          {guessForm}
+          {model.turnActions ? turnControls : guessForm}
           {guesses}
         </div>
       )}

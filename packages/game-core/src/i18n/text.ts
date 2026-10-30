@@ -22,6 +22,7 @@ export interface LocalizedGameText {
     confirmation?: LocalizedSetupOptionText;
   };
   playerSetup?: {
+    shuffleLabel?: string;
     title?: string;
     description?: string;
     readyBlockedLabel?: string;

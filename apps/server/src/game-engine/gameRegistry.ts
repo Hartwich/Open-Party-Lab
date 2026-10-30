@@ -1,6 +1,7 @@
 ﻿import {
   defaultLanguage,
   localizeGameManifest,
+  resolvePlayerSetup,
   type GameManifest,
   type ServerGame,
   type SupportedLanguage
@@ -37,18 +38,19 @@ export class GameRegistry {
 
   getAvailableGame(
     gameId: string,
-    language: SupportedLanguage = defaultLanguage
+    language: SupportedLanguage = defaultLanguage,
+    settings: Readonly<Record<string, unknown>> = {}
   ): AvailableGameDto | undefined {
     const manifest = this.get(gameId)?.manifest;
 
-    return manifest ? this.toAvailableGameDto(localizeGameManifest(manifest, language)) : undefined;
+    return manifest ? this.toAvailableGameDto(resolvePlayerSetup(localizeGameManifest(manifest, language), settings)) : undefined;
   }
 
-  listAvailableGames(language: SupportedLanguage = defaultLanguage): AvailableGameDto[] {
+  listAvailableGames(language: SupportedLanguage = defaultLanguage, settings: Record<string, Record<string, unknown>> = {}): AvailableGameDto[] {
     return [...this.games.values()]
       .map((entry) => entry.manifest)
       .filter((manifest) => manifest.listed !== false)
-      .map((manifest) => this.toAvailableGameDto(localizeGameManifest(manifest, language)));
+      .map((manifest) => this.toAvailableGameDto(resolvePlayerSetup(localizeGameManifest(manifest, language), settings[manifest.id])));
   }
 
   private toAvailableGameDto(manifest: GameManifest): AvailableGameDto {

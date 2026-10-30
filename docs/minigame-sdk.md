@@ -116,6 +116,32 @@ the room freezes the game for everyone still in it.
 
 ## Optional server hooks
 
+### Conditional player setup and balanced teams
+
+`playerSetup.visibleWhen` uses the same `{ field, anyOf }` contract as lobby
+fields. The server resolves it against room settings and manifest defaults before
+publishing available games or validating player choices. Hidden player setup
+does not block readiness. Choice setups may specify `assignment: "balanced-random"`
+to assign missing choices, preserve manual choices/reconnects and balance late
+arrivals. `minPlayersPerOption` prevents starting with undersized teams.
+`shuffleLabel` labels the host's explicit shuffle action; translate it through
+`translations[language].playerSetup.shuffleLabel`. `shuffle-player-setup` resets
+readiness and redistributes choices only outside an active game. These choices
+are public; never use player setup or room settings for secret text inputs.
+
+### Reusable drawing state
+
+`DrawingBoard`, `emptyDrawing`, `drawingColors` and `applyDrawingInput` are
+exported from game-core for games using normalized coordinates and the existing
+`drawing_guess` controller. Authenticate actor, card generation and server deadline
+before applying drawing input. The helper validates coordinates, colors and
+aspect ratio and bounds stroke/point counts. Clear the board on each new card;
+retain its aspect ratio so host and phone agree. `drawing_guess` may provide
+`turnActions`, `turnStatus`, `turnDeadline` and `getServerTime` for spoken guessing
+games. Without those additions its existing text-guess flow is unchanged.
+`social_party.privateTextList` provides a reusable private word-list form; its
+`values` must come from authenticated per-player state, never public snapshots.
+
 | Hook | Purpose |
 | --- | --- |
 | `shouldContinueRun(state, context)` | Return true when a finished round should flow into the next one instead of ending the session. Games with a persistent run implement this; the platform no longer inspects game state to decide. |

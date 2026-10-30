@@ -50,6 +50,7 @@ export function localizeGameManifest(
     ...(manifest.playerSetup && text.playerSetup ? {
       playerSetup: {
         ...manifest.playerSetup,
+        ...(manifest.playerSetup.kind === "choice" && text.playerSetup.shuffleLabel ? { shuffleLabel: text.playerSetup.shuffleLabel } : {}),
         title: text.playerSetup.title ?? manifest.playerSetup.title,
         description: text.playerSetup.description ?? manifest.playerSetup.description,
         ...(manifest.playerSetup.kind === "multi-select" ? {

@@ -279,7 +279,7 @@ function renderChoicePlayerSetupChooser(
 
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
                     <span style={{ color: selectedByCurrentPlayer ? "var(--success)" : "var(--text-muted)" }}>
-                      {selectedByCurrentPlayer ? text.yourCharacter : text.select}
+                      {selectedByCurrentPlayer ? setup.assignment === "balanced-random" ? setup.title ?? text.yourCharacter : text.yourCharacter : text.select}
                     </span>
                     <span style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>
                       {selectedPlayers.length > 0

@@ -145,6 +145,15 @@
 .dg-phone-result-mark { display: grid; place-items: center; width: 72px; height: 72px; border: 1px solid #d6a55b; border-radius: 50%; background: radial-gradient(circle, #e6bd74, #8c5e32); color: #342315; font: 40px Georgia, serif; }
 .dg-phone-result h1 { white-space: normal; font-size: 27px; }
 .dg-phone-result p { color: #d4c5a8; font-size: 12px; }
+.dg-phone-combat-status,.dg-phone-sale-panel{display:grid;flex:0 0 auto;gap:4px;padding:8px 10px;border-left:2px solid #d7a85a;background:#ffffff08;color:#e8d4ae;font-size:11px;line-height:1.3}
+.dg-phone-combat-status span,.dg-phone-sale-panel small{display:block;color:#bdae93;font-size:10px}
+.dg-phone-sale-panel{max-height:25dvh;overflow:auto;scrollbar-width:thin}
+.dg-phone-sale-panel .dg-phone-play{min-height:36px;flex-shrink:0}
+.dg-phone-sell[aria-pressed="true"]{border-color:#edc274;background:#806035;box-shadow:0 0 0 1px #d3a657}
+.dg-phone-target{display:flex;align-items:center;justify-content:center;gap:8px;color:#cbb88f;font-size:11px}
+.dg-phone-target select{max-width:220px;padding:7px;border:1px solid #9b7948;border-radius:7px;background:#30261c;color:#f3dfb8;font:inherit}
+.dg-phone-actions{flex-wrap:wrap;overflow:visible}
+.dg-phone-action{flex:1 1 auto;white-space:normal;text-align:center;min-width:85px;max-width:100%;padding:6px 9px}
 
 @media (max-height: 670px) {
   .dg-phone { gap: 6px; padding-top: 8px; }

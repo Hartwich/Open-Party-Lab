@@ -105,6 +105,12 @@ function isPlayerSetupComplete(selectedGame: AvailableGameDto, player: PlayerRec
 }
 
 function areRequiredPlayerSetupChoicesSelected(room: RoomRecord, selectedGame: AvailableGameDto): boolean {
+  const setup = selectedGame.playerSetup;
+  if (setup?.kind === "choice" && setup.minPlayersPerOption) {
+    const key = getPlayerSetupSelectionKey(setup);
+    if (setup.options.some((option) => [...room.players.values()].filter((player) =>
+      player.setupSelectionsByGameId[selectedGame.id]?.[key] === option.id).length < setup.minPlayersPerOption!)) return false;
+  }
   return [...room.players.values()].every((player) => isPlayerSetupComplete(selectedGame, player));
 }
 
@@ -211,6 +217,11 @@ export function explainCannotStartRound(
   }
 
   if (!areRequiredPlayerSetupChoicesSelected(room, selectedGame)) {
+    const setup = selectedGame.playerSetup;
+    if (setup?.kind === "choice" && setup.minPlayersPerOption) {
+      return en ? `Each team needs at least ${setup.minPlayersPerOption} players.`
+        : `Jedes Team braucht mindestens ${setup.minPlayersPerOption} Personen.`;
+    }
     const missingChoices = players
       .filter((player) => !isPlayerSetupComplete(selectedGame, player))
       .map((player) => player.name)

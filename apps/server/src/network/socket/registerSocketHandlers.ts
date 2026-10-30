@@ -16,6 +16,7 @@ import { PlayerManager } from "../../players/playerManager.js";
 import { ReconnectService } from "../../players/reconnectService.js";
 import { canStartRound, explainCannotStartRound } from "../../rooms/roomLifecycle.js";
 import { RoomManager } from "../../rooms/roomManager.js";
+import { assignPlayerSetup } from "../../rooms/playerSetupAssignments.js";
 import { RoomCleanupService } from "../../rooms/roomCleanupService.js";
 import { createGuardedOn } from "./guardClientEvents.js";
 
@@ -187,7 +188,9 @@ export function registerSocketHandlers({
   }
 
   function getSelectedGame(room: NonNullable<ReturnType<RoomManager["getRoom"]>>) {
-    return room.selectedGameId ? gameRegistry.getAvailableGame(room.selectedGameId, room.language) : undefined;
+    const game = room.selectedGameId ? gameRegistry.getAvailableGame(room.selectedGameId, room.language, room.gameSettingsByGameId[room.selectedGameId]) : undefined;
+    if (game) assignPlayerSetup(room, game);
+    return game;
   }
 
   function resetInvalidPlayerSetupSelections(
@@ -757,6 +760,11 @@ export function registerSocketHandlers({
       const playerSetup = selectedGame?.playerSetup;
       const playerSetupOptions = playerSetup?.kind === "choice" ? playerSetup.options : [];
 
+      if (room.currentRound && room.currentRound.phase !== "finished") {
+        stateBroadcaster.emitError(socket, "player/forbidden", text.ownCharacterOnly);
+        return;
+      }
+
       if (!playerSetupOptions.some((option) => option.id === payload.characterId)) {
         stateBroadcaster.emitError(socket, "player/not-found", text.characterOrPlayerNotFound);
         return;
@@ -799,6 +807,11 @@ export function registerSocketHandlers({
 
       const selectedGame = getSelectedGame(room);
       const setup = selectedGame?.playerSetup;
+
+      if (room.currentRound && room.currentRound.phase !== "finished") {
+        ack(ackError(text.characterOrPlayerNotFound));
+        return;
+      }
 
       if (!selectedGame || !setup || getPlayerSetupSelectionKey(setup) !== payload.selectionKey) {
         ack(ackError(text.characterOrPlayerNotFound));
@@ -1016,6 +1029,16 @@ export function registerSocketHandlers({
           "game/not-selected",
           text.hostActionWrongGame
         );
+        return;
+      }
+
+      if (payload.action && typeof payload.action === "object" && "type" in payload.action && payload.action.type === "shuffle-player-setup") {
+        const game = getSelectedGame(room);
+        if (game?.playerSetup?.kind === "choice" && game.playerSetup.assignment === "balanced-random" &&
+          (!room.currentRound || room.currentRound.phase === "finished")) {
+          assignPlayerSetup(room, game, true);
+          stateBroadcaster.broadcastRoomState(room);
+        }
         return;
       }
 
