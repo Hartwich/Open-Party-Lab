@@ -182,5 +182,13 @@
     "repo": "https://github.com/Hartwich/dungeon-guild.git",
     "defaultLocalPath": "local-games/dungeon-guild",
     "alternateLocalPaths": []
+  },
+  {
+    "id": "studenten-activity",
+    "package": "@open-party-lab/game-studenten-activity",
+    "repo": "https://github.com/Hartwich/student-activity.git",
+    "defaultBranch": "main",
+    "defaultLocalPath": "local-games/student-activity",
+    "alternateLocalPaths": ["local-games/studenten-activity"]
   }
 ]

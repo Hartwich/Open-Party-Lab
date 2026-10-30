@@ -29,7 +29,7 @@ The catalog includes 21 optional game projects. Twelve are currently recommended
 | Word Tiles | Shared word board |
 | Zeichnen & Erraten | Drawing and guessing |
 
-Other known games include Air Hockey, Blickwinkel, Dungeon-Gilde, Imposter, Light Trails, Pantomime, Schattenjagd and Tap Race. Dungeon Party is in development. Optional games are separate repositories, so a fresh source checkout does not include their files until you clone them. The Windows release and hosted build assemble the known game repositories for you.
+Other known games include Air Hockey, Blickwinkel, Dungeon-Gilde, Imposter, Light Trails, Pantomime, Schattenjagd, Studenten Activity and Tap Race. Dungeon Party is in development. Optional games are separate repositories, so a fresh source checkout does not include their files until you clone them. The Windows release and hosted build assemble the known game repositories for you.
 
 Recent game updates include:
 
