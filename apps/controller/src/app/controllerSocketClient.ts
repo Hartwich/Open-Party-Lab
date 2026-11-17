@@ -129,10 +129,10 @@ export class ControllerSocketClient {
       this.stopClockSync = startServerClockSync(this.serverClock, (reply) => {
         this.socket.timeout(3000).emit("server:time", {}, (error, serverTime) => { if (!error) reply(serverTime); });
       });
-      const storedSession = loadStoredSession();
+      const storedSession = this.sessionTerminated ? null : loadStoredSession();
       this.updateState({
         connected: !storedSession,
-        error: null,
+        error: this.sessionTerminated ? this.state.error : null,
         hasStoredSession: Boolean(storedSession),
         storedSession
       });
@@ -146,7 +146,10 @@ export class ControllerSocketClient {
       this.resumePending = false;
       clearTimeout(this.resumeRetry);
       this.updateState({ connected: false });
-      if (reason === "io server disconnect" && !this.sessionTerminated && !this.sessionTerminationPending) {
+      // A termination message can be followed by a queued server disconnect.
+      // Reopen the transport for the join screen too; the connect handler
+      // keeps terminated identities from automatically resuming.
+      if (reason === "io server disconnect" && !this.sessionTerminationPending) {
         this.socket.connect();
       }
     });
@@ -239,9 +242,10 @@ export class ControllerSocketClient {
       });
     });
 
-    this.socket.on("session:terminated", ({ message }) => {
+    this.socket.on("session:terminated", ({ reason, message }) => {
       this.clearStoredSession({
-        rotateDeviceId: true,
+        rotateDeviceId: reason !== "replaced",
+        preserveStoredIdentity: reason === "replaced",
         disconnect: true,
         error: message
       });
@@ -424,6 +428,7 @@ export class ControllerSocketClient {
 
   clearStoredSession(options?: {
     rotateDeviceId?: boolean;
+    preserveStoredIdentity?: boolean;
     disconnect?: boolean;
     error?: string | null;
   }): void {
@@ -432,7 +437,9 @@ export class ControllerSocketClient {
     this.resumePending = false;
     clearTimeout(this.resumeRetry);
 
-    clearStoredControllerIdentity();
+    // Other tabs share localStorage. Replacing this tab must not erase the
+    // identity the new controller just resumed.
+    if (!options?.preserveStoredIdentity) clearStoredControllerIdentity();
 
     if (options?.rotateDeviceId) {
       rotateDeviceId();

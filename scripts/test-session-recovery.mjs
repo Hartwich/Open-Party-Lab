@@ -54,16 +54,24 @@ dependencies["../i18n/controllerText.js"] = loadClient("apps/controller/src/i18n
 const { HostSocketClient } = loadClient("apps/host/src/app/hostSocketClient.ts");
 const { ControllerSocketClient } = loadClient("apps/controller/src/app/controllerSocketClient.ts");
 const host = new HostSocketClient(url);
-const phone = new ControllerSocketClient(url);
+let phone = new ControllerSocketClient(url);
 const waitFor = async (condition, label) => {
   const deadline = Date.now() + 12_000;
   while (!condition()) {
-    assert.ok(Date.now() < deadline, `Timed out: ${label}; host=${JSON.stringify(host.getState())}; phone=${JSON.stringify(phone.getState())}`);
+    const summary = (client) => {
+      if (!client) return null;
+      const state = client.getState();
+      return { connected: state.connected, room: state.room?.code, player: state.player?.id,
+        socket: client.socket.id, error: state.error, hasStoredSession: state.hasStoredSession,
+        terminated: client.sessionTerminated, resumePending: client.resumePending };
+    };
+    assert.ok(Date.now() < deadline, `Timed out: ${label}; ${JSON.stringify({ host: summary(host), phone: summary(phone), retired: summary(replacedPhone) })}`);
     await new Promise((resolve) => setTimeout(resolve, 25));
   }
 };
 const ack = (socket, event, payload) => socket.timeout(3000).emitWithAck(event, payload);
 let peer;
+let replacedPhone;
 try {
   host.connect();
   await waitFor(() => host.getState().connected && host.getState().room, "host room");
@@ -151,13 +159,31 @@ try {
   } else {
     console.log("SKIP: active round continuity (optional tap-race package is not installed).");
   }
+  // Two browser tabs share their device/session storage. Continuing in a new
+  // tab must retire the old controller without wiping the new tab's identity
+  // or starting an endless automatic takeover/reconnect loop.
+  const deviceId = dependencies["./deviceSession.js"].getOrCreateDeviceId();
+  replacedPhone = phone;
+  phone = new ControllerSocketClient(url);
+  phone.connect();
+  await waitFor(() => phone.getState().connected && phone.getState().player?.id === playerId, "replacement controller");
+  await waitFor(() => replacedPhone.getState().connected && !replacedPhone.getState().room, "retired tab join screen");
+  assert.equal(replacedPhone.getState().hasStoredSession, false);
+  assert.ok(replacedPhone.getState().error, "retired tab explains the replacement");
+  assert.equal(dependencies["./deviceSession.js"].getOrCreateDeviceId(), deviceId, "replacement preserves shared device identity");
+  assert.equal(dependencies["./deviceSession.js"].loadReconnectToken(), token, "replacement preserves shared reconnect token");
+  await new Promise((resolve) => setTimeout(resolve, 250));
+  assert.equal(phone.getState().player.id, playerId);
+  assert.equal(replacedPhone.getState().room, null, "retired tab does not automatically reclaim the session");
+
   phone.clearStoredSession({ disconnect: true });
   await waitFor(() => phone.getState().connected, "fresh join connection after leaving");
   assert.equal(phone.getState().room, null, "intentional termination does not restore the room");
   assert.equal(phone.getState().hasStoredSession, false);
-  console.log(`PASS: automatic host/player recovery, ${testGame ? "active round continuity, " : ""}lost ACK retry, profile validation, ownership and offline inputs.`);
+  console.log(`PASS: automatic host/player recovery, ${testGame ? "active round continuity, " : ""}lost ACK retry, profile validation, ownership, offline inputs and replacement tabs with shared storage.`);
 } finally {
   phone.socket.disconnect();
+  replacedPhone?.socket.disconnect();
   host.socket.disconnect();
   peer?.disconnect();
   app.io.close();

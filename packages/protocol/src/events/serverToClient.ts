@@ -47,7 +47,7 @@ export interface SessionResumedPayload {
   reconnectToken: string;
 }
 
-export type SessionTerminationReason = "left" | "kicked";
+export type SessionTerminationReason = "left" | "kicked" | "replaced";
 
 export interface SessionTerminatedPayload {
   roomCode: string;

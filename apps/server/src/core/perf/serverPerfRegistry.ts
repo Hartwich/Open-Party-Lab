@@ -44,6 +44,14 @@ class ServerPerfRegistry {
       .sort((left, right) => left.ownerKey.localeCompare(right.ownerKey));
   }
 
+  clearRoom(roomCode: string): void {
+    // Room-owned runtime/broadcaster keys end in :CODE, including trackers
+    // that have not published a snapshot yet. Keep global and other-room data.
+    for (const ownerKey of this.trackers.keys()) {
+      if (ownerKey.endsWith(`:${roomCode}`)) this.clear(ownerKey);
+    }
+  }
+
   private resolveTracker(ownerKey: string, sourceId: string): PerfTracker {
     const existing = this.trackers.get(ownerKey);
 

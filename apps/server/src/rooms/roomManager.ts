@@ -32,7 +32,7 @@ export class RoomManager {
       language: normalizeLanguage(language),
       theme: defaultThemeName,
       hostName,
-      hostSocketId: null,
+      hostSocketIds: new Set(),
       hostControl: { holderPlayerId: null, pendingRequest: null },
       clock: { pausedAt: null, pausedTotalMs: 0, pausedByPlayerId: null },
       selectedGameId: null,
@@ -55,18 +55,13 @@ export class RoomManager {
     return this.roomStore.delete(roomCode);
   }
 
-  attachHostSocket(room: RoomRecord, socketId: string, hostName: string): string | null {
-    const previousHostSocketId =
-      room.hostSocketId && room.hostSocketId !== socketId ? room.hostSocketId : null;
-
-    room.hostSocketId = socketId;
+  attachHostSocket(room: RoomRecord, socketId: string, hostName: string): void {
+    room.hostSocketIds.add(socketId);
     this.touch(room);
 
     if (hostName.trim()) {
       room.hostName = hostName.trim();
     }
-
-    return previousHostSocketId;
   }
 
   getRoom(roomCode: string): RoomRecord | undefined {
@@ -82,7 +77,8 @@ export class RoomManager {
   }
 
   setHostSocket(room: RoomRecord, socketId: string | null): RoomRecord {
-    room.hostSocketId = socketId;
+    room.hostSocketIds.clear();
+    if (socketId) room.hostSocketIds.add(socketId);
     this.touch(room);
     return room;
   }
@@ -282,11 +278,10 @@ export class RoomManager {
   }
 
   clearHostSocket(room: RoomRecord, socketId: string): boolean {
-    if (room.hostSocketId !== socketId) {
+    if (!room.hostSocketIds.delete(socketId)) {
       return false;
     }
 
-    room.hostSocketId = null;
     this.touch(room);
     return true;
   }

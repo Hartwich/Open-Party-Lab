@@ -85,6 +85,9 @@ function socketText(en: boolean) {
     sessionNotFound: en ? "Session not found." : "Session nicht gefunden.",
     sessionRoomGone: en ? "The room for this session no longer exists." : "Raum zur Session existiert nicht mehr.",
     sessionRestoreFailed: en ? "Session could not be restored." : "Session konnte nicht wiederhergestellt werden.",
+    sessionReplaced: en
+      ? "This controller session was continued in another tab or device."
+      : "Diese Controller-Sitzung wurde in einem anderen Tab oder auf einem anderen Geraet fortgesetzt.",
     ownSessionOnly: en ? "You can only leave your own session." : "Du kannst nur deine eigene Session verlassen.",
     leftRoom: en ? "You left the room." : "Du hast den Raum verlassen.",
     hostLanguageOnly: en ? "Only the host can change the language." : "Nur der Host kann die Sprache aendern.",
@@ -134,13 +137,7 @@ function socketText(en: boolean) {
   };
 }
 
-function clearSocketIdentity(socket: {
-  data: { role?: "host" | "controller"; roomCode?: string; playerId?: string };
-  leave(roomCode: string): void;
-  disconnect(close?: boolean): void;
-  emit(event: "session:terminated", payload: { roomCode: string; playerId: string; reason: "left" | "kicked"; message: string }): void;
-  id: string;
-}) {
+function clearSocketIdentity(socket: RoomSocket): void {
   if (socket.data.roomCode) {
     socket.leave(socket.data.roomCode);
   }
@@ -161,6 +158,65 @@ export function registerSocketHandlers({
   roomCleanupService,
   hostedMode
 }: RegisterSocketHandlersDeps): void {
+  // A socket has one identity in one room. Repeated joins/resumes of that
+  // identity are idempotent, while an explicit switch releases the old room.
+  function leavePreviousIdentity(
+    socket: RoomSocket,
+    nextRole: "host" | "controller",
+    nextRoomCode: string,
+    nextPlayerId?: string
+  ): void {
+    if (
+      socket.data.role === nextRole && socket.data.roomCode === nextRoomCode &&
+      (nextRole === "host" || socket.data.playerId === nextPlayerId)
+    ) return;
+
+    const room = socket.data.roomCode ? roomManager.getRoom(socket.data.roomCode) : undefined;
+    if (room) {
+      if (socket.data.role === "host") {
+        roomManager.clearHostSocket(room, socket.id);
+      } else if (socket.data.role === "controller" && socket.data.playerId) {
+        const player = room.players.get(socket.data.playerId);
+        if (player?.socketId === socket.id) {
+          const result = playerManager.removePlayer(room, player.id);
+          // A running round keeps its participants and their scores. Mark the
+          // departing participant disconnected instead of altering the roster.
+          if ("error" in result) {
+            playerManager.disconnectPlayer(room, socket.id);
+            playerManager.setReady(room, player.id, false);
+          }
+          roomManager.forgetHostControlForPlayer(room, player.id);
+        }
+      }
+      roomManager.touch(room);
+    }
+    clearSocketIdentity(socket);
+    if (room) {
+      stateBroadcaster.broadcastRoomState(room);
+      stateBroadcaster.broadcastScoreboard(room);
+      if (room.currentRound) stateBroadcaster.broadcastGameState(room);
+    }
+  }
+
+  function replacePreviousControllers(room: NonNullable<ReturnType<RoomManager["getRoom"]>>, playerId: string, socket: RoomSocket): void {
+    for (const socketId of [...(io.sockets.adapter.rooms.get(room.code) ?? [])]) {
+      const previous = io.sockets.sockets.get(socketId);
+      if (!previous || previous.id === socket.id || previous.data.role !== "controller" ||
+          previous.data.playerId !== playerId) continue;
+
+      previous.emit("session:terminated", {
+        roomCode: room.code,
+        playerId,
+        reason: "replaced",
+        message: socketText(room.language === "en").sessionReplaced
+      });
+      // Clear before disconnect so the old transport cannot mark the newly
+      // bound player offline or trigger another automatic session takeover.
+      clearSocketIdentity(previous);
+      previous.disconnect(true);
+    }
+  }
+
   /**
    * Single authorisation gate for every room-driving action.
    *
@@ -365,18 +421,8 @@ export function registerSocketHandlers({
         return;
       }
 
-      const previousHostSocketId = roomManager.attachHostSocket(room, socket.id, hostName);
-
-      if (previousHostSocketId) {
-        const previousHostSocket = io.sockets.sockets.get(previousHostSocketId);
-
-        if (previousHostSocket) {
-          previousHostSocket.leave(room.code);
-          delete previousHostSocket.data.role;
-          delete previousHostSocket.data.roomCode;
-          delete previousHostSocket.data.playerId;
-        }
-      }
+      leavePreviousIdentity(socket, "host", room.code);
+      roomManager.attachHostSocket(room, socket.id, hostName);
 
       socket.data.role = "host";
       socket.data.roomCode = room.code;
@@ -393,7 +439,7 @@ export function registerSocketHandlers({
       stateBroadcaster.broadcastScoreboard(room);
 
       if (room.currentRound) {
-        stateBroadcaster.broadcastGameState(room);
+        stateBroadcaster.broadcastGameState(room, { forceFullHostState: true });
       }
     });
 
@@ -462,7 +508,7 @@ export function registerSocketHandlers({
         return;
       }
 
-      if (socket.data.role !== "host" || socket.data.roomCode !== room.code || room.hostSocketId !== socket.id) {
+      if (socket.data.role !== "host" || socket.data.roomCode !== room.code || !room.hostSocketIds.has(socket.id)) {
         ack(ackError(en ? "Only the host can extend the room." : "Nur der Host kann den Raum verlaengern."));
         return;
       }
@@ -498,8 +544,11 @@ export function registerSocketHandlers({
         return;
       }
 
+      const existingPlayer = [...room.players.values()].find((player) => player.deviceId === payload.deviceId);
+      leavePreviousIdentity(socket, "controller", room.code, existingPlayer?.id);
       const result = playerManager.joinPlayer(room, payload, socket.id);
       const player = result.player;
+      replacePreviousControllers(room, player.id, socket);
       roomManager.touch(room);
 
       socket.data.role = "controller";
@@ -541,6 +590,13 @@ export function registerSocketHandlers({
       }
       const text = socketText(room.language === "en");
 
+      const resumablePlayer = room.players.get(session.playerId);
+      if (!resumablePlayer || resumablePlayer.deviceId !== payload.deviceId ||
+          resumablePlayer.reconnectToken !== payload.reconnectToken) {
+        ack(ackError(text.sessionRestoreFailed));
+        return;
+      }
+      leavePreviousIdentity(socket, "controller", room.code, resumablePlayer.id);
       const player = playerManager.resumePlayer(
         room,
         payload.reconnectToken,
@@ -553,6 +609,7 @@ export function registerSocketHandlers({
         return;
       }
 
+      replacePreviousControllers(room, player.id, socket);
       roomManager.touch(room);
 
       socket.data.role = "controller";
@@ -971,8 +1028,9 @@ export function registerSocketHandlers({
         : roomManager.resumeRoom(room);
 
       if (changed) {
+        if (payload.paused) gameRuntime.clearHeldInputs(room);
         stateBroadcaster.broadcastRoomState(room);
-        stateBroadcaster.broadcastGameState(room);
+        stateBroadcaster.broadcastGameState(room, { reliable: true });
       }
     });
 
@@ -992,6 +1050,7 @@ export function registerSocketHandlers({
 
       try {
         gameRuntime.selectGame(room, payload.gameId);
+        stateBroadcaster.clearGameStateCache(room.code);
       } catch {
         stateBroadcaster.emitError(socket, "game/not-found", text.unknownGame);
         return;

@@ -9,6 +9,7 @@ import type { Socket } from "socket.io";
 import type { Server } from "socket.io";
 import { performance } from "node:perf_hooks";
 import { serverPerfRegistry } from "../core/perf/serverPerfRegistry.js";
+import { logger } from "../core/logger/logger.js";
 import { toRoomSnapshot } from "../rooms/roomLifecycle.js";
 import { assignPlayerSetup } from "../rooms/playerSetupAssignments.js";
 import type { RoomRecord } from "../rooms/roomStore.js";
@@ -43,6 +44,12 @@ export class StateBroadcaster {
   >();
   private readonly lastHostEmitAtByRoom = new Map<string, number>();
   private readonly lastControllerEmitAtByRoom = new Map<string, number>();
+  private readonly lastRoundByRoom = new Map<string, { gameId: string; roundNumber: number; phase: string }>();
+  private readonly pendingReliableByRoom = new Map<string, {
+    timer: NodeJS.Timeout;
+    requestedAt: number;
+    delayMs: number;
+  }>();
 
   createRoomSnapshot(room: RoomRecord) {
     if (room.selectedGameId) {
@@ -86,12 +93,14 @@ export class StateBroadcaster {
   }
 
   clearGameStateCache(roomCode: string): void {
+    this.cancelPendingReliableState(roomCode);
     this.lastHostStateByRoom.delete(roomCode);
     this.lastHostEmitAtByRoom.delete(roomCode);
     this.lastControllerEmitAtByRoom.delete(roomCode);
+    this.lastRoundByRoom.delete(roomCode);
   }
 
-  broadcastGameState(room: RoomRecord): void {
+  broadcastGameState(room: RoomRecord, options: { forceFullHostState?: boolean; reliable?: boolean } = {}): void {
     const totalStart = performance.now();
     const round = room.currentRound;
 
@@ -108,7 +117,30 @@ export class StateBroadcaster {
     // Decide who is due before building anything. Building the public states
     // walks every entity of the round; doing it for an emit the throttle is
     // about to drop was the bulk of the cost of input-triggered broadcasts.
-    const reliableState = this.getBroadcastPolicy(round.gameId)?.reliableState === true;
+    const entry = this.gameRegistry.get(round.gameId);
+    const policy = entry?.manifest.broadcast;
+    const hasPrivateControllerState = Boolean(entry?.serverGame.toControllerStateForPlayer);
+    const hasHostPatches = Boolean(policy?.supportsHostPatches && entry?.serverGame.buildHostPatch);
+    const previousRound = this.lastRoundByRoom.get(room.code);
+    const roundChanged = !previousRound || previousRound.gameId !== round.gameId ||
+      previousRound.roundNumber !== round.roundNumber || previousRound.phase !== round.phase;
+    this.lastRoundByRoom.set(room.code, { gameId: round.gameId, roundNumber: round.roundNumber, phase: round.phase });
+    const forceFullHostState = options.forceFullHostState || options.reliable || roundChanged;
+    const liveStream = round.phase === "playing" || round.phase === "locked";
+    const reliableState = Boolean(forceFullHostState || policy?.reliableState || !liveStream);
+
+    if (reliableState) {
+      this.cancelPendingReliableState(room.code);
+    } else {
+      // Coalesce the last frame of a burst into one reliable snapshot. A
+      // throttled or dropped volatile update must not remain lost when the
+      // game has no further state changes (menus, turns, the final input).
+      this.scheduleReliableState(room, totalStart, Math.max(
+        defaultHostStateIntervalMs,
+        policy?.hostStateIntervalMs ?? defaultHostStateIntervalMs,
+        policy?.controllerStateIntervalMs ?? defaultControllerStateIntervalMs
+      ));
+    }
     const shouldEmitHostState = reliableState || this.shouldEmitHostState(room.code, round.gameId, round.phase, totalStart);
     const shouldEmitControllerState = reliableState || this.shouldEmitControllerState(
       room.code,
@@ -119,6 +151,7 @@ export class StateBroadcaster {
     let hostStateMs = 0;
     let controllerStateMs = 0;
     let hostGameState: ReturnType<GameRuntime["getPublicGameState"]> | undefined;
+    let hostPatchPayload: GamePatchPayload | null | undefined;
     let sharedControllerGameState: ReturnType<GameRuntime["getPublicGameState"]> | undefined;
     const resolveHostGameState = () => {
       if (hostGameState === undefined) {
@@ -132,7 +165,7 @@ export class StateBroadcaster {
     const resolveControllerGameState = (playerId: string | undefined) => {
       const start = performance.now();
 
-      if (playerId) {
+      if (playerId && hasPrivateControllerState) {
         const playerState = this.gameRuntime.getControllerGameStateForPlayer(room, playerId);
         controllerStateMs += performance.now() - start;
         return playerState;
@@ -174,7 +207,13 @@ export class StateBroadcaster {
           continue;
         }
 
-        const patchPayload = this.buildHostPatchPayload(room, currentHostGameState);
+        // Every screen receives the same delta against the previous broadcast.
+        // Building it per recipient would advance the shared baseline after
+        // the first screen, leaving later screens with a different patch.
+        if (hostPatchPayload === undefined) {
+          hostPatchPayload = forceFullHostState ? null : this.buildHostPatchPayload(room, currentHostGameState);
+        }
+        const patchPayload = hostPatchPayload;
 
         if (patchPayload) {
           hostPatchRecipients += 1;
@@ -188,7 +227,7 @@ export class StateBroadcaster {
           game: currentHostGameState
         };
         const shouldUseVolatileHostStream =
-          !reliableState && (currentHostGameState.phase === "playing" || currentHostGameState.phase === "locked");
+          !reliableState && liveStream && !hasHostPatches;
 
         if (shouldUseVolatileHostStream) {
           hostEmitter.volatile.emit("game:state", hostPayload);
@@ -215,7 +254,7 @@ export class StateBroadcaster {
 
       const controllerEmitter = socket.compress(false);
       const shouldUseVolatileControllerStream =
-        !reliableState && (controllerGameState.phase === "playing" || controllerGameState.phase === "locked");
+        !reliableState && liveStream;
 
       if (shouldUseVolatileControllerStream) {
         controllerEmitter.volatile.emit("game:state", {
@@ -262,6 +301,44 @@ export class StateBroadcaster {
         }
       }
     );
+  }
+
+  private cancelPendingReliableState(roomCode: string): void {
+    const pending = this.pendingReliableByRoom.get(roomCode);
+    if (pending) clearTimeout(pending.timer);
+    this.pendingReliableByRoom.delete(roomCode);
+  }
+
+  private scheduleReliableState(room: RoomRecord, requestedAt: number, delayMs: number): void {
+    const existing = this.pendingReliableByRoom.get(room.code);
+    if (existing) {
+      existing.requestedAt = requestedAt;
+      existing.delayMs = delayMs;
+      return;
+    }
+
+    const flush = () => {
+      const remaining = pending.delayMs - (performance.now() - pending.requestedAt);
+      if (remaining > 0) {
+        pending.timer = setTimeout(flush, Math.ceil(remaining));
+        pending.timer.unref();
+        return;
+      }
+      this.pendingReliableByRoom.delete(room.code);
+      try {
+        this.broadcastGameState(room, { reliable: true });
+      } catch (error) {
+        // This callback runs outside the guarded client-event listener.
+        logger.error("Deferred game state delivery failed.", {
+          roomCode: room.code,
+          gameId: room.currentRound?.gameId,
+          reason: error instanceof Error ? error.message : String(error)
+        });
+      }
+    };
+    const pending = { requestedAt, delayMs, timer: setTimeout(flush, delayMs) };
+    pending.timer.unref();
+    this.pendingReliableByRoom.set(room.code, pending);
   }
 
   /**

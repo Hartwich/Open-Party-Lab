@@ -37,6 +37,22 @@ The shared protocol lives in `packages/protocol`.
 - `game:host-action` is for host-only game setup or control actions, such as setup panels.
 - `player:kick` is host-only and currently allowed outside active rounds.
 - `session:terminated` tells a controller that its local session is no longer valid.
+  The `replaced` reason means a newer controller has continued the same player
+  session. The retired tab must stop automatically resuming without clearing the
+  device ID or reconnect token shared with that newer tab in localStorage.
+- A successful join/resume replaces older connected controllers for that player.
+  A socket switching rooms or roles first releases its previous identity;
+  failed requests and repeated requests for the same identity leave it intact.
+- Multiple host screens may attach to one room through `room:create` with its
+  room code. Every screen remains a host and receives the same state/patches;
+  `hostConnected` remains true until the last host screen disconnects.
+- Paused rooms reject controller `game:input` events until resumed. Host menu
+  and room controls remain available. Games clear held inputs through their
+  server `onPause` hook when entering the pause.
+- Phase changes and pause/resume deliver reliable full game snapshots. Live
+  streams retain their configured cadence; the last update of a burst is
+  coalesced into a reliable full snapshot. Closing a room or clearing its round
+  cancels pending delivery.
 
 ## Game Payloads
 

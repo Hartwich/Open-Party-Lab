@@ -23,7 +23,7 @@
     "smoke:games": "node scripts/smoke-all-games.mjs",
     "smoke:control": "node scripts/smoke-host-control.mjs",
     "smoke:robustness": "node scripts/smoke-robustness.mjs",
-    "test:connections": "node --import tsx scripts/test-session-recovery.mjs",
+    "test:connections": "node --import tsx scripts/test-session-recovery.mjs && node --import tsx --test scripts/tests/room-connections.test.mjs scripts/tests/state-delivery.test.mjs",
     "smoke:remote-setup": "node scripts/smoke-remote-setup.mjs",
     "postinstall": "node scripts/local-games.mjs ensure-generated",
     "build:packages": "npm run check:game-boundaries && tsc -b packages/utils packages/ui-kit packages/game-core packages/protocol",

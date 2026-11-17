@@ -1,4 +1,5 @@
 import { logger } from "../core/logger/logger.js";
+import { serverPerfRegistry } from "../core/perf/serverPerfRegistry.js";
 import type {
   ClientToServerEvents,
   InterServerEvents,
@@ -90,7 +91,7 @@ export class RoomCleanupService {
 
       const hasConnectedPlayer = [...room.players.values()].some((player) => player.connected);
 
-      if (room.hostSocketId || hasConnectedPlayer || room.lastActivityAt > cutoff) continue;
+      if (room.hostSocketIds.size > 0 || hasConnectedPlayer || room.lastActivityAt > cutoff) continue;
       this.closeRoom(room, "inactive");
       removedRoomCodes.push(room.code);
     }
@@ -131,6 +132,7 @@ export class RoomCleanupService {
     this.roomManager.deleteRoom(room.code);
     this.sessionStore.removeByRoomCode(room.code);
     this.stateBroadcaster.clearGameStateCache(room.code);
+    serverPerfRegistry.clearRoom(room.code);
 
     logger.info("Closed room.", { roomCode: room.code, reason });
   }

@@ -1,6 +1,62 @@
 # Project Status
 
-Snapshot date: 2026-10-30
+Snapshot date: 2026-11-17
+
+Pause/input and state-delivery follow-up (2026-11-17): a generic optional
+`ServerGame.onPause` hook clears held controls without simulation or scoring.
+Arena Survivor and Air Hockey neutralize movement; Light Trails clears held
+turn buttons; Drift Racer neutralizes human driving/fire controls; Chaos-Kommando
+clears movement and cancels charging without firing. Gameplay inputs remain
+blocked while paused, and new inputs work after resume. These five game changes
+live in their optional repositories and require the compatible game-core
+contract before publication.
+
+Phase and pause changes now send reliable full snapshots immediately. Live
+streams retain throttling/volatile delivery, with one coalesced reliable full
+snapshot after a burst ends. Patch fallback snapshots are reliable so later
+patches always have a valid baseline. Round/game reset and room closure cancel
+pending delivery. Shared controller state is serialized once per broadcast;
+games with private per-player serializers remain isolated. Closing a room also
+clears all room-owned performance trackers/snapshots while preserving other rooms
+and global telemetry. Host layout remains intended for landscape screens.
+
+Verification: `npm run test:connections` passes browser-client recovery/shared
+storage checks and 21 server regressions, including dropped/throttled final
+updates, reliable pause/phase delivery, 16 shared/private controllers, deferred
+delivery cancellation, room telemetry cleanup and the five actual game pause
+hooks and deferred-serializer error containment. Platform and all five game
+typechecks and the full build pass (existing Vite bundle-size warnings).
+In-app checks at 360x640 (phone) and 1280x720 (host) confirm that a Pantomime
+turn paused with 15 seconds left resumes at 15 seconds after a pause longer
+than the whole turn; both views continue normally, without console warnings or
+errors. Physical-device checks remain open.
+
+Connection lifecycle and pause fixes (2026-11-17): the server now rejects
+controller gameplay inputs while a room is paused, including scoring and
+input-triggered round transitions. Resuming accepts new inputs normally.
+Continuing a player session through join/resume replaces older connected
+controller tabs. Retired tabs receive a localized notice and return to the join
+screen without automatically reclaiming the session or deleting the shared
+device/reconnect identity used by the new tab.
+
+Switching a socket to another room or role releases the previous subscription,
+presence and phone host control. Lobby departures remove the old player/session;
+departures during active rounds retain a disconnected participant and score for
+rejoining, clear readiness and release any pause held by that phone. Failed
+join/resume requests leave the current room intact; repeated requests for the
+same identity preserve it. Host screens are intentionally different from
+controllers: multiple screens may show and control the same room simultaneously.
+Late screens receive a reliable complete game state, and subsequent patches are
+built once and shared by all screens. Host presence lasts until the final screen
+disconnects. Room-code access and the existing readiness trust model remain.
+
+Verification: `npm run test:connections` covers real browser-client socket logic
+with shared storage, automatic recovery and replacement, plus six independent
+server regressions for pause/scoring, replacement/kick, room/role switching and
+parallel hosts/full-state/patch delivery. These regressions use a synthetic game
+and do not require optional game checkouts. Platform typecheck and full build
+passed; existing Vite bundle-size warnings remain. No physical-device or rendered
+browser checks were performed for this connection/state change.
 
 Studenten Activity (2026-10-30): new optional local game `studenten-activity`.
 A fixed pool passes through Explain, Draw, One Word and Charades, reshuffled per

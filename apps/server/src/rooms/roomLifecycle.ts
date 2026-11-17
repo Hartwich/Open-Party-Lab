@@ -278,7 +278,7 @@ export function toRoomSnapshot(
     joinUrl: room.joinUrl,
     language: room.language,
     theme: room.theme,
-    hostConnected: room.hostSocketId !== null,
+    hostConnected: room.hostSocketIds.size > 0,
     hostControl: toHostControlSnapshot(room),
     lifecycle: deriveRoomLifecycle(room),
     pausedBy:

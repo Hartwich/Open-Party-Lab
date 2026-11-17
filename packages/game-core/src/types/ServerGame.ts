@@ -66,6 +66,8 @@ export interface ServerGame<
     context: ServerGameContext
   ): GameHostActionResult<TState> | null;
   handleInput(state: TState, input: TInput, context: ServerGameContext): TState;
+  /** Clear held movement/buttons when pausing, without simulation, actions or scoring. */
+  onPause?(state: TState, context: ServerGameContext): TState;
   tick?(state: TState, deltaMs: number, context: ServerGameContext): TState;
   isRoundFinished(state: TState, context: ServerGameContext): boolean;
   buildScore(state: TState, context: ServerGameContext): ScoreEntry[];

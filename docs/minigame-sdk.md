@@ -106,8 +106,21 @@ whenever it opens the host menu. Pausing does not stop time — a round resumed 
 minute later would find every deadline it had stored long expired. The room
 keeps its own clock instead (`RoomRecord.clock`): wall time minus everything
 this room has spent paused, and that is the `now` a game sees in its context. A
-game therefore needs no pause handling of its own; from its side the pause never
-happened.
+game therefore needs no special timer adjustment. Games that retain held input
+must implement `onPause(state, context)` to clear movement, steering, buttons or
+weapon charging. Return a new state without advancing physics, triggering an
+action or changing scores. The platform invokes the hook once when entering a
+pause and rejects subsequent gameplay inputs until resume, so releasing a stick
+during the pause cannot leave an old direction held.
+
+Phase and pause transitions are sent reliably without interval throttling.
+Ordinary live streams keep their configured cadence and volatile delivery;
+after a burst stops, the platform sends one coalesced reliable full snapshot so
+the last dropped/throttled update cannot leave a stale screen. Patch streams
+also deliver fallback full snapshots reliably to preserve the next patch's
+baseline. Common controller serialization runs once per broadcast; only
+`toControllerStateForPlayer` opts into per-player serialization. Keep all secret
+state in that per-player hook.
 
 Two rules that are easy to get wrong and are enforced server-side: a round never
 begins paused (every path into one clears it), and the pause is released when
@@ -144,6 +157,7 @@ games. Without those additions its existing text-guess flow is unchanged.
 
 | Hook | Purpose |
 | --- | --- |
+| `onPause(state, context)` | Clear held inputs without simulation, actions or scoring. Required for games retaining movement/button/charge state. |
 | `shouldContinueRun(state, context)` | Return true when a finished round should flow into the next one instead of ending the session. Games with a persistent run implement this; the platform no longer inspects game state to decide. |
 | `buildHostPatch(state, previousState, context)` | Return an incremental delta against the last public state the host received, or null to force a full state. Requires `broadcast.supportsHostPatches`. |
 

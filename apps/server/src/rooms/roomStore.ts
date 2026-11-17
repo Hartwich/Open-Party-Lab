@@ -77,7 +77,7 @@ export interface RoomRecord {
   language: SupportedLanguage;
   theme: ThemeName;
   hostName: string;
-  hostSocketId: string | null;
+  hostSocketIds: Set<string>;
   hostControl: HostControlRecord;
   clock: RoomClock;
   selectedGameId: string | null;
@@ -115,6 +115,6 @@ export class RoomStore {
   }
 
   findByHostSocketId(socketId: string): RoomRecord | undefined {
-    return this.values().find((room) => room.hostSocketId === socketId);
+    return this.values().find((room) => room.hostSocketIds.has(socketId));
   }
 }

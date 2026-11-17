@@ -107,13 +107,27 @@ export class GameRuntime {
     return this.getPublicGameState(room);
   }
 
+  clearHeldInputs(room: RoomRecord): void {
+    const round = room.currentRound;
+    if (!round) return;
+
+    const game = this.gameRegistry.require(round.gameId);
+    if (!game.serverGame.onPause) return;
+
+    const state = game.serverGame.onPause(
+      round.state as BaseRoundState,
+      this.buildContext(room, round.roundNumber, game.manifest, 0)
+    );
+    if (state !== round.state) this.roundManager.replaceState(room, state);
+  }
+
   handleInput(
     room: RoomRecord,
     payload: { playerId: string; input: unknown }
   ): GameRuntimeUpdate | null {
     const totalStart = performance.now();
 
-    if (!room.currentRound) {
+    if (!room.currentRound || room.clock.pausedAt !== null) {
       return null;
     }
 
