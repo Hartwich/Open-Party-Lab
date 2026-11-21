@@ -4,6 +4,7 @@ import {
   type RoomLifecycle,
   type SupportedLanguage
 } from "@open-party-lab/protocol";
+import { additionalHostText } from "./hostAdditionalText.js";
 
 const languagePreferenceKey = "open-party-lab.host-language";
 
@@ -24,6 +25,12 @@ export function writeStoredHostLanguage(language: SupportedLanguage): void {
 }
 
 export interface HostText {
+  showRules: string;
+  shuffleTeams: string;
+  reconnectingToRoom: string;
+  connectionFailed: string;
+  tryAgainOffline: string;
+  tryAgainTimeout: string;
   languageLabel: string;
   themeLabel: string;
   themeLight: string;
@@ -133,6 +140,12 @@ export interface HostText {
 
 const hostText = {
   de: {
+    showRules: "Regeln anzeigen",
+    shuffleTeams: "Teams neu mischen",
+    reconnectingToRoom: "Verbindung unterbrochen. Dein Raum wird automatisch wieder verbunden…",
+    connectionFailed: "Verbindung zum Server fehlgeschlagen",
+    tryAgainOffline: "Keine Verbindung. Bitte erneut versuchen.",
+    tryAgainTimeout: "Keine Antwort. Bitte erneut versuchen.",
     shellKicker: "Spiel waehlen",
     shellTitle: "Was spielen wir?",
     shellSetupKicker: "Einstellungen",
@@ -250,6 +263,12 @@ const hostText = {
     lifecycle: (phase: RoomLifecycle | string) => phase
   },
   en: {
+    showRules: "Show rules",
+    shuffleTeams: "Shuffle teams",
+    reconnectingToRoom: "Connection lost. Reconnecting to your room automatically…",
+    connectionFailed: "Connection to server failed",
+    tryAgainOffline: "No connection. Please try again.",
+    tryAgainTimeout: "No response. Please try again.",
     shellKicker: "Choose a game",
     shellTitle: "What are we playing?",
     shellSetupKicker: "Settings",
@@ -388,7 +407,8 @@ const hostText = {
           return phase;
       }
     }
-  }
+  },
+  ...additionalHostText
 } satisfies Record<SupportedLanguage, HostText>;
 
 export function getHostText(language: SupportedLanguage | null | undefined): HostText {

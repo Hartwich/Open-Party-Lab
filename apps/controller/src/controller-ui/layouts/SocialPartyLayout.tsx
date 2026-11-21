@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { getPartyLayoutText, type PartyLayoutText } from "../../i18n/partyLayoutText.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import type { SocialPartyLayoutModel } from "./models.js";
 import { compressPartyImage, encodePartyCanvas, SocialPartyMediaError } from "./socialPartyMedia.js";
@@ -7,32 +8,32 @@ type Props = { model: SocialPartyLayoutModel };
 type Stroke = { color: string; points: Array<{ x: number; y: number }> };
 const INK = ["#352436", "#ed715e", "#399b91", "#e6b33e", "#657db5"];
 
-function PrivateTextList({ model, en }: { model: NonNullable<SocialPartyLayoutModel["privateTextList"]>; en: boolean }) {
+function PrivateTextList({ model, text }: { model: NonNullable<SocialPartyLayoutModel["privateTextList"]>; text: PartyLayoutText }) {
   const [values, setValues] = useState(() => Array.from({ length: model.count }, (_, index) => model.values[index] ?? ""));
   const normalized = values.map((value) => value.trim().replace(/\s+/g, " "));
   const unique = new Set(normalized.map((value) => value.toLocaleLowerCase()));
   const valid = normalized.every((value) => value.length > 0 && value.length <= model.maxLength) && unique.size === model.count;
   return <form className="sp-actions" onSubmit={(event) => { event.preventDefault(); if (valid) model.onSave(values, true); }}>
     {values.map((value, index) => <label key={index} className="sp-actions" style={{ gap: 4 }}>
-      <span className="sp-caption">{en ? "Word" : "Begriff"} {index + 1}</span>
+      <span className="sp-caption">{text.word} {index + 1}</span>
       <input className="sp-field" value={value} maxLength={model.maxLength} autoComplete="off"
         onChange={(event) => setValues((old) => old.map((entry, position) => position === index ? event.target.value : entry))}
         onBlur={() => model.onSave(values, false)} />
     </label>)}
-    {unique.size !== model.count && normalized.some(Boolean) ? <p role="status" className="sp-caption">{en ? "Use a different word in each field." : "Schreibe in jedes Feld einen anderen Begriff."}</p> : null}
-    <button type="submit" className="sp-choice" disabled={!valid}>{model.submitted ? (en ? "Update words" : "Begriffe aktualisieren") : (en ? "Submit words" : "Begriffe abgeben")}</button>
-    <p className="sp-caption" role="status">{model.submitted ? (en ? "Submitted. You may edit until everyone is done." : "Abgegeben. Bis alle fertig sind, kannst du noch ändern.") : (en ? "Only you can see these words. Saved when you leave a field." : "Nur du siehst diese Begriffe. Beim Verlassen eines Feldes gespeichert.")}</p>
+    {unique.size !== model.count && normalized.some(Boolean) ? <p role="status" className="sp-caption">{text.uniqueWords}</p> : null}
+    <button type="submit" className="sp-choice" disabled={!valid}>{model.submitted ? (text.updateWords) : (text.submitWords)}</button>
+    <p className="sp-caption" role="status">{model.submitted ? (text.wordsSubmitted) : (text.privateWords)}</p>
   </form>;
 }
 
-function RoundTimer({ deadline, en, getServerTime = Date.now }: { deadline: number; en: boolean; getServerTime?: () => number }) {
+function RoundTimer({ deadline, text, getServerTime = Date.now }: { deadline: number; text: PartyLayoutText; getServerTime?: () => number }) {
   const [now, setNow] = useState(getServerTime);
   useEffect(() => {
     setNow(getServerTime());
     const timer = window.setInterval(() => setNow(getServerTime()), 250);
     return () => window.clearInterval(timer);
   }, [deadline, getServerTime]);
-  return <span role="timer" aria-label={en ? "Seconds remaining" : "Verbleibende Sekunden"} style={{ font: "700 28px ui-monospace, monospace", fontVariantNumeric: "tabular-nums" }}>{Math.max(0, Math.ceil((deadline - now) / 1000))} s</span>;
+  return <span role="timer" aria-label={text.secondsRemaining} style={{ font: "700 28px ui-monospace, monospace", fontVariantNumeric: "tabular-nums" }}>{Math.max(0, Math.ceil((deadline - now) / 1000))} s</span>;
 }
 
 function ToolIcon({ kind }: { kind: "photo" | "gallery" | "undo" | "clear" }) {
@@ -44,7 +45,7 @@ function ToolIcon({ kind }: { kind: "photo" | "gallery" | "undo" | "clear" }) {
   </svg>;
 }
 
-function PhotoPicker({ en, selfie = false, compact = false, disabled, onImage }: { en: boolean; selfie?: boolean; compact?: boolean; disabled: boolean; onImage(file?: File): void }) {
+function PhotoPicker({ text, selfie = false, compact = false, disabled, onImage }: { text: PartyLayoutText; selfie?: boolean; compact?: boolean; disabled: boolean; onImage(file?: File): void }) {
   const change = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0]; event.currentTarget.value = ""; onImage(file);
   };
@@ -52,8 +53,8 @@ function PhotoPicker({ en, selfie = false, compact = false, disabled, onImage }:
     if (disabled || (event.key !== "Enter" && event.key !== " ")) return;
     event.preventDefault(); event.currentTarget.querySelector("input")?.click();
   };
-  const cameraLabel = selfie ? (en ? "Take selfie" : "Selfie aufnehmen") : (en ? "Take photo" : "Foto aufnehmen");
-  const galleryLabel = en ? "Choose photo" : "Foto auswählen";
+  const cameraLabel = selfie ? (text.takeSelfie) : (text.takePhoto);
+  const galleryLabel = text.choosePhoto;
   return <div className="sp-photo-tools">
     <label className={`sp-tool ${compact ? "sp-icon-tool" : "sp-camera"}`} role="button" aria-label={cameraLabel} title={cameraLabel} aria-disabled={disabled} tabIndex={disabled ? -1 : 0} onKeyDown={keyboard}><ToolIcon kind="photo" />{!compact && <span>{cameraLabel}</span>}<input type="file" aria-label={cameraLabel} accept="image/*" capture={selfie ? "user" : "environment"} disabled={disabled} hidden onChange={change} /></label>
     <label className="sp-tool sp-icon-tool" role="button" aria-label={galleryLabel} title={galleryLabel} aria-disabled={disabled} tabIndex={disabled ? -1 : 0} onKeyDown={keyboard}><ToolIcon kind="gallery" /><input type="file" aria-label={galleryLabel} accept="image/*" disabled={disabled} hidden onChange={change} /></label>
@@ -61,7 +62,7 @@ function PhotoPicker({ en, selfie = false, compact = false, disabled, onImage }:
 }
 
 export function SocialPartyLayout({ model }: Props) {
-  const en = model.language === "en";
+  const text = getPartyLayoutText(model.language);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
   const photoImageRef = useRef<{ src: string; image: HTMLImageElement } | null>(null);
@@ -175,13 +176,13 @@ export function SocialPartyLayout({ model }: Props) {
   const buttonStyle: React.CSSProperties = { border: 0, borderRadius: 18, background: "#422b42", color: "#fffaf2", minHeight: 54, padding: "14px 18px", fontSize: 16, fontWeight: 750, boxShadow: "0 5px 0 #2c1d2d", touchAction: "manipulation" };
   const disabled = Boolean(model.disabled || model.hasSubmitted || sending || (model.stage !== "submit" && model.stage !== "avatar"));
   const photoDisabled = disabled || uploading;
-  const imageErrorText = imageError === "size" ? (en ? "Photo too large (maximum 50 MB)." : "Foto zu groß (maximal 50 MB).")
-    : imageError === "format" || imageError === "decode" ? (en ? "Photo unreadable. Try a JPEG or another photo." : "Foto nicht lesbar. Versuche ein JPEG oder ein anderes Foto.")
-    : (en ? "Photo could not be prepared. Try another photo." : "Foto konnte nicht vorbereitet werden. Versuche ein anderes Foto.");
-  const sendLabel = sending ? (en ? "Sending…" : "Wird gesendet …") : sendError ? (en ? "Send again" : "Erneut senden") : null;
+  const imageErrorText = imageError === "size" ? (text.photoTooLarge)
+    : imageError === "format" || imageError === "decode" ? (text.photoUnreadable)
+    : (text.photoFailed);
+  const sendLabel = sending ? (text.sending) : sendError ? (text.sendAgain) : null;
 
-  return <main className={`social-party${model.title ? " has-context" : ""}`} key={model.resetKey} aria-label={model.title ?? (en ? "Game controller" : "Spieleingabe")}>
-    {model.deadline !== undefined && <RoundTimer deadline={model.deadline} en={en} getServerTime={model.getServerTime} />}
+  return <main className={`social-party${model.title ? " has-context" : ""}`} key={model.resetKey} aria-label={model.title ?? (text.gameController)}>
+    {model.deadline !== undefined && <RoundTimer deadline={model.deadline} text={text} getServerTime={model.getServerTime} />}
     <style>{`
       .social-party{--paper:#fffaf1;--plum:#39283c;--coral:#e97763;--teal:#398f87;color:var(--plum);font-family:Georgia,'Times New Roman',serif;display:grid;align-content:center;justify-items:center;gap:12px;box-sizing:border-box;padding:72px clamp(14px,4vw,24px) 24px;min-height:calc(100dvh - max(10px,env(safe-area-inset-top)) - max(10px,env(safe-area-inset-bottom)));background:radial-gradient(ellipse at 92% 4%,#f8ded4 0,transparent 32%),radial-gradient(ellipse at 0 75%,#d9eee8 0,transparent 35%),#f5eee2;animation:sp-in .38s cubic-bezier(.2,.8,.2,1) both}
       .social-party>.sp-actions,.social-party>.sp-results{width:100%;max-width:480px;min-width:0}.social-party>.sp-actions>label.sp-tool{justify-self:center;max-width:100%;text-align:center;padding:14px 20px}.social-party>.sp-actions>.sp-photo{max-height:42dvh;object-fit:contain}.social-party>.sp-actions>.sp-photo.is-avatar{max-width:min(260px,38dvh)}
@@ -198,45 +199,45 @@ export function SocialPartyLayout({ model }: Props) {
     `}</style>
     {model.title && <>
       <style>{`.social-party.has-context{align-content:start;gap:16px}.sp-context,.sp-secret,.sp-auto{width:100%;max-width:480px;box-sizing:border-box}.sp-context h1{font:700 clamp(34px,9vw,48px)/1.05 Georgia,serif;margin:6px 0 14px}.sp-context .sp-helper{font-size:16px}.sp-context .sp-head{font:750 13px system-ui,sans-serif}.sp-secret{border:1px solid #c7b7cc;background:#fffaf1;border-radius:6px;padding:22px 18px;min-height:112px;color:var(--plum);display:grid;gap:8px;text-align:center;cursor:pointer;animation:sp-rise .4s both}.sp-secret span{font:700 11px system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#79647e}.sp-secret strong{font:700 clamp(25px,6vw,36px)/1.1 Georgia,serif;overflow-wrap:anywhere}.sp-secret small{font:12px system-ui,sans-serif;color:#79647e}.sp-auto{display:flex;align-items:center;gap:12px;font:650 15px system-ui,sans-serif;min-height:48px}.sp-auto input{width:24px;height:24px;accent-color:#6d587a}.social-party.has-context>.sp-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.has-context .sp-results .sp-choice{flex-direction:column;text-align:center;gap:8px;padding:14px 8px;overflow-wrap:anywhere}.has-context .sp-results .sp-choice-avatar{width:64px;height:64px}.has-context>section:has(.sp-status-mark){text-align:center}.has-context>.sp-actions .sp-photo.is-avatar{aspect-ratio:1;max-width:min(220px,30dvh)}.has-context>.sp-ready{width:100%;max-width:480px}.has-context .sp-choice:focus-visible,.sp-secret:focus-visible{outline:3px solid #6d587a;outline-offset:3px}@media(max-height:650px){.social-party.has-context{padding-top:58px;gap:12px}.sp-context h1{font-size:32px;margin-bottom:10px}.sp-secret{min-height:92px;padding:16px}}`}</style>
-      <header className="sp-context"><div className="sp-head"><span className="sp-kicker">{model.title}</span>{model.score !== undefined && <span>{model.score} {en ? "points" : "Punkte"}</span>}</div><h1>{model.statusLabel ?? model.title}</h1>{model.helperText && <p className="sp-helper" role="status">{model.helperText}</p>}</header>
-      {model.secret && <button className="sp-secret" type="button" aria-expanded={showSecret} onClick={() => setShowSecret((value) => !value)}><span>{model.secret.label}</span><strong>{showSecret ? model.secret.term : en ? "Tap to reveal" : "Tippen zum Anzeigen"}</strong><small>{showSecret ? (en ? "Tap to hide" : "Tippen zum Verbergen") : (en ? "For your eyes only" : "Nur für deine Augen")}</small></button>}
+      <header className="sp-context"><div className="sp-head"><span className="sp-kicker">{model.title}</span>{model.score !== undefined && <span>{model.score} {text.points}</span>}</div><h1>{model.statusLabel ?? model.title}</h1>{model.helperText && <p className="sp-helper" role="status">{model.helperText}</p>}</header>
+      {model.secret && <button className="sp-secret" type="button" aria-expanded={showSecret} onClick={() => setShowSecret((value) => !value)}><span>{model.secret.label}</span><strong>{showSecret ? model.secret.term : text.reveal}</strong><small>{showSecret ? (text.hide) : (text.secret)}</small></button>}
     </>}
-    {model.privateTextList ? <PrivateTextList key={model.resetKey} model={model.privateTextList} en={en} /> : null}
+    {model.privateTextList ? <PrivateTextList key={model.resetKey} model={model.privateTextList} text={text} /> : null}
     {model.stage === "avatar" && !model.hasSubmitted && <section className="sp-actions">
-      <PhotoPicker en={en} selfie disabled={photoDisabled} onImage={(file) => { void onImage(file); }} />
-      {photo && <><img className="sp-photo is-avatar" src={photo} alt={en ? "Character photo preview" : "Vorschau deines Charakterfotos"} /><button style={buttonStyle} type="button" disabled={photoDisabled || model.connected === false} onClick={() => sendMedia(() => model.onSubmitAvatar(photo))}>{sendLabel ?? (en ? "Use this photo" : "Dieses Foto verwenden")}</button></>}
+      <PhotoPicker text={text} selfie disabled={photoDisabled} onImage={(file) => { void onImage(file); }} />
+      {photo && <><img className="sp-photo is-avatar" src={photo} alt={text.characterPreview} /><button style={buttonStyle} type="button" disabled={photoDisabled || model.connected === false} onClick={() => sendMedia(() => model.onSubmitAvatar(photo))}>{sendLabel ?? (text.usePhoto)}</button></>}
     </section>}
     {model.stage === "submit" && !model.hasSubmitted && <section className={`sp-actions${model.taskKind === "draw" && photo ? " is-photo-edit" : ""}`} key={model.taskKind}>
       {model.taskKind === "pick" && model.choices.map((choice, i) => <button key={choice.id} className="sp-choice" disabled={disabled} style={{ animation: `sp-rise .3s ${i * 45}ms both` }} type="button" onClick={() => model.onSubmitPick(choice.id)}>{choice.avatar ? <img className="sp-choice-avatar" src={choice.avatar} alt="" /> : <span className="sp-choice-avatar">{choice.label.slice(0, 1)}</span>}<span>{choice.label}</span></button>)}
-      {model.taskKind === "text" && <form onSubmit={submit} className="sp-actions"><textarea className="sp-field" maxLength={model.maxTextLength ?? 180} rows={4} value={draft} disabled={disabled} aria-label={en ? "Your answer" : "Deine Antwort"} onChange={(e) => setDraft(e.target.value)} placeholder={en ? "Write your answer…" : "Schreib deine Antwort …"} /><button style={buttonStyle} disabled={disabled || !draft.trim()}>{en ? "Send" : "Absenden"}</button></form>}
+      {model.taskKind === "text" && <form onSubmit={submit} className="sp-actions"><textarea className="sp-field" maxLength={model.maxTextLength ?? 180} rows={4} value={draft} disabled={disabled} aria-label={text.answer} onChange={(e) => setDraft(e.target.value)} placeholder={text.answerPlaceholder} /><button style={buttonStyle} disabled={disabled || !draft.trim()}>{text.send}</button></form>}
       {model.taskKind === "photo" && <>
-        <PhotoPicker en={en} disabled={photoDisabled} onImage={(file) => { void onImage(file); }} />
-        {photo && <><img className="sp-photo" src={photo} alt={en ? "Your photo preview" : "Vorschau deines Fotos"} /><button style={buttonStyle} type="button" disabled={photoDisabled || model.connected === false} onClick={() => sendMedia(() => model.onSubmitMedia(photo))}>{sendLabel ?? (en ? "Send photo" : "Foto senden")}</button></>}
+        <PhotoPicker text={text} disabled={photoDisabled} onImage={(file) => { void onImage(file); }} />
+        {photo && <><img className="sp-photo" src={photo} alt={text.photoPreview} /><button style={buttonStyle} type="button" disabled={photoDisabled || model.connected === false} onClick={() => sendMedia(() => model.onSubmitMedia(photo))}>{sendLabel ?? (text.sendPhoto)}</button></>}
       </>}
       {model.taskKind === "draw" && <>
-        {model.requirePhoto && !photo && <PhotoPicker en={en} disabled={photoDisabled} onImage={(file) => { void onImage(file); }} />}
+        {model.requirePhoto && !photo && <PhotoPicker text={text} disabled={photoDisabled} onImage={(file) => { void onImage(file); }} />}
         {(!model.requirePhoto || photo) && <>
         <div className="sp-toolbar">
-          {INK.map((swatch) => <button type="button" key={swatch} className="sp-tool sp-color-tool" aria-label={`${en ? "Color" : "Farbe"} ${swatch}`} aria-pressed={color === swatch} disabled={disabled} onClick={() => setColor(swatch)}><span style={{ background: swatch }} /></button>)}
-          {!model.basePhoto && <PhotoPicker en={en} compact disabled={photoDisabled} onImage={(file) => { void onImage(file); }} />}
-          <button className="sp-tool sp-icon-tool" type="button" aria-label={en ? "Undo" : "Rückgängig"} disabled={disabled || !strokes.length} onClick={() => setStrokes((v) => v.slice(0, -1))}><ToolIcon kind="undo" /></button>
-          <button className="sp-tool sp-icon-tool" type="button" aria-label={en ? "Clear strokes" : "Striche löschen"} disabled={photoDisabled} onClick={() => { drawingRef.current = false; setStrokes([]); setImageError(null); }}><ToolIcon kind="clear" /></button>
+          {INK.map((swatch) => <button type="button" key={swatch} className="sp-tool sp-color-tool" aria-label={`${text.color} ${swatch}`} aria-pressed={color === swatch} disabled={disabled} onClick={() => setColor(swatch)}><span style={{ background: swatch }} /></button>)}
+          {!model.basePhoto && <PhotoPicker text={text} compact disabled={photoDisabled} onImage={(file) => { void onImage(file); }} />}
+          <button className="sp-tool sp-icon-tool" type="button" aria-label={text.undo} disabled={disabled || !strokes.length} onClick={() => setStrokes((v) => v.slice(0, -1))}><ToolIcon kind="undo" /></button>
+          <button className="sp-tool sp-icon-tool" type="button" aria-label={text.clearStrokes} disabled={photoDisabled} onClick={() => { drawingRef.current = false; setStrokes([]); setImageError(null); }}><ToolIcon kind="clear" /></button>
         </div>
-        {model.maxStrokes && <p className="sp-caption" aria-live="polite">{strokes.length} / {model.maxStrokes} {en ? "strokes" : "Striche"}</p>}
-        <canvas ref={canvasRef} className="sp-canvas" width={canvasSize.width} height={canvasSize.height} style={{ aspectRatio: `${canvasSize.width}/${canvasSize.height}`, width: photo ? `min(100%, calc(max(160px, 100dvh - 280px) * ${canvasSize.width / canvasSize.height}))` : "100%" }} aria-label={en ? "Drawing canvas" : "Zeichenfläche"} onPointerDown={(e) => { if (photoDisabled || !photoReady || (model.maxStrokes && strokes.length >= model.maxStrokes)) return; e.currentTarget.setPointerCapture(e.pointerId); drawingRef.current = true; const p = point(e); setStrokes((current) => [...current, { color, points: [p] }]); }} onPointerMove={(e) => { if (drawingRef.current) addPoint(e); }} onPointerUp={() => { drawingRef.current = false; }} onPointerCancel={() => { drawingRef.current = false; }} />
-        <button style={buttonStyle} type="button" disabled={photoDisabled || model.connected === false || !strokes.length || !photoReady || (model.requirePhoto && !photo)} onClick={submitDrawing}>{sendLabel ?? (en ? "Send drawing" : "Zeichnung senden")}</button>
+        {model.maxStrokes && <p className="sp-caption" aria-live="polite">{strokes.length} / {model.maxStrokes} {text.strokes}</p>}
+        <canvas ref={canvasRef} className="sp-canvas" width={canvasSize.width} height={canvasSize.height} style={{ aspectRatio: `${canvasSize.width}/${canvasSize.height}`, width: photo ? `min(100%, calc(max(160px, 100dvh - 280px) * ${canvasSize.width / canvasSize.height}))` : "100%" }} aria-label={text.drawingCanvas} onPointerDown={(e) => { if (photoDisabled || !photoReady || (model.maxStrokes && strokes.length >= model.maxStrokes)) return; e.currentTarget.setPointerCapture(e.pointerId); drawingRef.current = true; const p = point(e); setStrokes((current) => [...current, { color, points: [p] }]); }} onPointerMove={(e) => { if (drawingRef.current) addPoint(e); }} onPointerUp={() => { drawingRef.current = false; }} onPointerCancel={() => { drawingRef.current = false; }} />
+        <button style={buttonStyle} type="button" disabled={photoDisabled || model.connected === false || !strokes.length || !photoReady || (model.requirePhoto && !photo)} onClick={submitDrawing}>{sendLabel ?? (text.sendDrawing)}</button>
         </>}
       </>}
     </section>}
     {(model.stage === "avatar" || model.stage === "submit") && !model.hasSubmitted && <>
-      {uploading && <p className="sp-caption" role="status">{en ? "Preparing photo…" : "Foto wird vorbereitet …"}</p>}
+      {uploading && <p className="sp-caption" role="status">{text.preparingPhoto}</p>}
       {imageError && <p className="sp-caption" role="alert">{imageErrorText}</p>}
-      {model.connected === false ? <p className="sp-caption" role="status">{en ? "Reconnecting. Your photo is still here." : "Verbindung wird wiederhergestellt. Dein Foto bleibt erhalten."}</p>
-        : sendError && <p className="sp-caption" role="alert">{en ? "Not confirmed yet. Please send again." : "Noch nicht bestätigt. Bitte erneut senden."}</p>}
+      {model.connected === false ? <p className="sp-caption" role="status">{text.reconnectingPhoto}</p>
+        : sendError && <p className="sp-caption" role="alert">{text.photoNotConfirmed}</p>}
     </>}
-    {(model.stage === "avatar" || model.stage === "submit") && model.hasSubmitted && <span className="sp-status-mark" role="status" aria-label={en ? "Submitted" : "Abgegeben"}>✓</span>}
+    {(model.stage === "avatar" || model.stage === "submit") && model.hasSubmitted && <span className="sp-status-mark" role="status" aria-label={text.submitted}>✓</span>}
     {model.stage === "vote" && <section className="sp-results">{model.choices.map((choice, i) => <button className="sp-choice" key={choice.id} type="button" disabled={Boolean(model.disabled || choice.disabled || model.hasSubmitted)} aria-pressed={model.selectedId === choice.id} onClick={() => model.onVote(choice.id)} style={{ animation: `sp-rise .3s ${i * 45}ms both` }}><span className="sp-choice-avatar">{choice.avatar ? <img className="sp-choice-avatar" src={choice.avatar} alt="" /> : choice.label.slice(0, 1)}</span><span>{choice.label}</span></button>)}</section>}
-    {!model.title && (model.stage === "waiting" || model.stage === "finished") && <span className="sp-status-mark" role="status" aria-label={en ? "Watch the shared screen" : "Auf den Hauptbildschirm schauen"}>✓</span>}
+    {!model.title && (model.stage === "waiting" || model.stage === "finished") && <span className="sp-status-mark" role="status" aria-label={text.watchScreen}>✓</span>}
     {model.feedback && <section className="sp-actions sp-paper" role="status" aria-live="polite" style={{ textAlign: "center", boxSizing: "border-box", border: "2px solid #398f87" }}>
       <span style={{ font: "700 14px system-ui, sans-serif", color: "#398f87" }}>✓ {model.feedback.label}</span>
       <strong style={{ font: "700 clamp(25px,6vw,36px)/1.15 Georgia,serif", overflowWrap: "anywhere" }}>{model.feedback.term}</strong>
@@ -245,7 +246,7 @@ export function SocialPartyLayout({ model }: Props) {
       <h2 style={{ fontSize: 22, margin: "8px 0" }}>{model.review.title}</h2>
       {model.review.entries.map((entry) => <label key={entry.id} style={{ display: "grid", gap: 8, borderBottom: "1px solid #dfd2c5", padding: "8px 0 14px", font: "600 16px system-ui, sans-serif" }}>
         <span>{entry.label}</span>
-        {model.review?.editable ? <select aria-label={`${en ? "Assign" : "Zuordnung"}: ${entry.label}`} value={entry.selectedId} onChange={(event) => model.review?.onAssign(entry.id, event.currentTarget.value)} style={{ minHeight: 48, width: "100%", minWidth: 0, padding: 10, borderRadius: 8, font: "inherit", background: "#fffdf8", color: "#39283c", border: "1px solid #c7b7cc" }}>
+        {model.review?.editable ? <select aria-label={`${text.assign}: ${entry.label}`} value={entry.selectedId} onChange={(event) => model.review?.onAssign(entry.id, event.currentTarget.value)} style={{ minHeight: 48, width: "100%", minWidth: 0, padding: 10, borderRadius: 8, font: "inherit", background: "#fffdf8", color: "#39283c", border: "1px solid #c7b7cc" }}>
           <option value="">{model.review.unassignedLabel}</option>
           {model.review.options.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
         </select> : <span>{model.review?.options.find((option) => option.id === entry.selectedId)?.label ?? model.review?.unassignedLabel}</span>}
@@ -253,7 +254,7 @@ export function SocialPartyLayout({ model }: Props) {
       </label>)}
     </section>}
     {model.actions?.length ? <section className="sp-actions">{model.actions.map((action) => <button key={action.id} type="button" style={{ ...buttonStyle, opacity: action.disabled ? 0.5 : 1 }} disabled={action.disabled} onClick={action.onPress}>{action.label}</button>)}</section> : null}
-    {model.autoReady && <label className="sp-auto"><input type="checkbox" checked={model.autoReady.enabled} onChange={(event) => model.autoReady?.onChange(event.currentTarget.checked)} /><span>{en ? "Automatically ready for the next word" : "Automatisch bereit für den nächsten Begriff"}</span></label>}
+    {model.autoReady && <label className="sp-auto"><input type="checkbox" checked={model.autoReady.enabled} onChange={(event) => model.autoReady?.onChange(event.currentTarget.checked)} /><span>{text.autoReady}</span></label>}
     {model.ready && <div className="sp-ready"><ReadyPanel ready={model.ready} /></div>}
   </main>;
 }

@@ -1,4 +1,5 @@
 import type { ClientToServerEvents, ServerToClientEvents, SupportedLanguage } from "@open-party-lab/protocol";
+import { languageLabels, normalizeLanguage, supportedLanguages } from "@open-party-lab/protocol";
 import { defaultThemeName, themeCssVariablesFor } from "@open-party-lab/ui-kit";
 import { io, type Socket } from "socket.io-client";
 import { readStoredHostLanguage, writeStoredHostLanguage } from "../i18n/hostText.js";
@@ -35,7 +36,7 @@ const landingText = {
     closedInactive: "Der vorherige Raum wurde nach zehn Minuten ohne Aktivität geschlossen.",
     closedExpired: "Der vorherige Raum wurde nach einer Stunde automatisch geschlossen.",
     closedCapacity: "Der vorherige Raum hatte keine aktiven Spieler und wurde geschlossen, um Platz für einen neuen Raum zu schaffen.",
-    switchLanguage: "Switch to English"
+    languageLabel: "Sprache"
   },
   en: {
     title: "Open Party Lab – Start a room",
@@ -57,8 +58,74 @@ const landingText = {
     closedInactive: "The previous room was closed after ten minutes without activity.",
     closedExpired: "The previous room was closed automatically after one hour.",
     closedCapacity: "The previous room had no active players and was closed to make space for a new room.",
-    switchLanguage: "Auf Deutsch wechseln"
-  }
+    languageLabel: "Language"
+  },
+  "es": {
+    title: "Open Party Lab – Crear una sala",
+    kicker: "UNA PANTALLA. SUS CELULARES. UNA SALA.",
+    heading: "La fiesta empieza",
+    headingAccent: "en tu sala.",
+    intro: "Crea una sala de juego en esta pantalla o únete a una sala desde tu celular.",
+    create: "Crear una sala",
+    createHint: "Esta pantalla será la del anfitrión",
+    or: "o",
+    join: "Unirse a una sala",
+    roomCode: "CÓDIGO DE SALA",
+    joinButton: "Unirse",
+    joinHint: "Se abrirá el control para esta sala.",
+    ready: "Listo.",
+    creating: "Creando sala…",
+    unavailable: "El servidor no está disponible. Vuelve a intentarlo.",
+    invalidCode: "Ingresa el código de sala de cuatro caracteres.",
+    closedInactive: "La sala anterior se cerró tras diez minutos de inactividad.",
+    closedExpired: "La sala anterior se cerró automáticamente al cabo de una hora.",
+    closedCapacity: "La sala anterior se cerró para dar espacio a una nueva porque no tenía jugadores activos.",
+    languageLabel: "Idioma",
+  },
+  "fr": {
+    title: "Open Party Lab – Ouvrir une salle",
+    kicker: "UN ÉCRAN. VOS TÉLÉPHONES. UNE SALLE.",
+    heading: "La fête commence",
+    headingAccent: "dans votre salle.",
+    intro: "Créez une salle de jeu sur cet écran ou rejoignez une salle avec votre téléphone.",
+    create: "Créer une salle",
+    createHint: "Cet écran sera celui de l’hôte",
+    or: "ou",
+    join: "Rejoindre une salle",
+    roomCode: "CODE DE LA SALLE",
+    joinButton: "Rejoindre",
+    joinHint: "La manette de cette salle s’ouvrira sur votre téléphone.",
+    ready: "Prêt.",
+    creating: "Création de la salle…",
+    unavailable: "Le serveur est indisponible. Réessayez.",
+    invalidCode: "Saisissez le code de la salle à quatre caractères.",
+    closedInactive: "La salle précédente a été fermée après dix minutes d’inactivité.",
+    closedExpired: "La salle précédente a été fermée automatiquement au bout d’une heure.",
+    closedCapacity: "La salle précédente a été fermée pour libérer une place car elle ne comptait aucun joueur actif.",
+    languageLabel: "Langue",
+  },
+  "pt-BR": {
+    title: "Open Party Lab – Criar uma sala",
+    kicker: "UMA TELA. SEUS CELULARES. UMA SALA.",
+    heading: "A festa começa",
+    headingAccent: "na sua sala.",
+    intro: "Crie uma sala de jogo nesta tela ou entre em uma sala pelo celular.",
+    create: "Criar uma sala",
+    createHint: "Esta será a tela do anfitrião",
+    or: "ou",
+    join: "Entrar em uma sala",
+    roomCode: "CÓDIGO DA SALA",
+    joinButton: "Entrar",
+    joinHint: "O controle desta sala será aberto no celular.",
+    ready: "Pronto.",
+    creating: "Criando sala…",
+    unavailable: "O servidor está indisponível. Tente novamente.",
+    invalidCode: "Digite o código de quatro caracteres da sala.",
+    closedInactive: "A sala anterior fechou após dez minutos de inatividade.",
+    closedExpired: "A sala anterior fechou automaticamente após uma hora.",
+    closedCapacity: "A sala anterior foi fechada para abrir espaço porque não tinha jogadores ativos.",
+    languageLabel: "Idioma",
+  },
 } as const;
 
 function normalizeRoomCode(value: string): string {
@@ -77,7 +144,7 @@ export function mountHostedLanding(): void {
   app.innerHTML = `
     <main class="hosted-landing">
       <section class="hosted-hero" aria-labelledby="landing-title">
-        <div class="hosted-topbar"><div class="hosted-brand"><span aria-hidden="true">OPL</span> Open Party Lab</div><button class="hosted-language" type="button">DE / EN</button></div>
+        <div class="hosted-topbar"><div class="hosted-brand"><span aria-hidden="true">OPL</span> Open Party Lab</div><select class="hosted-language">${supportedLanguages.map((locale) => `<option value="${locale}" lang="${locale}">${languageLabels[locale]}</option>`).join("")}</select></div>
         <p class="hosted-kicker" data-text="kicker">DEIN BILDSCHIRM. EURE HANDYS. EIN RAUM.</p>
         <h1 id="landing-title"><span data-text="heading">Die Party beginnt</span><br><em data-text="headingAccent">mit deinem Raum.</em></h1>
         <p class="hosted-intro" data-text="intro">Erstelle einen neuen Spielraum auf diesem Bildschirm oder tritt mit deinem Handy einem bestehenden Raum bei.</p>
@@ -100,7 +167,7 @@ export function mountHostedLanding(): void {
       </section>
       <aside class="hosted-art" aria-hidden="true">
         <div class="hosted-orbit orbit-one"></div><div class="hosted-orbit orbit-two"></div>
-        <div class="hosted-code-card"><small>RAUMCODE</small><strong>PLAY</strong><span>● ● ●</span></div>
+        <div class="hosted-code-card"><small data-text="roomCode">RAUMCODE</small><strong>PLAY</strong><span>● ● ●</span></div>
       </aside>
     </main>
   `;
@@ -157,7 +224,7 @@ export function mountHostedLanding(): void {
   const joinForm = app.querySelector<HTMLFormElement>(".hosted-join");
   const roomInput = app.querySelector<HTMLInputElement>("#hosted-room-code");
   const status = app.querySelector<HTMLParagraphElement>("#hosted-status");
-  const languageButton = app.querySelector<HTMLButtonElement>(".hosted-language");
+  const languageSelect = app.querySelector<HTMLSelectElement>(".hosted-language");
   let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 
   const renderLanguage = () => {
@@ -171,7 +238,10 @@ export function mountHostedLanding(): void {
     }
 
     if (roomInput) roomInput.placeholder = text.roomCode;
-    if (languageButton) languageButton.ariaLabel = text.switchLanguage;
+    if (languageSelect) {
+      languageSelect.value = language;
+      languageSelect.ariaLabel = text.languageLabel;
+    }
 
     if (closedReason === "inactive") setStatus(text.closedInactive);
     if (closedReason === "expired") setStatus(text.closedExpired);
@@ -188,8 +258,8 @@ export function mountHostedLanding(): void {
     roomInput.value = normalizeRoomCode(roomInput.value);
   });
 
-  languageButton?.addEventListener("click", () => {
-    language = language === "de" ? "en" : "de";
+  languageSelect?.addEventListener("change", () => {
+    language = normalizeLanguage(languageSelect.value, language);
     writeStoredHostLanguage(language);
     renderLanguage();
   });
@@ -225,7 +295,7 @@ export function mountHostedLanding(): void {
       return;
     }
 
-    window.location.assign(`/controller/#join?room=${encodeURIComponent(roomCode)}`);
+    window.location.assign(`/controller/#join?room=${encodeURIComponent(roomCode)}&lang=${encodeURIComponent(language)}`);
   });
 
   renderLanguage();

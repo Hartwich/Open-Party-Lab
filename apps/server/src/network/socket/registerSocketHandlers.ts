@@ -16,9 +16,11 @@ import { PlayerManager } from "../../players/playerManager.js";
 import { ReconnectService } from "../../players/reconnectService.js";
 import { canStartRound, explainCannotStartRound } from "../../rooms/roomLifecycle.js";
 import { RoomManager } from "../../rooms/roomManager.js";
+import { getRoomText } from "../../rooms/roomText.js";
 import { assignPlayerSetup } from "../../rooms/playerSetupAssignments.js";
 import { RoomCleanupService } from "../../rooms/roomCleanupService.js";
 import { createGuardedOn } from "./guardClientEvents.js";
+import { socketText } from "./socketText.js";
 
 type IoServer = import("socket.io").Server<
   ClientToServerEvents,
@@ -75,66 +77,6 @@ function normalizePlayerSetupValue(
   }
 
   return normalized;
-}
-
-function socketText(en: boolean) {
-  return {
-    roomNotFound: en ? "Room not found." : "Raum nicht gefunden.",
-    roomCodeNotFound: en ? "Room code not found." : "Raumcode nicht gefunden.",
-    enterPlayerName: en ? "Please enter a player name." : "Bitte gib einen Spielernamen ein.",
-    sessionNotFound: en ? "Session not found." : "Session nicht gefunden.",
-    sessionRoomGone: en ? "The room for this session no longer exists." : "Raum zur Session existiert nicht mehr.",
-    sessionRestoreFailed: en ? "Session could not be restored." : "Session konnte nicht wiederhergestellt werden.",
-    sessionReplaced: en
-      ? "This controller session was continued in another tab or device."
-      : "Diese Controller-Sitzung wurde in einem anderen Tab oder auf einem anderen Geraet fortgesetzt.",
-    ownSessionOnly: en ? "You can only leave your own session." : "Du kannst nur deine eigene Session verlassen.",
-    leftRoom: en ? "You left the room." : "Du hast den Raum verlassen.",
-    hostLanguageOnly: en ? "Only the host can change the language." : "Nur der Host kann die Sprache aendern.",
-    hostKickOnly: en ? "Only the host can kick players." : "Nur der Host kann Spieler kicken.",
-    kicked: en ? "You were removed from the room by the host." : "Du wurdest vom Host aus dem Raum entfernt.",
-    playerNotFound: en ? "Player not found." : "Spieler nicht gefunden.",
-    ownCharacterOnly: en ? "You can only choose your own character." : "Du darfst nur deinen eigenen Charakter waehlen.",
-    characterOrPlayerNotFound: en ? "Character or player not found." : "Charakter oder Spieler nicht gefunden.",
-    hostSelectOnly: en ? "Only the host can choose games." : "Nur der Host kann Spiele waehlen.",
-    unknownGame: en ? "Unknown game." : "Unbekanntes Spiel.",
-    hostActionOnly: en ? "Only the host can send host actions." : "Nur der Host kann Host-Aktionen senden.",
-    hostActionWrongGame: en
-      ? "This host action does not match the currently selected game."
-      : "Diese Host-Aktion passt nicht zum aktuell ausgewaehlten Spiel.",
-    hostActionUnsupported: en
-      ? "This host action is not supported by the current game."
-      : "Diese Host-Aktion wird vom aktuellen Spiel nicht unterstuetzt.",
-    hostStartOnly: en ? "Only the host can start rounds." : "Nur der Host kann Runden starten.",
-    readyAutoStart: en
-      ? "This round starts automatically once all players are ready again."
-      : "Diese Runde startet automatisch, sobald alle Spieler wieder bereit sind.",
-    notReadyFallback: en
-      ? "All players must be ready and the player count must fit."
-      : "Alle Spieler muessen bereit sein und die Spielerzahl muss passen.",
-    hostAbortOnly: en ? "Only the host can end running rounds." : "Nur der Host kann laufende Runden beenden.",
-    ownInputOnly: en
-      ? "You can only send inputs for your own player."
-      : "Du darfst nur Eingaben fuer deinen eigenen Spieler senden.",
-    hostThemeOnly: en
-      ? "Only the host can change the theme."
-      : "Nur der Host kann das Design aendern.",
-    hostControlPlayersOnly: en
-      ? "Only players in this room can request host control."
-      : "Nur Spieler in diesem Raum koennen die Steuerung anfragen.",
-    hostControlAlreadyHeld: en
-      ? "Another player already has host control."
-      : "Ein anderer Spieler hat die Steuerung bereits.",
-    hostControlScreenOnly: en
-      ? "Only the shared screen can answer takeover requests."
-      : "Nur der Bildschirm kann Uebernahme-Anfragen beantworten.",
-    hostControlNoRequest: en
-      ? "There is no pending takeover request."
-      : "Es liegt keine Uebernahme-Anfrage vor.",
-    hostControlReleaseForbidden: en
-      ? "Only the shared screen or the current holder can hand control back."
-      : "Nur der Bildschirm oder der aktuelle Halter kann die Steuerung zurueckgeben."
-  };
 }
 
 function clearSocketIdentity(socket: RoomSocket): void {
@@ -208,7 +150,7 @@ export function registerSocketHandlers({
         roomCode: room.code,
         playerId,
         reason: "replaced",
-        message: socketText(room.language === "en").sessionReplaced
+        message: socketText(room.language).sessionReplaced
       });
       // Clear before disconnect so the old transport cannot mark the newly
       // bound player offline or trigger another automatic session takeover.
@@ -401,13 +343,8 @@ export function registerSocketHandlers({
         const capacity = roomCleanupService.prepareForRoomCreation();
 
         if (!capacity.ok) {
-          const en = normalizeLanguage(payload.language) === "en";
-          const maxRoomCount = roomCleanupService.getMaxRoomCount();
-          ack(ackError(
-            en
-              ? `The server already has ${maxRoomCount} active rooms. Please try again later.`
-              : `Der Server hat bereits ${maxRoomCount} aktive Räume. Bitte versuche es später erneut.`
-          ));
+          const text = getRoomText(normalizeLanguage(payload.language));
+          ack(ackError(text.capacity(roomCleanupService.getMaxRoomCount())));
           return;
         }
       }
@@ -417,7 +354,7 @@ export function registerSocketHandlers({
         : roomManager.createRoom(hostName, normalizeLanguage(payload.language));
 
       if (!room) {
-        ack(ackError("Raumcode nicht gefunden."));
+        ack(ackError(socketText(normalizeLanguage(payload.language)).roomCodeNotFound));
         return;
       }
 
@@ -450,7 +387,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         ack(ackError(text.hostLanguageOnly));
@@ -481,7 +418,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         ack(ackError(text.hostThemeOnly));
@@ -496,30 +433,30 @@ export function registerSocketHandlers({
 
     on("room:extend-lifetime", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
-      const en = room?.language === "en";
+      const text = getRoomText(room?.language);
 
       if (!hostedMode) {
-        ack(ackError(en ? "Room lifetime extension is only available on the hosted server." : "Die Raumverlaengerung ist nur auf dem gehosteten Server verfuegbar."));
+        ack(ackError(text.hostedOnly));
         return;
       }
 
       if (!room) {
-        ack(ackError(socketText(false).roomNotFound));
+        ack(ackError(socketText().roomNotFound));
         return;
       }
 
       if (socket.data.role !== "host" || socket.data.roomCode !== room.code || !room.hostSocketIds.has(socket.id)) {
-        ack(ackError(en ? "Only the host can extend the room." : "Nur der Host kann den Raum verlaengern."));
+        ack(ackError(text.extendHostOnly));
         return;
       }
 
       if (room.expiresAt === null || room.expiresAt <= now()) {
-        ack(ackError(en ? "This room is already expired." : "Dieser Raum ist bereits abgelaufen."));
+        ack(ackError(text.alreadyExpired));
         return;
       }
 
       if (room.expiresAt - now() > ROOM_EXTENSION_WINDOW_MS) {
-        ack(ackError(en ? "Room extension is available during the final five minutes only." : "Die Raumverlaengerung ist erst in den letzten fuenf Minuten moeglich."));
+        ack(ackError(text.extendWindow));
         return;
       }
 
@@ -532,10 +469,10 @@ export function registerSocketHandlers({
       const room = roomManager.getRoom(payload.roomCode);
 
       if (!room) {
-        ack(ackError("Raumcode nicht gefunden."));
+        ack(ackError(socketText(normalizeLanguage(payload.language)).roomCodeNotFound));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       const playerName = payload.playerName.trim();
 
@@ -578,17 +515,17 @@ export function registerSocketHandlers({
       const session = reconnectService.getSession(payload.reconnectToken);
 
       if (!session) {
-        ack(ackError("Session nicht gefunden."));
+        ack(ackError(socketText(normalizeLanguage(payload.language)).sessionNotFound));
         return;
       }
 
       const room = roomManager.getRoom(session.roomCode);
 
       if (!room) {
-        ack(ackError("Raum zur Session existiert nicht mehr."));
+        ack(ackError(socketText(normalizeLanguage(payload.language)).sessionRoomGone));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       const resumablePlayer = room.players.get(session.playerId);
       if (!resumablePlayer || resumablePlayer.deviceId !== payload.deviceId ||
@@ -651,7 +588,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (socket.data.role !== "controller" || socket.data.roomCode !== room.code || !socket.data.playerId) {
         ack(ackError(text.ownSessionOnly));
@@ -699,7 +636,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         ack(ackError(text.hostKickOnly));
@@ -755,7 +692,7 @@ export function registerSocketHandlers({
         stateBroadcaster.emitError(socket, "room/not-found", "Raum nicht gefunden.");
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       const player = playerManager.setReady(room, payload.playerId, payload.isReady);
 
@@ -770,22 +707,22 @@ export function registerSocketHandlers({
 
     on("player:set-profile", (payload, ack) => {
       const room = roomManager.getRoom(payload.roomCode);
-      const en = room?.language === "en";
+      const text = getRoomText(room?.language);
       const player = room?.players.get(payload.playerId);
       if (!room || !player || socket.data.role !== "controller" ||
           socket.data.roomCode !== room.code || socket.data.playerId !== player.id || player.socketId !== socket.id) {
-        ack(ackError(en ? "You can only edit your own profile." : "Du kannst nur dein eigenes Profil ändern."));
+        ack(ackError(text.profileOwnOnly));
         return;
       }
       if (hasActiveRound(room)) {
-        ack(ackError(en ? "Edit your profile in the lobby." : "Ändere dein Profil in der Lobby."));
+        ack(ackError(text.profileLobbyOnly));
         return;
       }
       const name = typeof payload.name === "string" ? payload.name.trim() : "";
       const avatar = payload.avatar;
       if (!name || name.length > 32 || (avatar !== null &&
           (typeof avatar !== "string" || avatar.length > 35_000 || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(avatar)))) {
-        ack(ackError(en ? "Use a name of 1–32 characters and a compressed selfie." : "Verwende einen Namen mit 1–32 Zeichen und ein komprimiertes Selfie."));
+        ack(ackError(text.profileInvalid));
         return;
       }
       player.name = name;
@@ -802,7 +739,7 @@ export function registerSocketHandlers({
         stateBroadcaster.emitError(socket, "room/not-found", "Raum nicht gefunden.");
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (socket.data.role !== "controller" || socket.data.playerId !== payload.playerId) {
         stateBroadcaster.emitError(
@@ -855,7 +792,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (socket.data.role !== "controller" || socket.data.playerId !== payload.playerId) {
         ack(ackError(text.ownCharacterOnly));
@@ -918,7 +855,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (
         socket.data.role !== "controller" ||
@@ -945,7 +882,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       // The question is put to whoever would lose the controls, so the current
       // holder answers it. The shared screen may answer too — it owns the room
@@ -978,7 +915,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       const isScreen = socket.data.role === "host" && socket.data.roomCode === room.code;
       const isHolder =
@@ -1010,7 +947,7 @@ export function registerSocketHandlers({
         return;
       }
 
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         stateBroadcaster.emitError(socket, "room/forbidden", text.hostActionOnly);
@@ -1041,7 +978,7 @@ export function registerSocketHandlers({
         stateBroadcaster.emitError(socket, "room/not-found", "Raum nicht gefunden.");
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         stateBroadcaster.emitError(socket, "room/forbidden", text.hostSelectOnly);
@@ -1075,7 +1012,7 @@ export function registerSocketHandlers({
         stateBroadcaster.emitError(socket, "room/not-found", "Raum nicht gefunden.");
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         stateBroadcaster.emitError(socket, "room/forbidden", text.hostActionOnly);
@@ -1139,7 +1076,7 @@ export function registerSocketHandlers({
         stateBroadcaster.emitError(socket, "room/not-found", "Raum nicht gefunden.");
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         stateBroadcaster.emitError(socket, "room/forbidden", text.hostStartOnly);
@@ -1177,7 +1114,7 @@ export function registerSocketHandlers({
         ack(ackError("Raum nicht gefunden."));
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (!canControlRoom(room, socket)) {
         ack(ackError(text.hostAbortOnly));
@@ -1209,7 +1146,7 @@ export function registerSocketHandlers({
         stateBroadcaster.emitError(socket, "room/not-found", "Raum nicht gefunden.");
         return;
       }
-      const text = socketText(room.language === "en");
+      const text = socketText(room.language);
 
       if (socket.data.role !== "controller" || socket.data.playerId !== payload.playerId) {
         stateBroadcaster.emitError(

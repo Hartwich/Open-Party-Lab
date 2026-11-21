@@ -7,6 +7,7 @@ import {
 import { createId } from "../core/ids/createId.js";
 import { now } from "../core/time/now.js";
 import type { PlayerRecord, RoomRecord } from "../rooms/roomStore.js";
+import { getRoomText } from "../rooms/roomText.js";
 import { PlayerPresenceTracker } from "./playerPresenceTracker.js";
 import { PlayerStore } from "./playerStore.js";
 import { ReconnectService } from "./reconnectService.js";
@@ -186,9 +187,7 @@ export class PlayerManager {
   removePlayer(room: RoomRecord, playerId: string): RemovePlayerOutcome {
     if (!canManagePlayerRoster(room)) {
       return {
-        error: room.language === "en"
-          ? "Players can only be removed while no active round is running."
-          : "Spieler koennen nur entfernt werden, solange keine aktive Runde laeuft."
+        error: getRoomText(room.language).removeDuringRound
       };
     }
 
@@ -196,7 +195,7 @@ export class PlayerManager {
 
     if (!player) {
       return {
-        error: room.language === "en" ? "Player not found." : "Spieler nicht gefunden."
+        error: getRoomText(room.language).playerMissing
       };
     }
 

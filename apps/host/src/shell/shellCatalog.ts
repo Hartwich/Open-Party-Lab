@@ -70,8 +70,8 @@ function renderSelectField(field: LobbyField & { kind: "select" }, value: unknow
     .join("");
 
   const selected = field.options.find((option) => option.id === current);
-  const rules = selected?.rules?.[language] ?? selected?.rules?.de;
-  const help = rules?.length ? `<details class="opl-rules-preview"><summary>${language === "en" ? "Show rules" : "Regeln anzeigen"}</summary>${rules.map((section) => `<section><h3>${escapeHtml(section.title)}</h3><ul>${section.lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul></section>`).join("")}</details>` : "";
+  const rules = selected?.rules?.[language] ?? selected?.rules?.en ?? selected?.rules?.de;
+  const help = rules?.length ? `<details class="opl-rules-preview"><summary>${escapeHtml(getHostText(language).showRules)}</summary>${rules.map((section) => `<section><h3>${escapeHtml(section.title)}</h3><ul>${section.lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul></section>`).join("")}</details>` : "";
   return `
     <div class="opl-field">
       <p class="opl-field-label">${escapeHtml(field.label)}</p>
@@ -202,7 +202,7 @@ function renderSetup(game: AvailableGameDto, settings: SettingsMap, locked: bool
 
   const teams = game.playerSetup;
   const shuffle = teams?.kind === "choice" && teams.assignment === "balanced-random"
-    ? `<button type="button" class="opl-option" data-action="setup-confirm" data-action-type="shuffle-player-setup" ${locked ? "disabled" : ""}>${escapeHtml(teams.shuffleLabel ?? (language === "en" ? "Shuffle teams" : "Teams neu mischen"))}</button>` : "";
+    ? `<button type="button" class="opl-option" data-action="setup-confirm" data-action-type="shuffle-player-setup" ${locked ? "disabled" : ""}>${escapeHtml(teams.shuffleLabel ?? getHostText(language).shuffleTeams)}</button>` : "";
   return fields + shuffle + confirmButton;
 }
 

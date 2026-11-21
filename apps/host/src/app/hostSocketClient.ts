@@ -11,7 +11,7 @@ import type {
 import { io, type Socket } from "socket.io-client";
 import { ServerClock, startServerClockSync } from "@open-party-lab/game-core";
 import { hasActiveRound } from "@open-party-lab/protocol";
-import { readStoredHostLanguage, writeStoredHostLanguage } from "../i18n/hostText.js";
+import { getHostText, readStoredHostLanguage, writeStoredHostLanguage } from "../i18n/hostText.js";
 import { hostGameRegistry } from "../games/registry.js";
 import { applyHostTheme } from "../ui/theme/theme.js";
 
@@ -92,6 +92,7 @@ export class HostSocketClient {
     }
 
     this.listenersBound = true;
+    if (typeof document !== "undefined") document.documentElement.lang = this.state.preferredLanguage;
     this.socket.on("server:hello", ({ serverTime }) => {
       this.serverClock.initialize(serverTime);
     });
@@ -114,7 +115,7 @@ export class HostSocketClient {
     this.socket.on("connect_error", (error) => {
       this.updateState({
         connected: false,
-        error: `Verbindung zum Server fehlgeschlagen: ${error.message}`
+        error: `${getHostText(this.state.preferredLanguage).connectionFailed}: ${error.message}`
       });
     });
 
@@ -311,14 +312,14 @@ export class HostSocketClient {
 
   async extendRoomLifetime(): Promise<string | null> {
     const roomCode = this.state.room?.code;
-    const en = this.state.room?.language === "en";
+    const text = getHostText(this.state.room?.language ?? this.state.preferredLanguage);
     if (!roomCode || !this.socket.connected) {
-      return en ? "No connection. Please try again." : "Keine Verbindung. Bitte erneut versuchen.";
+      return text.tryAgainOffline;
     }
     return new Promise((resolve) => {
       this.socket.timeout(8_000).emit("room:extend-lifetime", { roomCode }, (error, result) => {
         if (error) {
-          resolve(en ? "No response. Please try again." : "Keine Antwort. Bitte erneut versuchen.");
+          resolve(text.tryAgainTimeout);
           return;
         }
         if (!result.ok) {
@@ -440,6 +441,9 @@ export class HostSocketClient {
 
   private updateState(patch: Partial<HostAppState>): void {
     this.state = { ...this.state, ...patch };
+    if (patch.preferredLanguage && typeof document !== "undefined") {
+      document.documentElement.lang = patch.preferredLanguage;
+    }
 
     this.scheduleNotifyListeners();
   }

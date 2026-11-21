@@ -110,6 +110,7 @@ export interface WordTilesPublicState {
   activeTurn?: WordTilesActiveTurnState;
   lastError?: string;
   tileValues: Record<string, number>;
+  blankLetters?: string[];
 }
 
 export interface WordTilesControllerState extends WordTilesPublicState {

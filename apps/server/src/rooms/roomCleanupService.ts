@@ -11,6 +11,7 @@ import type { StateBroadcaster } from "../game-engine/stateBroadcaster.js";
 import type { SocketSessionStore } from "../network/socket/socketSessionStore.js";
 import type { RoomManager } from "./roomManager.js";
 import type { RoomRecord, RoomStore } from "./roomStore.js";
+import { getRoomText } from "./roomText.js";
 
 type IoServer = import("socket.io").Server<
   ClientToServerEvents,
@@ -110,7 +111,12 @@ export class RoomCleanupService {
   }
 
   private closeRoom(room: RoomRecord, reason: RoomClosedReason): void {
-    const message = this.closeMessage(room.language === "en", reason);
+    const text = getRoomText(room.language);
+    const message = {
+      expired: text.closedExpired,
+      capacity: text.closedCapacity,
+      inactive: text.closedInactive
+    }[reason];
 
     this.io.to(room.code).emit("room:closed", {
       roomCode: room.code,
@@ -137,21 +143,4 @@ export class RoomCleanupService {
     logger.info("Closed room.", { roomCode: room.code, reason });
   }
 
-  private closeMessage(en: boolean, reason: RoomClosedReason): string {
-    if (reason === "expired") {
-      return en
-        ? "This room reached its one-hour limit and was closed."
-        : "Dieser Raum hat sein Ein-Stunden-Limit erreicht und wurde geschlossen.";
-    }
-
-    if (reason === "capacity") {
-      return en
-        ? "This room had no active players and was closed to make space for a new room."
-        : "Dieser Raum hatte keine aktiven Spieler und wurde geschlossen, um Platz für einen neuen Raum zu schaffen.";
-    }
-
-    return en
-      ? "This room was closed after ten minutes without activity."
-      : "Dieser Raum wurde nach zehn Minuten ohne Aktivität geschlossen.";
-  }
 }

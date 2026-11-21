@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { getCardHandText } from "../../i18n/cardHandText.js";
 import { useHaptics } from "../../hooks/useHaptics.js";
 import { useOrientationHint } from "../../hooks/useOrientationHint.js";
 import { MatchingSymbolIcon, PlayingCard } from "./cardArt.js";
@@ -77,7 +78,7 @@ export function CardHandLayout({ model }: CardHandLayoutProps) {
 function StandardCardHandLayout({ model }: CardHandLayoutProps) {
   const haptics = useHaptics();
   const orientation = useOrientationHint();
-  const en = model.language === "en";
+  const text = getCardHandText(model.language);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [choiceCardId, setChoiceCardId] = useState<string | null>(null);
   const [handRef, handBox] = useBoxSize();
@@ -158,14 +159,12 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
         }}
       >
         <strong style={{ fontFamily: "var(--font-display)", fontSize: "1.05rem" }}>
-          {en ? "Round over" : "Runde vorbei"}
+          {text.over}
         </strong>
         <span style={{ color: "var(--muted)", fontSize: "0.86rem" }}>
           {model.winnerName
-            ? `${en ? "Winner" : "Sieger"}: ${model.winnerName}`
-            : en
-              ? "The result is on the shared screen."
-              : "Die Auswertung steht auf dem großen Bildschirm."}
+            ? `${text.winner}: ${model.winnerName}`
+            : text.shared}
         </span>
         {model.ready ? <ReadyPanel ready={model.ready} /> : null}
       </div>
@@ -288,7 +287,7 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
                   color: "var(--muted)"
                 }}
               >
-                {en ? "No cards left." : "Keine Karten mehr."}
+                {text.noCards}
               </span>
             ) : null}
           </div>
@@ -313,7 +312,7 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
             touchAction: "manipulation"
           }}
         >
-          {en ? "Play" : "Legen"}
+          {text.play}
         </button>
 
         <div style={{ display: "contents" }}>
@@ -366,7 +365,7 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
             zIndex: 60
           }}
         >
-          {en ? "Turn your phone sideways." : "Halte dein Handy quer."}
+          {text.rotate}
         </div>
       ) : null}
 
@@ -440,7 +439,7 @@ function StandardCardHandLayout({ model }: CardHandLayoutProps) {
                 fontWeight: 600
               }}
             >
-              {en ? "Cancel" : "Abbrechen"}
+              {text.cancel}
             </button>
           </div>
         </div>

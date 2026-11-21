@@ -11,11 +11,14 @@
  *
  *   npm run dev:server
  *   URL=http://127.0.0.1:3000 npm run smoke:games
+ *   OPEN_PARTY_LAB_SMOKE_LANGUAGE=fr npm run smoke:games
  */
 import { io } from "socket.io-client";
+import { normalizeLanguage } from "@open-party-lab/game-core";
 
 const URL = process.env.URL ?? "http://127.0.0.1:3000";
-const LIVE_PHASES = new Set(["round_intro", "countdown", "playing", "locked"]);
+const language = normalizeLanguage(process.env.OPEN_PARTY_LAB_SMOKE_LANGUAGE);
+const LIVE_PHASES = new Set(["playing", "locked"]);
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -63,7 +66,7 @@ async function exerciseGame(game) {
 
   try {
     await once(host, "server:hello");
-    const created = await emitAck(host, "room:create", { hostName: "Catalog", language: "de" });
+    const created = await emitAck(host, "room:create", { hostName: "Catalog", language });
 
     if (!created.ok) {
       return { ok: false, detail: `Raum: ${created.error}` };
@@ -88,20 +91,24 @@ async function exerciseGame(game) {
       if (!joined.ok) {
         return { ok: false, detail: `Beitritt: ${joined.error}` };
       }
+      if (joined.data.room.language !== language) {
+        return { ok: false, detail: `Raumsprache ${joined.data.room.language} statt ${language}` };
+      }
 
       phone.playerId = joined.data.player.id;
     }
 
     const selected = once(host, "room:state", (p) => p.room.selectedGameId === game.id, 8000);
     host.emit("game:select", { roomCode: room.code, gameId: game.id });
-    await selected.catch(() => null);
+    await selected;
 
-    // Satisfy a per-player chooser by taking the first option for everyone.
-    const setupOption = game.playerSetup?.options?.[0];
+    // The server already distributes balanced teams on game selection.
+    const setup = game.playerSetup;
+    const setupOption = setup?.assignment === "balanced-random" ? undefined : setup?.options?.[0];
 
     if (setupOption) {
       for (const phone of phones) {
-        await emitAck(phone, "player:set-setup", {
+        const chosen = await emitAck(phone, "player:set-setup", {
           roomCode: room.code,
           playerId: phone.playerId,
           selectionKey: game.playerSetup.selectionKey ?? "character",
@@ -112,6 +119,7 @@ async function exerciseGame(game) {
                   .map((option) => option.id)
               : setupOption.id
         });
+        if (!chosen.ok) return { ok: false, detail: `Spieler-Setup: ${chosen.error}` };
       }
     }
 
@@ -151,7 +159,7 @@ async function exerciseGame(game) {
     const stillAlive = await emitAck(host, "round:abort", { roomCode: room.code });
 
     return {
-      ok: true,
+      ok: stillAlive.ok,
       detail: `${started.room.currentRound.phase}${stillAlive.ok ? "" : " (Abbruch fehlgeschlagen)"}`
     };
   } catch (error) {
@@ -165,11 +173,11 @@ async function exerciseGame(game) {
 async function main() {
   const probe = connect();
   await once(probe, "server:hello");
-  const created = await emitAck(probe, "room:create", { hostName: "Probe", language: "de" });
+  const created = await emitAck(probe, "room:create", { hostName: "Probe", language });
   const games = created.data.room.availableGames;
   probe.close();
 
-  console.log(`${games.length} Spiele im Katalog\n`);
+  console.log(`${games.length} Spiele im Katalog (${language})\n`);
 
   const failures = [];
 

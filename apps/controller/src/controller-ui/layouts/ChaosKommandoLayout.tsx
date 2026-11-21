@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef, useState } from "react";
+import { getChaosKommandoText } from "../../i18n/chaosKommandoText.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import type { ChaosKommandoLayoutModel } from "./models.js";
 
@@ -237,7 +238,7 @@ const StickPad = memo(function StickPad({ label, accentColor, disabled, resetKey
 const chargeWindowMs = 1_750;
 
 export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel }) {
-  const en = model.language === "en";
+  const text = getChaosKommandoText(model.language);
   const controlColor = model.accentColor ?? "#ae4938";
   const fireDisabled = model.fireDisabled ?? model.disabled;
   const [hudMode, setHudMode] = useState<"kommando" | "steuerung">("steuerung");
@@ -413,7 +414,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
           onClick={() => setHudMode("kommando")}
           style={modeToggleStyle(hudMode === "kommando", model.accentColor)}
         >
-          {en ? "ARSENAL" : "WAFFEN"}
+          {text.arsenal}
         </button>
 
         <button
@@ -421,7 +422,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
           onClick={() => setHudMode("steuerung")}
           style={modeToggleStyle(hudMode === "steuerung", "var(--danger)")}
         >
-          {en ? "CONTROLS" : "STEUERUNG"}
+          {text.controls}
         </button>
       </div>
 
@@ -506,7 +507,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
         >
           <div style={{ display: "grid", justifyItems: "center" }}>
             <StickPad
-              label={en ? "WALK / ROPE" : "LAUFEN / SEIL"}
+              label={text.move}
               accentColor={model.accentColor ?? "var(--accent)"}
               disabled={model.disabled}
               resetKey={model.resetKey}
@@ -595,14 +596,14 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
                 letterSpacing: "0.06em"
               }}
             >
-              {en ? "HOP" : "SPRUNG"}
+              {text.hop}
             </button>
-            {model.onBackflip ? <button type="button" disabled={model.disabled} onClick={model.onBackflip} style={toggleStyle(false, model.accentColor)}>{en ? "BACKFLIP" : "SALTO"}</button> : null}
+            {model.onBackflip ? <button type="button" disabled={model.disabled} onClick={model.onBackflip} style={toggleStyle(false, model.accentColor)}>{text.backflip}</button> : null}
           </div>
 
           <div style={{ display: "grid", justifyItems: "center" }}>
             <StickPad
-              label={en ? "AIM" : "ZIELEN"}
+              label={text.aim}
               accentColor="var(--danger)"
               disabled={model.disabled}
               resetKey={model.resetKey}
@@ -617,7 +618,7 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
         <button type="button" disabled={model.ropeDisabled ?? model.disabled}
           onClick={() => { model.onRopeToggle?.(); setHudMode("steuerung"); }}
           style={toggleStyle(Boolean(model.ropeAttached), model.accentColor)}>
-          {model.ropeAttached ? en ? "RELEASE HOOK" : "HAKEN LOESEN" : en ? "HOOK" : "HAKEN"}
+          {model.ropeAttached ? text.release : text.hook}
         </button>
         <button type="button" disabled={model.disabled || !model.ropeAttached}
           aria-pressed={model.ropeReeling}
@@ -627,14 +628,14 @@ export function ChaosKommandoLayout({ model }: { model: ChaosKommandoLayoutModel
           onKeyDown={(event) => { if ((event.key === " " || event.key === "Enter") && !event.repeat) { event.preventDefault(); model.onReelChange?.(-1); } }}
           onKeyUp={(event) => { if (event.key === " " || event.key === "Enter") model.onReelChange?.(0); }}
           style={{ ...toggleStyle(Boolean(model.ropeReeling), model.accentColor), touchAction: "none" }}>
-          {en ? "PULL UP (HOLD)" : "HOCHZIEHEN (HALTEN)"}
+          {text.pull}
         </button>
       </div> : null}
       {model.fuseSeconds !== undefined && model.onSetFuse ? <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-        <span>{en ? "Fuse" : "Zuender"}</span>
+        <span>{text.fuse}</span>
         {[1, 2, 3, 4, 5].map((seconds) => <button key={seconds} type="button" disabled={model.fireDisabled ?? model.disabled} onClick={() => model.onSetFuse?.(seconds)} style={toggleStyle(seconds === model.fuseSeconds, model.accentColor)}>{seconds}s</button>)}
       </div> : null}
-      {model.onEndTurn ? <button type="button" disabled={model.disabled || !model.isLocalPlayersTurn} onClick={model.onEndTurn} style={toggleStyle(false, model.accentColor)}>{en ? "END TURN" : "ZUG BEENDEN"}</button> : null}
+      {model.onEndTurn ? <button type="button" disabled={model.disabled || !model.isLocalPlayersTurn} onClick={model.onEndTurn} style={toggleStyle(false, model.accentColor)}>{text.endTurn}</button> : null}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+import { getPartyLayoutText } from "../../i18n/partyLayoutText.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import { contrastInk } from "../common/contrastInk.js";
 import type { DrawingGuessLayoutModel } from "./models.js";
@@ -39,7 +40,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
   const [isLandscape, setIsLandscape] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth > window.innerHeight : false
   );
-  const en = model.language === "en";
+  const text = getPartyLayoutText(model.language);
   const recentGuesses = useMemo(() => model.guessFeed.slice(-4).reverse(), [model.guessFeed]);
   const boardHeight = 1000 / Math.max(0.4, Math.min(2.5, model.canvasAspectRatio));
 
@@ -168,8 +169,8 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
   }
 
   const word = model.isDrawer
-    ? `${en ? "Your word" : "Dein Wort"}: ${model.secretWord ?? "…"}`
-    : `${en ? "Word" : "Wort"}: ${model.wordMask}`;
+    ? `${text.yourWord}: ${model.secretWord ?? "…"}`
+    : `${text.drawingWord}: ${model.wordMask}`;
 
   const turnControls = model.turnActions ? <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
     {model.turnDeadline ? <TurnTimer deadline={model.turnDeadline} getServerTime={model.getServerTime} /> : null}
@@ -189,7 +190,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
 
   const palette = (
     <div
-      aria-label={en ? "Drawing colors" : "Zeichenfarben"}
+      aria-label={text.drawingColors}
       style={{ display: "flex", flexWrap: "wrap", alignContent: "center", gap: isLandscape ? 7 : 6 }}
     >
       {(model.availableColors ?? []).map((color) => {
@@ -200,7 +201,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
             type="button"
             onClick={() => model.onSelectColor?.(color)}
             disabled={model.disabled}
-            aria-label={`${en ? "Color" : "Farbe"} ${color}`}
+            aria-label={`${text.color} ${color}`}
             aria-pressed={selected}
             style={{
               width: isLandscape ? 34 : 28,
@@ -245,7 +246,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
         padding: "8px 12px"
       }}
     >
-      {en ? "Clear drawing" : "Zeichnung loeschen"}
+      {text.clearDrawing}
     </button>
   );
 
@@ -339,7 +340,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
         value={guess}
         onChange={(event) => setGuess(event.target.value)}
         disabled={model.disabled}
-        placeholder={en ? "Your guess..." : "Dein Tipp..."}
+        placeholder={text.yourGuess}
         style={{ minWidth: 0, width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line-strong)", background: "var(--surface)", color: "var(--ink)", fontSize: 18 }}
       />
       <button
@@ -347,14 +348,14 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
         disabled={model.disabled || !guess.trim()}
         style={{ minHeight: 44, border: 0, borderRadius: 12, background: "var(--accent)", color: "var(--on-accent)", fontSize: 16, fontWeight: 800, padding: "10px 14px" }}
       >
-        {en ? "Send guess" : "Tipp senden"}
+        {text.sendGuess}
       </button>
     </form>
   );
 
   const portraitToolbar = (
     <div style={{ display: "grid", gap: 5, minHeight: 0, alignContent: "start", overflow: "hidden" }}>
-      {model.winnerName ? <div style={{ color: "var(--sage)", fontWeight: 700, lineHeight: 1.1 }}>{en ? "Winner" : "Gewinner"}: {model.winnerName}</div> : null}
+      {model.winnerName ? <div style={{ color: "var(--sage)", fontWeight: 700, lineHeight: 1.1 }}>{text.winner}: {model.winnerName}</div> : null}
       {model.ready ? <ReadyPanel ready={model.ready} /> : null}
       <div style={wordStyle}>{word}</div>
       {palette}
@@ -384,7 +385,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
           <>
             {canvas}
             <aside style={{ display: "flex", minWidth: 0, minHeight: 0, flexDirection: "column", justifyContent: "space-between", gap: 10, overflow: "hidden" }}>
-              {model.winnerName ? <div style={{ color: "var(--sage)", fontWeight: 700, lineHeight: 1.1 }}>{en ? "Winner" : "Gewinner"}: {model.winnerName}</div> : null}
+              {model.winnerName ? <div style={{ color: "var(--sage)", fontWeight: 700, lineHeight: 1.1 }}>{text.winner}: {model.winnerName}</div> : null}
               {model.ready ? <ReadyPanel ready={model.ready} /> : null}
               <div style={wordStyle}>{word}</div>
               {palette}
@@ -402,7 +403,7 @@ export function DrawingGuessLayout({ model }: DrawingGuessLayoutProps) {
         )
       ) : (
         <div style={{ gridColumn: "1 / -1", display: "flex", minHeight: 0, flexDirection: "column", justifyContent: "flex-start", paddingTop: isLandscape ? "8dvh" : "18dvh", gap: 12, overflow: "hidden" }}>
-          {model.winnerName ? <div style={{ color: "var(--sage)", fontWeight: 700, lineHeight: 1.1 }}>{en ? "Winner" : "Gewinner"}: {model.winnerName}</div> : null}
+          {model.winnerName ? <div style={{ color: "var(--sage)", fontWeight: 700, lineHeight: 1.1 }}>{text.winner}: {model.winnerName}</div> : null}
           {model.ready ? <ReadyPanel ready={model.ready} /> : null}
           <div style={wordStyle}>{word}</div>
           {model.turnActions ? turnControls : guessForm}

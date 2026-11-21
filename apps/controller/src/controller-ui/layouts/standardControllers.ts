@@ -48,17 +48,37 @@ export const standardControllerPresetCatalog: StandardControllerPresetDefinition
   }
 ];
 
-const englishPresetDescriptions: Record<StandardControllerPresetId, string> = {
-  joystick_a: "An analog stick on the left and a large action button on the right.",
-  joystick_abcd: "An analog stick on the left and four action buttons on the right.",
-  dual_joystick: "A left stick for movement and a right stick for aiming or looking around.",
-  dpad_abcd: "Four direction buttons on the left and four action buttons on the right."
+const presetDescriptions: Record<Exclude<SupportedLanguage, "de">, Record<StandardControllerPresetId, string>> = {
+  en: {
+    joystick_a: "An analog stick on the left and a large action button on the right.",
+    joystick_abcd: "An analog stick on the left and four action buttons on the right.",
+    dual_joystick: "A left stick for movement and a right stick for aiming or looking around.",
+    dpad_abcd: "Four direction buttons on the left and four action buttons on the right."
+  },
+  es: {
+    joystick_a: "Un joystick analógico a la izquierda y un botón de acción grande a la derecha.",
+    joystick_abcd: "Un joystick analógico a la izquierda y cuatro botones de acción a la derecha.",
+    dual_joystick: "El joystick izquierdo sirve para moverte y el derecho para apuntar o mirar.",
+    dpad_abcd: "Cuatro botones de dirección a la izquierda y cuatro de acción a la derecha."
+  },
+  fr: {
+    joystick_a: "Un stick analogique à gauche et un grand bouton d’action à droite.",
+    joystick_abcd: "Un stick analogique à gauche et quatre boutons d’action à droite.",
+    dual_joystick: "Le stick gauche sert à se déplacer et le droit à viser ou à regarder autour de soi.",
+    dpad_abcd: "Quatre boutons directionnels à gauche et quatre boutons d’action à droite."
+  },
+  "pt-BR": {
+    joystick_a: "Um controle analógico à esquerda e um botão de ação grande à direita.",
+    joystick_abcd: "Um controle analógico à esquerda e quatro botões de ação à direita.",
+    dual_joystick: "O analógico esquerdo move o personagem e o direito mira ou ajusta a visão.",
+    dpad_abcd: "Quatro botões de direção à esquerda e quatro botões de ação à direita."
+  }
 };
 
 export function listStandardControllerPresets(language: SupportedLanguage = "de"): StandardControllerPresetDefinition[] {
   return standardControllerPresetCatalog.map((preset) => ({
     ...preset,
-    description: language === "en" ? englishPresetDescriptions[preset.id] : preset.description
+    description: language === "de" ? preset.description : presetDescriptions[language][preset.id]
   }));
 }
 

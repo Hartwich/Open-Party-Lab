@@ -1,4 +1,5 @@
 import type { HostSocketClient } from "./hostSocketClient.js";
+import { getHostText } from "../i18n/hostText.js";
 
 export function mountConnectionOverlay(client: HostSocketClient): () => void {
   const banner = document.createElement("div");
@@ -8,9 +9,7 @@ export function mountConnectionOverlay(client: HostSocketClient): () => void {
   document.body.append(banner);
   const unsubscribe = client.subscribe((state) => {
     banner.hidden = state.connected || !state.room;
-    banner.textContent = state.preferredLanguage === "en"
-      ? "Connection lost. Reconnecting to your room automatically…"
-      : "Verbindung unterbrochen. Dein Raum wird automatisch wieder verbunden…";
+    banner.textContent = getHostText(state.preferredLanguage).reconnectingToRoom;
   });
   return () => { unsubscribe(); banner.remove(); };
 }

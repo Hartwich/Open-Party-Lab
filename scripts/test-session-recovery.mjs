@@ -30,8 +30,7 @@ const dependencies = {
   "@open-party-lab/protocol": protocol,
   "@open-party-lab/ui-kit": { applyThemeVariables() {}, normalizeThemeName: (theme) => theme },
   "../games/registry.js": { hostGameRegistry: {} },
-  "../ui/theme/theme.js": { applyHostTheme: () => false },
-  "../i18n/hostText.js": { readStoredHostLanguage: () => "de", writeStoredHostLanguage() {} }
+  "../ui/theme/theme.js": { applyHostTheme: () => false }
 };
 function loadClient(path) {
   const code = ts.transpileModule(readFileSync(new URL(`../${path}`, import.meta.url), "utf8").replaceAll("import.meta.env", "({})"), {
@@ -45,12 +44,15 @@ function loadClient(path) {
       return dependencies[name];
     },
     window: windowTarget, document: documentTarget, crypto: globalThis.crypto,
-    setTimeout, clearTimeout, console
+    setTimeout, clearTimeout, URLSearchParams, console
   }, { filename: path });
   return module.exports;
 }
 dependencies["./deviceSession.js"] = loadClient("apps/controller/src/app/deviceSession.ts");
+dependencies["./controllerAdditionalText.js"] = loadClient("apps/controller/src/i18n/controllerAdditionalText.ts");
 dependencies["../i18n/controllerText.js"] = loadClient("apps/controller/src/i18n/controllerText.ts");
+dependencies["./hostAdditionalText.js"] = loadClient("apps/host/src/i18n/hostAdditionalText.ts");
+dependencies["../i18n/hostText.js"] = loadClient("apps/host/src/i18n/hostText.ts");
 const { HostSocketClient } = loadClient("apps/host/src/app/hostSocketClient.ts");
 const { ControllerSocketClient } = loadClient("apps/controller/src/app/controllerSocketClient.ts");
 const host = new HostSocketClient(url);
@@ -80,6 +82,14 @@ try {
   await waitFor(() => phone.getState().connected, "phone transport");
   phone.joinRoom(roomCode, "Before");
   await waitFor(() => phone.getState().player, "join");
+  for (const language of ["es", "fr", "pt-BR"]) {
+    host.setLanguage(language);
+    await waitFor(() => phone.getState().room.language === language, `room language ${language}`);
+    assert.equal(phone.getState().preferredLanguage, language);
+    assert.equal(documentTarget.documentElement.lang, language);
+    const invite = new URL(phone.getState().room.joinUrl);
+    assert.equal(new URLSearchParams(invite.hash.split("?")[1]).get("lang"), language);
+  }
   const playerId = phone.getState().player.id;
   const token = phone.getState().storedSession.reconnectToken;
   const avatar = "data:image/jpeg;base64,/9j/AA==";
@@ -111,6 +121,7 @@ try {
   await waitFor(() => host.getState().connected, "host automatic restore");
   assert.notEqual(host.socket.id, oldHostSocket);
   assert.equal(host.getState().room.code, roomCode);
+  assert.equal(host.getState().room.language, "pt-BR");
   assert.equal(host.getState().room.selectedGameId, testGame?.id ?? null);
   const oldPhoneSocket = phone.socket.id;
   phone.socket.io.engine.close();

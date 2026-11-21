@@ -1,4 +1,5 @@
 import { useHaptics } from "../../hooks/useHaptics.js";
+import { getSymboljagdText } from "../../i18n/symboljagdText.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import type { CardHandLayoutModel } from "./models.js";
 
@@ -11,7 +12,7 @@ function SymbolImage({ symbolId }: { symbolId: string }) {
 
 export function SymboljagdLayout({ model }: { model: CardHandLayoutModel }) {
   const haptics = useHaptics();
-  const en = model.language === "en";
+  const text = getSymboljagdText(model.language);
   const card = model.hand[0];
   const symbols = card?.symbols ?? [];
   const positions = model.symboljagdPositions ?? [];
@@ -20,12 +21,12 @@ export function SymboljagdLayout({ model }: { model: CardHandLayoutModel }) {
     return (
       <div style={{ display: "grid", gap: 10, placeItems: "center", minHeight: "70dvh", padding: 18, textAlign: "center" }}>
         <strong style={{ fontFamily: "var(--font-display)", fontSize: "1.25rem" }}>
-          {model.symboljagdSoloTime !== undefined ? (en ? "All cards completed!" : "Alle Karten abgelegt!")
-            : model.winnerName ? `${en ? "Winner" : "Gewonnen hat"}: ${model.winnerName}` : en ? "Round over" : "Runde vorbei"}
+          {model.symboljagdSoloTime !== undefined ? (text.complete)
+            : model.winnerName ? `${text.winner}: ${model.winnerName}` : text.over}
         </strong>
         {model.symboljagdSoloTime !== undefined ? (
           <div style={{ display: "grid", gap: 4 }}>
-            <span>{en ? "Your time" : "Deine Zeit"}</span>
+            <span>{text.time}</span>
             <strong style={{ fontFamily: "var(--font-display)", fontSize: "2rem", fontVariantNumeric: "tabular-nums" }}>{model.symboljagdSoloTime}</strong>
           </div>
         ) : null}
@@ -35,7 +36,7 @@ export function SymboljagdLayout({ model }: { model: CardHandLayoutModel }) {
   }
 
   return (
-    <main aria-label={en ? "Your picture card" : "Deine Symbolkarte"} style={{
+    <main aria-label={text.card} style={{
       position: "fixed", inset: 0, zIndex: 20, overflow: "hidden", touchAction: "manipulation",
       background: "radial-gradient(120% 90% at 50% 0%, #f8efd9, #ddcfb5 78%)",
       padding: "max(76px, calc(env(safe-area-inset-top) + 72px)) max(7px, env(safe-area-inset-right)) max(27px, calc(env(safe-area-inset-bottom) + 20px)) max(7px, env(safe-area-inset-left))"
@@ -50,7 +51,7 @@ export function SymboljagdLayout({ model }: { model: CardHandLayoutModel }) {
             const choice = model.pendingChoice?.options.find((option) => option.symbolImage === symbol);
             const enabled = Boolean(choice && card.playable && !model.disabled);
             return (
-              <button key={`${card.cardId}-${symbol}`} type="button" aria-label={choice?.label ?? (en ? "Picture" : "Symbol")} disabled={!enabled}
+              <button key={`${card.cardId}-${symbol}`} type="button" aria-label={choice?.label ?? (text.picture)} disabled={!enabled}
                 onClick={() => { if (!choice) return; haptics.tap(18); model.onPlayCard(card.cardId, choice.id); }}
                 style={{ position: "absolute", left: `${cx}%`, top: `${cy}%`, transform: "translate(-50%, -50%)", width: `min(${size}cqw, ${size}cqh)`, aspectRatio: "1", display: "grid", placeItems: "center", padding: 2, border: 0, borderRadius: 8, background: "transparent", cursor: enabled ? "pointer" : "default", filter: enabled ? "drop-shadow(0 2px 3px #392e2020)" : "none", WebkitTapHighlightColor: "transparent" }}>
                 <SymbolImage symbolId={symbol} />
@@ -64,7 +65,7 @@ export function SymboljagdLayout({ model }: { model: CardHandLayoutModel }) {
           ) : null}
           {!card.playable && !model.privateNote && !model.lastError ? <div style={{ position: "absolute", inset: 0, background: "#fff8", pointerEvents: "none" }} /> : null}
         </section>
-      ) : <div style={{ height: "100%", display: "grid", placeItems: "center", color: "#51483e", textAlign: "center" }}>{en ? "Waiting for the next card…" : "Warte auf die nächste Karte …"}</div>}
+      ) : <div style={{ height: "100%", display: "grid", placeItems: "center", color: "#51483e", textAlign: "center" }}>{text.waiting}</div>}
     </main>
   );
 }

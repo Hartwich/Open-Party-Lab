@@ -142,6 +142,17 @@ arrivals. `minPlayersPerOption` prevents starting with undersized teams.
 readiness and redistributes choices only outside an active game. These choices
 are public; never use player setup or room settings for secret text inputs.
 
+### Room languages
+
+The host selects a shared room language. `SupportedLanguage` covers German
+(`de`), English (`en`), Spanish (`es`), French (`fr`) and Brazilian
+Portuguese (`pt-BR`). Use `context.language` for server-owned content and
+`room.language` to render it on the host and phones. Add game catalog and
+setup text to the manifest's `translations` map. New-language entries can
+inherit missing setup labels from English. Games without an English entry
+fall back to German or their base manifest. Keep card, prompt and option IDs
+independent of the displayed language.
+
 ### Reusable drawing state
 
 `DrawingBoard`, `emptyDrawing`, `drawingColors` and `applyDrawingInput` are

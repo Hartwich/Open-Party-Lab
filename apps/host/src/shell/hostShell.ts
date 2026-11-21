@@ -236,7 +236,7 @@ export function mountHostShell(client: HostSocketClient): () => void {
       }
     })
       .then((dataUrl) => {
-        if (destroyed) {
+        if (destroyed || qrSourceUrl !== joinUrl) {
           return;
         }
 
@@ -245,7 +245,7 @@ export function mountHostShell(client: HostSocketClient): () => void {
         render(client.getState());
       })
       .catch(() => {
-        qrSourceUrl = null;
+        if (qrSourceUrl === joinUrl) qrSourceUrl = null;
       });
   }
 

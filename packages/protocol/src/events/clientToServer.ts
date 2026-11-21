@@ -27,11 +27,13 @@ export interface JoinRoomRequest {
   playerName: string;
   deviceId: string;
   preferredColor?: string;
+  language?: SupportedLanguage;
 }
 
 export interface ResumeSessionRequest {
   reconnectToken: string;
   deviceId: string;
+  language?: SupportedLanguage;
 }
 
 export interface PlayerReadyRequest {

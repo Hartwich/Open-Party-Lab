@@ -38,6 +38,23 @@ test("missing requested language falls back to German package copy", () => {
   assert.equal(translated.lobbySetup.title, "Base setup");
 });
 
+test("new locales apply their setup copy over the English fallback of older packages", () => {
+  const bilingual = localizeGameManifest(manifest, "pt-BR");
+  assert.equal(bilingual.displayName, "Game");
+  assert.equal(bilingual.lobbySetup.fields[0].label, "Mode");
+  const spanish = localizeGameManifest({
+    ...manifest,
+    translations: {
+      ...manifest.translations,
+      es: { displayName: "Juego", description: "Descripción", lobbySetup: { title: "Configuración" } }
+    }
+  }, "es");
+  assert.equal(spanish.displayName, "Juego");
+  assert.equal(spanish.lobbySetup.title, "Configuración");
+  assert.equal(spanish.lobbySetup.fields[0].label, "Mode");
+  assert.equal(spanish.lobbySetup.fields[0].defaultValue, "a");
+});
+
 test("legacy or untranslated game keeps its own base manifest", () => {
   const { translations, ...legacy } = manifest;
   assert.equal(localizeGameManifest(legacy, "en"), legacy);

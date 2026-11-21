@@ -107,6 +107,28 @@ Shared-contract releases must publish the compatible platform interface before
 dependent games, then remove legacy platform content
 after the games are available; the release guidance below has been corrected.
 
+Five-language localization pass (2026-11-21): the platform adds Spanish,
+French and Brazilian Portuguese to German and English. The host sets the room
+language. The invitation link and QR code carry it so the phone can render the
+join form in that language. Phones pick up room language changes and use the
+room's current language on reconnect. All 22 optional games provide localized
+catalog entries and setup copy. Translated live screens and game content vary
+by game. Some games use smaller localized prompt and card pools, and some
+secondary runtime text still uses the existing German or English copy.
+Schaetzorama provides 12 localized questions per category and language for a
+ten-round game without repeats. Studenten Activity supports a 100-card pool
+in each age setting. Pantomime keeps both age pools and the two-word limit.
+Word Tiles chooses the alphabet and tile values at round start. Changing the
+display language leaves those rules in place. Players still judge words
+through the table's challenge system. Catalog fallback supports older
+installed games without the new translations.
+The platform typecheck and production build passed with all 22 games
+installed. All 28 catalog and setup tests passed in strict locale mode.
+Each of the 22 games reached play in each new room language in the socket
+smoke test. The in-app browser verified language switching on the host
+and a Portuguese Tap Race turn at 360×640. Physical devices and complete
+matches in every game remain unverified.
+
 DE/EN game localization pass (2026-10-29): all 21 optional games now provide
 game-owned German/English catalog and complete English lobby/player setup
 copy. Generic manifest localization covers descriptions, confirmations,

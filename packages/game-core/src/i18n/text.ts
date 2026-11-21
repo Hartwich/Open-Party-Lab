@@ -1,6 +1,8 @@
 import type { SupportedLanguage } from "./language.js";
 
-export type LocalizedTextMap<T> = Record<SupportedLanguage, T>;
+/** The original locales remain required in bilingual game packages. */
+export type LocalizedTextMap<T> = Record<"de" | "en", T> &
+  Partial<Record<Exclude<SupportedLanguage, "de" | "en">, T>>;
 
 export interface LocalizedSetupOptionText {
   label?: string;

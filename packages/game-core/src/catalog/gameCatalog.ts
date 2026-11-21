@@ -1,5 +1,6 @@
 ﻿import type { GameManifest } from "../types/GameManifest.js";
-import { defaultLanguage, normalizeLanguage, type SupportedLanguage } from "../i18n/language.js";
+import { defaultLanguage, type SupportedLanguage } from "../i18n/language.js";
+import type { LocalizedGameText } from "../i18n/text.js";
 
 export const gameCatalog: readonly GameManifest[] = [];
 
@@ -15,12 +16,17 @@ export function localizeGameManifest(
   manifest: GameManifest,
   language: SupportedLanguage = defaultLanguage
 ): GameManifest {
-  const text = manifest.translations?.[normalizeLanguage(language)] ?? manifest.translations?.[defaultLanguage];
+  const translations = manifest.translations;
+  if (!translations) return manifest;
 
-  if (!text) {
-    return manifest;
-  }
+  const legacyLanguage = language === "de" ? "de" : "en";
+  const fallback = translations[legacyLanguage] ?? translations.de;
+  const base = fallback ? applyGameText(manifest, fallback) : manifest;
+  const text = language === legacyLanguage ? undefined : translations[language];
+  return text ? applyGameText(base, text) : base;
+}
 
+function applyGameText(manifest: GameManifest, text: LocalizedGameText): GameManifest {
   return {
     ...manifest,
     displayName: text.displayName,

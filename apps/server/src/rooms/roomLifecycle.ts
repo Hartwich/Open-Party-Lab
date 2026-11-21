@@ -6,6 +6,7 @@ import type {
 } from "@open-party-lab/protocol";
 import { resolveGameMaxPlayers, resolveGameMinPlayers } from "@open-party-lab/game-core";
 import type { RoomRecord } from "./roomStore.js";
+import { getRoomText } from "./roomText.js";
 
 type PlayerRecord = RoomRecord["players"] extends Map<string, infer TPlayer> ? TPlayer : never;
 type PlayerSetupValue = string | string[];
@@ -176,14 +177,14 @@ export function explainCannotStartRound(
   room: RoomRecord,
   selectedGame: AvailableGameDto | undefined
 ): string | null {
-  const en = room.language === "en";
+  const text = getRoomText(room.language);
 
   if (!room.selectedGameId || !selectedGame) {
-    return en ? "Please choose a game first." : "Bitte zuerst ein Spiel auswaehlen.";
+    return text.chooseGame;
   }
 
   if (room.currentRound && room.currentRound.phase !== "finished") {
-    return en ? "The current round is still running." : "Die aktuelle Runde laeuft noch.";
+    return text.roundRunning;
   }
 
   const players = [...room.players.values()];
@@ -197,45 +198,34 @@ export function explainCannotStartRound(
   );
 
   if (players.length < minimumPlayers) {
-    return en
-      ? `${selectedGame.displayName} needs at least ${minimumPlayers} players.`
-      : `${selectedGame.displayName} braucht mindestens ${minimumPlayers} Spieler.`;
+    return text.minPlayers(selectedGame.displayName, minimumPlayers);
   }
 
   if (players.length > maximumPlayers) {
-    return en
-      ? `${selectedGame.displayName} allows at most ${maximumPlayers} players.`
-      : `${selectedGame.displayName} erlaubt hoechstens ${maximumPlayers} Spieler.`;
+    return text.maxPlayers(selectedGame.displayName, maximumPlayers);
   }
 
   const waitingPlayers = players.filter((player) => !player.isReady);
 
   if (waitingPlayers.length > 0) {
-    return en
-      ? `Not everyone is ready yet: ${waitingPlayers.map((player) => player.name).join(", ")}.`
-      : `Es sind noch nicht alle bereit: ${waitingPlayers.map((player) => player.name).join(", ")}.`;
+    return text.waitingPlayers(waitingPlayers.map((player) => player.name).join(", "));
   }
 
   if (!areRequiredPlayerSetupChoicesSelected(room, selectedGame)) {
     const setup = selectedGame.playerSetup;
     if (setup?.kind === "choice" && setup.minPlayersPerOption) {
-      return en ? `Each team needs at least ${setup.minPlayersPerOption} players.`
-        : `Jedes Team braucht mindestens ${setup.minPlayersPerOption} Personen.`;
+      return text.minTeamPlayers(setup.minPlayersPerOption);
     }
     const missingChoices = players
       .filter((player) => !isPlayerSetupComplete(selectedGame, player))
       .map((player) => player.name)
       .join(", ");
 
-    return en
-      ? `These players need to choose their setup first: ${missingChoices}.`
-      : `Diese Spieler muessen erst ihre Auswahl treffen: ${missingChoices}.`;
+    return text.setupPending(missingChoices);
   }
 
   if (!isLobbySetupConfirmed(room, selectedGame)) {
-    return en
-      ? "The host needs to confirm the game setup first."
-      : "Der Host muss das Spiel-Setup erst bestaetigen.";
+    return text.confirmSetup;
   }
 
   return null;

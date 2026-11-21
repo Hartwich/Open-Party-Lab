@@ -240,6 +240,7 @@ export function HostControlPanel({
                   holding control does not mean walking back to the screen. */}
               <LobbySetupControls
                 game={selectedGame}
+                shuffleLabel={text.shuffleTeams}
                 settings={room.selectedGameSettings ?? {}}
                 disabled={roundRunning}
                 onHostAction={onHostAction}

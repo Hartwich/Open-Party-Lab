@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { getMagicArenaText } from "../../i18n/magicArenaText.js";
 import type { CSSProperties } from "react";
 import type { MagicArenaLayoutModel } from "./models.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
@@ -250,18 +251,14 @@ function isSelfOnlyCard(cardId: MagicArenaCardId | undefined): boolean {
   return cardId === "earthquake" || cardId === "stealth" || cardId === "shockwave";
 }
 
-function getBaseActionDescription(mode: DraftMode, en: boolean): string | null {
+function getBaseActionDescription(mode: DraftMode, text: ReturnType<typeof getMagicArenaText>): string | null {
   switch (mode) {
     case "base:move":
-      return en ? "Move the selected figure up to 2 free hexes." : "Bewege die gewaehlte Figur bis zu 2 freie Hexfelder.";
+      return text.moveHelp;
     case "base:punch":
-      return en
-        ? "Hit an enemy on your own or an adjacent hex. If no enemy is there, damage the field."
-        : "Trifft einen Gegner auf dem eigenen oder angrenzenden Feld. Wenn keiner dort steht, nimmt das Feld Schaden.";
+      return text.punchHelp;
     case "base:dig":
-      return en
-        ? "Reduce your current field by 1 HP and find cards, or sometimes a buried bomb."
-        : "Baut das eigene Feld um 1 ab und findet Karten, manchmal aber eine vergrabene Bombe.";
+      return text.digHelp;
     default:
       return null;
   }
@@ -468,7 +465,7 @@ interface PlannedBoardMarker {
 }
 
 export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
-  const en = model.language === "en";
+  const text = getMagicArenaText(model.language);
   const state = model.state as MagicArenaControllerState;
   const ownPlayer = state.ownPlayer;
   const ownPlans = state.plannedActionsByPlayer?.[model.currentPlayerId] ?? [];
@@ -519,7 +516,7 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
   const canReady =
     plannedSlotCount >= selectableSlots && selectableSlots >= 0 && !ready && state.magicPhase === "planning";
   const actionComplete = Boolean(buildDraftAction());
-  const selectedActionDescription = selectedCardDefinition?.description ?? getBaseActionDescription(mode, en);
+  const selectedActionDescription = selectedCardDefinition?.description ?? getBaseActionDescription(mode, text);
   const boardCells = useMemo<BoardCellLayout[]>(() => {
     const fields = Object.values(fieldsByCoord).sort(
       (left, right) => left.coord.r - right.coord.r || left.coord.q - right.coord.q
@@ -1176,10 +1173,10 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
 
   const phaseLabel =
     state.magicPhase === "planning"
-      ? en ? "Planning" : "Planung"
+      ? text.planning
       : state.magicPhase === "execution"
-        ? en ? "Execution" : "Ausfuehrung"
-        : en ? "Game over" : "Spielende";
+        ? text.execution
+        : text.ended;
 
   return (
     <div className="magic-arena-controller" style={arenaControllerStyle}>
@@ -1205,19 +1202,13 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
         <section style={turnBannerStyle(isOwnTurn)}>
           <strong>
             {isOwnTurn
-              ? en ? "Your turn" : "Du bist am Zug"
-              : en
-                ? `Waiting for ${activePlayerName}`
-                : `${activePlayerName} ist am Zug`}
+              ? text.yourTurn
+              : text.waitForTurn(activePlayerName)}
           </strong>
           <span style={{ color: "var(--text-muted)", lineHeight: 1.3 }}>
             {isOwnTurn
-              ? en
-                ? "Pick a figure, an action and a target, then execute your move."
-                : "Waehle Figur, Aktion und Ziel und fuehre deinen Zug aus."
-              : en
-                ? "The other players act one after another."
-                : "Die Spieler ziehen nacheinander."}
+              ? text.pick
+              : text.others}
           </span>
         </section>
       ) : (
@@ -1254,19 +1245,19 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
       )}
 
       <section style={panelStyle}>
-        <strong>{en ? "Action" : "Aktion"}</strong>
+        <strong>{text.action}</strong>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 6 }}>
-          <button type="button" title={en ? "Move" : "Bewegen"} aria-label={en ? "Move" : "Bewegen"} disabled={model.disabled} onClick={() => resetTargets("base:move")} style={modeButtonStyle(mode === "base:move")}>
+          <button type="button" title={text.move} aria-label={text.move} disabled={model.disabled} onClick={() => resetTargets("base:move")} style={modeButtonStyle(mode === "base:move")}>
             <ActionIcon actionId="move" large />
-            <span style={actionArtCaptionStyle}>{en ? "Move" : "Bewegen"}</span>
+            <span style={actionArtCaptionStyle}>{text.move}</span>
           </button>
-          <button type="button" title={en ? "Punch" : "Schlagen"} aria-label={en ? "Punch" : "Schlagen"} disabled={model.disabled} onClick={() => resetTargets("base:punch")} style={modeButtonStyle(mode === "base:punch")}>
+          <button type="button" title={text.punch} aria-label={text.punch} disabled={model.disabled} onClick={() => resetTargets("base:punch")} style={modeButtonStyle(mode === "base:punch")}>
             <ActionIcon actionId="punch" large />
-            <span style={actionArtCaptionStyle}>{en ? "Punch" : "Schlagen"}</span>
+            <span style={actionArtCaptionStyle}>{text.punch}</span>
           </button>
-          <button type="button" title={en ? "Dig" : "Graben"} aria-label={en ? "Dig" : "Graben"} disabled={model.disabled} onClick={() => resetTargets("base:dig")} style={modeButtonStyle(mode === "base:dig")}>
+          <button type="button" title={text.dig} aria-label={text.dig} disabled={model.disabled} onClick={() => resetTargets("base:dig")} style={modeButtonStyle(mode === "base:dig")}>
             <ActionIcon actionId="dig" large />
-            <span style={actionArtCaptionStyle}>{en ? "Dig" : "Graben"}</span>
+            <span style={actionArtCaptionStyle}>{text.dig}</span>
           </button>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 6 }}>
@@ -1450,7 +1441,7 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
 
       {needsDirection(currentCardId, targetSameAsFigure) ? (
         <section style={panelStyle}>
-          <strong>{en ? "Direction" : "Richtung"}</strong>
+          <strong>{text.direction}</strong>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(6, minmax(0, 1fr))", gap: 5 }}>
             {directionLabels.map((label, index) => (
               <button key={label} type="button" onClick={() => setDirection(index)} style={modeButtonStyle(direction === index)}>
@@ -1469,23 +1460,23 @@ export function MagicArenaLayout({ model }: MagicArenaLayoutProps) {
             onClick={confirmSlot}
             style={{ ...primaryButtonStyle, width: "100%", opacity: model.disabled || !actionComplete ? 0.5 : 1 }}
           >
-            {en ? "Execute move" : "Zug ausfuehren"}
+            {text.execute}
           </button>
         </section>
       ) : (
         <section style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 6 }}>
           <button type="button" disabled={model.disabled || !actionComplete} onClick={confirmSlot} style={primaryButtonStyle}>
-            {en ? "Lock slot" : "Slot setzen"}
+            {text.lock}
           </button>
           <button type="button" disabled={!canReady} onClick={model.onReady} style={canReady ? primaryButtonStyle : secondaryButtonStyle}>
-            {ready ? (en ? "Ready" : "Bereit") : "Ready"}
+            {text.ready}
           </button>
         </section>
       )}
 
       {state.magicPhase !== "planning" ? (
         <section style={panelStyle}>
-          <strong>{state.activeAction?.label ?? (en ? "Waiting for execution" : "Warte auf Ausfuehrung")}</strong>
+          <strong>{state.activeAction?.label ?? (text.waiting)}</strong>
           <div style={{ display: "grid", gap: 4 }}>
             {(ownPlayer?.figures ?? []).map((figure) => (
               <span key={figure.figureId} style={{ color: "var(--text-muted)" }}>

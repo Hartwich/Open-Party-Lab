@@ -31,7 +31,7 @@ export function createApp(environment: AppEnv = loadEnv()) {
   const sessionStore = new SocketSessionStore();
   const roomManager = new RoomManager(
     roomStore,
-    (roomCode) => buildJoinUrl(environment.publicControllerOrigin, roomCode),
+    (roomCode, language) => buildJoinUrl(environment.publicControllerOrigin, roomCode, language),
     now,
     environment.fixedPrimaryRoomCode,
     roomMaxLifetimeMs

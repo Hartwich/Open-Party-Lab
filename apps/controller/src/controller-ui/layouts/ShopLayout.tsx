@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getShopLayoutText } from "../../i18n/shopLayoutText.js";
 import type { ShopLayoutModel } from "./models.js";
 import { BigButton } from "../common/BigButton.js";
 
@@ -6,19 +7,19 @@ interface ShopLayoutProps {
   model: ShopLayoutModel;
 }
 
-function formatLabel(kind: ShopLayoutModel["offers"][number]["kind"], en: boolean): string {
+function formatLabel(kind: ShopLayoutModel["offers"][number]["kind"], text: ReturnType<typeof getShopLayoutText>): string {
   switch (kind) {
     case "weapon":
-      return en ? "Weapon" : "Waffe";
+      return text.weapon;
     case "upgrade":
-      return "Upgrade";
+      return text.upgrade;
     default:
-      return "Item";
+      return text.item;
   }
 }
 
 export function ShopLayout({ model }: ShopLayoutProps) {
-  const en = model.language === "en";
+  const text = getShopLayoutText(model.language);
   const [selectedWeaponInstanceId, setSelectedWeaponInstanceId] = useState<string | null>(null);
   const selectedWeapon =
     model.loadout?.weapons.find(
@@ -59,7 +60,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
       >
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline" }}>
           <strong style={{ fontSize: "1.3rem", color: model.accentColor ?? "var(--accent)" }}>{model.title}</strong>
-          <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>{en ? "Wave" : "Welle"} {model.waveNumber}</span>
+          <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>{text.wave} {model.waveNumber}</span>
         </div>
         {model.subtitle ? <span style={{ color: "var(--text-muted)" }}>{model.subtitle}</span> : null}
         {model.helperText ? <span style={{ color: "var(--text-muted)" }}>{model.helperText}</span> : null}
@@ -78,12 +79,10 @@ export function ShopLayout({ model }: ShopLayoutProps) {
         >
           <div style={{ display: "grid", gap: 4 }}>
             <strong style={{ fontSize: "1.05rem" }}>
-              {model.ready.currentPlayerReady ? (en ? "Ready for next wave" : "Bereit fuer naechste Welle") : en ? "Not ready yet" : "Noch nicht bereit"}
+              {model.ready.currentPlayerReady ? (text.waveReady) : text.notYet}
             </strong>
             <span style={{ color: "var(--text-muted)", lineHeight: 1.45 }}>
-              {model.ready.description ?? (en
-                ? `Waiting for all players. ${model.ready.readyCount}/${model.ready.playerCount} ready.`
-                : `Warte auf alle Spieler. ${model.ready.readyCount}/${model.ready.playerCount} bereit.`)}
+              {model.ready.description ?? (text.readyCount(model.ready.readyCount, model.ready.playerCount))}
             </span>
           </div>
 
@@ -98,7 +97,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                 : "linear-gradient(180deg, var(--accent) 0%, var(--accent) 100%)"
             }}
           >
-            {model.ready.currentPlayerReady ? (en ? "Not ready" : "Nicht bereit") : model.ready.label}
+            {model.ready.currentPlayerReady ? (text.notReady) : model.ready.label}
           </BigButton>
         </section>
       ) : null}
@@ -118,7 +117,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
             border: "1px solid var(--panel-border)"
           }}
         >
-          <div style={{ color: "var(--text-muted)", fontSize: "0.84rem" }}>Material</div>
+          <div style={{ color: "var(--text-muted)", fontSize: "0.84rem" }}>{text.material}</div>
           <strong style={{ fontSize: "1.6rem" }}>{model.materials}</strong>
         </div>
         {typeof model.runSummary?.wavesCleared === "number" ? (
@@ -130,7 +129,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
               border: "1px solid var(--panel-border)"
             }}
           >
-            <div style={{ color: "var(--text-muted)", fontSize: "0.84rem" }}>{en ? "Waves played" : "Gespielte Wellen"}</div>
+            <div style={{ color: "var(--text-muted)", fontSize: "0.84rem" }}>{text.waves}</div>
             <strong style={{ fontSize: "1.6rem" }}>{model.runSummary.wavesCleared}</strong>
           </div>
         ) : null}
@@ -138,7 +137,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
 
       {model.loadout?.items?.length || model.loadout?.weapons?.length ? (
         <section style={{ display: "grid", gap: 10 }}>
-          <h2 style={{ margin: 0, fontSize: "1rem", color: "var(--text-muted)" }}>{en ? "Active Setup" : "Aktives Setup"}</h2>
+          <h2 style={{ margin: 0, fontSize: "1rem", color: "var(--text-muted)" }}>{text.setup}</h2>
           <div style={{ display: "grid", gap: 8 }}>
             {model.loadout?.weapons?.map((weapon, index) => (
               <button
@@ -184,7 +183,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                   {`W${index + 1} ${weapon.displayName}`}
                   {weapon.sellable ? (
                     <span style={{ display: "block", color: "var(--text-muted)", fontSize: "0.68rem", marginTop: 2 }}>
-                      {en ? "Sell" : "Verkauf"} {weapon.sellValue ?? 0} M
+                      {text.sell} {weapon.sellValue ?? 0} M
                     </span>
                   ) : null}
                   {weapon.canCombine ? (
@@ -197,7 +196,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                         fontWeight: 700
                       }}
                     >
-                      {en ? "Merge ready" : "Kombi bereit"}
+                      {text.mergeReady}
                     </span>
                   ) : null}
                 </span>
@@ -236,12 +235,8 @@ export function ShopLayout({ model }: ShopLayoutProps) {
               }}
             >
               {selectedWeapon.canCombine
-                ? en
-                  ? `Merge ${selectedWeapon.displayName} to Lv. ${selectedWeapon.level + 1}`
-                  : `${selectedWeapon.displayName} zu Lv. ${selectedWeapon.level + 1} kombinieren`
-                : en
-                  ? "Merge needs two matching weapons of the same level"
-                  : "Kombinieren braucht zwei gleiche Waffen desselben Levels"}
+                ? text.mergeNamed(selectedWeapon.displayName, selectedWeapon.level + 1)
+                : text.mergeRequires}
             </BigButton>
           ) : null}
           {selectedWeapon ? (
@@ -307,10 +302,8 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                   }}
                 >
                   {selectedWeapon.sellable
-                    ? en
-                      ? `Sell for ${selectedWeapon.sellValue ?? 0} M`
-                      : `Verkaufen fuer ${selectedWeapon.sellValue ?? 0} M`
-                    : en ? "Cannot sell" : "Nicht verkaufbar"}
+                    ? text.sellFor(selectedWeapon.sellValue ?? 0)
+                    : text.cannotSell}
                 </BigButton>
                 {model.onCombineWeapon ? (
                   <BigButton
@@ -326,8 +319,8 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                     }}
                   >
                     {selectedWeapon.canCombine
-                      ? en ? `Merge to Lv. ${selectedWeapon.level + 1}` : `Kombinieren zu Lv. ${selectedWeapon.level + 1}`
-                      : en ? "No matching copy" : "Keine passende Kopie"}
+                      ? text.merge(selectedWeapon.level + 1)
+                      : text.noMatching}
                   </BigButton>
                 ) : null}
                 </div>
@@ -339,7 +332,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
 
       <section style={{ display: "grid", gap: 12 }}>
         <div style={{ display: "grid", gap: 10 }}>
-          <h2 style={{ margin: 0, fontSize: "1rem", color: "var(--text-muted)" }}>Shop</h2>
+          <h2 style={{ margin: 0, fontSize: "1rem", color: "var(--text-muted)" }}>{text.shop}</h2>
           {model.reroll ? (
             <BigButton
               disabled={model.disabled || !model.reroll.affordable}
@@ -351,7 +344,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                 background: "linear-gradient(180deg, color-mix(in srgb, var(--amber) 94%, transparent) 0%, color-mix(in srgb, var(--amber) 98%, transparent) 100%)"
               }}
             >
-              {`${en ? "Reroll" : "Neu wuerfeln"} ${model.reroll.cost} M`}
+              {`${text.reroll} ${model.reroll.cost} M`}
             </BigButton>
           ) : null}
         </div>
@@ -397,7 +390,7 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                   <div style={{ display: "grid", gap: 4 }}>
                     <strong>{offer.title}</strong>
                     <span style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>
-                      {formatLabel(offer.kind, en)}
+                      {formatLabel(offer.kind, text)}
                     </span>
                   </div>
                 </div>
@@ -476,10 +469,10 @@ export function ShopLayout({ model }: ShopLayoutProps) {
                 }}
               >
                   {offer.purchased
-                    ? en ? "Bought" : "Gekauft"
+                    ? text.bought
                     : offer.affordable
-                      ? en ? "Buy" : "Kaufen"
-                      : en ? "Too expensive" : "Zu teuer"}
+                      ? text.buy
+                      : text.expensive}
               </button>
             </article>
           ))}

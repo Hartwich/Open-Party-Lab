@@ -1,11 +1,12 @@
 import { useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { getQuizLayoutText, type QuizLayoutText } from "../../i18n/quizLayoutText.js";
 import type { SchaetzoramaAssignQuestion, SchaetzoramaAssignmentZone, SchaetzoramaRankQuestion } from "@open-party-lab/protocol";
 
 interface Drag { pointerId: number; origin: number; index: number; target: number; offset: number; centers: number[]; distance: number }
 
-export function RankingControl({ question, order, en, disabled, onChange }: {
+export function RankingControl({ question, order, text, disabled, onChange }: {
   question: Omit<SchaetzoramaRankQuestion, "answerOrder">;
-  order: string[]; en: boolean; disabled: boolean; onChange: (order: string[]) => void;
+  order: string[]; text: QuizLayoutText; disabled: boolean; onChange: (order: string[]) => void;
 }) {
   const list = useRef<HTMLDivElement>(null);
   const gesture = useRef<Drag | null>(null);
@@ -18,7 +19,7 @@ export function RankingControl({ question, order, en, disabled, onChange }: {
     next.splice(to, 0, id);
     onChange(next);
     const label = question.items.find((item) => item.id === id)?.label ?? id;
-    setAnnouncement(`${label}: ${en ? "position" : "Platz"} ${to + 1}`);
+    setAnnouncement(`${label}: ${text.position} ${to + 1}`);
   };
   const begin = (event: PointerEvent<HTMLButtonElement>, index: number) => {
     if (disabled || !event.isPrimary || event.button !== 0 || !list.current) return;
@@ -60,7 +61,7 @@ export function RankingControl({ question, order, en, disabled, onChange }: {
         return <div key={id} data-rank-id={id} className={`szc-rank-row${drag?.index === index ? " is-dragging" : ""}`} style={{ transform: `translateY(${offset}px)` }}>
           <b>{drag?.index === index ? drag.target + 1 : index + 1}</b>
           <button type="button" className="szc-rank-grip" disabled={disabled} onPointerDown={(event) => begin(event, index)}
-            aria-label={`${item.label}: ${en ? "reorder" : "Reihenfolge ändern"}`} title={en ? "Drag to reorder" : "Zum Sortieren ziehen"}
+            aria-label={`${item.label}: ${text.reorder}`} title={text.drag}
             onKeyDown={(event) => { if (event.key === "ArrowUp" || event.key === "ArrowDown") { event.preventDefault(); reorder(index, index + (event.key === "ArrowUp" ? -1 : 1)); } }}>
             <span>{item.label}</span><span aria-hidden="true" className="szc-grip-mark">⠿</span>
           </button>
@@ -73,12 +74,12 @@ export function RankingControl({ question, order, en, disabled, onChange }: {
 
 const zones: SchaetzoramaAssignmentZone[] = ["left", "both", "right"];
 
-export function AssignmentControl({ question, assignments, en, disabled, onChange }: {
+export function AssignmentControl({ question, assignments, text, disabled, onChange }: {
   question: Omit<SchaetzoramaAssignQuestion, "answers">;
-  assignments: Record<string, SchaetzoramaAssignmentZone>; en: boolean; disabled: boolean;
+  assignments: Record<string, SchaetzoramaAssignmentZone>; text: QuizLayoutText; disabled: boolean;
   onChange: (assignments: Record<string, SchaetzoramaAssignmentZone>) => void;
 }) {
-  const labels = [question.leftLabel, en ? "Both" : "Beide", question.rightLabel];
+  const labels = [question.leftLabel, text.both, question.rightLabel];
   return <div className="szc-assign-control">
     <div className="szc-zone-headings">{labels.map((label, index) => <div key={index}><span aria-hidden="true">{["←", "∩", "→"][index]}</span><strong>{label}</strong></div>)}</div>
     {question.terms.map((term) => <AssignmentRail key={term.id} id={term.id} label={term.label} labels={labels} zone={assignments[term.id] ?? "both"} disabled={disabled}

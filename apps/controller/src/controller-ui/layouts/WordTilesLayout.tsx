@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { getWordTilesText } from "../../i18n/wordTilesText.js";
 import { useHaptics } from "../../hooks/useHaptics.js";
 import { ReadyPanel } from "../common/ReadyPanel.js";
 import type { WordTilesLayoutModel } from "./models.js";
@@ -17,8 +18,9 @@ interface DraftPlacement {
 
 const baseBlankLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-function blankLettersFor(en: boolean): string[] {
-  return (en ? baseBlankLetters : `${baseBlankLetters}ÄÖÜ`).split("");
+function blankLettersFor(language: WordTilesLayoutModel["language"] = "de"): string[] {
+  const extras = { de: "ÄÖÜ", en: "", es: "Ñ", fr: "", "pt-BR": "Ç" };
+  return (baseBlankLetters + extras[language]).split("");
 }
 
 function keyFor(x: number, y: number): string {
@@ -97,7 +99,7 @@ function scoreTile(tile: WordTilesRackTileState, letter: string): string {
 
 export function WordTilesLayout({ model }: WordTilesLayoutProps) {
   const haptics = useHaptics();
-  const en = model.language === "en";
+  const text = getWordTilesText(model.language);
   const [selectedTileId, setSelectedTileId] = useState<string | null>(null);
   const [draft, setDraft] = useState<DraftPlacement[]>([]);
   const [exchangeMode, setExchangeMode] = useState(false);
@@ -247,12 +249,8 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
   const pendingRequiredCount = pendingMove?.requiredAcceptancePlayerIds.length ?? 0;
   const pendingMoveStatus = pendingMove
     ? pendingMove.challengedByName
-      ? en
-        ? `Challenged by ${pendingMove.challengedByName}`
-        : `Angezweifelt von ${pendingMove.challengedByName}`
-      : en
-        ? `${pendingAcceptCount}/${pendingRequiredCount} accepted`
-        : `${pendingAcceptCount}/${pendingRequiredCount} akzeptiert`
+      ? text.challengedBy(pendingMove.challengedByName)
+      : text.acceptedCount(pendingAcceptCount, pendingRequiredCount)
     : "";
 
   return (
@@ -287,19 +285,19 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
         }}
       >
         <div style={metricStyle}>
-          <span style={metricLabelStyle}>{en ? "Bag" : "Beutel"}</span>
+          <span style={metricLabelStyle}>{text.bag}</span>
           <strong>{model.bagCount}</strong>
         </div>
         <div style={metricStyle}>
-          <span style={metricLabelStyle}>{en ? "Move" : "Zug"}</span>
+          <span style={metricLabelStyle}>{text.move}</span>
           <strong>{model.moveNumber + 1}</strong>
         </div>
         <div style={metricStyle}>
-          <span style={metricLabelStyle}>{en ? "Rack" : "Rack"}</span>
+          <span style={metricLabelStyle}>{text.rack}</span>
           <strong>{currentPlayer?.rackCount ?? model.rack.length}</strong>
         </div>
         <div style={metricStyle}>
-          <span style={metricLabelStyle}>{en ? "Turn" : "Zug"}</span>
+          <span style={metricLabelStyle}>{text.turn}</span>
           <strong>{activeTurn?.score ?? 0}</strong>
         </div>
       </section>
@@ -405,7 +403,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
 
       <section style={{ display: "grid", gap: 8 }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
-          <strong>{exchangeMode ? (en ? "Exchange tiles" : "Steine tauschen") : (en ? "Your rack" : "Dein Rack")}</strong>
+          <strong>{exchangeMode ? (text.exchange) : (text.yourRack)}</strong>
           <span style={{ color: "var(--text-muted)" }}>
             {draft.length > 0 ? `${draft.length}/7` : exchangeMode ? `${exchangeTileIds.length}` : selectedTile?.letter ?? "-"}
           </span>
@@ -471,14 +469,14 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
-            <strong>{en ? "This turn" : "Dieser Zug"}</strong>
+            <strong>{text.thisTurn}</strong>
             <span style={{ color: "var(--ink-soft)", fontWeight: 900 }}>
               {activeTurn.score} P
               {activeTurn.bingoEligible ? " +50" : ""}
             </span>
           </div>
           <span style={{ color: "var(--text-muted)", fontSize: "0.84rem", lineHeight: 1.35 }}>
-            {activeTurn.acceptedMoveCount} {en ? "accepted placement(s)" : "akzeptierte Abschnitt(e)"}
+            {activeTurn.acceptedMoveCount} {text.acceptedPlacements}
             {activeTurn.words.length > 0 ? ` | ${activeTurn.words.map((word) => word.word).join(", ")}` : ""}
           </span>
         </section>
@@ -496,7 +494,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
-            <strong>{en ? "Open move" : "Offener Zug"}</strong>
+            <strong>{text.openMove}</strong>
             <span style={{ color: pendingMove.challengedByName ? "var(--danger-soft)" : "var(--amber-soft)", fontWeight: 850 }}>
               {pendingMoveStatus}
             </span>
@@ -508,19 +506,11 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
           <span style={{ color: "var(--text-muted)", fontSize: "0.84rem", lineHeight: 1.35 }}>
             {isPendingMoveOwner
               ? pendingMove.challengedByName
-                ? en
-                  ? "Resolve the challenge after checking externally."
-                  : "Entscheide nach der externen Pruefung."
-                : en
-                  ? "Waiting for the other players to accept or challenge."
-                  : "Warte auf Akzeptieren oder Anzweifeln der anderen."
+                ? text.resolveChallenge
+                : text.awaitPlayers
               : acceptedPendingMove
-                ? en
-                  ? "You accepted this placement."
-                  : "Du hast diesen Abschnitt akzeptiert."
-              : en
-                ? "Accept to let the turn continue, or challenge for an external check."
-                : "Akzeptiere zum Weiterspielen oder zweifle fuer eine externe Pruefung an."}
+                ? text.acceptedThis
+              : text.acceptOrChallenge}
           </span>
         </section>
       ) : null}
@@ -543,7 +533,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
                     onClick={() => model.onRecallPendingMove(pendingMove.id)}
                     style={dangerButtonStyle}
                   >
-                    {en ? "Recall" : "Zuruecknehmen"}
+                    {text.recall}
                   </button>
                   <button
                     type="button"
@@ -551,12 +541,12 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
                     onClick={() => model.onConfirmPendingMove(pendingMove.id)}
                     style={primaryButtonStyle}
                   >
-                    {en ? "Play" : "Legen"}
+                    {text.play}
                   </button>
                 </>
               ) : (
                 <button type="button" disabled style={secondaryButtonStyle}>
-                  {en ? "Waiting" : "Warten"}
+                  {text.waiting}
                 </button>
               )}
             </>
@@ -568,7 +558,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
                 onClick={() => model.onChallenge(pendingMove.id)}
                 style={warningButtonStyle}
               >
-                {en ? "Challenge" : "Anzweifeln"}
+                {text.challenge}
               </button>
               <button
                 type="button"
@@ -576,7 +566,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
                 onClick={() => model.onAcceptPendingMove(pendingMove.id)}
                 style={acceptedPendingMove ? secondaryButtonStyle : primaryButtonStyle}
               >
-                {acceptedPendingMove ? (en ? "Accepted" : "Akzeptiert") : (en ? "Accept" : "Akzeptieren")}
+                {acceptedPendingMove ? (text.accepted) : (text.accept)}
               </button>
             </>
           )}
@@ -584,7 +574,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
       ) : (
         <section style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 6 }}>
           <button type="button" disabled={model.disabled || draft.length === 0} onClick={submitDraft} style={primaryButtonStyle}>
-            {en ? "Play" : "Legen"}
+            {text.play}
           </button>
           <button
             type="button"
@@ -595,7 +585,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
             }}
             style={secondaryButtonStyle}
           >
-            {en ? "Recall" : "Zurueck"}
+            {text.recall}
           </button>
           <button
             type="button"
@@ -617,17 +607,17 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
             }}
             style={activeTurn ? primaryButtonStyle : exchangeMode ? warningButtonStyle : secondaryButtonStyle}
           >
-            {activeTurn ? (en ? "Finish" : "Fertig") : exchangeMode ? (en ? "OK" : "OK") : (en ? "Swap" : "Tausch")}
+            {activeTurn ? (text.finish) : exchangeMode ? (text.ok) : (text.swap)}
           </button>
           <button type="button" disabled={!model.canAct || Boolean(activeTurn) || draft.length > 0 || exchangeMode} onClick={model.onPass} style={secondaryButtonStyle}>
-            {en ? "Pass" : "Pass"}
+            {text.pass}
           </button>
         </section>
       )}
 
       {model.lastMove ? (
         <section style={{ color: "var(--text-muted)", fontSize: "0.86rem", lineHeight: 1.4 }}>
-          <strong style={{ color: "var(--text-main)" }}>{en ? "Last move" : "Letzter Zug"}: </strong>
+          <strong style={{ color: "var(--text-main)" }}>{text.lastMove}: </strong>
           {model.lastMove.playerName} {model.lastMove.score > 0 ? `${model.lastMove.score} P` : model.lastMove.reason ?? "0 P"}
           {model.lastMove.words.length > 0 ? ` | ${model.lastMove.words.map((word) => word.word).join(", ")}` : ""}
         </section>
@@ -680,9 +670,9 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
               background: "var(--panel-bg)"
             }}
           >
-            <strong>{en ? "Blank tile" : "Joker"}</strong>
+            <strong>{text.blank}</strong>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 6 }}>
-              {blankLettersFor(en).map((letter) => (
+              {(model.blankLetters ?? blankLettersFor(model.language)).map((letter) => (
                 <button
                   key={letter}
                   type="button"
@@ -697,7 +687,7 @@ export function WordTilesLayout({ model }: WordTilesLayoutProps) {
               ))}
             </div>
             <button type="button" onClick={() => setPendingBlank(null)} style={secondaryButtonStyle}>
-              {en ? "Cancel" : "Abbrechen"}
+              {text.cancel}
             </button>
           </div>
         </div>

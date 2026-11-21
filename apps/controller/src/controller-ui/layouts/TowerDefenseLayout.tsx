@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getTowerDefenseText } from "../../i18n/towerDefenseText.js";
 import { useHaptics } from "../../hooks/useHaptics.js";
 import type {
   TowerDefenseCatalogEnemyModel,
@@ -20,12 +21,12 @@ function resolveCellKey(col: number, row: number): string {
   return `${col}:${row}`;
 }
 
-function resolveTowerStatusText(tower: TowerDefenseTowerModel | null, en: boolean): string {
+function resolveTowerStatusText(tower: TowerDefenseTowerModel | null, text: ReturnType<typeof getTowerDefenseText>): string {
   if (!tower) {
-    return en ? "Free build slot" : "Freier Bauplatz";
+    return text.freeSlot;
   }
 
-  return `Lv.${tower.level} | ${formatNumber(tower.damage)} DMG | ${formatNumber(tower.range)} Range`;
+  return `${text.level} ${tower.level} | ${formatNumber(tower.damage)} ${text.damage} | ${formatNumber(tower.range)} ${text.range}`;
 }
 
 function formatLevelSeries(values: number[], suffix = ""): string {
@@ -55,7 +56,7 @@ function BuildBlueprint({
   rangeOverlay,
   disabled,
   accentColor,
-  en,
+  text,
   onSelect
 }: {
   map: TowerDefenseMapModel;
@@ -68,7 +69,7 @@ function BuildBlueprint({
   } | null;
   disabled: boolean;
   accentColor?: string;
-  en: boolean;
+  text: ReturnType<typeof getTowerDefenseText>;
   onSelect: (slotId: string) => void;
 }) {
   const pathCells = new Set(map.pathCells.map((cell) => resolveCellKey(cell.col, cell.row)));
@@ -187,9 +188,9 @@ function BuildBlueprint({
       }}
     >
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10, color: "var(--text-muted)", fontSize: "0.78rem" }}>
-        <span>{en ? "Path" : "Pfad"}</span>
-        <span>{en ? "Free Slot" : "Freier Slot"}</span>
-        <span>Tower</span>
+        <span>{text.path}</span>
+        <span>{text.free}</span>
+        <span>{text.tower}</span>
       </div>
       <div
         style={{
@@ -451,7 +452,7 @@ function DetailStat({
 
 export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
   const haptics = useHaptics();
-  const en = model.language === "en";
+  const text = getTowerDefenseText(model.language);
   const previousLeakSignalCountRef = useRef<number | null>(null);
   const previousLivesRef = useRef<number | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
@@ -558,8 +559,8 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
   const canSend = Boolean(selectedEnemy && !model.sendDisabled && currentGold >= sendCost);
 
   const targetLabel = model.nextTargetPlayer
-    ? `${en ? "Next target" : "Naechstes Ziel"}: ${model.nextTargetPlayer.name}`
-    : en ? "No active target" : "Kein aktives Ziel";
+    ? `${text.nextTarget}: ${model.nextTargetPlayer.name}`
+    : text.noTarget;
 
   return (
     <div style={{ display: "grid", gap: 10 }}>
@@ -610,22 +611,22 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             flexWrap: "wrap"
           }}
         >
-          <strong>{en ? "Your Lane" : "Deine Lane"}</strong>
+          <strong>{text.lane}</strong>
           <span style={{ color: "var(--text-muted)" }}>{targetLabel}</span>
         </div>
         {model.currentPlayer ? (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(104px, 1fr))", gap: 8 }}>
-            <MetricCard label="Gold" value={model.currentPlayer.gold} />
+            <MetricCard label={text.gold} value={model.currentPlayer.gold} />
             <MetricCard
-              label="Income"
+              label={text.income}
               value={`+${model.currentPlayer.incomeTickValue} / ${Math.max(
                 1,
                 Math.round(model.currentPlayer.incomeTickEveryMs / 1000)
               )}s`}
             />
-            <MetricCard label={en ? "Lives" : "Leben"} value={model.currentPlayer.lives} />
-            <MetricCard label="Kills" value={model.currentPlayer.kills} />
-            <MetricCard label="Sends" value={model.currentPlayer.sends} />
+            <MetricCard label={text.lives} value={model.currentPlayer.lives} />
+            <MetricCard label={text.kills} value={model.currentPlayer.kills} />
+            <MetricCard label={text.sends} value={model.currentPlayer.sends} />
           </div>
         ) : null}
       </section>
@@ -640,9 +641,9 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             flexWrap: "wrap"
           }}
         >
-          <strong>{en ? "Blueprint" : "Bauplan"}</strong>
+          <strong>{text.blueprint}</strong>
           <span style={{ color: "var(--text-muted)" }}>
-            {selectedSlot ? `Slot ${selectedSlot.id.toUpperCase()} | ${selectedSlot.col},${selectedSlot.row}` : en ? "Tap build slot" : "Bauplatz antippen"}
+            {selectedSlot ? `${text.slot} ${selectedSlot.id.toUpperCase()} | ${selectedSlot.col},${selectedSlot.row}` : text.tapSlot}
           </span>
         </div>
         <div style={{ display: "grid", gap: 8 }}>
@@ -670,7 +671,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
                 opacity: model.disabled ? 0.55 : 1
               }}
             >
-              {buildTower ? `${en ? "Build" : "Bauen"} ${buildTower.cost}G` : en ? "Build" : "Bauen"}
+              {buildTower ? `${text.build} ${buildTower.cost}G` : text.build}
             </button>
             <button
               type="button"
@@ -695,7 +696,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
                 opacity: model.disabled ? 0.55 : 1
               }}
             >
-              {selectedSlot?.tower?.upgradeCost != null ? `Upgrade ${selectedSlot.tower.upgradeCost}G` : "Upgrade"}
+              {selectedSlot?.tower?.upgradeCost != null ? `${text.upgrade} ${selectedSlot.tower.upgradeCost}G` : text.upgrade}
             </button>
             <button
               type="button"
@@ -720,7 +721,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
                 opacity: model.disabled ? 0.55 : 1
               }}
             >
-              {selectedSlot?.tower ? `${en ? "Sell" : "Verkaufen"} ${selectedSlot.tower.sellValue}G` : en ? "Sell" : "Verkaufen"}
+              {selectedSlot?.tower ? `${text.sell} ${selectedSlot.tower.sellValue}G` : text.sell}
             </button>
             <button
               type="button"
@@ -742,7 +743,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
                 opacity: model.disabled ? 0.55 : 1
               }}
             >
-              {showTowerInfo ? (en ? "Info on" : "Info an") : (en ? "Info off" : "Info aus")}
+              {showTowerInfo ? (text.infoOn) : (text.infoOff)}
             </button>
           </div>
           <div
@@ -755,11 +756,11 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
               background: "color-mix(in srgb, var(--surface) 58%, transparent)"
             }}
           >
-            <strong>{selectedSlot?.tower ? selectedSlot.tower.displayName : en ? "Free build slot" : "Freier Bauplatz"}</strong>
+            <strong>{selectedSlot?.tower ? selectedSlot.tower.displayName : text.freeSlot}</strong>
             <span style={{ color: "var(--text-muted)", lineHeight: 1.45 }}>
               {selectedSlot
-                ? resolveTowerStatusText(selectedSlot.tower, en)
-                : en ? "Choose one of the marked slots on your map to build a tower there." : "Waehle einen der markierten Slots auf deiner Map, um Tower direkt dort zu bauen."}
+                ? resolveTowerStatusText(selectedSlot.tower, text)
+                : text.chooseSlot}
             </span>
           </div>
           <BuildBlueprint
@@ -768,7 +769,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             rangeOverlay={selectedRangeOverlay}
             disabled={model.disabled}
             accentColor={model.accentColor}
-            en={en}
+            text={text}
             onSelect={(slotId) => {
               setSelectedSlotId(slotId);
               haptics.tap(20);
@@ -787,9 +788,9 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             flexWrap: "wrap"
           }}
         >
-          <strong>{en ? "Choose Tower" : "Tower auswaehlen"}</strong>
+          <strong>{text.chooseTower}</strong>
           <span style={{ color: "var(--text-muted)" }}>
-            {buildTower ? `${buildTower.displayName} | ${buildTower.cost}G` : en ? "Choose a tower for the marked slot" : "Waehl einen Tower fuer den markierten Slot"}
+            {buildTower ? `${buildTower.displayName} | ${buildTower.cost}G` : text.chooseMarked}
           </span>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 5 }}>
@@ -842,22 +843,22 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             <div style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>{buildTower.description}</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
               <DetailStat
-                label={en ? "Cost" : "Kosten"}
+                label={text.cost}
                 value={formatLevelSeries(buildTower.levels.map((level) => level.price))}
                 subtle
               />
               <DetailStat
-                label="DMG"
+                label={text.damage}
                 value={formatLevelSeries(buildTower.levels.map((level) => level.damage))}
                 subtle
               />
               <DetailStat
-                label="Range"
+                label={text.range}
                 value={formatLevelSeries(buildTower.levels.map((level) => level.range))}
                 subtle
               />
               <DetailStat
-                label="Atk Speed"
+                label={text.attackInterval}
                 value={formatLevelSeries(buildTower.levels.map((level) => level.fireRateMs), " ms")}
                 subtle
               />
@@ -876,7 +877,7 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             flexWrap: "wrap"
           }}
         >
-          <strong>{en ? "Send Enemies" : "Gegner senden"}</strong>
+          <strong>{text.sendEnemies}</strong>
           <span style={{ color: "var(--text-muted)" }}>{currentGold}G</span>
         </div>
         <div style={{ maxHeight: 284, overflowY: "auto", paddingRight: 2 }}>
@@ -927,8 +928,8 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
           }}
         >
           {selectedEnemy
-            ? `${en ? "SEND TO" : "AN"} ${model.nextTargetPlayer?.name ?? "NEXT"} ${en ? "" : "SENDEN"} (${selectedEnemy.sendCost}G)`
-            : en ? "SEND" : "SENDEN"}
+            ? `${model.nextTargetPlayer ? text.sendTo(model.nextTargetPlayer.name) : text.send} (${selectedEnemy.sendCost}G)`
+            : text.send}
         </button>
         {selectedEnemy ? (
           <div
@@ -944,12 +945,12 @@ export function TowerDefenseLayout({ model }: TowerDefenseLayoutProps) {
             <strong>{selectedEnemy.displayName}</strong>
             <div style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>{selectedEnemy.description}</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(96px, 1fr))", gap: 8 }}>
-              <DetailStat label={en ? "Cost" : "Kosten"} value={`${selectedEnemy.sendCost}`} />
-              <DetailStat label="Income" value={`+${selectedEnemy.incomeBonus} / 15s`} />
-              <DetailStat label="HP" value={`${selectedEnemy.maxHp}`} />
-              <DetailStat label="Speed" value={formatNumber(selectedEnemy.speed)} />
-              <DetailStat label="Bounty" value={`${selectedEnemy.bounty}`} />
-              <DetailStat label="Leak Damage" value={`${selectedEnemy.damage}`} />
+              <DetailStat label={text.cost} value={`${selectedEnemy.sendCost}`} />
+              <DetailStat label={text.income} value={`+${selectedEnemy.incomeBonus} / 15s`} />
+              <DetailStat label={text.hp} value={`${selectedEnemy.maxHp}`} />
+              <DetailStat label={text.speed} value={formatNumber(selectedEnemy.speed)} />
+              <DetailStat label={text.bounty} value={`${selectedEnemy.bounty}`} />
+              <DetailStat label={text.leakDamage} value={`${selectedEnemy.damage}`} />
             </div>
           </div>
         ) : null}

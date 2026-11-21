@@ -698,6 +698,7 @@ export interface WordTilesLayoutModel {
   activeTurn?: import("@open-party-lab/protocol").WordTilesActiveTurnState;
   lastError?: string;
   tileValues: Record<string, number>;
+  blankLetters?: string[];
   canAcceptPendingMove: boolean;
   canChallenge: boolean;
   canResolvePendingMove: boolean;

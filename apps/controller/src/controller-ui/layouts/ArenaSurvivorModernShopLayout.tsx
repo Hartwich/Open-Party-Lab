@@ -1,4 +1,5 @@
 import { useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { getSurvivorShopText } from "../../i18n/survivorShopText.js";
 import type {
   ArenaSurvivorModernShopLayoutModel,
   LayoutStat,
@@ -55,14 +56,14 @@ type DetailContent =
       stats: LayoutStat[];
     };
 
-function offerKindLabel(kind: ShopOfferModel["kind"], en: boolean): string {
+function offerKindLabel(kind: ShopOfferModel["kind"], text: ReturnType<typeof getSurvivorShopText>): string {
   switch (kind) {
     case "weapon":
-      return en ? "Weapon" : "Waffe";
+      return text.weapon;
     case "upgrade":
-      return "Upgrade";
+      return text.upgrade;
     default:
-      return "Item";
+      return text.item;
   }
 }
 
@@ -366,10 +367,10 @@ function PowerUpBadge() {
   );
 }
 
-function LevelUpMarker({ choicesRemaining, en }: { choicesRemaining?: number; en: boolean }) {
+function LevelUpMarker({ choicesRemaining, text }: { choicesRemaining?: number; text: ReturnType<typeof getSurvivorShopText> }) {
   return (
     <div
-      aria-label={en ? "Level-up power-up selection" : "Level-Up-Power-up-Auswahl"}
+      aria-label={text.levelSelection}
       style={{
         minHeight: 58,
         display: "grid",
@@ -401,7 +402,7 @@ function LevelUpMarker({ choicesRemaining, en }: { choicesRemaining?: number; en
       <strong style={{ fontSize: "1rem", letterSpacing: 0 }}>LVL UP</strong>
       {typeof choicesRemaining === "number" ? (
         <strong
-          aria-label={en ? `${choicesRemaining} choices remaining` : `${choicesRemaining} Auswahlen verbleibend`}
+          aria-label={text.remaining(choicesRemaining)}
           style={{
             minWidth: 36,
             height: 32,
@@ -629,13 +630,13 @@ function LoadoutTile({
 function OfferTile({
   offer,
   model,
-  en,
+  text,
   levelUp,
   onInfo
 }: {
   offer: ShopOfferModel;
   model: ArenaSurvivorModernShopLayoutModel;
-  en: boolean;
+  text: ReturnType<typeof getSurvivorShopText>;
   levelUp: boolean;
   onInfo: () => void;
 }) {
@@ -670,7 +671,7 @@ function OfferTile({
       <button
         type="button"
         onClick={onInfo}
-        aria-label={en ? `Show details for ${offer.title}` : `Details zu ${offer.title}`}
+        aria-label={text.detailsFor(offer.title)}
         style={{
           position: "relative",
           display: "grid",
@@ -696,19 +697,19 @@ function OfferTile({
         onClick={() => model.onBuy(offer.id)}
         aria-label={
           offer.purchased
-            ? en ? `${offer.title} bought` : `${offer.title} gekauft`
+            ? text.alreadyBought(offer.title)
             : levelUp
-              ? en ? `Choose ${offer.title}` : `${offer.title} waehlen`
-              : en ? `Buy ${offer.title}` : `${offer.title} kaufen`
+              ? text.chooseName(offer.title)
+              : text.buyName(offer.title)
         }
         title={
           offer.purchased
-            ? en ? "Bought" : "Gekauft"
+            ? text.bought
             : levelUp
-              ? en ? "Choose power-up" : "Power-up waehlen"
+              ? text.choosePower
               : offer.affordable
-              ? en ? "Buy" : "Kaufen"
-              : en ? "Too expensive" : "Zu teuer"
+              ? text.buy
+              : text.expensive
         }
         style={{
           border: 0,
@@ -799,7 +800,7 @@ function StatGrid({ stats }: { stats?: LayoutStat[] }) {
 function resolveDetailContent(
   model: ArenaSurvivorModernShopLayoutModel,
   target: DetailTarget | null,
-  en: boolean
+  text: ReturnType<typeof getSurvivorShopText>
 ): DetailContent | null {
   if (!target) {
     return null;
@@ -809,7 +810,7 @@ function resolveDetailContent(
     return {
       type: "stats",
       title: "Stats",
-      subtitle: en ? "Player values" : "Spielerwerte",
+      subtitle: text.values,
       stats: model.playerStats?.map((stat) => ({ ...stat })) ?? []
     };
   }
@@ -826,11 +827,11 @@ function resolveDetailContent(
       title: offer.title,
       subtitle: model.shopMode === "level_up"
         ? offer.targetLevel
-          ? `${offerKindLabel(offer.kind, en)} | Lv. ${offer.targetLevel}`
-          : offerKindLabel(offer.kind, en)
+          ? `${offerKindLabel(offer.kind, text)} | Lv. ${offer.targetLevel}`
+          : offerKindLabel(offer.kind, text)
         : offer.targetLevel
-          ? `${offerKindLabel(offer.kind, en)} | Lv. ${offer.targetLevel} | ${offer.cost} M`
-          : `${offerKindLabel(offer.kind, en)} | ${offer.cost} M`,
+          ? `${offerKindLabel(offer.kind, text)} | Lv. ${offer.targetLevel} | ${offer.cost} M`
+          : `${offerKindLabel(offer.kind, text)} | ${offer.cost} M`,
       description: offer.description,
       iconPath: offer.iconPath,
       level: offer.targetLevel,
@@ -880,12 +881,12 @@ function resolveDetailContent(
 function DetailSheet({
   model,
   detail,
-  en,
+  text,
   onClose
 }: {
   model: ArenaSurvivorModernShopLayoutModel;
   detail: DetailContent | null;
-  en: boolean;
+  text: ReturnType<typeof getSurvivorShopText>;
   onClose: () => void;
 }) {
   if (!detail) {
@@ -954,7 +955,7 @@ function DetailSheet({
               {detail.subtitle}
             </span>
           </div>
-          <RoundIconButton label={en ? "Close" : "Schliessen"} onClick={onClose} tone="slate">
+          <RoundIconButton label={text.close} onClick={onClose} tone="slate">
             <CloseIcon />
           </RoundIconButton>
         </header>
@@ -1037,17 +1038,17 @@ function DetailSheet({
           >
             {detail.offer.purchased ? (
               levelUp
-                ? en ? "Chosen" : "Gewaehlt"
-                : en ? "Bought" : "Gekauft"
+                ? text.chosen
+                : text.bought
             ) : levelUp ? (
               <>
                 <PowerUpIcon />
-                <span>{en ? "Choose" : "Waehlen"}</span>
+                <span>{text.choose}</span>
               </>
             ) : detail.offer.affordable ? (
-              en ? `Buy for ${detail.offer.cost} M` : `Kaufen fuer ${detail.offer.cost} M`
+              text.buyFor(detail.offer.cost)
             ) : (
-              en ? `Need ${detail.offer.cost} M` : `${detail.offer.cost} M benoetigt`
+              text.need(detail.offer.cost)
             )}
           </button>
         ) : null}
@@ -1057,8 +1058,8 @@ function DetailSheet({
             {model.onCombineWeapon ? (
               <button
                 type="button"
-                aria-label={en ? `Combine ${detail.weapon.displayName}` : `${detail.weapon.displayName} kombinieren`}
-                title={en ? "Combine weapons" : "Waffen kombinieren"}
+                aria-label={text.combine(detail.weapon.displayName)}
+                title={text.combineWeapons}
                 disabled={!canMerge}
                 onClick={() => {
                   if (!canMerge) {
@@ -1118,17 +1119,17 @@ function DetailSheet({
 }
 
 export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShopLayoutProps) {
-  const en = model.language === "en";
+  const text = getSurvivorShopText(model.language);
   const levelUp = model.shopMode === "level_up";
   const [detailTarget, setDetailTarget] = useState<DetailTarget | null>(null);
-  const detail = useMemo(() => resolveDetailContent(model, detailTarget, en), [detailTarget, en, model]);
+  const detail = useMemo(() => resolveDetailContent(model, detailTarget, text), [detailTarget, text, model]);
   const weapons = model.loadout?.weapons ?? [];
   const items = model.loadout?.items ?? [];
   const ready = model.ready;
   const readyLabel =
     ready?.currentPlayerReady
-      ? en ? "Unset ready" : "Bereit entfernen"
-      : ready?.label ?? (en ? "Ready" : "Bereit");
+      ? text.unsetReady
+      : ready?.label ?? (text.ready);
 
   return (
     <div style={{ display: "grid", gap: 12, paddingBottom: 16 }}>
@@ -1155,7 +1156,7 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
           >
             {model.survival ? model.title : compactPlayerName(model.title)}
           </strong>
-          <RoundIconButton label={en ? "Show stats" : "Stats anzeigen"} onClick={() => setDetailTarget({ type: "stats" })} tone="slate">
+          <RoundIconButton label={text.showStats} onClick={() => setDetailTarget({ type: "stats" })} tone="slate">
             <StatsIcon />
           </RoundIconButton>
         </div>
@@ -1170,11 +1171,11 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
             </div>
           </>
         ) : levelUp ? (
-          <LevelUpMarker choicesRemaining={model.levelUpChoicesRemaining} en={en} />
+          <LevelUpMarker choicesRemaining={model.levelUpChoicesRemaining} text={text} />
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: ready ? "1fr 1fr 1fr" : "1fr 1fr", gap: 8 }}>
             <MetricChip icon={<MaterialIcon />} label="M" value={model.materials} tone="gold" />
-            <MetricChip icon={<WaveIcon />} label={en ? "Wave" : "Welle"} value={model.waveNumber} tone="blue" />
+            <MetricChip icon={<WaveIcon />} label={text.wave} value={model.waveNumber} tone="blue" />
             {ready ? <MetricChip icon={<ReadyIcon />} label="OK" value={`${ready.readyCount}/${ready.playerCount}`} tone="green" /> : null}
           </div>
         )}
@@ -1185,8 +1186,8 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
               type="button"
               disabled={model.disabled || !model.reroll.affordable}
               onClick={model.reroll.onReroll}
-              aria-label={en ? `Reroll for ${model.reroll.cost} material` : `Neu wuerfeln fuer ${model.reroll.cost} Material`}
-              title={en ? "Reroll" : "Neu wuerfeln"}
+              aria-label={text.rerollFor(model.reroll.cost)}
+              title={text.reroll}
               style={{
                 minHeight: 54,
                 display: "grid",
@@ -1247,7 +1248,7 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
         <section style={{ display: "grid", gap: 8 }}>
           {weapons.length ? (
             <div style={{ display: "grid", gap: 6 }}>
-              <div style={{ color: "var(--text-muted)", fontSize: "0.76rem", fontWeight: 900 }}>{en ? "Weapons" : "Waffen"}</div>
+              <div style={{ color: "var(--text-muted)", fontSize: "0.76rem", fontWeight: 900 }}>{text.weapons}</div>
               <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
                 {weapons.map((weapon) => (
                   <LoadoutTile
@@ -1282,7 +1283,7 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
         </section>
       ) : null}
 
-      <section style={{ display: "grid", gap: 8 }} aria-label={levelUp ? (en ? "Level-up power-ups" : "Level-Up-Power-ups") : "Shop"}>
+      <section style={{ display: "grid", gap: 8 }} aria-label={levelUp ? text.powers : text.shop}>
         {levelUp ? (
           <div style={{ display: "flex", alignItems: "center", gap: 7, color: "var(--accent)", fontSize: "0.76rem", fontWeight: 900 }}>
             <PowerUpIcon size={18} />
@@ -1297,7 +1298,7 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
               key={offer.id}
               offer={offer}
               model={model}
-              en={en}
+              text={text}
               levelUp={levelUp}
               onInfo={() => setDetailTarget({ type: "offer", id: offer.id })}
             />
@@ -1305,7 +1306,7 @@ export function ArenaSurvivorModernShopLayout({ model }: ArenaSurvivorModernShop
         </div>
       </section>
 
-      <DetailSheet model={model} detail={detail} en={en} onClose={() => setDetailTarget(null)} />
+      <DetailSheet model={model} detail={detail} text={text} onClose={() => setDetailTarget(null)} />
     </div>
   );
 }

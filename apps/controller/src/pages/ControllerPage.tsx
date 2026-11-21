@@ -162,7 +162,7 @@ export function ControllerPage({ state, onLeaveRoom, onInput, onSetReady }: Cont
   return (
     <ControllerFrame
       title={minimalChrome ? "" : gameName}
-      subtitle={minimalChrome || hideSubtitle ? undefined : `${text.phase}: ${text.formatPhase(game?.phase ?? text.unknown)} | ${orientation}`}
+      subtitle={minimalChrome || hideSubtitle ? undefined : `${text.phase}: ${text.formatPhase(game?.phase ?? text.unknown)}`}
       wide={wideChrome}
       bare={bareChrome}
       footer={

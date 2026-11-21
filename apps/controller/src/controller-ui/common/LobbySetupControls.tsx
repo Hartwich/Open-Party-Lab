@@ -5,6 +5,7 @@ type SettingsMap = Record<string, string | number | boolean>;
 
 export interface LobbySetupControlsProps {
   game: AvailableGameDto;
+  shuffleLabel: string;
   settings: SettingsMap;
   /** Frozen while a round runs, mirroring the shared screen. */
   disabled: boolean;
@@ -272,6 +273,7 @@ function NumberField({
 
 export function LobbySetupControls({
   game,
+  shuffleLabel,
   settings,
   disabled,
   onHostAction
@@ -360,7 +362,7 @@ export function LobbySetupControls({
 
       {game.playerSetup?.kind === "choice" && game.playerSetup.assignment === "balanced-random" ?
         <button type="button" disabled={disabled} style={optionBase} onClick={() => onHostAction(game.id, { type: "shuffle-player-setup" })}>
-          {game.playerSetup.shuffleLabel ?? "Teams neu mischen"}
+          {game.playerSetup.shuffleLabel ?? shuffleLabel}
         </button> : null}
       {confirmation ? (
         <div style={{ display: "grid", gap: 7 }}>

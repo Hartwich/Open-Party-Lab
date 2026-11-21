@@ -8,7 +8,7 @@ import { RoomStore } from "./roomStore.js";
 export class RoomManager {
   constructor(
     private readonly roomStore: RoomStore,
-    private readonly createJoinUrl: (roomCode: string) => string,
+    private readonly createJoinUrl: (roomCode: string, language: SupportedLanguage) => string,
     private readonly getNow: () => number,
     private readonly fixedPrimaryRoomCode: string | null = null,
     private readonly maxLifetimeMs = 3_600_000
@@ -22,14 +22,15 @@ export class RoomManager {
         : createRoomCode((candidate) => this.roomStore.has(candidate));
 
     const createdAt = this.getNow();
+    const roomLanguage = normalizeLanguage(language);
 
     return this.roomStore.create({
       code,
       createdAt,
       expiresAt: this.maxLifetimeMs > 0 ? createdAt + this.maxLifetimeMs : null,
       lastActivityAt: createdAt,
-      joinUrl: this.createJoinUrl(code),
-      language: normalizeLanguage(language),
+      joinUrl: this.createJoinUrl(code, roomLanguage),
+      language: roomLanguage,
       theme: defaultThemeName,
       hostName,
       hostSocketIds: new Set(),
@@ -84,7 +85,11 @@ export class RoomManager {
   }
 
   setLanguage(room: RoomRecord, language: SupportedLanguage): RoomRecord {
-    room.language = normalizeLanguage(language, room.language);
+    const nextLanguage = normalizeLanguage(language, room.language);
+    if (nextLanguage !== room.language) {
+      room.language = nextLanguage;
+      room.joinUrl = this.createJoinUrl(room.code, nextLanguage);
+    }
     return room;
   }
 

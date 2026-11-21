@@ -4,6 +4,7 @@ import {
   type PublicGamePhase,
   type SupportedLanguage
 } from "@open-party-lab/protocol";
+import { additionalControllerText } from "./controllerAdditionalText.js";
 
 const languagePreferenceKey = "open-party-lab.controller-language";
 
@@ -12,7 +13,9 @@ export function readStoredControllerLanguage(): SupportedLanguage {
     return defaultLanguage;
   }
 
-  return normalizeLanguage(window.localStorage.getItem(languagePreferenceKey));
+  const [route, query] = (window.location?.hash ?? "").slice(1).split("?");
+  const joinLanguage = route === "join" ? new URLSearchParams(query).get("lang") : null;
+  return normalizeLanguage(joinLanguage, normalizeLanguage(window.localStorage.getItem(languagePreferenceKey)));
 }
 
 export function writeStoredControllerLanguage(language: SupportedLanguage): void {
@@ -24,6 +27,11 @@ export function writeStoredControllerLanguage(language: SupportedLanguage): void
 }
 
 export interface ControllerText {
+  connectionFailed: string;
+  tryAgainTimeout: string;
+  noSavedSession: string;
+  leftRoom: string;
+  waitingForReconnect: string;
   inputs: {
     move: string;
     aim: string;
@@ -110,6 +118,7 @@ export interface ControllerText {
   chooseCharacterFirst: string;
   chooseSetupFirst: string;
   setup: string;
+  shuffleTeams: string;
   setupChooseTitle: string;
   selectionCount: (selected: number, min: number, max: number) => string;
   characterChooseTitle: string;
@@ -136,6 +145,11 @@ export interface ControllerText {
 
 const controllerText = {
   de: {
+    connectionFailed: "Verbindung zum Server fehlgeschlagen",
+    tryAgainTimeout: "Keine Antwort. Bitte erneut versuchen.",
+    noSavedSession: "Keine gespeicherte Session gefunden.",
+    leftRoom: "Du hast den Raum verlassen.",
+    waitingForReconnect: "Warte auf die Wiederverbindung.",
     inputs: {
       move: "BEWEGEN", aim: "ZIELEN", look: "UMSEHEN",
       joystickHint: "Innen fein steuern, am Rand mit voller Geschwindigkeit laufen.",
@@ -214,6 +228,7 @@ const controllerText = {
     chooseCharacterFirst: "Erst Charakter waehlen",
     chooseSetupFirst: "Erst Setup waehlen",
     setup: "Setup",
+    shuffleTeams: "Teams neu mischen",
     setupChooseTitle: "Setup waehlen",
     selectionCount: (selected: number, min: number, max: number) =>
       `${selected}/${max} gewaehlt, mindestens ${min}`,
@@ -260,6 +275,11 @@ const controllerText = {
     }
   },
   en: {
+    connectionFailed: "Connection to server failed",
+    tryAgainTimeout: "No response. Please try again.",
+    noSavedSession: "No saved session found.",
+    leftRoom: "You left the room.",
+    waitingForReconnect: "Waiting for reconnection.",
     inputs: {
       move: "MOVE", aim: "AIM", look: "LOOK",
       joystickHint: "Move gently near the center, or push to the edge for full speed.",
@@ -338,6 +358,7 @@ const controllerText = {
     chooseCharacterFirst: "Choose character first",
     chooseSetupFirst: "Choose setup first",
     setup: "Setup",
+    shuffleTeams: "Shuffle teams",
     setupChooseTitle: "Choose Setup",
     selectionCount: (selected: number, min: number, max: number) =>
       `${selected}/${max} selected, at least ${min}`,
@@ -382,7 +403,8 @@ const controllerText = {
           return "Waiting";
       }
     }
-  }
+  },
+  ...additionalControllerText
 } satisfies Record<SupportedLanguage, ControllerText>;
 
 export function getControllerText(language: SupportedLanguage | null | undefined): ControllerText {

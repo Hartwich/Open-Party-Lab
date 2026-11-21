@@ -12,6 +12,7 @@ import { applyThemeVariables, normalizeThemeName, type ThemeName } from "@open-p
 import { io, type Socket } from "socket.io-client";
 import { ServerClock, startServerClockSync } from "@open-party-lab/game-core";
 import {
+  getControllerText,
   readStoredControllerLanguage,
   writeStoredControllerLanguage
 } from "../i18n/controllerText.js";
@@ -123,6 +124,7 @@ export class ControllerSocketClient {
     }
 
     this.listenersBound = true;
+    if (typeof document !== "undefined") document.documentElement.lang = this.state.preferredLanguage;
     this.socket.on("server:hello", ({ serverTime }) => this.serverClock.initialize(serverTime));
     this.socket.on("connect", () => {
       this.stopClockSync?.();
@@ -157,10 +159,7 @@ export class ControllerSocketClient {
     this.socket.on("connect_error", (error) => {
       this.updateState({
         connected: false,
-        error:
-          this.state.preferredLanguage === "en"
-            ? `Connection to server failed: ${error.message}`
-            : `Verbindung zum Server fehlgeschlagen: ${error.message}`
+        error: `${getControllerText(this.state.preferredLanguage).connectionFailed}: ${error.message}`
       });
     });
 
@@ -284,7 +283,8 @@ export class ControllerSocketClient {
       {
         roomCode: roomCode.toUpperCase(),
         playerName,
-        deviceId: getOrCreateDeviceId()
+        deviceId: getOrCreateDeviceId(),
+        language: this.state.preferredLanguage
       },
       (result) => {
         if (!result.ok) {
@@ -319,10 +319,7 @@ export class ControllerSocketClient {
 
     if (!reconnectToken) {
       this.updateState({
-        error:
-          this.state.preferredLanguage === "en"
-            ? "No saved session found."
-            : "Keine gespeicherte Session gefunden.",
+        error: getControllerText(this.state.preferredLanguage).noSavedSession,
         hasStoredSession: false
       });
       return;
@@ -344,7 +341,8 @@ export class ControllerSocketClient {
       "session:resume",
       {
         reconnectToken,
-        deviceId: getOrCreateDeviceId()
+        deviceId: getOrCreateDeviceId(),
+        language: this.state.preferredLanguage
       },
       (error, result) => {
         if (this.socket.id !== socketId || this.sessionTerminated || this.sessionTerminationPending) return;
@@ -417,10 +415,7 @@ export class ControllerSocketClient {
         this.clearStoredSession({
           rotateDeviceId: true,
           disconnect: true,
-          error:
-            this.state.preferredLanguage === "en"
-              ? "You left the room."
-              : "Du hast den Raum verlassen."
+          error: getControllerText(this.state.preferredLanguage).leftRoom
         });
       }
     );
@@ -477,14 +472,14 @@ export class ControllerSocketClient {
 
   async setProfile(name: string, avatar: string | null): Promise<string | null> {
     const { room, player } = this.state;
-    const en = this.state.preferredLanguage === "en";
+    const text = getControllerText(this.state.preferredLanguage);
     if (!room || !player || !this.state.connected) {
-      return en ? "Waiting for reconnection." : "Warte auf die Wiederverbindung.";
+      return text.waitingForReconnect;
     }
     return new Promise((resolve) => {
       this.socket.timeout(8_000).emit("player:set-profile", { roomCode: room.code, playerId: player.id, name, avatar }, (error, result) => {
         if (error) {
-          resolve(en ? "No response. Please try again." : "Keine Antwort. Bitte erneut versuchen.");
+          resolve(text.tryAgainTimeout);
           return;
         }
         if (!result.ok) { resolve(result.error); return; }
@@ -778,6 +773,9 @@ export class ControllerSocketClient {
 
   private updateState(patch: Partial<ControllerAppState>): void {
     this.state = { ...this.state, ...patch };
+    if (patch.preferredLanguage && typeof document !== "undefined") {
+      document.documentElement.lang = patch.preferredLanguage;
+    }
 
     this.scheduleNotifyListeners();
   }
