@@ -67,10 +67,11 @@ function shouldUseVolatileInput(input: unknown): boolean {
     return false;
   }
 
-  const { type: inputType, moveX, moveY } = input as {
+  const { type: inputType, moveX, moveY, active } = input as {
     type?: unknown;
     moveX?: unknown;
     moveY?: unknown;
+    active?: unknown;
   };
 
   // Releasing the stick must arrive: a dropped stop leaves the figure running
@@ -79,7 +80,8 @@ function shouldUseVolatileInput(input: unknown): boolean {
     return false;
   }
 
-  return inputType === "move" || inputType === "turn" || inputType === "aim";
+  // Held turn controls send transitions only; losing either edge changes the steering state.
+  return inputType === "move" || (inputType === "turn" && typeof active !== "boolean") || inputType === "aim";
 }
 
 export class ControllerSocketClient {

@@ -131,7 +131,7 @@ export interface SecretCardLayoutModel {
   roleTone: SecretCardRoleTone;
   statusLabel?: string;
   helperText?: string;
-  /** Grosser Countdown vor Zugbeginn. */
+  /** Countdown vor Zugbeginn. */
   countdownMs?: number | null;
   timer?: {
     remainingMs: number | null;
@@ -141,6 +141,7 @@ export interface SecretCardLayoutModel {
     term: string;
     forbidden: string[];
     tag?: string;
+    forbiddenLabel?: string;
   } | null;
   /** Platzhaltertext, wenn dieser Spieler die Karte nicht sehen darf. */
   hiddenCardHint?: string;
